@@ -1,6 +1,7 @@
 package homo.repository;
 
 
+import homo.model.Entity;
 import homo.observe.evens.ModelSaveEven;
 import org.springframework.context.ApplicationContext;
 
@@ -18,19 +19,19 @@ public class RepositoryProxy implements AbcRepository {
     }
 
     @Override
-    public int save() {
-        int affected = this.repository.save();
-        context.publishEvent(new ModelSaveEven(""));
+    public int save(Entity entity) {
+        int affected = this.repository.save(entity);
+        context.publishEvent(new ModelSaveEven(entity));
         return affected;
     }
 
     @Override
-    public int update() {
+    public int update(Entity entity) {
         return 0;
     }
 
     @Override
-    public int delete() {
+    public int delete(Entity entity) {
         return 0;
     }
 }

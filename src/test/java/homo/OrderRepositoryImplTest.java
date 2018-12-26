@@ -1,5 +1,6 @@
 package homo;
 
+import homo.demo.model.Order;
 import homo.demo.repository.OrderRepositoryImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,7 +19,9 @@ public class OrderRepositoryImplTest {
 
     @Test
     public void test1() {
-        int effect = repository.getProxy().save();
+        Order order = new Order();
+        order.setUuid("837423981236");
+        int effect = repository.getProxy().save(order);
         System.out.println(effect);
     }
 }

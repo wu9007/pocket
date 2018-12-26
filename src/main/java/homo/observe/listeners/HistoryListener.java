@@ -1,5 +1,6 @@
 package homo.observe.listeners;
 
+import homo.model.Entity;
 import homo.observe.evens.ModelSaveEven;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.SmartApplicationListener;
@@ -22,7 +23,8 @@ public class HistoryListener implements SmartApplicationListener {
 
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
-        System.out.println("保存历史。");
+        Entity entity = (Entity) event.getSource();
+        System.out.println("保存" + entity.getUuid() + "的历史数据。");
     }
 
     @Override
