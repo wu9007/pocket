@@ -1,6 +1,6 @@
 package homo;
 
-import homo.demo.OrderRepositoryImpl;
+import homo.demo.repository.OrderRepositoryImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

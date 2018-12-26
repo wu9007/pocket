@@ -1,6 +1,5 @@
-package homo.demo;
+package homo.demo.repository;
 
-import homo.repository.AbcRepository;
 import homo.repository.AbstractRepository;
 import org.springframework.stereotype.Repository;
 
@@ -8,7 +7,7 @@ import org.springframework.stereotype.Repository;
  * @author wujianchuan 2018/12/26
  */
 @Repository
-public class OrderRepositoryImpl extends AbstractRepository implements AbcRepository {
+public class OrderRepositoryImpl extends AbstractRepository {
 
     @Override
     public int save() {
