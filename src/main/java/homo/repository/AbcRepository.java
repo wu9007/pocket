@@ -1,4 +1,4 @@
-package homo.demo.repository;
+package homo.repository;
 
 /**
  * @author wujianchuan 2018/12/26

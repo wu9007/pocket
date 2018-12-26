@@ -1,8 +1,6 @@
-package homo.proxy;
+package homo.repository;
 
 
-import homo.demo.repository.AbcRepository;
-import homo.demo.repository.AbstractRepository;
 import homo.observe.evens.ModelSaveEven;
 import org.springframework.context.ApplicationContext;
 
@@ -14,7 +12,7 @@ public class RepositoryProxy implements AbcRepository {
     private ApplicationContext context;
     private AbstractRepository repository;
 
-    public void setRepository(ApplicationContext context, AbstractRepository repository) {
+    void setRepository(ApplicationContext context, AbstractRepository repository) {
         this.repository = repository;
         this.context = context;
     }

@@ -1,5 +1,7 @@
-package homo.demo.repository;
+package homo.demo;
 
+import homo.repository.AbcRepository;
+import homo.repository.AbstractRepository;
 import org.springframework.stereotype.Repository;
 
 /**

@@ -1,6 +1,5 @@
-package homo.demo.repository;
+package homo.repository;
 
-import homo.proxy.RepositoryProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
