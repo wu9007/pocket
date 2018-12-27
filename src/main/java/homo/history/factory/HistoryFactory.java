@@ -1,4 +1,4 @@
-package homo.history.service;
+package homo.history.factory;
 
 import homo.common.model.Entity;
 import homo.constant.OperateTypes;
@@ -25,15 +25,10 @@ public class HistoryFactory {
 
     public boolean saveEntityHistory(Entity entity, Class clazz, OperateTypes operateType) {
         AtomicInteger effect = new AtomicInteger(0);
-        String content = entity.getUuid();
+        String content = operateType.getName() + "了数据标识为：" + entity.getUuid() + "的数据。";
         History history = History.newInstance(content, "Home", new Date());
-        if (OperateTypes.SAVE.equals(operateType)) {
-            effect.addAndGet(repository.save(history));
-        } else if (OperateTypes.UPDATE.equals(operateType)) {
-            effect.addAndGet(repository.update(history));
-        } else if (OperateTypes.DELETE.equals(operateType)) {
-            effect.addAndGet(repository.delete(history));
-        }
+        effect.addAndGet(repository.save(history));
+
         return effect.get() > 0;
     }
 }

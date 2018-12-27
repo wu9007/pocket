@@ -2,7 +2,8 @@ package homo.repository;
 
 
 import homo.common.model.Entity;
-import homo.observe.evens.ModelSaveEven;
+import homo.constant.OperateTypes;
+import homo.observe.evens.EntityRepositoryEven;
 import org.springframework.context.ApplicationContext;
 
 import java.util.HashMap;
@@ -24,23 +25,30 @@ public class RepositoryProxy<T extends Entity> implements HomoRepository<T> {
     @Override
     public int save(T entity) {
         int affected = this.repository.save(entity);
-
-        Class clazz = entity.getClass();
-        Map<String, Object> source = new HashMap<>(2);
-        source.put("clazz", clazz);
-        source.put("entity", entity);
-        context.publishEvent(new ModelSaveEven(source));
-
+        this.afterReturningAdvise(entity, OperateTypes.SAVE);
         return affected;
     }
 
     @Override
     public int update(T entity) {
-        return 0;
+        int affected = this.repository.update(entity);
+        this.afterReturningAdvise(entity, OperateTypes.UPDATE);
+        return affected;
     }
 
     @Override
     public int delete(T entity) {
-        return 0;
+        int affected = this.repository.delete(entity);
+        this.afterReturningAdvise(entity, OperateTypes.DELETE);
+        return affected;
+    }
+
+    private void afterReturningAdvise(T entity, OperateTypes operateType) {
+        Class clazz = entity.getClass();
+        Map<String, Object> source = new HashMap<>(2);
+        source.put("clazz", clazz);
+        source.put("entity", entity);
+        source.put("operateType", operateType);
+        context.publishEvent(new EntityRepositoryEven(source));
     }
 }
