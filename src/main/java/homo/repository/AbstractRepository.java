@@ -6,9 +6,9 @@ import org.springframework.context.ApplicationContext;
 /**
  * @author wujianchuan 2018/12/26
  */
-public abstract class AbstractRepository implements AbcRepository {
+public abstract class AbstractRepository implements HomoRepository {
     @Autowired
-    ApplicationContext context;
+    private ApplicationContext context;
 
     private RepositoryProxy proxy;
 

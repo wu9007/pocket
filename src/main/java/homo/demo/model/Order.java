@@ -1,6 +1,6 @@
 package homo.demo.model;
 
-import homo.model.Entity;
+import homo.common.model.Entity;
 
 import java.math.BigDecimal;
 

@@ -1,14 +1,17 @@
 package homo.repository;
 
 
-import homo.model.Entity;
+import homo.common.model.Entity;
 import homo.observe.evens.ModelSaveEven;
 import org.springframework.context.ApplicationContext;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author wujianchuan 2018/12/26
  */
-public class RepositoryProxy implements AbcRepository {
+public class RepositoryProxy implements HomoRepository {
 
     private ApplicationContext context;
     private AbstractRepository repository;
@@ -21,7 +24,13 @@ public class RepositoryProxy implements AbcRepository {
     @Override
     public int save(Entity entity) {
         int affected = this.repository.save(entity);
-        context.publishEvent(new ModelSaveEven(entity));
+
+        Class clazz = entity.getClass();
+        Map<String, Object> source = new HashMap<>(2);
+        source.put("clazz", clazz);
+        source.put("entity", entity);
+        context.publishEvent(new ModelSaveEven(source));
+
         return affected;
     }
 

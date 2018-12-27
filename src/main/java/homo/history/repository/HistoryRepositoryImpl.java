@@ -1,18 +1,18 @@
-package homo.demo.repository;
+package homo.history.repository;
 
 import homo.common.model.Entity;
 import homo.repository.AbstractRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * @author wujianchuan 2018/12/26
+ * @author wujianchuan 2018/12/27
  */
 @Repository
-public class OrderRepositoryImpl extends AbstractRepository {
+public class HistoryRepositoryImpl extends AbstractRepository {
 
     @Override
     public int save(Entity entity) {
-        System.out.println("保存订单。");
+        System.out.println("保存历史数据：" + entity.getDescribe());
         return 0;
     }
 

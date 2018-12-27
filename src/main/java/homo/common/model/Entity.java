@@ -1,4 +1,4 @@
-package homo.model;
+package homo.common.model;
 
 import java.io.Serializable;
 
@@ -15,6 +15,10 @@ public class Entity implements Serializable {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public String getDescribe() {
+        return "uuid: " + this.getUuid();
     }
 
     @Override

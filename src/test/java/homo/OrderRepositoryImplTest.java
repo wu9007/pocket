@@ -1,5 +1,6 @@
 package homo;
 
+import homo.constant.OperateTypes;
 import homo.demo.model.Order;
 import homo.demo.repository.OrderRepositoryImpl;
 import org.junit.Test;
@@ -21,7 +22,13 @@ public class OrderRepositoryImplTest {
     public void test1() {
         Order order = new Order();
         order.setUuid("837423981236");
+        order.setCode("ABC-001");
         int effect = repository.getProxy().save(order);
         System.out.println(effect);
+    }
+
+    @Test
+    public void test2() {
+        System.out.println(OperateTypes.SAVE);
     }
 }

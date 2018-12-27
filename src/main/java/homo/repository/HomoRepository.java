@@ -1,11 +1,11 @@
 package homo.repository;
 
-import homo.model.Entity;
+import homo.common.model.Entity;
 
 /**
  * @author wujianchuan 2018/12/26
  */
-public interface AbcRepository {
+public interface HomoRepository {
 
     /**
      * 保存实体
