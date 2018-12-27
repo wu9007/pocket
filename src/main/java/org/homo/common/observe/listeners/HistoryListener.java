@@ -27,7 +27,7 @@ public class HistoryListener implements SmartApplicationListener {
     }
 
     @Override
-    public void onApplicationEvent(ApplicationEvent event) {
+    public void onApplicationEvent(ApplicationEvent event){
         Map<String, Object> source = (Map<String, Object>) event.getSource();
         Class clazz = (Class) source.get("clazz");
         BaseEntity entity = (BaseEntity) source.get("entity");
