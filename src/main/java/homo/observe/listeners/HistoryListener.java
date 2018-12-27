@@ -3,7 +3,7 @@ package homo.observe.listeners;
 import homo.common.model.Entity;
 import homo.constant.OperateTypes;
 import homo.history.factory.HistoryFactory;
-import homo.observe.evens.EntityRepositoryEven;
+import homo.observe.evens.RepositoryEven;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.stereotype.Component;
@@ -17,7 +17,7 @@ import java.util.Map;
 public class HistoryListener implements SmartApplicationListener {
     @Override
     public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
-        return EntityRepositoryEven.class == eventType;
+        return RepositoryEven.class == eventType;
     }
 
     @Override

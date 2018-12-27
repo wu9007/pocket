@@ -1,6 +1,6 @@
 package homo.observe.listeners;
 
-import homo.observe.evens.EntityRepositoryEven;
+import homo.observe.evens.RepositoryEven;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.stereotype.Component;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class MessageListener implements SmartApplicationListener {
     @Override
     public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
-        return EntityRepositoryEven.class == eventType;
+        return RepositoryEven.class == eventType;
     }
 
     @Override

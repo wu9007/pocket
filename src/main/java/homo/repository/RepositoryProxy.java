@@ -3,7 +3,7 @@ package homo.repository;
 
 import homo.common.model.Entity;
 import homo.constant.OperateTypes;
-import homo.observe.evens.EntityRepositoryEven;
+import homo.observe.evens.RepositoryEven;
 import org.springframework.context.ApplicationContext;
 
 import java.util.HashMap;
@@ -49,6 +49,6 @@ public class RepositoryProxy<T extends Entity> implements HomoRepository<T> {
         source.put("clazz", clazz);
         source.put("entity", entity);
         source.put("operateType", operateType);
-        context.publishEvent(new EntityRepositoryEven(source));
+        context.publishEvent(new RepositoryEven(source));
     }
 }
