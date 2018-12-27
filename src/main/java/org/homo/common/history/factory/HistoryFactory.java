@@ -30,7 +30,9 @@ public class HistoryFactory {
                 .append(operateType.getName())
                 .append("】uuid：")
                 .append(entity.getUuid());
-        Arrays.stream(clazz.getDeclaredFields()).filter(field -> !"serialVersionUID".equals(field.getName()))
+
+        Arrays.stream(clazz.getDeclaredFields())
+                .filter(field -> !"serialVersionUID".equals(field.getName()))
                 .forEach(field -> {
                     field.setAccessible(true);
                     try {
