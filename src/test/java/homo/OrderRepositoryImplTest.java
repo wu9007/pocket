@@ -2,7 +2,7 @@ package homo;
 
 import homo.constant.OperateTypes;
 import homo.demo.model.Order;
-import homo.demo.repository.OrderRepositoryImpl;
+import homo.repository.AbstractRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest(classes = Application.class)
 public class OrderRepositoryImplTest {
     @Autowired
-    OrderRepositoryImpl repository;
+    AbstractRepository<Order> repository;
 
     @Test
     public void test1() {

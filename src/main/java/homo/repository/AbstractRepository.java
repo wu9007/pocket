@@ -13,11 +13,11 @@ public abstract class AbstractRepository<T extends Entity> implements HomoReposi
 
     private RepositoryProxy<T> proxy;
 
-    public RepositoryProxy getProxy() {
+    public RepositoryProxy<T> getProxy() {
         if (this.proxy != null) {
             return this.proxy;
         } else {
-            this.proxy = new RepositoryProxy<T>();
+            this.proxy = new RepositoryProxy<>();
             proxy.setRepository(context, this);
         }
         return this.proxy;
