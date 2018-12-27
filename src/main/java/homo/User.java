@@ -1,11 +1,11 @@
 package homo;
 
-import homo.common.model.Entity;
+import homo.common.model.BaseEntity;
 
 /**
  * @author wujianchuan 2018/12/27
  */
-public class User extends Entity {
+public class User extends BaseEntity {
     private static final long serialVersionUID = -8894255862274388288L;
 
     private String avatar;

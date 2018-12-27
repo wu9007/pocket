@@ -1,10 +1,10 @@
-package homo.repository;
+package homo.common.repository;
 
 
 import homo.User;
-import homo.common.model.Entity;
+import homo.common.model.BaseEntity;
 import homo.constant.OperateTypes;
-import homo.observe.evens.RepositoryEven;
+import homo.common.observe.evens.RepositoryEven;
 import org.springframework.context.ApplicationContext;
 
 import java.util.HashMap;
@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * @author wujianchuan 2018/12/26
  */
-public class RepositoryProxy<T extends Entity> implements HomoRepository<T> {
+public class RepositoryProxy<T extends BaseEntity> implements HomoRepository<T> {
 
     private ApplicationContext context;
     private AbstractRepository<T> repository;

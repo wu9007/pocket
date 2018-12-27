@@ -1,6 +1,6 @@
-package homo.history.repository;
+package homo.common.history.repository;
 
-import homo.history.model.History;
+import homo.common.history.model.History;
 import org.springframework.stereotype.Repository;
 
 /**

@@ -1,17 +1,27 @@
 package homo.demo.model;
 
-import homo.common.model.Entity;
+import homo.common.model.BaseEntity;
 
 import java.math.BigDecimal;
 
 /**
  * @author wujianchuan 2018/12/26
  */
-public class Order extends Entity {
+public class Order extends BaseEntity {
     private static final long serialVersionUID = 2560385391551524826L;
 
     private String code;
     private BigDecimal price;
+
+    private Order() {
+    }
+
+    public static Order newInstance(String code, BigDecimal price) {
+        Order order = new Order();
+        order.setCode(code);
+        order.setPrice(price);
+        return order;
+    }
 
     public String getCode() {
         return code;

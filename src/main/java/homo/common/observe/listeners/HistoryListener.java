@@ -1,10 +1,10 @@
-package homo.observe.listeners;
+package homo.common.observe.listeners;
 
 import homo.User;
-import homo.common.model.Entity;
+import homo.common.model.BaseEntity;
 import homo.constant.OperateTypes;
-import homo.history.factory.HistoryFactory;
-import homo.observe.evens.RepositoryEven;
+import homo.common.history.factory.HistoryFactory;
+import homo.common.observe.evens.RepositoryEven;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.stereotype.Component;
@@ -30,16 +30,10 @@ public class HistoryListener implements SmartApplicationListener {
     public void onApplicationEvent(ApplicationEvent event) {
         Map<String, Object> source = (Map<String, Object>) event.getSource();
         Class clazz = (Class) source.get("clazz");
-        Entity entity = (Entity) source.get("entity");
+        BaseEntity entity = (BaseEntity) source.get("entity");
         User operator = (User) source.get("operator");
         OperateTypes operateType = (OperateTypes) source.get("operateType");
-
-        boolean success = HistoryFactory.getInstance().saveEntityHistory(entity, clazz, operateType, operator);
-        if (success) {
-            System.out.println("历史保存成功。");
-        } else {
-            System.out.println("历史保存失败");
-        }
+        HistoryFactory.getInstance().saveEntityHistory(entity, clazz, operateType, operator);
     }
 
     @Override

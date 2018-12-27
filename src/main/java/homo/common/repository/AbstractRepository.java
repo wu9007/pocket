@@ -1,13 +1,13 @@
-package homo.repository;
+package homo.common.repository;
 
-import homo.common.model.Entity;
+import homo.common.model.BaseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 /**
  * @author wujianchuan 2018/12/26
  */
-public abstract class AbstractRepository<T extends Entity> implements HomoRepository<T> {
+public abstract class AbstractRepository<T extends BaseEntity> implements HomoRepository<T> {
     @Autowired
     private ApplicationContext context;
 

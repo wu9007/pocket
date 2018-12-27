@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * @author wujianchuan 2018/12/26
  */
-public class Entity implements Serializable {
+public abstract class BaseEntity implements Serializable {
     private static final long serialVersionUID = -8735555543925687138L;
     private String uuid;
 
@@ -35,7 +35,7 @@ public class Entity implements Serializable {
         } else if (this.getClass() != obj.getClass()) {
             return false;
         } else {
-            Entity other = (Entity) obj;
+            BaseEntity other = (BaseEntity) obj;
             if (this.uuid == null) {
                 return other.uuid == null;
             } else {

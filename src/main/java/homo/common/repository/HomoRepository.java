@@ -1,12 +1,12 @@
-package homo.repository;
+package homo.common.repository;
 
 import homo.User;
-import homo.common.model.Entity;
+import homo.common.model.BaseEntity;
 
 /**
  * @author wujianchuan 2018/12/26
  */
-public interface HomoRepository<T extends Entity> {
+public interface HomoRepository<T extends BaseEntity> {
 
     /**
      * 保存实体

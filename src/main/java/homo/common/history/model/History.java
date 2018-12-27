@@ -1,13 +1,13 @@
-package homo.history.model;
+package homo.common.history.model;
 
-import homo.common.model.Entity;
+import homo.common.model.BaseEntity;
 
 import java.util.Date;
 
 /**
  * @author wujianchuan 2018/12/27
  */
-public class History extends Entity {
+public class History extends BaseEntity {
     private static final long serialVersionUID = -4471597190430423414L;
 
     private String uuid;
