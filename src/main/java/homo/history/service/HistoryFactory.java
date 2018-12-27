@@ -4,7 +4,6 @@ import homo.common.model.Entity;
 import homo.constant.OperateTypes;
 import homo.history.model.History;
 import homo.history.repository.HistoryRepositoryImpl;
-import homo.repository.HomoRepository;
 
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -15,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class HistoryFactory {
     private final static HistoryFactory INSTANCE = new HistoryFactory();
 
-    private HomoRepository repository = new HistoryRepositoryImpl();
+    private HistoryRepositoryImpl repository = new HistoryRepositoryImpl();
 
     private HistoryFactory() {
     }

@@ -11,18 +11,18 @@ import java.util.Map;
 /**
  * @author wujianchuan 2018/12/26
  */
-public class RepositoryProxy implements HomoRepository {
+public class RepositoryProxy<T extends Entity> implements HomoRepository<T> {
 
     private ApplicationContext context;
-    private AbstractRepository repository;
+    private AbstractRepository<T> repository;
 
-    void setRepository(ApplicationContext context, AbstractRepository repository) {
+    void setRepository(ApplicationContext context, AbstractRepository<T> repository) {
         this.repository = repository;
         this.context = context;
     }
 
     @Override
-    public int save(Entity entity) {
+    public int save(T entity) {
         int affected = this.repository.save(entity);
 
         Class clazz = entity.getClass();
@@ -35,12 +35,12 @@ public class RepositoryProxy implements HomoRepository {
     }
 
     @Override
-    public int update(Entity entity) {
+    public int update(T entity) {
         return 0;
     }
 
     @Override
-    public int delete(Entity entity) {
+    public int delete(T entity) {
         return 0;
     }
 }

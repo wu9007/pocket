@@ -31,7 +31,12 @@ public class HistoryListener implements SmartApplicationListener {
         Class clazz = (Class) source.get("clazz");
         Entity entity = (Entity) source.get("entity");
 
-        HistoryFactory.getInstance().saveEntityHistory(entity, clazz, OperateTypes.SAVE);
+        boolean success = HistoryFactory.getInstance().saveEntityHistory(entity, clazz, OperateTypes.SAVE);
+        if (success) {
+            System.out.println("历史保存成功。");
+        } else {
+            System.out.println("历史保存失败");
+        }
     }
 
     @Override
