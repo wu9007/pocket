@@ -1,5 +1,6 @@
 package homo.repository;
 
+import homo.User;
 import homo.common.model.Entity;
 
 /**
@@ -12,19 +13,19 @@ public interface HomoRepository<T extends Entity> {
      * @param entity 实体类
      * @return 影响行数
      */
-    int save(T entity);
+    int save(T entity, User operator);
 
     /**
      * 更新实体
      * @param entity 实体类
      * @return 影响行数
      */
-    int update(T entity);
+    int update(T entity, User operator);
 
     /**
      * 删除实体
      * @param entity 实体类
      * @return 影响行数
      */
-    int delete(T entity);
+    int delete(T entity, User operator);
 }

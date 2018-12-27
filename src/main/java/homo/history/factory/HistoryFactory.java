@@ -1,5 +1,6 @@
 package homo.history.factory;
 
+import homo.User;
 import homo.common.model.Entity;
 import homo.constant.OperateTypes;
 import homo.history.model.History;
@@ -23,10 +24,10 @@ public class HistoryFactory {
         return INSTANCE;
     }
 
-    public boolean saveEntityHistory(Entity entity, Class clazz, OperateTypes operateType) {
+    public boolean saveEntityHistory(Entity entity, Class clazz, OperateTypes operateType, User operator) {
         AtomicInteger effect = new AtomicInteger(0);
         String content = operateType.getName() + "了数据标识为：" + entity.getUuid() + "的数据。";
-        History history = History.newInstance(content, "Home", new Date());
+        History history = History.newInstance(content, operator.getName(), new Date());
         effect.addAndGet(repository.save(history));
 
         return effect.get() > 0;

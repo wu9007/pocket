@@ -1,5 +1,6 @@
 package homo.demo.repository;
 
+import homo.User;
 import homo.demo.model.Order;
 import homo.repository.AbstractRepository;
 import org.springframework.stereotype.Repository;
@@ -11,18 +12,20 @@ import org.springframework.stereotype.Repository;
 public class OrderRepositoryImpl extends AbstractRepository<Order> {
 
     @Override
-    public int save(Order entity) {
+    public int save(Order entity, User operator) {
         System.out.println("保存订单。");
         return 0;
     }
 
     @Override
-    public int update(Order entity) {
+    public int update(Order entity, User operator) {
+        System.out.println("更新订单。");
         return 0;
     }
 
     @Override
-    public int delete(Order entity) {
+    public int delete(Order entity, User operator) {
+        System.out.println("删除订单。");
         return 0;
     }
 }

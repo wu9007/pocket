@@ -23,7 +23,8 @@ public class OrderRepositoryImplTest {
         Order order = new Order();
         order.setUuid("837423981236");
         order.setCode("ABC-001");
-        int effect = repository.getProxy().update(order);
+        User user = User.newInstance("Home", "霍姆");
+        int effect = repository.getProxy().update(order, user);
         System.out.println(effect);
     }
 
