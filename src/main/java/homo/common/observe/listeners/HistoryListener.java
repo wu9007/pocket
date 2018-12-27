@@ -1,8 +1,8 @@
 package homo.common.observe.listeners;
 
-import homo.User;
+import homo.authority.model.User;
 import homo.common.model.BaseEntity;
-import homo.constant.OperateTypes;
+import homo.common.constant.OperateTypes;
 import homo.common.history.factory.HistoryFactory;
 import homo.common.observe.evens.RepositoryEven;
 import org.springframework.context.ApplicationEvent;

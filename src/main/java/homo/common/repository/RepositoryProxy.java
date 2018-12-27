@@ -1,9 +1,9 @@
 package homo.common.repository;
 
 
-import homo.User;
+import homo.authority.model.User;
 import homo.common.model.BaseEntity;
-import homo.constant.OperateTypes;
+import homo.common.constant.OperateTypes;
 import homo.common.observe.evens.RepositoryEven;
 import org.springframework.context.ApplicationContext;
 

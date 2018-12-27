@@ -1,4 +1,4 @@
-package homo.constant;
+package homo.common.constant;
 
 /**
  * @author wujianchuan 2018/12/27

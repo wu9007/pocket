@@ -1,6 +1,6 @@
 package homo.demo.repository;
 
-import homo.User;
+import homo.authority.model.User;
 import homo.demo.model.Order;
 import homo.common.repository.AbstractRepository;
 import org.springframework.stereotype.Repository;

@@ -1,4 +1,4 @@
-package homo;
+package homo.authority.model;
 
 import homo.common.model.BaseEntity;
 

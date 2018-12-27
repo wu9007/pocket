@@ -1,6 +1,6 @@
 package homo.common.repository;
 
-import homo.User;
+import homo.authority.model.User;
 import homo.common.model.BaseEntity;
 
 /**

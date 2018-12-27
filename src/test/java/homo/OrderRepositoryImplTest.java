@@ -1,6 +1,7 @@
 package homo;
 
-import homo.constant.OperateTypes;
+import homo.authority.model.User;
+import homo.common.constant.OperateTypes;
 import homo.demo.model.Order;
 import homo.common.repository.AbstractRepository;
 import org.junit.Test;
@@ -25,7 +26,7 @@ public class OrderRepositoryImplTest {
         Order order = Order.newInstance("ABC-001", new BigDecimal("12.593"));
         User user = User.newInstance("Home", "霍姆");
         int effect = repository.getProxy().update(order, user);
-        System.out.println(effect);
+        System.out.println("影响行数：" + effect);
     }
 
     @Test
