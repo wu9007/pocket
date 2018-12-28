@@ -1,4 +1,4 @@
-package org.homo.common.observe.evens;
+package org.homo.common.evens;
 
 import org.springframework.context.ApplicationEvent;
 

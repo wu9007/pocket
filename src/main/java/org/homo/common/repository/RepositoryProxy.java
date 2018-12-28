@@ -4,7 +4,7 @@ package org.homo.common.repository;
 import org.homo.authority.model.User;
 import org.homo.common.model.BaseEntity;
 import org.homo.common.constant.OperateTypes;
-import org.homo.common.observe.evens.RepositoryEven;
+import org.homo.common.evens.RepositoryEven;
 import org.springframework.context.ApplicationContext;
 
 import java.util.HashMap;
