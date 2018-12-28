@@ -27,7 +27,7 @@ public class SaveExecutor implements HomoExecutor {
     @Override
     public ExecutionResult execute(HttpServletRequest request) {
         Order order = Order.newInstance("A-001", new BigDecimal("12.5"));
-        User user = User.newInstance("Homo", "霍姆");
+        User user = User.newInstance("Home", "霍姆");
         repository.getProxy().save(order, user);
         return ExecutionResult.newSuccessInstance("成功", "订单保存成功", order);
     }

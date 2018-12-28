@@ -62,7 +62,7 @@ public class OrderRepositoryImplTest {
 
     @Test
     public void test3() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/common/demo/order"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/common/demo/detail"))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }

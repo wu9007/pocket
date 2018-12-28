@@ -11,6 +11,7 @@ public interface HomoRepository<T extends BaseEntity> {
     /**
      * 保存实体
      * @param entity 实体类
+     * @param operator 操作人
      * @return 影响行数
      */
     int save(T entity, User operator);
@@ -18,6 +19,7 @@ public interface HomoRepository<T extends BaseEntity> {
     /**
      * 更新实体
      * @param entity 实体类
+     * @param operator 操作人
      * @return 影响行数
      */
     int update(T entity, User operator);
@@ -25,6 +27,7 @@ public interface HomoRepository<T extends BaseEntity> {
     /**
      * 删除实体
      * @param entity 实体类
+     * @param operator 操作人
      * @return 影响行数
      */
     int delete(T entity, User operator);
