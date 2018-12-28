@@ -27,12 +27,12 @@ class HomoDispatchServlet {
     }
 
     @RequestMapping(
-            value = {"/{containerName}/{bundleName}/{executorName:[^.]*}"},
+            value = {"/{bundleName}/{executorName:[^.]*}"},
             method = {RequestMethod.POST, RequestMethod.GET}
     )
     @ResponseBody
-    void service(@PathVariable String containerName, @PathVariable String bundleName, @PathVariable String executorName, HttpServletRequest request, HttpServletResponse response) {
-        HomoExecutor executor = controllerFactory.getExecutor(containerName + "_" + bundleName + "_" + executorName);
+    void service(@PathVariable String bundleName, @PathVariable String executorName, HttpServletRequest request, HttpServletResponse response) {
+        HomoExecutor executor = controllerFactory.getExecutor(request.getContextPath().substring(1) + "_" + bundleName + "_" + executorName);
         ExecutionResult responseBody = executor.execute(request);
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");

@@ -1,9 +1,9 @@
 {
   "properties": [
     {
-      "name": "homo.serverName",
+      "name": "homo.describe",
       "type": "java.lang.String",
-      "description": "Description for homo.serverName."
+      "description": "Description for homo.describe."
     }
   ]
 }

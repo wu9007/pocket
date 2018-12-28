@@ -1,0 +1,6 @@
+homo:
+  describe: this's a prod homo
+server:
+  port: 80
+  servlet:
+    context-path: /homo

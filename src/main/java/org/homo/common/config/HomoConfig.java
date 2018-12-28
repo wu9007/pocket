@@ -9,13 +9,13 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "homo")
 public class HomoConfig {
-    private String serverName;
+    private String describe;
 
-    public String getServerName() {
-        return serverName;
+    public String getDescribe() {
+        return describe;
     }
 
-    public void setServerName(String serverName) {
-        this.serverName = serverName;
+    public void setDescribe(String describe) {
+        this.describe = describe;
     }
 }

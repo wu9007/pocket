@@ -1,2 +1,3 @@
-homo:
-  serverName: common
+spring:
+  profiles:
+    active: dev

@@ -1,0 +1,6 @@
+homo:
+  describe: this's a dev homo
+server:
+  port: 8080
+  servlet:
+    context-path: /dev
