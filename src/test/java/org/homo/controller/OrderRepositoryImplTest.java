@@ -70,7 +70,7 @@ public class OrderRepositoryImplTest {
 
     @Test
     public void test4() {
-        controllerFactory.getController("index").execute();
+        controllerFactory.getExecutor("index").execute();
     }
 
     @Test
@@ -80,6 +80,6 @@ public class OrderRepositoryImplTest {
 
     @Test
     public void test6() {
-        controllerFactory.getController("/common/demo/list").execute();
+        controllerFactory.getExecutor("/common/demo/list").execute();
     }
 }
