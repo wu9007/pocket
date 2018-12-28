@@ -9,6 +9,7 @@ import java.math.BigDecimal;
  * @author wujianchuan 2018/12/26
  */
 @HomoEntity
+
 public class Order extends BaseEntity {
     private static final long serialVersionUID = 2560385391551524826L;
 
@@ -39,5 +40,10 @@ public class Order extends BaseEntity {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    @Override
+    public String getDescribe() {
+        return super.getDescribe();
     }
 }

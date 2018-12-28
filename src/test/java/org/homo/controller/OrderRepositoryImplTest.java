@@ -63,7 +63,7 @@ public class OrderRepositoryImplTest {
 
     @Test
     public void test3() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/auth/publishers/a"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/common/demo/order"))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
@@ -80,6 +80,6 @@ public class OrderRepositoryImplTest {
 
     @Test
     public void test6() {
-        controllerFactory.getExecutor("/common/demo/list").execute();
+        controllerFactory.getExecutor("common_demo_order").execute();
     }
 }
