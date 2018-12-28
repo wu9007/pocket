@@ -2,6 +2,7 @@ package org.homo.common.repository;
 
 
 import org.homo.authority.model.User;
+import org.homo.common.annotation.HomoEntity;
 import org.homo.common.model.BaseEntity;
 import org.homo.common.constant.OperateTypes;
 import org.homo.common.evens.RepositoryEven;
@@ -46,11 +47,14 @@ public class RepositoryProxy<T extends BaseEntity> implements HomoRepository<T> 
 
     private void afterReturningAdvise(T entity, OperateTypes operateType, User operator) {
         Class clazz = entity.getClass();
-        Map<String, Object> source = new HashMap<>(2);
-        source.put("clazz", clazz);
-        source.put("entity", entity);
-        source.put("operator", operator);
-        source.put("operateType", operateType);
-        context.publishEvent(new RepositoryEven(source));
+        HomoEntity entityAnnotation = (HomoEntity) clazz.getAnnotation(HomoEntity.class);
+        if (entityAnnotation == null || entityAnnotation.history()) {
+            Map<String, Object> source = new HashMap<>(2);
+            source.put("clazz", clazz);
+            source.put("entity", entity);
+            source.put("operator", operator);
+            source.put("operateType", operateType);
+            context.publishEvent(new RepositoryEven(source));
+        }
     }
 }

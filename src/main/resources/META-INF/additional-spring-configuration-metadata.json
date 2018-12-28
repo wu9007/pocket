@@ -4,5 +4,6 @@
       "name": "homo.serverName",
       "type": "java.lang.String",
       "description": "Description for homo.serverName."
-  }
-] }
+    }
+  ]
+}

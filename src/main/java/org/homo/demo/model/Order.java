@@ -1,5 +1,6 @@
 package org.homo.demo.model;
 
+import org.homo.common.annotation.HomoEntity;
 import org.homo.common.model.BaseEntity;
 
 import java.math.BigDecimal;
@@ -7,6 +8,7 @@ import java.math.BigDecimal;
 /**
  * @author wujianchuan 2018/12/26
  */
+@HomoEntity
 public class Order extends BaseEntity {
     private static final long serialVersionUID = 2560385391551524826L;
 

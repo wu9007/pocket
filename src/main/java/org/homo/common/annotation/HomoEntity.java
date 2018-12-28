@@ -1,7 +1,5 @@
 package org.homo.common.annotation;
 
-import org.springframework.stereotype.Component;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -14,8 +12,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Component
-public @interface Execute {
-
-    String value() default "";
+public @interface HomoEntity {
+    boolean history() default true;
 }
