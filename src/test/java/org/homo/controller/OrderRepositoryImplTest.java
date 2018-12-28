@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -70,16 +71,7 @@ public class OrderRepositoryImplTest {
 
     @Test
     public void test4() {
-        controllerFactory.getExecutor("index").execute();
-    }
-
-    @Test
-    public void test5() {
         System.out.println(homoConfig.getServerName());
     }
 
-    @Test
-    public void test6() {
-        controllerFactory.getExecutor("common_demo_order").execute();
-    }
 }
