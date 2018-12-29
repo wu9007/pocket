@@ -4,11 +4,11 @@ import org.homo.authority.model.User;
 import org.homo.common.annotation.Executor;
 import org.homo.controller.ExecutionResult;
 import org.homo.controller.HomoExecutor;
+import org.homo.controller.HomoRequest;
 import org.homo.demo.model.Order;
 import org.homo.demo.repository.OrderRepositoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 
 /**
@@ -25,10 +25,9 @@ public class SaveExecutor implements HomoExecutor {
     }
 
     @Override
-    public ExecutionResult execute(HttpServletRequest request) {
+    public ExecutionResult execute(HomoRequest request) {
         Order order = Order.newInstance("A-001", new BigDecimal("12.5"));
-        User user = User.newInstance("Home", "霍姆");
-        repository.getProxy().save(order, user);
+        repository.getProxy().save(order, request.getUser());
         return ExecutionResult.newSuccessInstance("成功", "订单保存成功", order);
     }
 }

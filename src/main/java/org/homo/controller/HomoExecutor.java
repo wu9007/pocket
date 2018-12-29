@@ -11,5 +11,5 @@ public interface HomoExecutor {
      *
      * @return 响应结果集
      */
-    ExecutionResult execute(HttpServletRequest request);
+    ExecutionResult execute(HomoRequest request);
 }

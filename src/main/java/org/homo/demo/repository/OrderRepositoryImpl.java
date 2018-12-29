@@ -5,11 +5,13 @@ import org.homo.demo.model.Order;
 import org.homo.common.repository.AbstractRepository;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
+
 /**
  * @author wujianchuan 2018/12/26
  */
 @Repository
-public class OrderRepositoryImpl extends AbstractRepository<Order> {
+public class OrderRepositoryImpl extends AbstractRepository<Order> implements OrderRepository {
 
     @Override
     public int save(Order entity, User operator) {
@@ -27,5 +29,11 @@ public class OrderRepositoryImpl extends AbstractRepository<Order> {
     public int delete(Order entity, User operator) {
         System.out.println("删除订单。");
         return 1;
+    }
+
+
+    @Override
+    public Order findOne(String uuid) {
+        return Order.newInstance("B-001", new BigDecimal("100.54"));
     }
 }

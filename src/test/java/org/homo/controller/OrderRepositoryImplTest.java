@@ -78,4 +78,11 @@ public class OrderRepositoryImplTest {
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
+
+    @Test
+    public void test6() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/demo/discount"))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
 }

@@ -1,6 +1,7 @@
 package org.homo.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.homo.authority.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,6 +33,8 @@ class HomoDispatchServlet {
     )
     @ResponseBody
     void service(@PathVariable String bundleName, @PathVariable String executorName, HttpServletRequest request, HttpServletResponse response) {
+        User user = User.newInstance("Home", "霍姆");
+        HomoRequest homoRequest = HomoRequest.newInstance(request, user);
         String contextPath = request.getContextPath();
         String url = (contextPath.length() > 1 ? contextPath.substring(1) : contextPath)
                 + "_" + bundleName
@@ -39,7 +42,7 @@ class HomoDispatchServlet {
         HomoExecutor executor = controllerFactory.getExecutor(url);
         ExecutionResult responseBody;
         if (executor != null) {
-            responseBody = executor.execute(request);
+            responseBody = executor.execute(homoRequest);
         } else {
             throw new NullPointerException("未找到执行器【" + url + "】");
         }

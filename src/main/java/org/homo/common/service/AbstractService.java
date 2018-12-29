@@ -3,29 +3,36 @@ package org.homo.common.service;
 import org.hibernate.Session;
 import org.homo.common.annotation.HomoTransaction;
 import org.homo.common.evens.ServiceEven;
+import org.homo.common.repository.AbstractRepository;
+import org.homo.controller.HomoRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  * @author wujianchuan 2018/12/29
  */
-public abstract class AbstractService {
+public abstract class AbstractService<T extends AbstractRepository> {
     private Map<String, Field> fieldMapper = new HashMap<>(20);
     private Session session;
     private HomoTransaction homoTransactionAnnotation;
+    private T repository;
+
+    public AbstractService(T repository) {
+        this.repository = repository;
+    }
 
     @Autowired
     private ApplicationContext context;
 
-    public Object handle(Function<Map<String, Object>, Object> function, Map<String, Object> parameter) {
+    public Object handle(BiFunction<HomoRequest, T, Object> function, HomoRequest request) {
 
         this.before(function);
-        Object result = function.apply(parameter);
+        Object result = function.apply(request, repository);
         this.after(function, result);
         return result;
     }
@@ -35,7 +42,7 @@ public abstract class AbstractService {
      *
      * @param function 执行函数
      */
-    private void before(Function<Map<String, Object>, Object> function) {
+    private void before(BiFunction<HomoRequest, T, Object> function) {
         this.transactionAnnotation(function.toString());
 
         if (this.homoTransactionAnnotation != null && this.homoTransactionAnnotation.open()) {
@@ -49,7 +56,7 @@ public abstract class AbstractService {
      *
      * @param function 执行函数
      */
-    private void after(Function<Map<String, Object>, Object> function, Object result) {
+    private void after(BiFunction<HomoRequest, T, Object> function, Object result) {
 
         if (this.homoTransactionAnnotation != null && this.homoTransactionAnnotation.open()) {
             // TODO 通过工厂获取session {this.session = SessionFactory.getInstance.getSession("demo")}
@@ -59,7 +66,7 @@ public abstract class AbstractService {
         this.notifyAllListener(function, result);
     }
 
-    private void notifyAllListener(Function<Map<String, Object>, Object> function, Object result) {
+    private void notifyAllListener(BiFunction<HomoRequest, T, Object> function, Object result) {
         Map<String, Object> source = new HashMap<>(2);
         source.put("field", fieldMapper.get(function.toString()));
         source.put("result", result);

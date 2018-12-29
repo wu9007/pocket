@@ -29,7 +29,8 @@ public class MessageListener implements SmartApplicationListener {
         Map<String, Object> source = (Map<String, Object>) event.getSource();
         Field field = (Field) source.get("field");
         Object result = source.get("result");
-        if (field.getAnnotation(HomoMessage.class).open()) {
+        HomoMessage messageAnnotation = field.getAnnotation(HomoMessage.class);
+        if (messageAnnotation != null && messageAnnotation.open()) {
             System.out.println("发送短信-" + result);
         }
     }

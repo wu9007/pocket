@@ -17,5 +17,5 @@ import java.lang.annotation.Target;
 @Component
 public @interface Executor {
 
-    String value() default "";
+    String value();
 }
