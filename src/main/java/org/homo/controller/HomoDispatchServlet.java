@@ -32,8 +32,17 @@ class HomoDispatchServlet {
     )
     @ResponseBody
     void service(@PathVariable String bundleName, @PathVariable String executorName, HttpServletRequest request, HttpServletResponse response) {
-        HomoExecutor executor = controllerFactory.getExecutor(request.getContextPath().substring(1) + "_" + bundleName + "_" + executorName);
-        ExecutionResult responseBody = executor.execute(request);
+        String contextPath = request.getContextPath();
+        String url = (contextPath.length() > 1 ? contextPath.substring(1) : contextPath)
+                + "_" + bundleName
+                + "_" + executorName;
+        HomoExecutor executor = controllerFactory.getExecutor(url);
+        ExecutionResult responseBody;
+        if (executor != null) {
+            responseBody = executor.execute(request);
+        } else {
+            throw new NullPointerException("未找到执行器【" + url + "】");
+        }
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");
         try {
