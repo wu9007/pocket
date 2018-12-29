@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 /**
  * @author wujianchuan 2018/12/26
  */
-@HomoEntity
+@HomoEntity(history = false)
 public class Order extends BaseEntity {
     private static final long serialVersionUID = 2560385391551524826L;
 

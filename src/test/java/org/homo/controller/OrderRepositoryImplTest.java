@@ -71,4 +71,11 @@ public class OrderRepositoryImplTest {
     public void test4() {
         System.out.println(homoConfig.getDescribe());
     }
+
+    @Test
+    public void test5() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/demo/save"))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
 }
