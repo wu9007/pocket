@@ -1,6 +1,10 @@
 # Homo
+[![](https://img.shields.io/badge/Version-0.0.1-brightgreen.svg)](https://github.com/leyan95/Homo)
 
-> 一些想法的实现
+一个可以快速上手的简单可扩展框架
+
+#### 关于我
+[![github](https://img.shields.io/badge/GitHub-leyan95-blue.svg)](https://github.com/leyan95)
 
 2018年12月28日 给你一双耳朵，愿你在这寒冬里听得到暖心的故事
 
