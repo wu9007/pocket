@@ -1,3 +1,7 @@
 language: java
 jdk:
   - oraclejdk8
+
+install: echo "skip './gradlew assemble' step"
+
+script: ./gradlew build coveralls --continue
