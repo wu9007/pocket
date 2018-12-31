@@ -3,7 +3,27 @@
     {
       "name": "homo.describe",
       "type": "java.lang.String",
-      "description": "Description for homo.describe."
+      "description": "service describe."
+    },
+    {
+      "name": "homo.datasource.url",
+      "type": "java.lang.String",
+      "description": "database url."
+    },
+    {
+      "name": "homo.datasource.name",
+      "type": "java.lang.String",
+      "description": "database name."
+    },
+    {
+      "name": "homo.datasource.user",
+      "type": "java.lang.String",
+      "description": "database user."
+    },
+    {
+      "name": "homo.datasource.password",
+      "type": "java.lang.String",
+      "description": "database password."
     }
   ]
 }
