@@ -1,10 +1,10 @@
-package org.homo.demo.executor;
+package org.homo.orderdemo.executor;
 
 import org.homo.core.annotation.Executor;
 import org.homo.core.executor.ExecutionResult;
 import org.homo.core.executor.HomoExecutor;
 import org.homo.core.executor.HomoRequest;
-import org.homo.demo.service.OrderServiceImpl;
+import org.homo.orderdemo.service.OrderServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**

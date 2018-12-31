@@ -1,4 +1,4 @@
-package org.homo.demo.model;
+package org.homo.orderdemo.model;
 
 import org.homo.core.annotation.HomoEntity;
 import org.homo.core.model.BaseEntity;

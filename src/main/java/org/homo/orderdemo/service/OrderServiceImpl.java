@@ -1,11 +1,12 @@
-package org.homo.demo.service;
+package org.homo.orderdemo.service;
 
+import org.homo.authority.model.User;
 import org.homo.core.annotation.HomoMessage;
 import org.homo.core.annotation.HomoTransaction;
 import org.homo.core.service.AbstractService;
 import org.homo.core.executor.HomoRequest;
-import org.homo.demo.model.Order;
-import org.homo.demo.repository.OrderRepositoryImpl;
+import org.homo.orderdemo.model.Order;
+import org.homo.orderdemo.repository.OrderRepositoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,16 +23,16 @@ public class OrderServiceImpl extends AbstractService<OrderRepositoryImpl> {
         super(repository);
     }
 
-    @HomoTransaction(sessionName = "demo")
-    @HomoMessage(open = true)
+    @HomoTransaction(open = false, sessionName = "demo")
+    @HomoMessage(open = true, type = User.class)
     public BiFunction<HomoRequest, OrderRepositoryImpl, Object> getCode = (request, repository) -> "A-001";
 
-    @HomoTransaction(sessionName = "demo")
-    @HomoMessage(open = true)
+    @HomoTransaction(open = false, sessionName = "demo")
+    @HomoMessage(open = true, type = Order.class)
     public BiFunction<HomoRequest, OrderRepositoryImpl, Object> discount = (request, repository) -> {
         String uuid = request.getParameter("uuid");
         Order order = repository.findOne(uuid);
-        order.setPrice(order.getPrice().multiply(new BigDecimal("0.85")));
+        order.setPrice(order.getPrice().add(new BigDecimal("1")));
         repository.getProxy().update(order, request.getUser());
         return order.getPrice().toString();
     };

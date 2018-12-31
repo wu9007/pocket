@@ -15,5 +15,7 @@ import java.lang.annotation.Target;
 public @interface HomoMessage {
     boolean open() default false;
 
+    Class type();
+
     String message() default "";
 }

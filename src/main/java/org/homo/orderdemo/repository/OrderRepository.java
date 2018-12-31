@@ -1,6 +1,6 @@
-package org.homo.demo.repository;
+package org.homo.orderdemo.repository;
 
-import org.homo.demo.model.Order;
+import org.homo.orderdemo.model.Order;
 
 /**
  * @author wujianchuan 2018/12/29

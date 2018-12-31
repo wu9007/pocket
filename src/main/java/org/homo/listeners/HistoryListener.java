@@ -1,4 +1,4 @@
-package org.homo.core.history.listeners;
+package org.homo.listeners;
 
 import org.homo.authority.model.User;
 import org.homo.core.model.BaseEntity;

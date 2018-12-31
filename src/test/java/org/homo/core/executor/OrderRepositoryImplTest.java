@@ -1,11 +1,10 @@
-package org.homo.controller;
+package org.homo.core.executor;
 
 import org.homo.Application;
 import org.homo.authority.model.User;
 import org.homo.config.HomoConfig;
 import org.homo.core.constant.OperateTypes;
-import org.homo.core.executor.ControllerFactory;
-import org.homo.demo.model.Order;
+import org.homo.orderdemo.model.Order;
 import org.homo.core.repository.AbstractRepository;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,7 +62,7 @@ public class OrderRepositoryImplTest {
 
     @Test
     public void test3() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/demo/detail"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/orderdemo/detail"))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
@@ -75,15 +74,15 @@ public class OrderRepositoryImplTest {
 
     @Test
     public void test5() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/demo/save"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/orderdemo/save"))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
     public void test6() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/demo/discount"))
-                .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().isOk());
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/orderdemo/discount"));
+
     }
 }

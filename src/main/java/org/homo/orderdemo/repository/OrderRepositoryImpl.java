@@ -1,7 +1,7 @@
-package org.homo.demo.repository;
+package org.homo.orderdemo.repository;
 
 import org.homo.authority.model.User;
-import org.homo.demo.model.Order;
+import org.homo.orderdemo.model.Order;
 import org.homo.core.repository.AbstractRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,19 +15,16 @@ public class OrderRepositoryImpl extends AbstractRepository<Order> implements Or
 
     @Override
     public int save(Order entity, User operator) {
-        System.out.println("保存订单。");
         return 1;
     }
 
     @Override
     public int update(Order entity, User operator) {
-        System.out.println("更新订单。");
         return 1;
     }
 
     @Override
     public int delete(Order entity, User operator) {
-        System.out.println("删除订单。");
         return 1;
     }
 
