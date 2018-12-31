@@ -2,7 +2,7 @@ package org.homo.demo.repository;
 
 import org.homo.authority.model.User;
 import org.homo.demo.model.Order;
-import org.homo.common.repository.AbstractRepository;
+import org.homo.core.repository.AbstractRepository;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;

@@ -1,7 +1,7 @@
 package org.homo.demo.model;
 
-import org.homo.common.annotation.HomoEntity;
-import org.homo.common.model.BaseEntity;
+import org.homo.core.annotation.HomoEntity;
+import org.homo.core.model.BaseEntity;
 
 import java.math.BigDecimal;
 

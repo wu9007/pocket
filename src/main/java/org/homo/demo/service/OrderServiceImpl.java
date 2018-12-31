@@ -1,9 +1,9 @@
 package org.homo.demo.service;
 
-import org.homo.common.annotation.HomoMessage;
-import org.homo.common.annotation.HomoTransaction;
-import org.homo.common.service.AbstractService;
-import org.homo.controller.HomoRequest;
+import org.homo.core.annotation.HomoMessage;
+import org.homo.core.annotation.HomoTransaction;
+import org.homo.core.service.AbstractService;
+import org.homo.core.executor.HomoRequest;
 import org.homo.demo.model.Order;
 import org.homo.demo.repository.OrderRepositoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;

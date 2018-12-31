@@ -1,6 +1,6 @@
 package org.homo.authority.model;
 
-import org.homo.common.model.BaseEntity;
+import org.homo.core.model.BaseEntity;
 
 /**
  * @author wujianchuan 2018/12/27

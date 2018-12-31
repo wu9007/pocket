@@ -2,10 +2,11 @@ package org.homo.controller;
 
 import org.homo.Application;
 import org.homo.authority.model.User;
-import org.homo.common.config.HomoConfig;
-import org.homo.common.constant.OperateTypes;
+import org.homo.config.HomoConfig;
+import org.homo.core.constant.OperateTypes;
+import org.homo.core.executor.ControllerFactory;
 import org.homo.demo.model.Order;
-import org.homo.common.repository.AbstractRepository;
+import org.homo.core.repository.AbstractRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

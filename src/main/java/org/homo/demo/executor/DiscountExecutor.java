@@ -1,9 +1,9 @@
 package org.homo.demo.executor;
 
-import org.homo.common.annotation.Executor;
-import org.homo.controller.ExecutionResult;
-import org.homo.controller.HomoExecutor;
-import org.homo.controller.HomoRequest;
+import org.homo.core.annotation.Executor;
+import org.homo.core.executor.ExecutionResult;
+import org.homo.core.executor.HomoExecutor;
+import org.homo.core.executor.HomoRequest;
 import org.homo.demo.service.OrderServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 
