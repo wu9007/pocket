@@ -18,7 +18,7 @@ apply plugin: 'io.spring.dependency-management'
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
- 
+
 repositories {
     mavenCentral()
 }
@@ -27,7 +27,8 @@ compileJava.dependsOn(processResources)
 
 dependencies {
     implementation('org.springframework.boot:spring-boot-starter-web')
-    implementation('org.hibernate:hibernate-c3p0:4.3.9.Final')
+    implementation('com.google.guava:guava:23.0')
+//    implementation('org.hibernate:hibernate-c3p0:4.3.9.Final')
     implementation('mysql:mysql-connector-java')
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     testImplementation('org.springframework.boot:spring-boot-starter-test')
