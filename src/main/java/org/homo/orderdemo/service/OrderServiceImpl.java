@@ -23,12 +23,12 @@ public class OrderServiceImpl extends AbstractService<OrderRepositoryImpl> {
         super(repository);
     }
 
-    @HomoTransaction(open = false, sessionName = "demo")
-    @HomoMessage(open = true, type = User.class)
+    @HomoTransaction(sessionName = "demo")
+    @HomoMessage(type = Order.class)
     public BiFunction<HomoRequest, OrderRepositoryImpl, Object> getCode = (request, repository) -> "A-001";
 
-    @HomoTransaction(open = false, sessionName = "demo")
-    @HomoMessage(open = true, type = Order.class)
+    @HomoTransaction(sessionName = "demo")
+    @HomoMessage(type = Order.class)
     public BiFunction<HomoRequest, OrderRepositoryImpl, Object> discount = (request, repository) -> {
         String uuid = request.getParameter("uuid");
         Order order = repository.findOne(uuid);

@@ -1,6 +1,5 @@
 package org.homo.core.service;
 
-import org.hibernate.Session;
 import org.homo.core.annotation.HomoTransaction;
 import org.homo.core.evens.ServiceEven;
 import org.homo.core.repository.AbstractRepository;
@@ -18,7 +17,6 @@ import java.util.function.BiFunction;
  */
 public abstract class AbstractService<T extends AbstractRepository> {
     private Map<String, Field> fieldMapper = new HashMap<>(20);
-    private Session session;
     private HomoTransaction homoTransactionAnnotation;
     private T repository;
 
@@ -46,7 +44,7 @@ public abstract class AbstractService<T extends AbstractRepository> {
         this.transactionAnnotation(function.toString());
 
         if (this.homoTransactionAnnotation != null && this.homoTransactionAnnotation.open()) {
-            // TODO 通过工厂获取session {this.session = SessionFactory.getInstance.getSession("demo")}
+            // TODO: 通过JDBC与数据库连接、映射、开启关闭事务，通过Guava进行缓存查询出的数据
             System.out.println("开启事务-" + this.homoTransactionAnnotation.sessionName());
         }
     }
@@ -59,7 +57,6 @@ public abstract class AbstractService<T extends AbstractRepository> {
     private void after(BiFunction<HomoRequest, T, Object> function, Object result) {
 
         if (this.homoTransactionAnnotation != null && this.homoTransactionAnnotation.open()) {
-            // TODO 通过工厂获取session {this.session = SessionFactory.getInstance.getSession("demo")}
             System.out.println("关闭事务-" + this.homoTransactionAnnotation.sessionName());
         }
 

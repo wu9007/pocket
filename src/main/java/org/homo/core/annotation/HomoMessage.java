@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface HomoMessage {
-    boolean open() default false;
+    boolean open() default true;
 
     Class type();
 
