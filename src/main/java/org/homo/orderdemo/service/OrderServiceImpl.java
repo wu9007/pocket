@@ -1,6 +1,5 @@
 package org.homo.orderdemo.service;
 
-import org.homo.authority.model.User;
 import org.homo.core.annotation.HomoMessage;
 import org.homo.core.annotation.HomoTransaction;
 import org.homo.core.service.AbstractService;
