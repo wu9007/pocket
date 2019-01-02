@@ -23,7 +23,7 @@ interface Session {
      * @param entity 实体对象
      * @return 影响行数
      */
-    int save(BaseEntity entity);
+    int save(BaseEntity entity) throws SQLException;
 
     /**
      * 更新实体

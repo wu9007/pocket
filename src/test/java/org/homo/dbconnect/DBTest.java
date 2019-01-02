@@ -23,6 +23,8 @@ public class DBTest {
 
     @Autowired
     DatabaseManager manager;
+    @Autowired
+    SessionFactory sessionFactory;
 
     @Before
     public void setup() {
@@ -46,5 +48,20 @@ public class DBTest {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void test2() throws SQLException {
+        UuidProducer producer = HomoUuidProducter.getInstance();
+        Session session = sessionFactory.getSession("homo");
+        Transaction transaction = session.getTransaction();
+        transaction.transactionOn();
+        User u1 = User.newInstance("Crease", "克里斯");
+        u1.setUuid(producer.getUuid(User.class));
+        User u2 = User.newInstance("Poseidon", "波塞东");
+        u2.setUuid(producer.getUuid(User.class));
+        session.save(u1);
+        session.save(u2);
+        transaction.commit();
     }
 }

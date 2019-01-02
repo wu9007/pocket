@@ -1,7 +1,7 @@
 homo:
   describe: this's a prod homo
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/homo?serverTimezone=GMT%2B8
+    url: jdbc:mysql://127.0.0.1:3306/homo?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8
     name: com.mysql.cj.jdbc.Driver
     user: root
     password: root
