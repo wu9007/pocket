@@ -1,6 +1,8 @@
-package org.homo.dbconnect;
+package org.homo.dbconnect.session;
 
 import org.homo.core.model.BaseEntity;
+import org.homo.dbconnect.transaction.Transaction;
+import org.homo.dbconnect.query.AbstractQuery;
 
 import java.sql.SQLException;
 
@@ -8,7 +10,7 @@ import java.sql.SQLException;
  * @author wujianchuan 2018/12/31
  */
 
-interface Session {
+public interface Session {
 
     /**
      * 获取事务对象
@@ -48,4 +50,19 @@ interface Session {
      * @return 实体对象
      */
     BaseEntity findOne(String uuid);
+
+    /**
+     * 获取SQL查询对象
+     *
+     * @param sql 查询语句
+     * @return 查询对象
+     */
+    AbstractQuery createSQLQuery(String sql);
+
+    /**
+     * 获取最大数据标识
+     * @param clazz 实体类型
+     * @return 最大值
+     */
+    long getMaxUuid(Class clazz) throws SQLException;
 }

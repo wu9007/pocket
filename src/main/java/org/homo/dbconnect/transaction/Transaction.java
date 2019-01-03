@@ -1,4 +1,4 @@
-package org.homo.dbconnect;
+package org.homo.dbconnect.transaction;
 
 import java.sql.SQLException;
 

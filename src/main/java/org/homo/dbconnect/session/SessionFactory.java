@@ -1,5 +1,6 @@
-package org.homo.dbconnect;
+package org.homo.dbconnect.session;
 
+import org.homo.dbconnect.DatabaseManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

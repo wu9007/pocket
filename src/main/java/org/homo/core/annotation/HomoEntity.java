@@ -14,4 +14,6 @@ import java.lang.annotation.Target;
 @Documented
 public @interface HomoEntity {
     boolean history() default true;
+
+    String table() default "";
 }

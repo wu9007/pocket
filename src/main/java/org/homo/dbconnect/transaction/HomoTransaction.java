@@ -1,4 +1,4 @@
-package org.homo.dbconnect;
+package org.homo.dbconnect.transaction;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -6,10 +6,10 @@ import java.sql.SQLException;
 /**
  * @author wujianchuan 2019/1/1
  */
-class HomoTransaction implements Transaction {
+public class HomoTransaction implements Transaction {
     private Connection connection;
 
-    HomoTransaction(Connection connection) {
+    public HomoTransaction(Connection connection) {
         this.connection = connection;
     }
 

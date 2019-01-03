@@ -13,7 +13,7 @@ import java.sql.ResultSet;
  * @author wujianchuan 2018/12/31
  */
 @Component
-class DatabaseManager {
+public class DatabaseManager {
     private final
     DatabaseConfig config;
     private static Connection conn = null;
