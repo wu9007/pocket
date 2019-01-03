@@ -33,7 +33,7 @@ public class CacheManager {
                         public BaseEntity load(@NonNull String key) throws Exception {
                             System.out.println("数据库直查。" + key);
                             User user = User.newInstance("Home", "霍姆");
-                            user.setUuid("001");
+                            user.setUuid(1L);
                             return user;
                         }
                     }

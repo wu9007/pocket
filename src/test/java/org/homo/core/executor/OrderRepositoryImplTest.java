@@ -49,7 +49,7 @@ public class OrderRepositoryImplTest {
     @Test
     public void test1() {
         Order order = Order.newInstance("ABC-001", new BigDecimal("12.593"));
-        order.setUuid("sl92mm34j4mndkj4nmd");
+        order.setUuid(1L);
         User user = User.newInstance("Home", "霍姆");
         int effect = repository.getProxy().update(order, user);
         System.out.println("影响行数：" + effect);

@@ -10,7 +10,7 @@ import java.util.Date;
 public class History extends BaseEntity {
     private static final long serialVersionUID = -4471597190430423414L;
 
-    private String uuid;
+    private Long uuid;
     private String content;
     private String operator;
     private Date operateTime;
@@ -25,14 +25,13 @@ public class History extends BaseEntity {
         return new History(content, operator, operateTime);
     }
 
-
     @Override
-    public String getUuid() {
+    public Long getUuid() {
         return uuid;
     }
 
     @Override
-    public void setUuid(String uuid) {
+    public void setUuid(Long uuid) {
         this.uuid = uuid;
     }
 

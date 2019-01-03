@@ -11,13 +11,13 @@ import java.io.Serializable;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public abstract class BaseEntity implements Serializable {
     private static final long serialVersionUID = -8735555543925687138L;
-    private String uuid;
+    private Long uuid;
 
-    public String getUuid() {
+    public Long getUuid() {
         return uuid;
     }
 
-    public void setUuid(String uuid) {
+    public void setUuid(Long uuid) {
         this.uuid = uuid;
     }
 

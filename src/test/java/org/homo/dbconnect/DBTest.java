@@ -43,7 +43,7 @@ public class DBTest {
             connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement("SELECT T.AVATAR AS avatar, T.NAME AS name FROM USER T");
             resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
+            while (resultSet.next()) {
                 String avatar = resultSet.getString("avatar");
                 String name = resultSet.getString("name");
                 User user = User.newInstance(avatar, name);
@@ -55,12 +55,12 @@ public class DBTest {
     }
 
     @Test
-    public void test2() throws SQLException {
+    public void test2() throws SQLException, IllegalAccessException {
         Session session = sessionFactory.getSession("homo");
         Transaction transaction = session.getTransaction();
         transaction.transactionOn();
         session.save(User.newInstance("Crease", "克里斯"));
-        session.save(User.newInstance("Poseidon", "波塞东"));
+        session.save(User.newInstance("Homo", "霍姆"));
         transaction.commit();
     }
 

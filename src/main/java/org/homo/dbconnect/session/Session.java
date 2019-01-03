@@ -25,7 +25,7 @@ public interface Session {
      * @param entity 实体对象
      * @return 影响行数
      */
-    int save(BaseEntity entity) throws SQLException;
+    int save(BaseEntity entity) throws SQLException, IllegalAccessException;
 
     /**
      * 更新实体
