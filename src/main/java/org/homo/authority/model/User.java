@@ -16,9 +16,6 @@ public class User extends BaseEntity {
     @HomoColumn(name = "NAME")
     private String name;
 
-    private User() {
-    }
-
     public static User newInstance(String avatar, String name) {
         User user = new User();
         user.setAvatar(avatar);

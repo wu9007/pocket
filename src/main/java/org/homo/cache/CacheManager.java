@@ -6,7 +6,6 @@ import com.google.common.cache.LoadingCache;
 import org.homo.authority.model.User;
 import org.homo.core.model.BaseEntity;
 import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -14,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author wujianchuan 2018/12/31
  */
-@Component
 public class CacheManager {
     private final static LoadingCache<String, BaseEntity> ENTITY_CACHE
             = CacheBuilder.newBuilder()
@@ -42,11 +40,11 @@ public class CacheManager {
     private CacheManager() {
     }
 
-    public BaseEntity get(String key) throws ExecutionException {
+    public static BaseEntity get(String key) throws ExecutionException {
         return ENTITY_CACHE.get(key);
     }
 
-    public void refresh(String key) {
+    public static void refresh(String key) {
         ENTITY_CACHE.refresh(key);
     }
 }

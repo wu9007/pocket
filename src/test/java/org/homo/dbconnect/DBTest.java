@@ -71,4 +71,10 @@ public class DBTest {
         Object[] result = (Object[]) query.unique();
         System.out.println(result[0] + "-" + result[1]);
     }
+
+    @Test
+    public void test4() throws SQLException, InstantiationException, IllegalAccessException {
+        Session session = sessionFactory.getSession("homo");
+        System.out.println(((User) session.findOne(User.class, 1L)).getName());
+    }
 }

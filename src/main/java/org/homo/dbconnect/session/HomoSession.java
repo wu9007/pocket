@@ -21,6 +21,7 @@ import java.sql.SQLException;
 public class HomoSession implements Session {
 
     private Connection connection;
+    private FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
 
     HomoSession(Connection connection) {
         this.connection = connection;
@@ -34,8 +35,7 @@ public class HomoSession implements Session {
     @Override
     public int save(BaseEntity entity) throws SQLException, IllegalAccessException {
         Class clazz = entity.getClass();
-        HomoEntity annotation = (HomoEntity) clazz.getAnnotation(HomoEntity.class);
-        String tableName = annotation.table();
+        String tableName = this.getTableName(clazz);
 
         StringBuilder sql = new StringBuilder("INSERT INTO ").append(tableName).append("(UUID, ");
         StringBuilder valuesSql = new StringBuilder("VALUES(?, ");
@@ -72,8 +72,31 @@ public class HomoSession implements Session {
     }
 
     @Override
-    public BaseEntity findOne(String uuid) {
-        return null;
+    public BaseEntity findOne(Class clazz, Long uuid) throws SQLException, IllegalAccessException, InstantiationException {
+        StringBuilder sql = new StringBuilder("SELECT UUID, ");
+        Field[] fields = clazz.getDeclaredFields();
+        for (int index = 1; index < fields.length; index++) {
+            sql.append(fields[index].getAnnotation(HomoColumn.class).name());
+            if (index < fields.length - 1) {
+                sql.append(", ");
+            }
+        }
+        sql.append(" FROM ").append(this.getTableName(clazz))
+                .append(" WHERE UUID = ?");
+        PreparedStatement preparedStatement = connection.prepareStatement(sql.toString());
+        preparedStatement.setLong(1, uuid);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        BaseEntity entity = (BaseEntity) clazz.newInstance();
+        entity.setUuid(uuid);
+        if (resultSet.next()) {
+            for (int index = 1; index < fields.length; index++) {
+                Field field = fields[index];
+                String columnName = field.getAnnotation(HomoColumn.class).name();
+                field.setAccessible(true);
+                field.set(entity, fieldTypeStrategy.getColumnValue(field, resultSet));
+            }
+        }
+        return entity;
     }
 
     @Override
@@ -90,5 +113,10 @@ public class HomoSession implements Session {
         } else {
             return 0;
         }
+    }
+
+    private String getTableName(Class clazz) {
+        HomoEntity annotation = (HomoEntity) clazz.getAnnotation(HomoEntity.class);
+        return annotation.table();
     }
 }

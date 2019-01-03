@@ -46,10 +46,11 @@ public interface Session {
     /**
      * 查询实体
      *
+     * @param clazz 对象类型
      * @param uuid 数据标识
      * @return 实体对象
      */
-    BaseEntity findOne(String uuid);
+    BaseEntity findOne(Class clazz, Long uuid) throws SQLException, IllegalAccessException, InstantiationException;
 
     /**
      * 获取SQL查询对象

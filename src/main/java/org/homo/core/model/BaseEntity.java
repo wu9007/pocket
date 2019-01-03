@@ -13,6 +13,9 @@ public abstract class BaseEntity implements Serializable {
     private static final long serialVersionUID = -8735555543925687138L;
     private Long uuid;
 
+    public BaseEntity() {
+    }
+
     public Long getUuid() {
         return uuid;
     }
