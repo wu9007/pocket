@@ -2,12 +2,13 @@ package org.homo.core.repository;
 
 
 import org.homo.authority.model.User;
-import org.homo.core.annotation.HomoEntity;
+import org.homo.core.annotation.Entity;
 import org.homo.core.model.BaseEntity;
 import org.homo.core.constant.OperateTypes;
 import org.homo.core.evens.RepositoryEven;
 import org.springframework.context.ApplicationContext;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,17 +26,17 @@ public class RepositoryProxy<T extends BaseEntity> implements HomoRepository<T> 
     }
 
     @Override
-    public int save(T entity, User operator) {
-        int affected = this.repository.save(entity, operator);
+    public T save(T entity, User operator) throws SQLException, IllegalAccessException {
+        T repositoryEntity = this.repository.save(entity, operator);
         this.afterReturningAdvise(entity, OperateTypes.SAVE, operator);
-        return affected;
+        return repositoryEntity;
     }
 
     @Override
-    public int update(T entity, User operator) {
-        int affected = this.repository.update(entity, operator);
+    public T update(T entity, User operator) {
+        T repositoryEntity = this.repository.update(entity, operator);
         this.afterReturningAdvise(entity, OperateTypes.UPDATE, operator);
-        return affected;
+        return repositoryEntity;
     }
 
     @Override
@@ -47,7 +48,7 @@ public class RepositoryProxy<T extends BaseEntity> implements HomoRepository<T> 
 
     private void afterReturningAdvise(T entity, OperateTypes operateType, User operator) {
         Class clazz = entity.getClass();
-        HomoEntity entityAnnotation = (HomoEntity) clazz.getAnnotation(HomoEntity.class);
+        Entity entityAnnotation = (Entity) clazz.getAnnotation(Entity.class);
         if (entityAnnotation == null || entityAnnotation.history()) {
             Map<String, Object> source = new HashMap<>(2);
             source.put("clazz", clazz);

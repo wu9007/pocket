@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface HomoMessage {
+public @interface Message {
     boolean open() default true;
 
     Class type();

@@ -1,8 +1,9 @@
 package org.homo.dbconnect.session;
 
-import org.homo.core.annotation.HomoColumn;
+import org.homo.core.annotation.Column;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
@@ -25,6 +26,14 @@ class FieldTypeStrategy {
                 return null;
             }
         });
+        STRATEGY_POOL.put(BigDecimal.class.getName(), (resultSet, columnName) -> {
+            try {
+                return resultSet.getBigDecimal(columnName);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
     }
 
     private FieldTypeStrategy() {
@@ -35,7 +44,7 @@ class FieldTypeStrategy {
     }
 
     Object getColumnValue(Field field, ResultSet resultSet) {
-        HomoColumn annotation = field.getAnnotation(HomoColumn.class);
+        Column annotation = field.getAnnotation(Column.class);
         String columnName = annotation.name();
         return STRATEGY_POOL.get(field.getType().getName()).apply(resultSet, columnName);
     }

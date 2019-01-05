@@ -7,11 +7,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * @author wujianchuan 2019/1/3
+ * @author wujianchuan 2018/12/29
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface HomoColumn {
-    String name();
+public @interface Transaction {
+    boolean open() default true;
+
+    String sessionName() default "";
 }

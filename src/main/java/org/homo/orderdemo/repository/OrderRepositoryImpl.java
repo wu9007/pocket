@@ -1,11 +1,14 @@
 package org.homo.orderdemo.repository;
 
 import org.homo.authority.model.User;
+import org.homo.dbconnect.session.InventoryFactory;
+import org.homo.dbconnect.session.InventoryManager;
 import org.homo.orderdemo.model.Order;
 import org.homo.core.repository.AbstractRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
+import java.sql.SQLException;
 
 /**
  * @author wujianchuan 2018/12/26
@@ -13,14 +16,25 @@ import java.math.BigDecimal;
 @Repository
 public class OrderRepositoryImpl extends AbstractRepository<Order> implements OrderRepository {
 
-    @Override
-    public int save(Order entity, User operator) {
-        return 1;
+    private final
+    InventoryFactory inventoryFactory;
+
+    InventoryManager inventoryManager;
+
+    @Autowired
+    public OrderRepositoryImpl(InventoryFactory inventoryFactory) {
+        this.inventoryFactory = inventoryFactory;
+        this.inventoryManager = this.inventoryFactory.getManager("order");
     }
 
     @Override
-    public int update(Order entity, User operator) {
-        return 1;
+    public Order save(Order entity, User operator) throws SQLException, IllegalAccessException {
+        return (Order) inventoryManager.save(entity);
+    }
+
+    @Override
+    public Order update(Order entity, User operator) {
+        return entity;
     }
 
     @Override
@@ -30,7 +44,7 @@ public class OrderRepositoryImpl extends AbstractRepository<Order> implements Or
 
 
     @Override
-    public Order findOne(String uuid) {
-        return Order.newInstance("B-001", new BigDecimal("100.54"));
+    public Order findOne(long uuid) throws IllegalAccessException, SQLException, InstantiationException {
+        return (Order) inventoryManager.findOne(Order.class, uuid);
     }
 }

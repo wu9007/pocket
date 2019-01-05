@@ -3,8 +3,8 @@ package org.homo.dbconnect;
 import org.homo.Application;
 import org.homo.authority.model.User;
 import org.homo.dbconnect.query.Query;
-import org.homo.dbconnect.session.Session;
-import org.homo.dbconnect.session.SessionFactory;
+import org.homo.dbconnect.session.InventoryManager;
+import org.homo.dbconnect.session.InventoryFactory;
 import org.homo.dbconnect.transaction.Transaction;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,7 +28,7 @@ public class DBTest {
     @Autowired
     DatabaseManager manager;
     @Autowired
-    SessionFactory sessionFactory;
+    InventoryFactory sessionFactory;
 
     @Before
     public void setup() {
@@ -56,7 +56,7 @@ public class DBTest {
 
     @Test
     public void test2() throws SQLException, IllegalAccessException {
-        Session session = sessionFactory.getSession("homo");
+        InventoryManager session = sessionFactory.getManager("homo");
         Transaction transaction = session.getTransaction();
         transaction.transactionOn();
         session.save(User.newInstance("Crease", "克里斯"));
@@ -66,7 +66,7 @@ public class DBTest {
 
     @Test
     public void test3() throws SQLException {
-        Session session = sessionFactory.getSession("homo");
+        InventoryManager session = sessionFactory.getManager("homo");
         Query query = session.createSQLQuery("select avatar, name from user");
         Object[] result = (Object[]) query.unique();
         System.out.println(result[0] + "-" + result[1]);
@@ -74,7 +74,7 @@ public class DBTest {
 
     @Test
     public void test4() throws SQLException, InstantiationException, IllegalAccessException {
-        Session session = sessionFactory.getSession("homo");
+        InventoryManager session = sessionFactory.getManager("homo");
         System.out.println(((User) session.findOne(User.class, 1L)).getName());
     }
 }

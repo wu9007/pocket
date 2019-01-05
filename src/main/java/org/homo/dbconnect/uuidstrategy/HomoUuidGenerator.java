@@ -1,6 +1,6 @@
 package org.homo.dbconnect.uuidstrategy;
 
-import org.homo.dbconnect.session.Session;
+import org.homo.dbconnect.session.InventoryManager;
 
 import java.sql.SQLException;
 import java.util.Map;
@@ -22,7 +22,7 @@ public class HomoUuidGenerator implements UuidGenerator {
     }
 
     @Override
-    public long getUuid(Class clazz, Session session) throws SQLException {
+    public long getUuid(Class clazz, InventoryManager session) throws SQLException {
         AtomicLong uuid = POOL.get(clazz.getName());
         if (uuid != null) {
             return uuid.addAndGet(1);
@@ -30,8 +30,8 @@ public class HomoUuidGenerator implements UuidGenerator {
             synchronized (this) {
                 uuid = new AtomicLong(session.getMaxUuid(clazz));
                 POOL.put(clazz.getName(), uuid);
+                return POOL.get(clazz.getName()).addAndGet(1);
             }
-            return POOL.get(clazz.getName()).addAndGet(1);
         }
     }
 }

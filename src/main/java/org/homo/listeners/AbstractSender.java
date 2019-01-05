@@ -1,6 +1,6 @@
 package org.homo.listeners;
 
-import org.homo.core.annotation.HomoMessage;
+import org.homo.core.annotation.Message;
 import org.homo.core.evens.ServiceEven;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.SmartApplicationListener;
@@ -27,7 +27,7 @@ public abstract class AbstractSender implements SmartApplicationListener {
         Map<String, Object> source = (Map<String, Object>) event.getSource();
         Field field = (Field) source.get("field");
         Object result = source.get("result");
-        HomoMessage messageAnnotation = field.getAnnotation(HomoMessage.class);
+        Message messageAnnotation = field.getAnnotation(Message.class);
         if (messageAnnotation != null && messageAnnotation.open() && this.supportsType() == messageAnnotation.type()) {
             this.send(result);
         }

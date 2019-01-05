@@ -1,6 +1,6 @@
 package org.homo.dbconnect.uuidstrategy;
 
-import org.homo.dbconnect.session.Session;
+import org.homo.dbconnect.session.InventoryManager;
 
 import java.sql.SQLException;
 
@@ -17,5 +17,5 @@ public interface UuidGenerator {
      * @return 数据标识
      * @throws SQLException sql语句异常
      */
-    long getUuid(Class clazz, Session session) throws SQLException;
+    long getUuid(Class clazz, InventoryManager session) throws SQLException;
 }

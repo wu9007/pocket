@@ -9,6 +9,7 @@ import org.homo.orderdemo.repository.OrderRepositoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 
 /**
  * @author wujianchuan 2018/12/28
@@ -25,8 +26,12 @@ public class SaveExecutor implements HomoExecutor {
 
     @Override
     public ExecutionResult execute(HomoRequest request) {
-        Order order = Order.newInstance("A-001", new BigDecimal("12.5"));
-        repository.getProxy().save(order, request.getUser());
+        Order order = Order.newInstance("A-002", new BigDecimal("12.6"));
+        try {
+            repository.getProxy().save(order, request.getUser());
+        } catch (SQLException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
         return ExecutionResult.newSuccessInstance("成功", "订单保存成功", order);
     }
 }

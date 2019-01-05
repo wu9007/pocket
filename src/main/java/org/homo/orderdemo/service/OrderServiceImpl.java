@@ -1,7 +1,7 @@
 package org.homo.orderdemo.service;
 
-import org.homo.core.annotation.HomoMessage;
-import org.homo.core.annotation.HomoTransaction;
+import org.homo.core.annotation.Message;
+import org.homo.core.annotation.Transaction;
 import org.homo.core.service.AbstractService;
 import org.homo.core.executor.HomoRequest;
 import org.homo.orderdemo.model.Order;
@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.function.BiFunction;
 
 /**
@@ -22,17 +23,23 @@ public class OrderServiceImpl extends AbstractService<OrderRepositoryImpl> {
         super(repository);
     }
 
-    @HomoTransaction(sessionName = "demo")
-    @HomoMessage(type = Order.class)
+    @Transaction(sessionName = "demo")
+    @Message(type = Order.class)
     public BiFunction<HomoRequest, OrderRepositoryImpl, Object> getCode = (request, repository) -> "A-001";
 
-    @HomoTransaction(sessionName = "demo")
-    @HomoMessage(type = Order.class)
+    @Transaction(sessionName = "demo")
+    @Message(type = Order.class)
     public BiFunction<HomoRequest, OrderRepositoryImpl, Object> discount = (request, repository) -> {
-        String uuid = request.getParameter("uuid");
-        Order order = repository.findOne(uuid);
-        order.setPrice(order.getPrice().add(new BigDecimal("1")));
-        repository.getProxy().update(order, request.getUser());
-        return order.getPrice().toString();
+        Order order;
+        try {
+            long uuid = Long.parseLong(request.getParameter("uuid"));
+            order = repository.findOne(uuid);
+            order.setPrice(order.getPrice().add(new BigDecimal("1")));
+            repository.getProxy().update(order, request.getUser());
+            return order.getPrice().toString();
+        } catch (IllegalAccessException | SQLException | InstantiationException e) {
+            e.printStackTrace();
+            return null;
+        }
     };
 }

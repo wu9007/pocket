@@ -1,7 +1,7 @@
 package org.homo.dbconnect.session;
 
-import org.homo.core.annotation.HomoColumn;
-import org.homo.core.annotation.HomoEntity;
+import org.homo.core.annotation.Column;
+import org.homo.core.annotation.Entity;
 import org.homo.core.model.BaseEntity;
 import org.homo.dbconnect.transaction.HomoTransaction;
 import org.homo.dbconnect.transaction.Transaction;
@@ -18,12 +18,12 @@ import java.sql.SQLException;
 /**
  * @author wujianchuan 2019/1/1
  */
-public class HomoSession implements Session {
+public class MysqlInventoryManager implements InventoryManager {
 
     private Connection connection;
     private FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
 
-    HomoSession(Connection connection) {
+    MysqlInventoryManager(Connection connection) {
         this.connection = connection;
     }
 
@@ -33,7 +33,7 @@ public class HomoSession implements Session {
     }
 
     @Override
-    public int save(BaseEntity entity) throws SQLException, IllegalAccessException {
+    public BaseEntity save(BaseEntity entity) throws SQLException, IllegalAccessException {
         Class clazz = entity.getClass();
         String tableName = this.getTableName(clazz);
 
@@ -42,28 +42,31 @@ public class HomoSession implements Session {
         Field[] fields = clazz.getDeclaredFields();
         for (int index = 1; index < fields.length; index++) {
             if (index < fields.length - 1) {
-                sql.append(fields[index].getAnnotation(HomoColumn.class).name()).append(", ");
+                sql.append(fields[index].getAnnotation(Column.class).name()).append(", ");
                 valuesSql.append("?").append(", ");
             } else {
-                sql.append(fields[index].getAnnotation(HomoColumn.class).name()).append(") ");
+                sql.append(fields[index].getAnnotation(Column.class).name()).append(") ");
                 valuesSql.append("?").append(")");
             }
         }
         sql.append(valuesSql);
 
         PreparedStatement preparedStatement = connection.prepareStatement(sql.toString());
-        preparedStatement.setObject(1, HomoUuidGenerator.getInstance().getUuid(entity.getClass(), this));
+        long uuid = HomoUuidGenerator.getInstance().getUuid(entity.getClass(), this);
+        entity.setUuid(uuid);
+        preparedStatement.setObject(1, uuid);
         for (int valueIndex = 1; valueIndex < fields.length; valueIndex++) {
             Field field = fields[valueIndex];
             field.setAccessible(true);
             preparedStatement.setObject(valueIndex + 1, field.get(entity));
         }
-        return preparedStatement.executeUpdate();
+        preparedStatement.executeUpdate();
+        return entity;
     }
 
     @Override
-    public int update(BaseEntity entity) {
-        return 0;
+    public BaseEntity update(BaseEntity entity) {
+        return entity;
     }
 
     @Override
@@ -76,7 +79,7 @@ public class HomoSession implements Session {
         StringBuilder sql = new StringBuilder("SELECT UUID, ");
         Field[] fields = clazz.getDeclaredFields();
         for (int index = 1; index < fields.length; index++) {
-            sql.append(fields[index].getAnnotation(HomoColumn.class).name());
+            sql.append(fields[index].getAnnotation(Column.class).name());
             if (index < fields.length - 1) {
                 sql.append(", ");
             }
@@ -91,7 +94,6 @@ public class HomoSession implements Session {
         if (resultSet.next()) {
             for (int index = 1; index < fields.length; index++) {
                 Field field = fields[index];
-                String columnName = field.getAnnotation(HomoColumn.class).name();
                 field.setAccessible(true);
                 field.set(entity, fieldTypeStrategy.getColumnValue(field, resultSet));
             }
@@ -106,7 +108,8 @@ public class HomoSession implements Session {
 
     @Override
     public long getMaxUuid(Class clazz) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement("SELECT MAX(UUID) FROM USER");
+        Entity annotation = (Entity) clazz.getAnnotation(Entity.class);
+        PreparedStatement preparedStatement = connection.prepareStatement("SELECT MAX(UUID) FROM " + annotation.table());
         ResultSet resultSet = preparedStatement.executeQuery();
         if (resultSet.next()) {
             return resultSet.getLong(1);
@@ -116,7 +119,7 @@ public class HomoSession implements Session {
     }
 
     private String getTableName(Class clazz) {
-        HomoEntity annotation = (HomoEntity) clazz.getAnnotation(HomoEntity.class);
+        Entity annotation = (Entity) clazz.getAnnotation(Entity.class);
         return annotation.table();
     }
 }

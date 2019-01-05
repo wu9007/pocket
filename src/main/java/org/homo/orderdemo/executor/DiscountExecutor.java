@@ -22,7 +22,9 @@ public class DiscountExecutor implements HomoExecutor {
 
     @Override
     public ExecutionResult execute(HomoRequest request) {
+        long start = System.currentTimeMillis();
         String price = (String) orderService.handle(orderService.discount, request);
-        return ExecutionResult.newSuccessInstance("成功", "打折成功", "VIP-" + price);
+        long time = System.currentTimeMillis() - start;
+        return ExecutionResult.newSuccessInstance("成功", "打折成功", "VIP-" + price + "消耗：" + time);
     }
 }

@@ -1,6 +1,6 @@
 package org.homo.core.service;
 
-import org.homo.core.annotation.HomoTransaction;
+import org.homo.core.annotation.Transaction;
 import org.homo.core.evens.ServiceEven;
 import org.homo.core.repository.AbstractRepository;
 import org.homo.core.executor.HomoRequest;
@@ -17,7 +17,7 @@ import java.util.function.BiFunction;
  */
 public abstract class AbstractService<T extends AbstractRepository> {
     private Map<String, Field> fieldMapper = new HashMap<>(20);
-    private HomoTransaction homoTransactionAnnotation;
+    private Transaction homoTransactionAnnotation;
     private T repository;
 
     public AbstractService(T repository) {
@@ -81,7 +81,7 @@ public abstract class AbstractService<T extends AbstractRepository> {
             this.pushField();
         }
         field = fieldMapper.get(name);
-        this.homoTransactionAnnotation = field.getAnnotation(HomoTransaction.class);
+        this.homoTransactionAnnotation = field.getAnnotation(Transaction.class);
     }
 
     /**
