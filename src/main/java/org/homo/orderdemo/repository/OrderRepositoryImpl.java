@@ -6,6 +6,7 @@ import org.homo.dbconnect.session.InventoryManager;
 import org.homo.orderdemo.model.Order;
 import org.homo.core.repository.AbstractRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
@@ -16,15 +17,11 @@ import java.sql.SQLException;
 @Repository
 public class OrderRepositoryImpl extends AbstractRepository<Order> implements OrderRepository {
 
-    private final
-    InventoryFactory inventoryFactory;
-
-    InventoryManager inventoryManager;
+    private InventoryManager inventoryManager;
 
     @Autowired
     public OrderRepositoryImpl(InventoryFactory inventoryFactory) {
-        this.inventoryFactory = inventoryFactory;
-        this.inventoryManager = this.inventoryFactory.getManager("order");
+        this.inventoryManager = inventoryFactory.getManager("order");
     }
 
     @Override
@@ -44,6 +41,7 @@ public class OrderRepositoryImpl extends AbstractRepository<Order> implements Or
 
 
     @Override
+    @Cacheable(value = "homo", key = "#root.method.getReturnType().getName()+#uuid")
     public Order findOne(long uuid) throws IllegalAccessException, SQLException, InstantiationException {
         return (Order) inventoryManager.findOne(Order.class, uuid);
     }
