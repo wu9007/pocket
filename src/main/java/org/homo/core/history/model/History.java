@@ -61,6 +61,6 @@ public class History extends BaseEntity {
 
     @Override
     public String getDescribe() {
-        return "内容：" + this.getContent() + "\t操作人：" + this.getOperator() + "\t操作时间：" + this.getOperateTime();
+        return "历史内容：" + this.getContent() + "\t操作人：" + this.getOperator() + "\t操作时间：" + this.getOperateTime();
     }
 }

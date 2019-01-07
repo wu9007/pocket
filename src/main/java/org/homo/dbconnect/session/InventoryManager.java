@@ -13,6 +13,13 @@ import java.sql.SQLException;
 public interface InventoryManager {
 
     /**
+     * 对应的数据库名称
+     *
+     * @return 数据库名称
+     */
+    String getDbName();
+
+    /**
      * 获取事务对象
      *
      * @return 事务对象

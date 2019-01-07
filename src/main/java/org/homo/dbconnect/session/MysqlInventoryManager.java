@@ -9,6 +9,7 @@ import org.homo.dbconnect.transaction.Transaction;
 import org.homo.dbconnect.query.AbstractQuery;
 import org.homo.dbconnect.query.HomoQuery;
 import org.homo.dbconnect.uuidstrategy.HomoUuidGenerator;
+import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -19,19 +20,24 @@ import java.sql.SQLException;
 /**
  * @author wujianchuan 2019/1/1
  */
+@Component
 public class MysqlInventoryManager implements InventoryManager {
 
-    private Connection connection;
-    private DatabaseManager databaseManager;
+    private Transaction transaction;
     private FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
 
     MysqlInventoryManager(DatabaseManager databaseManager) {
-        this.connection = databaseManager.getConn();
+        this.transaction = new HomoTransaction(databaseManager);
+    }
+
+    @Override
+    public String getDbName() {
+        return "com.mysql.cj.jdbc.Driver";
     }
 
     @Override
     public Transaction getTransaction() {
-        return new HomoTransaction(this.connection);
+        return this.transaction;
     }
 
     @Override
@@ -53,7 +59,7 @@ public class MysqlInventoryManager implements InventoryManager {
         }
         sql.append(valuesSql);
 
-        PreparedStatement preparedStatement = connection.prepareStatement(sql.toString());
+        PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement(sql.toString());
         long uuid = HomoUuidGenerator.getInstance().getUuid(entity.getClass(), this);
         entity.setUuid(uuid);
         preparedStatement.setObject(1, uuid);
@@ -88,7 +94,7 @@ public class MysqlInventoryManager implements InventoryManager {
         }
         sql.append(" FROM ").append(this.getTableName(clazz))
                 .append(" WHERE UUID = ?");
-        PreparedStatement preparedStatement = connection.prepareStatement(sql.toString());
+        PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement(sql.toString());
         preparedStatement.setLong(1, uuid);
         ResultSet resultSet = preparedStatement.executeQuery();
         BaseEntity entity = (BaseEntity) clazz.newInstance();
@@ -105,13 +111,13 @@ public class MysqlInventoryManager implements InventoryManager {
 
     @Override
     public AbstractQuery createSQLQuery(String sql) {
-        return new HomoQuery(sql, connection);
+        return new HomoQuery(sql, this.transaction.getConnection());
     }
 
     @Override
     public long getMaxUuid(Class clazz) throws SQLException {
         Entity annotation = (Entity) clazz.getAnnotation(Entity.class);
-        PreparedStatement preparedStatement = connection.prepareStatement("SELECT MAX(UUID) FROM " + annotation.table());
+        PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement("SELECT MAX(UUID) FROM " + annotation.table());
         ResultSet resultSet = preparedStatement.executeQuery();
         if (resultSet.next()) {
             return resultSet.getLong(1);

@@ -31,6 +31,7 @@ public class DatabaseManager {
     public Connection getConn() {
         try {
             conn = DriverManager.getConnection(config.getUrl(), config.getUser(), config.getPassword());
+            System.out.println("开启数据库连接");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -48,6 +49,7 @@ public class DatabaseManager {
             if (conn != null) {
                 conn.close();
             }
+            System.out.println("关闭数据库连接");
         } catch (Exception e) {
             e.printStackTrace();
         }

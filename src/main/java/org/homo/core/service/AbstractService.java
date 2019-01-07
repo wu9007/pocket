@@ -51,7 +51,7 @@ public abstract class AbstractService {
      */
     private void before(BiFunction<HomoRequest, ApplicationContext, Object> function) throws SQLException {
         this.transactionAnnotation(function.toString());
-
+        this.transaction.connect();
         if (this.homoTransactionAnnotation != null && this.homoTransactionAnnotation.open()) {
             this.transaction.transactionOn();
         }
@@ -67,7 +67,7 @@ public abstract class AbstractService {
         if (this.homoTransactionAnnotation != null && this.homoTransactionAnnotation.open()) {
             this.transaction.commit();
         }
-
+        this.transaction.closeConnection(null, null);
         this.notifyAllListener(function, result);
     }
 
