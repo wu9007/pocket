@@ -1,4 +1,4 @@
-package org.homo.dbconnect.session;
+package org.homo.dbconnect.inventory;
 
 import org.homo.config.DatabaseConfig;
 import org.springframework.beans.factory.annotation.Autowired;

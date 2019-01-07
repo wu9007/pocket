@@ -1,4 +1,4 @@
-package org.homo.dbconnect.session;
+package org.homo.dbconnect.inventory;
 
 import org.homo.core.annotation.Column;
 

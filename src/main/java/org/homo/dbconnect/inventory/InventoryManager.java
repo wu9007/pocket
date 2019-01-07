@@ -1,4 +1,4 @@
-package org.homo.dbconnect.session;
+package org.homo.dbconnect.inventory;
 
 import org.homo.core.model.BaseEntity;
 import org.homo.dbconnect.transaction.Transaction;

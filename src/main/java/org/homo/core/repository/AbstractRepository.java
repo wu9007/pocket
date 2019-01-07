@@ -1,8 +1,8 @@
 package org.homo.core.repository;
 
 import org.homo.core.model.BaseEntity;
-import org.homo.dbconnect.session.InventoryFactory;
-import org.homo.dbconnect.session.InventoryManager;
+import org.homo.dbconnect.inventory.InventoryFactory;
+import org.homo.dbconnect.inventory.InventoryManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 

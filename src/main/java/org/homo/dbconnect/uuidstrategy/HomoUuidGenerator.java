@@ -1,6 +1,6 @@
 package org.homo.dbconnect.uuidstrategy;
 
-import org.homo.dbconnect.session.InventoryManager;
+import org.homo.dbconnect.inventory.InventoryManager;
 
 import java.sql.SQLException;
 import java.util.Map;

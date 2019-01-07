@@ -1,7 +1,7 @@
 package org.homo.orderdemo.repository;
 
 import org.homo.authority.model.User;
-import org.homo.dbconnect.session.InventoryFactory;
+import org.homo.dbconnect.inventory.InventoryFactory;
 import org.homo.orderdemo.model.Order;
 import org.homo.core.repository.AbstractRepository;
 import org.springframework.cache.annotation.Cacheable;

@@ -3,8 +3,8 @@ package org.homo.core.service;
 import org.homo.core.annotation.Transaction;
 import org.homo.core.evens.ServiceEven;
 import org.homo.core.executor.HomoRequest;
-import org.homo.dbconnect.session.InventoryFactory;
-import org.homo.dbconnect.session.InventoryManager;
+import org.homo.dbconnect.inventory.InventoryFactory;
+import org.homo.dbconnect.inventory.InventoryManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 

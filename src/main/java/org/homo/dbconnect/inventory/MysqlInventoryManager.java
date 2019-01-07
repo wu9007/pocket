@@ -1,4 +1,4 @@
-package org.homo.dbconnect.session;
+package org.homo.dbconnect.inventory;
 
 import org.homo.core.annotation.Column;
 import org.homo.core.annotation.Entity;
@@ -12,7 +12,6 @@ import org.homo.dbconnect.uuidstrategy.HomoUuidGenerator;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
