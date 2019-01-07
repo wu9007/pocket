@@ -5,29 +5,25 @@ import org.homo.core.executor.ExecutionResult;
 import org.homo.core.executor.HomoExecutor;
 import org.homo.core.executor.HomoRequest;
 import org.homo.orderdemo.model.Order;
-import org.homo.orderdemo.repository.OrderRepositoryImpl;
+import org.homo.orderdemo.service.OrderServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.math.BigDecimal;
-import java.sql.SQLException;
 
 /**
  * @author wujianchuan 2018/12/28
  */
 @Executor(value = "save")
 public class SaveExecutor implements HomoExecutor {
-    private final
-    OrderRepositoryImpl repository;
+    final
+    private OrderServiceImpl orderService;
 
     @Autowired
-    public SaveExecutor(OrderRepositoryImpl repository) {
-        this.repository = repository;
+    public SaveExecutor(OrderServiceImpl orderService) {
+        this.orderService = orderService;
     }
 
     @Override
     public ExecutionResult execute(HomoRequest request) throws Exception {
-        Order order = Order.newInstance("A-002", new BigDecimal("12.6"));
-        repository.getProxy().save(order, request.getUser());
+        Order order = (Order) orderService.handle(orderService.saveOrder, request);
         return ExecutionResult.newSuccessInstance("成功", "订单保存成功", order);
     }
 }

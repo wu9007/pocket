@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 /**
  * @author wujianchuan 2018/12/29
@@ -25,7 +24,6 @@ public class OrderServiceImpl extends AbstractService {
         super(inventoryFactory);
     }
 
-    @Transaction
     @Message(type = Order.class)
     public BiFunction<HomoRequest, ApplicationContext, Object> getCode = (request, context) -> "A-001";
 
@@ -44,5 +42,18 @@ public class OrderServiceImpl extends AbstractService {
             e.printStackTrace();
             return null;
         }
+    };
+
+    @Transaction
+    @Message(type = Order.class)
+    public BiFunction<HomoRequest, ApplicationContext, Object> saveOrder = (request, context) -> {
+        OrderRepositoryImpl orderRepository = context.getBean(OrderRepositoryImpl.class);
+        Order order = Order.newInstance("A-002", new BigDecimal("12.6"));
+        try {
+            return orderRepository.save(order, request.getUser());
+        } catch (SQLException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return null;
     };
 }
