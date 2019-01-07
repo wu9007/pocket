@@ -2,12 +2,14 @@ package org.homo.core.service;
 
 import org.homo.core.annotation.Transaction;
 import org.homo.core.evens.ServiceEven;
-import org.homo.core.repository.AbstractRepository;
 import org.homo.core.executor.HomoRequest;
+import org.homo.dbconnect.session.InventoryFactory;
+import org.homo.dbconnect.session.InventoryManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import java.lang.reflect.Field;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -15,23 +17,30 @@ import java.util.function.BiFunction;
 /**
  * @author wujianchuan 2018/12/29
  */
-public abstract class AbstractService<T extends AbstractRepository> {
-    private Map<String, Field> fieldMapper = new HashMap<>(20);
-    private Transaction homoTransactionAnnotation;
-    private T repository;
-
-    public AbstractService(T repository) {
-        this.repository = repository;
-    }
+public abstract class AbstractService {
 
     @Autowired
     private ApplicationContext context;
 
-    public Object handle(BiFunction<HomoRequest, T, Object> function, HomoRequest request) {
+    private Map<String, Field> fieldMapper = new HashMap<>(20);
+    private Transaction homoTransactionAnnotation;
+    private org.homo.dbconnect.transaction.Transaction transaction;
+
+    @Autowired
+    public AbstractService(InventoryFactory inventoryFactory) {
+        InventoryManager inventoryManager = inventoryFactory.getManager();
+        this.transaction = inventoryManager.getTransaction();
+    }
+
+    public Object handle(BiFunction<HomoRequest, ApplicationContext, Object> function, HomoRequest request) throws SQLException {
 
         this.before(function);
-        Object result = function.apply(request, repository);
-        this.after(function, result);
+        Object result = function.apply(request, this.context);
+        try {
+            this.after(function, result);
+        } catch (SQLException e) {
+            this.transaction.rollBack();
+        }
         return result;
     }
 
@@ -40,12 +49,11 @@ public abstract class AbstractService<T extends AbstractRepository> {
      *
      * @param function 执行函数
      */
-    private void before(BiFunction<HomoRequest, T, Object> function) {
+    private void before(BiFunction<HomoRequest, ApplicationContext, Object> function) throws SQLException {
         this.transactionAnnotation(function.toString());
 
         if (this.homoTransactionAnnotation != null && this.homoTransactionAnnotation.open()) {
-            // TODO: 通过JDBC与数据库连接、映射、开启关闭事务，通过Guava进行缓存查询出的数据
-            System.out.println("开启事务-" + this.homoTransactionAnnotation.sessionName());
+            this.transaction.transactionOn();
         }
     }
 
@@ -54,16 +62,16 @@ public abstract class AbstractService<T extends AbstractRepository> {
      *
      * @param function 执行函数
      */
-    private void after(BiFunction<HomoRequest, T, Object> function, Object result) {
+    private void after(BiFunction<HomoRequest, ApplicationContext, Object> function, Object result) throws SQLException {
 
         if (this.homoTransactionAnnotation != null && this.homoTransactionAnnotation.open()) {
-            System.out.println("关闭事务-" + this.homoTransactionAnnotation.sessionName());
+            this.transaction.commit();
         }
 
         this.notifyAllListener(function, result);
     }
 
-    private void notifyAllListener(BiFunction<HomoRequest, T, Object> function, Object result) {
+    private void notifyAllListener(BiFunction<HomoRequest, ApplicationContext, Object> function, Object result) {
         Map<String, Object> source = new HashMap<>(2);
         source.put("field", fieldMapper.get(function.toString()));
         source.put("result", result);

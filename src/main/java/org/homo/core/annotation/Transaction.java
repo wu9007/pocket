@@ -14,6 +14,4 @@ import java.lang.annotation.Target;
 @Documented
 public @interface Transaction {
     boolean open() default true;
-
-    String sessionName() default "";
 }

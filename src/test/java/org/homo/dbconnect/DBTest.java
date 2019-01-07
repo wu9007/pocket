@@ -56,25 +56,25 @@ public class DBTest {
 
     @Test
     public void test2() throws SQLException, IllegalAccessException {
-        InventoryManager session = sessionFactory.getManager("homo");
-        Transaction transaction = session.getTransaction();
+        InventoryManager manager = sessionFactory.getManager();
+        Transaction transaction = manager.getTransaction();
         transaction.transactionOn();
-        session.save(User.newInstance("Crease", "克里斯"));
-        session.save(User.newInstance("Homo", "霍姆"));
+        manager.save(User.newInstance("Crease", "克里斯"));
+        manager.save(User.newInstance("Homo", "霍姆"));
         transaction.commit();
     }
 
     @Test
     public void test3() throws SQLException {
-        InventoryManager session = sessionFactory.getManager("homo");
-        Query query = session.createSQLQuery("select avatar, name from user");
+        InventoryManager manager = sessionFactory.getManager();
+        Query query = manager.createSQLQuery("select avatar, name from user");
         Object[] result = (Object[]) query.unique();
         System.out.println(result[0] + "-" + result[1]);
     }
 
     @Test
     public void test4() throws SQLException, InstantiationException, IllegalAccessException {
-        InventoryManager session = sessionFactory.getManager("homo");
-        System.out.println(((User) session.findOne(User.class, 1L)).getName());
+        InventoryManager manager = sessionFactory.getManager();
+        System.out.println(((User) manager.findOne(User.class, 1L)).getName());
     }
 }

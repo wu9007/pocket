@@ -18,9 +18,8 @@ public class InventoryFactory {
         this.databaseManager = databaseManager;
     }
 
-    public InventoryManager getManager(String managerName) {
-        System.out.println("InventoryManagerName:" + managerName);
-        Connection connection = this.databaseManager.getConn();
-        return new MysqlInventoryManager(connection);
+    public InventoryManager getManager() {
+        // TODO: 根据不同的数据源返回不同的内存管理员
+        return new MysqlInventoryManager(databaseManager);
     }
 }

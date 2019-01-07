@@ -20,7 +20,7 @@ public class DetailExecutor implements HomoExecutor {
     }
 
     @Override
-    public ExecutionResult execute(HomoRequest request) {
+    public ExecutionResult execute(HomoRequest request) throws Exception {
         String code = (String) orderService.handle(orderService.getCode, request);
         return ExecutionResult.newSuccessInstance("成功", "请求成功", code);
     }

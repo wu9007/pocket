@@ -21,7 +21,7 @@ public class DiscountExecutor implements HomoExecutor {
     }
 
     @Override
-    public ExecutionResult execute(HomoRequest request) {
+    public ExecutionResult execute(HomoRequest request) throws Exception {
         long start = System.currentTimeMillis();
         String price = (String) orderService.handle(orderService.discount, request);
         long time = System.currentTimeMillis() - start;

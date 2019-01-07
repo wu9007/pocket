@@ -4,38 +4,41 @@ import org.homo.core.annotation.Message;
 import org.homo.core.annotation.Transaction;
 import org.homo.core.service.AbstractService;
 import org.homo.core.executor.HomoRequest;
+import org.homo.dbconnect.session.InventoryFactory;
 import org.homo.orderdemo.model.Order;
 import org.homo.orderdemo.repository.OrderRepositoryImpl;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * @author wujianchuan 2018/12/29
  */
 @Service
-public class OrderServiceImpl extends AbstractService<OrderRepositoryImpl> {
-    @Autowired
-    public OrderServiceImpl(OrderRepositoryImpl repository) {
-        super(repository);
+public class OrderServiceImpl extends AbstractService {
+
+    public OrderServiceImpl(InventoryFactory inventoryFactory) {
+        super(inventoryFactory);
     }
 
-    @Transaction(sessionName = "demo")
+    @Transaction
     @Message(type = Order.class)
-    public BiFunction<HomoRequest, OrderRepositoryImpl, Object> getCode = (request, repository) -> "A-001";
+    public BiFunction<HomoRequest, ApplicationContext, Object> getCode = (request, context) -> "A-001";
 
-    @Transaction(sessionName = "demo")
+    @Transaction
     @Message(type = Order.class)
-    public BiFunction<HomoRequest, OrderRepositoryImpl, Object> discount = (request, repository) -> {
+    public BiFunction<HomoRequest, ApplicationContext, Object> discount = (request, context) -> {
         Order order;
         try {
+            OrderRepositoryImpl orderRepository = context.getBean(OrderRepositoryImpl.class);
             long uuid = Long.parseLong(request.getParameter("uuid"));
-            order = repository.findOne(uuid);
+            order = orderRepository.findOne(uuid);
             order.setPrice(order.getPrice().add(new BigDecimal("1")));
-            repository.getProxy().update(order, request.getUser());
+            orderRepository.getProxy().update(order, request.getUser());
             return order.getPrice().toString();
         } catch (IllegalAccessException | SQLException | InstantiationException e) {
             e.printStackTrace();

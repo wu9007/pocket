@@ -1,6 +1,8 @@
 package org.homo.core.repository;
 
 import org.homo.core.model.BaseEntity;
+import org.homo.dbconnect.session.InventoryFactory;
+import org.homo.dbconnect.session.InventoryManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -12,6 +14,13 @@ public abstract class AbstractRepository<T extends BaseEntity> implements HomoRe
     private ApplicationContext context;
 
     private RepositoryProxy<T> proxy;
+
+    protected InventoryManager inventoryManager;
+
+    @Autowired
+    public AbstractRepository(InventoryFactory inventoryFactory) {
+        this.inventoryManager = inventoryFactory.getManager();
+    }
 
     public RepositoryProxy<T> getProxy() {
         if (this.proxy != null) {

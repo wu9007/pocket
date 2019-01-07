@@ -25,13 +25,9 @@ public class SaveExecutor implements HomoExecutor {
     }
 
     @Override
-    public ExecutionResult execute(HomoRequest request) {
+    public ExecutionResult execute(HomoRequest request) throws Exception {
         Order order = Order.newInstance("A-002", new BigDecimal("12.6"));
-        try {
-            repository.getProxy().save(order, request.getUser());
-        } catch (SQLException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
+        repository.getProxy().save(order, request.getUser());
         return ExecutionResult.newSuccessInstance("成功", "订单保存成功", order);
     }
 }

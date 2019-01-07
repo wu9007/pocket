@@ -37,7 +37,7 @@ public class DatabaseManager {
         return conn;
     }
 
-    public static void closeConn(Connection conn, PreparedStatement preparedStatement, ResultSet rs) {
+    public void closeConn(Connection conn, PreparedStatement preparedStatement, ResultSet rs) {
         try {
             if (rs != null) {
                 rs.close();

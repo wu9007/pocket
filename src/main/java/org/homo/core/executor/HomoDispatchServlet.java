@@ -32,7 +32,7 @@ class HomoDispatchServlet {
             method = {RequestMethod.POST, RequestMethod.GET}
     )
     @ResponseBody
-    void service(@PathVariable String bundleName, @PathVariable String executorName, HttpServletRequest request, HttpServletResponse response) {
+    void service(@PathVariable String bundleName, @PathVariable String executorName, HttpServletRequest request, HttpServletResponse response) throws Exception {
         User user = User.newInstance("Home", "霍姆");
         HomoRequest homoRequest = HomoRequest.newInstance(request, user);
         String contextPath = request.getContextPath();

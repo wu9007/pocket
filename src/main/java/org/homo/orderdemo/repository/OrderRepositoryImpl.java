@@ -2,10 +2,8 @@ package org.homo.orderdemo.repository;
 
 import org.homo.authority.model.User;
 import org.homo.dbconnect.session.InventoryFactory;
-import org.homo.dbconnect.session.InventoryManager;
 import org.homo.orderdemo.model.Order;
 import org.homo.core.repository.AbstractRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 
@@ -17,16 +15,13 @@ import java.sql.SQLException;
 @Repository
 public class OrderRepositoryImpl extends AbstractRepository<Order> implements OrderRepository {
 
-    private InventoryManager inventoryManager;
-
-    @Autowired
     public OrderRepositoryImpl(InventoryFactory inventoryFactory) {
-        this.inventoryManager = inventoryFactory.getManager("order");
+        super(inventoryFactory);
     }
 
     @Override
     public Order save(Order entity, User operator) throws SQLException, IllegalAccessException {
-        return (Order) inventoryManager.save(entity);
+        return (Order) this.inventoryManager.save(entity);
     }
 
     @Override

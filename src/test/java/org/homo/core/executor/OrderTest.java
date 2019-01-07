@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
-public class OrderRepositoryImplTest {
+public class OrderTest {
     @Autowired
     private WebApplicationContext context;
     @Autowired
@@ -51,8 +51,8 @@ public class OrderRepositoryImplTest {
         Order order = Order.newInstance("ABC-001", new BigDecimal("12.593"));
         order.setUuid(1L);
         User user = User.newInstance("Home", "霍姆");
-        int effect = repository.getProxy().update(order, user);
-        System.out.println("影响行数：" + effect);
+        Order repositoryOrder = repository.getProxy().update(order, user);
+        System.out.println(repositoryOrder.getCode());
     }
 
     @Test
@@ -81,8 +81,6 @@ public class OrderRepositoryImplTest {
 
     @Test
     public void test6() throws Exception {
-
-        mockMvc.perform(MockMvcRequestBuilders.get("/orderdemo/discount"));
-
+        mockMvc.perform(MockMvcRequestBuilders.get("/orderdemo/discount?uuid=1"));
     }
 }

@@ -9,5 +9,5 @@ public interface HomoExecutor {
      *
      * @return 响应结果集
      */
-    ExecutionResult execute(HomoRequest request);
+    ExecutionResult execute(HomoRequest request) throws Exception;
 }

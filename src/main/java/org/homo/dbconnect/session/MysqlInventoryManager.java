@@ -3,6 +3,7 @@ package org.homo.dbconnect.session;
 import org.homo.core.annotation.Column;
 import org.homo.core.annotation.Entity;
 import org.homo.core.model.BaseEntity;
+import org.homo.dbconnect.DatabaseManager;
 import org.homo.dbconnect.transaction.HomoTransaction;
 import org.homo.dbconnect.transaction.Transaction;
 import org.homo.dbconnect.query.AbstractQuery;
@@ -21,10 +22,11 @@ import java.sql.SQLException;
 public class MysqlInventoryManager implements InventoryManager {
 
     private Connection connection;
+    private DatabaseManager databaseManager;
     private FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
 
-    MysqlInventoryManager(Connection connection) {
-        this.connection = connection;
+    MysqlInventoryManager(DatabaseManager databaseManager) {
+        this.connection = databaseManager.getConn();
     }
 
     @Override
