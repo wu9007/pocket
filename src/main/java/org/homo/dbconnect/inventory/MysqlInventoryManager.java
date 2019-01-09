@@ -59,6 +59,7 @@ public class MysqlInventoryManager implements InventoryManager {
             }
         }
         sql.append(valuesSql);
+        //TODO: 日志收集打印
         System.out.println(sql);
         PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement(sql.toString());
         long uuid = HomoUuidGenerator.getInstance().getUuid(entity.getClass(), this);
@@ -91,6 +92,7 @@ public class MysqlInventoryManager implements InventoryManager {
                     }
                 }
                 sql.append(" WHERE UUID = ?");
+                //TODO: 日志收集打印
                 System.out.println(sql);
                 PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement(sql.toString());
                 for (int valueIndex = 0; valueIndex < fields.length; valueIndex++) {
@@ -119,6 +121,8 @@ public class MysqlInventoryManager implements InventoryManager {
         BaseEntity garbage = this.findOne(clazz, entity.getUuid());
         if (garbage != null) {
             String sql = "DELETE FROM " + tableName + " WHERE UUID = ?";
+            //TODO: 日志收集打印
+            System.out.println(sql);
             PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement(sql);
             preparedStatement.setLong(1, entity.getUuid());
             int effectRow = preparedStatement.executeUpdate();
@@ -143,6 +147,7 @@ public class MysqlInventoryManager implements InventoryManager {
         }
         sql.append(" FROM ").append(this.getTableName(clazz))
                 .append(" WHERE UUID = ?");
+        //TODO: 日志收集打印
         System.out.println(sql);
         PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement(sql.toString());
         preparedStatement.setLong(1, uuid);
