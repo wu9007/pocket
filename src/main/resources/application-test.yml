@@ -11,6 +11,6 @@ server:
     context-path: /
 spring:
   cache:
-    cache-names: homo
+    cache-names: inventory,homo
     caffeine:
       spec: maximumSize=500,expireAfterAccess=600s

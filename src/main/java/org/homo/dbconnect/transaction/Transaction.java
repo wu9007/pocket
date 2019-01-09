@@ -1,8 +1,6 @@
 package org.homo.dbconnect.transaction;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
@@ -24,11 +22,8 @@ public interface Transaction {
 
     /**
      * 关闭数据库连接
-     *
-     * @param preparedStatement PreparedStatement
-     * @param rs                ResultSet
      */
-    void closeConnection(PreparedStatement preparedStatement, ResultSet rs);
+    void closeConnection();
 
     /**
      * 开启事务

@@ -1,16 +1,23 @@
 package org.homo.dbconnect.inventory;
 
+import org.homo.core.annotation.Column;
 import org.homo.core.model.BaseEntity;
 import org.homo.dbconnect.transaction.Transaction;
 import org.homo.dbconnect.query.AbstractQuery;
 
+import java.lang.reflect.Field;
 import java.sql.SQLException;
+import java.util.function.Predicate;
 
 /**
  * @author wujianchuan 2018/12/31
  */
 
 public interface InventoryManager {
+
+    String MYSQL_DB_NAME = "com.mysql.cj.jdbc.Driver";
+    String SERIAL_VERSION_UID = "serialVersionUID";
+    Predicate<Field> NO_MAPPING_FILTER = field -> !SERIAL_VERSION_UID.equals(field.getName()) && field.getAnnotation(Column.class) != null;
 
     /**
      * 对应的数据库名称
@@ -42,7 +49,7 @@ public interface InventoryManager {
      * @param entity 实体对象
      * @return 实体对象
      */
-    BaseEntity update(BaseEntity entity);
+    BaseEntity update(BaseEntity entity) throws IllegalAccessException, SQLException, InstantiationException;
 
     /**
      * 删除实体

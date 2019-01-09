@@ -53,7 +53,7 @@ public class OrderServiceImpl extends AbstractService {
             return orderRepository.save(order, request.getUser());
         } catch (SQLException | IllegalAccessException e) {
             e.printStackTrace();
+            return null;
         }
-        return null;
     };
 }

@@ -6,8 +6,6 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 
 /**
  * @author wujianchuan 2018/12/31
@@ -38,18 +36,12 @@ public class DatabaseManager {
         return conn;
     }
 
-    public void closeConn(Connection conn, PreparedStatement preparedStatement, ResultSet rs) {
+    public void closeConn(Connection conn) {
         try {
-            if (rs != null) {
-                rs.close();
-            }
-            if (preparedStatement != null) {
-                preparedStatement.close();
-            }
             if (conn != null) {
                 conn.close();
+                System.out.println("关闭数据库连接");
             }
-            System.out.println("关闭数据库连接");
         } catch (Exception e) {
             e.printStackTrace();
         }

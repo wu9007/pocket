@@ -3,8 +3,6 @@ package org.homo.dbconnect.transaction;
 import org.homo.dbconnect.DatabaseManager;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
@@ -29,8 +27,8 @@ public class HomoTransaction implements Transaction {
     }
 
     @Override
-    public void closeConnection(PreparedStatement preparedStatement, ResultSet rs) {
-        this.databaseManager.closeConn(this.connection, preparedStatement, rs);
+    public void closeConnection() {
+        this.databaseManager.closeConn(this.connection);
     }
 
     @Override

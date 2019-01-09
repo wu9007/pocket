@@ -9,12 +9,14 @@ import org.homo.dbconnect.transaction.Transaction;
 import org.homo.dbconnect.query.AbstractQuery;
 import org.homo.dbconnect.query.HomoQuery;
 import org.homo.dbconnect.uuidstrategy.HomoUuidGenerator;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 /**
  * @author wujianchuan 2019/1/1
@@ -31,7 +33,7 @@ public class MysqlInventoryManager implements InventoryManager {
 
     @Override
     public String getDbName() {
-        return "com.mysql.cj.jdbc.Driver";
+        return MYSQL_DB_NAME;
     }
 
     @Override
@@ -46,8 +48,8 @@ public class MysqlInventoryManager implements InventoryManager {
 
         StringBuilder sql = new StringBuilder("INSERT INTO ").append(tableName).append("(UUID, ");
         StringBuilder valuesSql = new StringBuilder("VALUES(?, ");
-        Field[] fields = clazz.getDeclaredFields();
-        for (int index = 1; index < fields.length; index++) {
+        Field[] fields = Arrays.stream(clazz.getDeclaredFields()).filter(NO_MAPPING_FILTER).toArray(Field[]::new);
+        for (int index = 0; index < fields.length; index++) {
             if (index < fields.length - 1) {
                 sql.append(fields[index].getAnnotation(Column.class).name()).append(", ");
                 valuesSql.append("?").append(", ");
@@ -57,22 +59,50 @@ public class MysqlInventoryManager implements InventoryManager {
             }
         }
         sql.append(valuesSql);
-
+        System.out.println(sql);
         PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement(sql.toString());
         long uuid = HomoUuidGenerator.getInstance().getUuid(entity.getClass(), this);
         entity.setUuid(uuid);
         preparedStatement.setObject(1, uuid);
-        for (int valueIndex = 1; valueIndex < fields.length; valueIndex++) {
+        for (int valueIndex = 0; valueIndex < fields.length; valueIndex++) {
             Field field = fields[valueIndex];
             field.setAccessible(true);
-            preparedStatement.setObject(valueIndex + 1, field.get(entity));
+            preparedStatement.setObject(valueIndex + 2, field.get(entity));
         }
         preparedStatement.executeUpdate();
+        preparedStatement.close();
         return entity;
     }
 
     @Override
-    public BaseEntity update(BaseEntity entity) {
+    public BaseEntity update(BaseEntity entity) throws IllegalAccessException, SQLException, InstantiationException {
+        Class clazz = entity.getClass();
+        String tableName = this.getTableName(clazz);
+        BaseEntity older = this.findOne(clazz, entity.getUuid());
+        Field[] fields = this.dirtyFieldFilter(entity, older);
+        if (fields.length > 0) {
+            StringBuilder sql = new StringBuilder("UPDATE ").append(tableName).append(" SET ");
+            for (int index = 0; index < fields.length; index++) {
+                if (index < fields.length - 1) {
+                    sql.append(fields[index].getAnnotation(Column.class).name()).append(" = ?, ");
+                } else {
+                    sql.append(fields[index].getAnnotation(Column.class).name()).append(" = ? ");
+                }
+            }
+            sql.append(" WHERE UUID = ?");
+            System.out.println(sql);
+            PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement(sql.toString());
+            for (int valueIndex = 0; valueIndex < fields.length; valueIndex++) {
+                Field field = fields[valueIndex];
+                field.setAccessible(true);
+                preparedStatement.setObject(valueIndex + 1, field.get(entity));
+            }
+            preparedStatement.setObject(fields.length + 1, entity.getUuid());
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+        } else {
+            System.out.println("数据未发生变化");
+        }
         return entity;
     }
 
@@ -82,10 +112,11 @@ public class MysqlInventoryManager implements InventoryManager {
     }
 
     @Override
+    @Cacheable(value = "inventory", key = "#clazz.getName()+#uuid")
     public BaseEntity findOne(Class clazz, Long uuid) throws SQLException, IllegalAccessException, InstantiationException {
         StringBuilder sql = new StringBuilder("SELECT UUID, ");
-        Field[] fields = clazz.getDeclaredFields();
-        for (int index = 1; index < fields.length; index++) {
+        Field[] fields = Arrays.stream(clazz.getDeclaredFields()).filter(NO_MAPPING_FILTER).toArray(Field[]::new);
+        for (int index = 0; index < fields.length; index++) {
             sql.append(fields[index].getAnnotation(Column.class).name());
             if (index < fields.length - 1) {
                 sql.append(", ");
@@ -93,18 +124,20 @@ public class MysqlInventoryManager implements InventoryManager {
         }
         sql.append(" FROM ").append(this.getTableName(clazz))
                 .append(" WHERE UUID = ?");
+        System.out.println(sql);
         PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement(sql.toString());
         preparedStatement.setLong(1, uuid);
         ResultSet resultSet = preparedStatement.executeQuery();
         BaseEntity entity = (BaseEntity) clazz.newInstance();
         entity.setUuid(uuid);
         if (resultSet.next()) {
-            for (int index = 1; index < fields.length; index++) {
-                Field field = fields[index];
+            for (Field field : fields) {
                 field.setAccessible(true);
                 field.set(entity, fieldTypeStrategy.getColumnValue(field, resultSet));
             }
         }
+        resultSet.close();
+        preparedStatement.close();
         return entity;
     }
 
@@ -118,15 +151,37 @@ public class MysqlInventoryManager implements InventoryManager {
         Entity annotation = (Entity) clazz.getAnnotation(Entity.class);
         PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement("SELECT MAX(UUID) FROM " + annotation.table());
         ResultSet resultSet = preparedStatement.executeQuery();
+        long uuid;
         if (resultSet.next()) {
-            return resultSet.getLong(1);
+            uuid = resultSet.getLong(1);
         } else {
-            return 0;
+            uuid = 0;
         }
+        resultSet.close();
+        preparedStatement.close();
+        return uuid;
     }
 
     private String getTableName(Class clazz) {
         Entity annotation = (Entity) clazz.getAnnotation(Entity.class);
         return annotation.table();
+    }
+
+    private Field[] dirtyFieldFilter(BaseEntity modern, BaseEntity older) {
+        Field[] fields = modern.getClass().getDeclaredFields();
+        return Arrays.stream(fields)
+                .filter(NO_MAPPING_FILTER)
+                .filter(field -> {
+                    try {
+                        field.setAccessible(true);
+                        Object modernValue = field.get(modern);
+                        Object olderValue = field.get(older);
+                        return modernValue == null && olderValue != null || olderValue == null && modernValue != null || modernValue != null && !modernValue.equals(olderValue);
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                        return false;
+                    }
+                })
+                .toArray(Field[]::new);
     }
 }

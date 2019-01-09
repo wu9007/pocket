@@ -67,7 +67,7 @@ public abstract class AbstractService {
         if (this.homoTransactionAnnotation != null && this.homoTransactionAnnotation.open()) {
             this.transaction.commit();
         }
-        this.transaction.closeConnection(null, null);
+        this.transaction.closeConnection();
         this.notifyAllListener(function, result);
     }
 
