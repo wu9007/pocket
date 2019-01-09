@@ -42,7 +42,7 @@ public class MysqlInventoryManager implements InventoryManager {
     }
 
     @Override
-    public BaseEntity save(BaseEntity entity) throws SQLException, IllegalAccessException {
+    public BaseEntity save(BaseEntity entity) throws Exception {
         Class clazz = entity.getClass();
         String tableName = this.getTableName(clazz);
 
@@ -75,45 +75,64 @@ public class MysqlInventoryManager implements InventoryManager {
     }
 
     @Override
-    public BaseEntity update(BaseEntity entity) throws IllegalAccessException, SQLException, InstantiationException {
+    public BaseEntity update(BaseEntity entity) throws Exception {
         Class clazz = entity.getClass();
         String tableName = this.getTableName(clazz);
         BaseEntity older = this.findOne(clazz, entity.getUuid());
-        Field[] fields = this.dirtyFieldFilter(entity, older);
-        if (fields.length > 0) {
-            StringBuilder sql = new StringBuilder("UPDATE ").append(tableName).append(" SET ");
-            for (int index = 0; index < fields.length; index++) {
-                if (index < fields.length - 1) {
-                    sql.append(fields[index].getAnnotation(Column.class).name()).append(" = ?, ");
-                } else {
-                    sql.append(fields[index].getAnnotation(Column.class).name()).append(" = ? ");
+        if (older != null) {
+            Field[] fields = this.dirtyFieldFilter(entity, older);
+            if (fields.length > 0) {
+                StringBuilder sql = new StringBuilder("UPDATE ").append(tableName).append(" SET ");
+                for (int index = 0; index < fields.length; index++) {
+                    if (index < fields.length - 1) {
+                        sql.append(fields[index].getAnnotation(Column.class).name()).append(" = ?, ");
+                    } else {
+                        sql.append(fields[index].getAnnotation(Column.class).name()).append(" = ? ");
+                    }
                 }
+                sql.append(" WHERE UUID = ?");
+                System.out.println(sql);
+                PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement(sql.toString());
+                for (int valueIndex = 0; valueIndex < fields.length; valueIndex++) {
+                    Field field = fields[valueIndex];
+                    field.setAccessible(true);
+                    preparedStatement.setObject(valueIndex + 1, field.get(entity));
+                }
+                preparedStatement.setObject(fields.length + 1, entity.getUuid());
+                preparedStatement.executeUpdate();
+                preparedStatement.close();
+            } else {
+                //TODO: 封装异常类型
+                throw new RuntimeException("数据未发生变化");
             }
-            sql.append(" WHERE UUID = ?");
-            System.out.println(sql);
-            PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement(sql.toString());
-            for (int valueIndex = 0; valueIndex < fields.length; valueIndex++) {
-                Field field = fields[valueIndex];
-                field.setAccessible(true);
-                preparedStatement.setObject(valueIndex + 1, field.get(entity));
-            }
-            preparedStatement.setObject(fields.length + 1, entity.getUuid());
-            preparedStatement.executeUpdate();
-            preparedStatement.close();
+            return entity;
         } else {
-            System.out.println("数据未发生变化");
+            //TODO: 封装异常类型
+            throw new RuntimeException("未找到数据");
         }
-        return entity;
     }
 
     @Override
-    public int delete(BaseEntity entity) {
-        return 0;
+    public int delete(BaseEntity entity) throws Exception {
+        Class clazz = entity.getClass();
+        String tableName = this.getTableName(clazz);
+        BaseEntity garbage = this.findOne(clazz, entity.getUuid());
+        if (garbage != null) {
+            String sql = "DELETE FROM " + tableName + " WHERE UUID = ?";
+            PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement(sql);
+            preparedStatement.setLong(1, entity.getUuid());
+            int effectRow = preparedStatement.executeUpdate();
+            preparedStatement.close();
+            return effectRow;
+        } else {
+            //TODO: 封装异常类型
+            throw new RuntimeException("未找到数据");
+        }
     }
 
     @Override
     @Cacheable(value = "inventory", key = "#clazz.getName()+#uuid")
-    public BaseEntity findOne(Class clazz, Long uuid) throws SQLException, IllegalAccessException, InstantiationException {
+    public BaseEntity findOne(Class clazz, Long uuid) throws Exception {
         StringBuilder sql = new StringBuilder("SELECT UUID, ");
         Field[] fields = Arrays.stream(clazz.getDeclaredFields()).filter(NO_MAPPING_FILTER).toArray(Field[]::new);
         for (int index = 0; index < fields.length; index++) {
@@ -135,10 +154,15 @@ public class MysqlInventoryManager implements InventoryManager {
                 field.setAccessible(true);
                 field.set(entity, fieldTypeStrategy.getColumnValue(field, resultSet));
             }
+            resultSet.close();
+            preparedStatement.close();
+            return entity;
+        } else {
+            resultSet.close();
+            preparedStatement.close();
+            return null;
         }
-        resultSet.close();
-        preparedStatement.close();
-        return entity;
+
     }
 
     @Override

@@ -8,7 +8,6 @@ import org.homo.core.constant.OperateTypes;
 import org.homo.core.evens.RepositoryEven;
 import org.springframework.context.ApplicationContext;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +25,7 @@ public class RepositoryProxy<T extends BaseEntity> implements HomoRepository<T> 
     }
 
     @Override
-    public T save(T entity, User operator) throws SQLException, IllegalAccessException {
+    public T save(T entity, User operator) throws Exception {
         T repositoryEntity = this.repository.save(entity, operator);
         this.afterReturningAdvise(entity, OperateTypes.SAVE, operator);
         return repositoryEntity;

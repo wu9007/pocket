@@ -7,8 +7,6 @@ import org.homo.core.repository.AbstractRepository;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 
-import java.sql.SQLException;
-
 /**
  * @author wujianchuan 2018/12/26
  */
@@ -20,7 +18,7 @@ public class OrderRepositoryImpl extends AbstractRepository<Order> implements Or
     }
 
     @Override
-    public Order save(Order entity, User operator) throws SQLException, IllegalAccessException {
+    public Order save(Order entity, User operator) throws Exception {
         return (Order) this.inventoryManager.save(entity);
     }
 
@@ -37,7 +35,7 @@ public class OrderRepositoryImpl extends AbstractRepository<Order> implements Or
 
     @Override
     @Cacheable(value = "homo", key = "#root.method.getReturnType().getName()+#uuid")
-    public Order findOne(long uuid) throws IllegalAccessException, SQLException, InstantiationException {
+    public Order findOne(long uuid) throws Exception {
         return (Order) inventoryManager.findOne(Order.class, uuid);
     }
 }

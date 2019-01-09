@@ -55,7 +55,7 @@ public class DBTest {
     }
 
     @Test
-    public void test2() throws SQLException, IllegalAccessException {
+    public void test2() throws Exception {
         InventoryManager manager = sessionFactory.getManager();
         Transaction transaction = manager.getTransaction();
         transaction.connect();
@@ -77,7 +77,7 @@ public class DBTest {
     }
 
     @Test
-    public void test4() throws SQLException, InstantiationException, IllegalAccessException {
+    public void test4() throws Exception {
         InventoryManager manager = sessionFactory.getManager();
         manager.getTransaction().connect();
         System.out.println(((User) manager.findOne(User.class, 1L)).getName());
@@ -85,13 +85,22 @@ public class DBTest {
     }
 
     @Test
-    public void test5() throws SQLException, InstantiationException, IllegalAccessException {
+    public void test5() throws Exception {
         InventoryManager manager = sessionFactory.getManager();
         manager.getTransaction().connect();
         User user = (User) manager.findOne(User.class, 1L);
         user.setAvatar("ANT");
         user.setName("蚂蚁");
         manager.update(user);
+        manager.getTransaction().closeConnection();
+    }
+
+    @Test
+    public void test6() throws Exception {
+        InventoryManager manager = sessionFactory.getManager();
+        manager.getTransaction().connect();
+        User user = (User) manager.findOne(User.class, 11L);
+        manager.delete(user);
         manager.getTransaction().closeConnection();
     }
 }

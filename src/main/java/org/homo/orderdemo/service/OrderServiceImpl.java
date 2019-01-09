@@ -11,7 +11,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.util.function.BiFunction;
 
 /**
@@ -38,7 +37,7 @@ public class OrderServiceImpl extends AbstractService {
             order.setPrice(order.getPrice().add(new BigDecimal("1")));
             orderRepository.getProxy().update(order, request.getUser());
             return order.getPrice().toString();
-        } catch (IllegalAccessException | SQLException | InstantiationException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -51,7 +50,7 @@ public class OrderServiceImpl extends AbstractService {
         Order order = Order.newInstance("A-002", new BigDecimal("12.6"));
         try {
             return orderRepository.save(order, request.getUser());
-        } catch (SQLException | IllegalAccessException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }

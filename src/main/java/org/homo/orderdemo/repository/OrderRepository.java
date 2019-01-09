@@ -14,5 +14,5 @@ public interface OrderRepository {
      * @param uuid 数据标识
      * @return 订单
      */
-    Order findOne(long uuid) throws IllegalAccessException, SQLException, InstantiationException;
+    Order findOne(long uuid) throws Exception;
 }

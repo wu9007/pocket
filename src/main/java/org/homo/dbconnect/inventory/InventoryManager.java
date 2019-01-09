@@ -41,7 +41,7 @@ public interface InventoryManager {
      * @throws SQLException           语句异常
      * @throws IllegalAccessException 反射异常
      */
-    BaseEntity save(BaseEntity entity) throws SQLException, IllegalAccessException;
+    BaseEntity save(BaseEntity entity) throws Exception;
 
     /**
      * 更新实体
@@ -49,7 +49,7 @@ public interface InventoryManager {
      * @param entity 实体对象
      * @return 实体对象
      */
-    BaseEntity update(BaseEntity entity) throws IllegalAccessException, SQLException, InstantiationException;
+    BaseEntity update(BaseEntity entity) throws Exception;
 
     /**
      * 删除实体
@@ -57,7 +57,7 @@ public interface InventoryManager {
      * @param entity 实体对象
      * @return 影响行数
      */
-    int delete(BaseEntity entity);
+    int delete(BaseEntity entity) throws Exception;
 
     /**
      * 查询对象
@@ -69,7 +69,7 @@ public interface InventoryManager {
      * @throws IllegalAccessException 反射异常
      * @throws InstantiationException 反射异常
      */
-    BaseEntity findOne(Class clazz, Long uuid) throws SQLException, IllegalAccessException, InstantiationException;
+    BaseEntity findOne(Class clazz, Long uuid) throws Exception;
 
     /**
      * 获取SQL查询对象
