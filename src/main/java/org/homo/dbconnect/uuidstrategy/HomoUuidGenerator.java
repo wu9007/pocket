@@ -2,7 +2,6 @@ package org.homo.dbconnect.uuidstrategy;
 
 import org.homo.dbconnect.inventory.InventoryManager;
 
-import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -22,7 +21,7 @@ public class HomoUuidGenerator implements UuidGenerator {
     }
 
     @Override
-    public long getUuid(Class clazz, InventoryManager session) throws SQLException {
+    public long getUuid(Class clazz, InventoryManager session) throws Exception {
         AtomicLong uuid = POOL.get(clazz.getName());
         if (uuid != null) {
             return uuid.addAndGet(1);

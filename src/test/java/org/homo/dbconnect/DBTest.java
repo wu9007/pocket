@@ -90,7 +90,7 @@ public class DBTest {
         manager.getTransaction().connect();
         User user = (User) manager.findOne(User.class, 1L);
         user.setAvatar("ANT");
-        user.setName("蚂蚁");
+        user.setName("蚂蚁2号");
         manager.update(user);
         manager.getTransaction().closeConnection();
     }
@@ -99,7 +99,7 @@ public class DBTest {
     public void test6() throws Exception {
         InventoryManager manager = sessionFactory.getManager();
         manager.getTransaction().connect();
-        User user = (User) manager.findOne(User.class, 11L);
+        User user = (User) manager.findOne(User.class, manager.getMaxUuid(User.class));
         manager.delete(user);
         manager.getTransaction().closeConnection();
     }

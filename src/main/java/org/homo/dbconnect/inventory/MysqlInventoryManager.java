@@ -15,14 +15,13 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Arrays;
 
 /**
  * @author wujianchuan 2019/1/1
  */
 @Component
-public class MysqlInventoryManager implements InventoryManager {
+public class MysqlInventoryManager extends AbstractInventoryManager {
 
     private Transaction transaction;
     private FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
@@ -176,7 +175,7 @@ public class MysqlInventoryManager implements InventoryManager {
     }
 
     @Override
-    public long getMaxUuid(Class clazz) throws SQLException {
+    public long getMaxUuid(Class clazz) throws Exception {
         Entity annotation = (Entity) clazz.getAnnotation(Entity.class);
         PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement("SELECT MAX(UUID) FROM " + annotation.table());
         ResultSet resultSet = preparedStatement.executeQuery();
@@ -189,28 +188,5 @@ public class MysqlInventoryManager implements InventoryManager {
         resultSet.close();
         preparedStatement.close();
         return uuid;
-    }
-
-    private String getTableName(Class clazz) {
-        Entity annotation = (Entity) clazz.getAnnotation(Entity.class);
-        return annotation.table();
-    }
-
-    private Field[] dirtyFieldFilter(BaseEntity modern, BaseEntity older) {
-        Field[] fields = modern.getClass().getDeclaredFields();
-        return Arrays.stream(fields)
-                .filter(NO_MAPPING_FILTER)
-                .filter(field -> {
-                    try {
-                        field.setAccessible(true);
-                        Object modernValue = field.get(modern);
-                        Object olderValue = field.get(older);
-                        return modernValue == null && olderValue != null || olderValue == null && modernValue != null || modernValue != null && !modernValue.equals(olderValue);
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                        return false;
-                    }
-                })
-                .toArray(Field[]::new);
     }
 }
