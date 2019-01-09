@@ -1,5 +1,6 @@
 package org.homo.orderdemo.model;
 
+import org.homo.core.annotation.Children;
 import org.homo.core.annotation.Column;
 import org.homo.core.annotation.Entity;
 import org.homo.core.model.BaseEntity;
@@ -17,6 +18,9 @@ public class Order extends BaseEntity {
     private String code;
     @Column(name = "PRICE")
     private BigDecimal price;
+
+    @Children(clazz = Commodity.class, columnName = "ORDER_UUID")
+    private String consumer;
 
     public static Order newInstance(String code, BigDecimal price) {
         Order order = new Order();
