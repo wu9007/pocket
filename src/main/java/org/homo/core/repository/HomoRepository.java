@@ -22,7 +22,7 @@ public interface HomoRepository<T extends BaseEntity> {
      * @param operator 操作人
      * @return 影响行数
      */
-    T update(T entity, User operator);
+    T update(T entity, User operator) throws Exception;
 
     /**
      * 删除实体
@@ -30,5 +30,5 @@ public interface HomoRepository<T extends BaseEntity> {
      * @param operator 操作人
      * @return 影响行数
      */
-    int delete(T entity, User operator);
+    int delete(T entity, User operator) throws Exception;
 }

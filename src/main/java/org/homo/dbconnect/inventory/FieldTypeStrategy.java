@@ -1,6 +1,7 @@
 package org.homo.dbconnect.inventory;
 
 import org.homo.core.annotation.Column;
+import org.homo.core.annotation.ManyToOne;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -34,6 +35,14 @@ class FieldTypeStrategy {
                 return null;
             }
         });
+        STRATEGY_POOL.put(Long.class.getName(), (resultSet, columnName) -> {
+            try {
+                return resultSet.getLong(columnName);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
     }
 
     private FieldTypeStrategy() {
@@ -44,8 +53,16 @@ class FieldTypeStrategy {
     }
 
     Object getColumnValue(Field field, ResultSet resultSet) {
-        Column annotation = field.getAnnotation(Column.class);
-        String columnName = annotation.name();
+        Column column = field.getAnnotation(Column.class);
+        ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);
+        String columnName;
+        if (column != null) {
+            columnName = column.name();
+        } else if (manyToOne != null) {
+            columnName = manyToOne.name();
+        } else {
+            throw new NullPointerException("未找到注解");
+        }
         return STRATEGY_POOL.get(field.getType().getName()).apply(resultSet, columnName);
     }
 }

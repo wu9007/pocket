@@ -32,14 +32,14 @@ public class RepositoryProxy<T extends BaseEntity> implements HomoRepository<T> 
     }
 
     @Override
-    public T update(T entity, User operator) {
+    public T update(T entity, User operator) throws Exception {
         T repositoryEntity = this.repository.update(entity, operator);
         this.afterReturningAdvise(entity, OperateTypes.UPDATE, operator);
         return repositoryEntity;
     }
 
     @Override
-    public int delete(T entity, User operator) {
+    public int delete(T entity, User operator) throws Exception {
         int affected = this.repository.delete(entity, operator);
         this.afterReturningAdvise(entity, OperateTypes.DELETE, operator);
         return affected;

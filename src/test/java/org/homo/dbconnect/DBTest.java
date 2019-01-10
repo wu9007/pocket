@@ -6,6 +6,8 @@ import org.homo.dbconnect.query.Query;
 import org.homo.dbconnect.inventory.InventoryManager;
 import org.homo.dbconnect.inventory.InventoryFactory;
 import org.homo.dbconnect.transaction.Transaction;
+import org.homo.orderdemo.model.Commodity;
+import org.homo.orderdemo.model.Order;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,10 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author wujianchuan 2018/12/26
@@ -41,7 +46,7 @@ public class DBTest {
         ResultSet resultSet;
         try {
             connection.setAutoCommit(false);
-            preparedStatement = connection.prepareStatement("SELECT T.AVATAR AS avatar, T.NAME AS name FROM USER T");
+            preparedStatement = connection.prepareStatement("SELECT T.AVATAR AS avatar, T.NAME AS name FROM TBL_USER T");
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 String avatar = resultSet.getString("avatar");
@@ -80,7 +85,7 @@ public class DBTest {
     public void test4() throws Exception {
         InventoryManager manager = sessionFactory.getManager();
         manager.getTransaction().connect();
-        System.out.println(((User) manager.findOne(User.class, 1L)).getName());
+        System.out.println(((User) manager.findOne(User.class, 5L)).getName());
         manager.getTransaction().closeConnection();
     }
 
@@ -88,7 +93,7 @@ public class DBTest {
     public void test5() throws Exception {
         InventoryManager manager = sessionFactory.getManager();
         manager.getTransaction().connect();
-        User user = (User) manager.findOne(User.class, 1L);
+        User user = (User) manager.findOne(User.class, 5L);
         user.setAvatar("ANT");
         user.setName("蚂蚁2号");
         manager.update(user);
@@ -101,6 +106,35 @@ public class DBTest {
         manager.getTransaction().connect();
         User user = (User) manager.findOne(User.class, manager.getMaxUuid(User.class));
         manager.delete(user);
+        manager.getTransaction().closeConnection();
+    }
+
+    @Test
+    public void test7() throws Exception {
+        InventoryManager manager = sessionFactory.getManager();
+        manager.getTransaction().connect();
+        manager.getTransaction().transactionOn();
+        Order order = Order.newInstance("A-002", new BigDecimal("12.6"));
+        List<Commodity> detailList = new ArrayList<>();
+        Commodity apple = new Commodity();
+        apple.setName("苹果");
+        apple.setPrice(new BigDecimal(7.6));
+        Commodity cookies = new Commodity();
+        cookies.setName("饼干");
+        cookies.setPrice(new BigDecimal(5));
+        detailList.add(apple);
+        detailList.add(cookies);
+        order.setCommodities(detailList);
+        manager.save(order);
+        manager.getTransaction().commit();
+        manager.getTransaction().closeConnection();
+    }
+
+    @Test
+    public void test8() throws Exception {
+        InventoryManager manager = sessionFactory.getManager();
+        manager.getTransaction().connect();
+        System.out.println(((Order) manager.findOne(Order.class, 11L)).getCommodities());
         manager.getTransaction().closeConnection();
     }
 }

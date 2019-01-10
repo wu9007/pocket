@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface Children {
+public @interface OneToMany {
     Class clazz();
-    String columnName();
+    String name();
 }

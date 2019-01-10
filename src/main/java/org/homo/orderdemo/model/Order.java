@@ -1,11 +1,12 @@
 package org.homo.orderdemo.model;
 
-import org.homo.core.annotation.Children;
+import org.homo.core.annotation.OneToMany;
 import org.homo.core.annotation.Column;
 import org.homo.core.annotation.Entity;
 import org.homo.core.model.BaseEntity;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @author wujianchuan 2018/12/26
@@ -19,8 +20,8 @@ public class Order extends BaseEntity {
     @Column(name = "PRICE")
     private BigDecimal price;
 
-    @Children(clazz = Commodity.class, columnName = "ORDER_UUID")
-    private String consumer;
+    @OneToMany(clazz = Commodity.class, name = "ORDER_UUID")
+    private List<Commodity> commodities;
 
     public static Order newInstance(String code, BigDecimal price) {
         Order order = new Order();
@@ -48,5 +49,13 @@ public class Order extends BaseEntity {
     @Override
     public String getDescribe() {
         return super.getDescribe();
+    }
+
+    public List<Commodity> getCommodities() {
+        return commodities;
+    }
+
+    public void setCommodities(List<Commodity> commodities) {
+        this.commodities = commodities;
     }
 }

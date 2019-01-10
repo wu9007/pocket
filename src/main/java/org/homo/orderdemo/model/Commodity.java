@@ -2,6 +2,7 @@ package org.homo.orderdemo.model;
 
 import org.homo.core.annotation.Column;
 import org.homo.core.annotation.Entity;
+import org.homo.core.annotation.ManyToOne;
 import org.homo.core.model.BaseEntity;
 
 import java.math.BigDecimal;
@@ -17,6 +18,9 @@ public class Commodity extends BaseEntity {
     @Column(name = "PRICE")
     private BigDecimal price;
 
+    @ManyToOne(name = "ORDER_UUID")
+    private Long order;
+
     public String getName() {
         return name;
     }
@@ -31,5 +35,13 @@ public class Commodity extends BaseEntity {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    public Long getOrder() {
+        return order;
+    }
+
+    public void setOrder(Long order) {
+        this.order = order;
     }
 }

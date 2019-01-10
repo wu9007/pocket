@@ -2,6 +2,8 @@ package org.homo.dbconnect.inventory;
 
 import org.homo.core.annotation.Column;
 import org.homo.core.annotation.Entity;
+import org.homo.core.annotation.ManyToOne;
+import org.homo.core.annotation.OneToMany;
 import org.homo.core.model.BaseEntity;
 import org.homo.dbconnect.DatabaseManager;
 import org.homo.dbconnect.transaction.HomoTransaction;
@@ -15,7 +17,10 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author wujianchuan 2019/1/1
@@ -45,33 +50,30 @@ public class MysqlInventoryManager extends AbstractInventoryManager {
         Class clazz = entity.getClass();
         String tableName = this.getTableName(clazz);
 
-        StringBuilder sql = new StringBuilder("INSERT INTO ").append(tableName).append("(UUID, ");
-        StringBuilder valuesSql = new StringBuilder("VALUES(?, ");
-        Field[] fields = Arrays.stream(clazz.getDeclaredFields()).filter(NO_MAPPING_FILTER).toArray(Field[]::new);
-        for (int index = 0; index < fields.length; index++) {
-            if (index < fields.length - 1) {
-                sql.append(fields[index].getAnnotation(Column.class).name()).append(", ");
-                valuesSql.append("?").append(", ");
-            } else {
-                sql.append(fields[index].getAnnotation(Column.class).name()).append(") ");
-                valuesSql.append("?").append(")");
-            }
-        }
+        Field[] fields = this.getMappingField(clazz);
+        StringBuilder sql = new StringBuilder("INSERT INTO ")
+                .append(tableName)
+                .append("(")
+                .append(this.getColumnNames(fields))
+                .append(") ");
+        StringBuilder valuesSql = new StringBuilder("VALUES(")
+                .append(this.getColumnPlaceholder(fields))
+                .append(") ");
         sql.append(valuesSql);
         //TODO: 日志收集打印
         System.out.println(sql);
-        PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement(sql.toString());
         long uuid = HomoUuidGenerator.getInstance().getUuid(entity.getClass(), this);
         entity.setUuid(uuid);
-        preparedStatement.setObject(1, uuid);
+        PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement(sql.toString());
         for (int valueIndex = 0; valueIndex < fields.length; valueIndex++) {
             Field field = fields[valueIndex];
             field.setAccessible(true);
-            preparedStatement.setObject(valueIndex + 2, field.get(entity));
+            preparedStatement.setObject(valueIndex + 1, field.get(entity));
         }
         preparedStatement.executeUpdate();
         preparedStatement.close();
-        return entity;
+        this.adoptChildren(entity);
+        return this.findOne(entity.getClass(), entity.getUuid());
     }
 
     @Override
@@ -136,15 +138,12 @@ public class MysqlInventoryManager extends AbstractInventoryManager {
     @Override
     @Cacheable(value = "inventory", key = "#clazz.getName()+#uuid")
     public BaseEntity findOne(Class clazz, Long uuid) throws Exception {
-        StringBuilder sql = new StringBuilder("SELECT UUID, ");
-        Field[] fields = Arrays.stream(clazz.getDeclaredFields()).filter(NO_MAPPING_FILTER).toArray(Field[]::new);
-        for (int index = 0; index < fields.length; index++) {
-            sql.append(fields[index].getAnnotation(Column.class).name());
-            if (index < fields.length - 1) {
-                sql.append(", ");
-            }
-        }
-        sql.append(" FROM ").append(this.getTableName(clazz))
+        StringBuilder sql = new StringBuilder("SELECT ");
+        Field[] fields = this.getMappingField(clazz);
+        Field[] childrenFields = Arrays.stream(clazz.getDeclaredFields())
+                .filter(FIND_CHILDREN)
+                .toArray(Field[]::new);
+        sql.append(this.getColumnNames(fields)).append(" FROM ").append(this.getTableName(clazz))
                 .append(" WHERE UUID = ?");
         //TODO: 日志收集打印
         System.out.println(sql);
@@ -156,7 +155,17 @@ public class MysqlInventoryManager extends AbstractInventoryManager {
         if (resultSet.next()) {
             for (Field field : fields) {
                 field.setAccessible(true);
-                field.set(entity, fieldTypeStrategy.getColumnValue(field, resultSet));
+                if (field.getAnnotation(Column.class) != null) {
+                    field.set(entity, fieldTypeStrategy.getColumnValue(field, resultSet));
+                }
+            }
+            if (childrenFields.length > 0) {
+                for (Field childField : childrenFields) {
+                    childField.setAccessible(true);
+                    if (childField.getAnnotation(OneToMany.class) != null) {
+                        childField.set(entity, this.getChildren(childField, uuid));
+                    }
+                }
             }
             resultSet.close();
             preparedStatement.close();
@@ -166,7 +175,6 @@ public class MysqlInventoryManager extends AbstractInventoryManager {
             preparedStatement.close();
             return null;
         }
-
     }
 
     @Override
@@ -188,5 +196,62 @@ public class MysqlInventoryManager extends AbstractInventoryManager {
         resultSet.close();
         preparedStatement.close();
         return uuid;
+    }
+
+    private void adoptChildren(BaseEntity entity) throws Exception {
+        Field[] childrenFields = Arrays.stream(entity.getClass().getDeclaredFields()).filter(FIND_CHILDREN).toArray(Field[]::new);
+        if (childrenFields.length > 0) {
+            for (Field childField : childrenFields) {
+                childField.setAccessible(true);
+                OneToMany oneToMany = childField.getAnnotation(OneToMany.class);
+                Collection child = (Collection) childField.get(entity);
+                if (child.size() > 0) {
+                    Field[] detailFields = childField.getAnnotation(OneToMany.class).clazz().getDeclaredFields();
+                    Field mappingField = Arrays.stream(detailFields)
+                            .filter(FIND_PARENT)
+                            .filter(field -> oneToMany.name().equals(field.getAnnotation(ManyToOne.class).name()))
+                            .findFirst().orElseThrow(() -> new NullPointerException("子表实体未配置ManyToOne(name = \"" + oneToMany.name() + "\")注解"));
+                    for (Object detail : child) {
+                        mappingField.setAccessible(true);
+                        mappingField.set(detail, entity.getUuid());
+                        this.save((BaseEntity) detail);
+                    }
+                }
+            }
+        }
+    }
+
+    private Collection getChildren(Field field, Long uuid) throws Exception {
+        OneToMany oneToMany = field.getAnnotation(OneToMany.class);
+        Class clazz = oneToMany.clazz();
+        String columnName = oneToMany.name();
+        Entity entityAnnotation = (Entity) clazz.getAnnotation(Entity.class);
+        Field[] fields = this.getMappingField(clazz);
+        String sql = "SELECT "
+                + this.getColumnNames(fields)
+                + " FROM "
+                + entityAnnotation.table()
+                + " WHERE "
+                + columnName
+                + " = ?";
+        PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement(sql);
+        preparedStatement.setLong(1, uuid);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        List<BaseEntity> collection = new ArrayList<>();
+        while (resultSet.next()) {
+            BaseEntity entity = (BaseEntity) clazz.newInstance();
+            for (Field childField : fields) {
+                childField.setAccessible(true);
+                if (childField.getAnnotation(OneToMany.class) != null) {
+                    childField.set(entity, this.getChildren(childField, entity.getUuid()));
+                } else {
+                    childField.set(entity, fieldTypeStrategy.getColumnValue(childField, resultSet));
+                }
+            }
+            collection.add(entity);
+        }
+        resultSet.close();
+        preparedStatement.close();
+        return collection;
     }
 }

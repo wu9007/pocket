@@ -23,15 +23,14 @@ public class OrderRepositoryImpl extends AbstractRepository<Order> implements Or
     }
 
     @Override
-    public Order update(Order entity, User operator) {
-        return entity;
+    public Order update(Order entity, User operator) throws Exception {
+        return (Order) this.inventoryManager.update(entity);
     }
 
     @Override
-    public int delete(Order entity, User operator) {
-        return 1;
+    public int delete(Order entity, User operator) throws Exception {
+        return this.inventoryManager.delete(entity);
     }
-
 
     @Override
     @Cacheable(value = "homo", key = "#root.method.getReturnType().getName()+#uuid")
