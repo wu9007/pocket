@@ -2,7 +2,7 @@ package org.homo.core.history.factory;
 
 import org.homo.authority.model.User;
 import org.homo.core.model.BaseEntity;
-import org.homo.core.constant.OperateTypes;
+import org.homo.core.constant.LogicOperateTypes;
 import org.homo.core.history.model.History;
 import org.homo.core.history.repository.HistoryRepositoryImpl;
 
@@ -24,7 +24,7 @@ public class HistoryFactory {
         return INSTANCE;
     }
 
-    public void saveEntityHistory(BaseEntity entity, Class clazz, OperateTypes operateType, User operator) {
+    public void saveEntityHistory(BaseEntity entity, Class clazz, LogicOperateTypes operateType, User operator) {
 
         StringBuilder content = new StringBuilder("【")
                 .append(operateType.getName())

@@ -4,7 +4,7 @@ package org.homo.core.repository;
 import org.homo.authority.model.User;
 import org.homo.core.annotation.Entity;
 import org.homo.core.model.BaseEntity;
-import org.homo.core.constant.OperateTypes;
+import org.homo.core.constant.LogicOperateTypes;
 import org.homo.core.evens.RepositoryEven;
 import org.springframework.context.ApplicationContext;
 
@@ -27,25 +27,25 @@ public class RepositoryProxy<T extends BaseEntity> implements HomoRepository<T> 
     @Override
     public T save(T entity, User operator) throws Exception {
         T repositoryEntity = this.repository.save(entity, operator);
-        this.afterReturningAdvise(entity, OperateTypes.SAVE, operator);
+        this.afterReturningAdvise(entity, LogicOperateTypes.SAVE, operator);
         return repositoryEntity;
     }
 
     @Override
     public T update(T entity, User operator) throws Exception {
         T repositoryEntity = this.repository.update(entity, operator);
-        this.afterReturningAdvise(entity, OperateTypes.UPDATE, operator);
+        this.afterReturningAdvise(entity, LogicOperateTypes.UPDATE, operator);
         return repositoryEntity;
     }
 
     @Override
     public int delete(T entity, User operator) throws Exception {
         int affected = this.repository.delete(entity, operator);
-        this.afterReturningAdvise(entity, OperateTypes.DELETE, operator);
+        this.afterReturningAdvise(entity, LogicOperateTypes.DELETE, operator);
         return affected;
     }
 
-    private void afterReturningAdvise(T entity, OperateTypes operateType, User operator) {
+    private void afterReturningAdvise(T entity, LogicOperateTypes operateType, User operator) {
         Class clazz = entity.getClass();
         Entity entityAnnotation = (Entity) clazz.getAnnotation(Entity.class);
         if (entityAnnotation == null || entityAnnotation.history()) {

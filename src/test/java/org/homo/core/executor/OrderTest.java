@@ -3,7 +3,7 @@ package org.homo.core.executor;
 import org.homo.Application;
 import org.homo.authority.model.User;
 import org.homo.config.HomoConfig;
-import org.homo.core.constant.OperateTypes;
+import org.homo.core.constant.LogicOperateTypes;
 import org.homo.dbconnect.inventory.InventoryFactory;
 import org.homo.dbconnect.inventory.InventoryManager;
 import org.homo.orderdemo.model.Order;
@@ -65,7 +65,7 @@ public class OrderTest {
 
     @Test
     public void test2() {
-        System.out.println(OperateTypes.SAVE);
+        System.out.println(LogicOperateTypes.SAVE);
     }
 
     @Test

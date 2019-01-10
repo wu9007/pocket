@@ -2,7 +2,7 @@ package org.homo.listeners;
 
 import org.homo.authority.model.User;
 import org.homo.core.model.BaseEntity;
-import org.homo.core.constant.OperateTypes;
+import org.homo.core.constant.LogicOperateTypes;
 import org.homo.core.history.factory.HistoryFactory;
 import org.homo.core.evens.RepositoryEven;
 import org.springframework.context.ApplicationEvent;
@@ -32,7 +32,7 @@ public class HistoryListener implements SmartApplicationListener {
         Class clazz = (Class) source.get("clazz");
         BaseEntity entity = (BaseEntity) source.get("entity");
         User operator = (User) source.get("operator");
-        OperateTypes operateType = (OperateTypes) source.get("operateType");
+        LogicOperateTypes operateType = (LogicOperateTypes) source.get("operateType");
         HistoryFactory.getInstance().saveEntityHistory(entity, clazz, operateType, operator);
     }
 

@@ -10,6 +10,7 @@ import org.homo.dbconnect.transaction.HomoTransaction;
 import org.homo.dbconnect.transaction.Transaction;
 import org.homo.dbconnect.query.AbstractQuery;
 import org.homo.dbconnect.query.HomoQuery;
+import org.homo.dbconnect.utils.ReflectUtils;
 import org.homo.dbconnect.uuidstrategy.HomoUuidGenerator;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import static org.homo.dbconnect.utils.ReflectUtils.FIND_CHILDREN;
+import static org.homo.dbconnect.utils.ReflectUtils.FIND_PARENT;
+
 /**
  * @author wujianchuan 2019/1/1
  */
@@ -30,6 +34,7 @@ public class MysqlInventoryManager extends AbstractInventoryManager {
 
     private Transaction transaction;
     private FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
+    private ReflectUtils reflectUtils = ReflectUtils.getInstance();
 
     MysqlInventoryManager(DatabaseManager databaseManager) {
         this.transaction = new HomoTransaction(databaseManager);
@@ -48,16 +53,16 @@ public class MysqlInventoryManager extends AbstractInventoryManager {
     @Override
     public BaseEntity save(BaseEntity entity) throws Exception {
         Class clazz = entity.getClass();
-        String tableName = this.getTableName(clazz);
+        String tableName = reflectUtils.getTableName(clazz);
 
-        Field[] fields = this.getMappingField(clazz);
+        Field[] fields = reflectUtils.getMappingField(clazz);
         StringBuilder sql = new StringBuilder("INSERT INTO ")
                 .append(tableName)
                 .append("(")
-                .append(this.getColumnNames(fields))
+                .append(reflectUtils.getColumnNames(fields))
                 .append(") ");
         StringBuilder valuesSql = new StringBuilder("VALUES(")
-                .append(this.getColumnPlaceholder(fields))
+                .append(reflectUtils.getColumnPlaceholder(fields))
                 .append(") ");
         sql.append(valuesSql);
         //TODO: 日志收集打印
@@ -79,10 +84,10 @@ public class MysqlInventoryManager extends AbstractInventoryManager {
     @Override
     public BaseEntity update(BaseEntity entity) throws Exception {
         Class clazz = entity.getClass();
-        String tableName = this.getTableName(clazz);
+        String tableName = reflectUtils.getTableName(clazz);
         BaseEntity older = this.findOne(clazz, entity.getUuid());
         if (older != null) {
-            Field[] fields = this.dirtyFieldFilter(entity, older);
+            Field[] fields = reflectUtils.dirtyFieldFilter(entity, older);
             if (fields.length > 0) {
                 StringBuilder sql = new StringBuilder("UPDATE ").append(tableName).append(" SET ");
                 for (int index = 0; index < fields.length; index++) {
@@ -118,7 +123,7 @@ public class MysqlInventoryManager extends AbstractInventoryManager {
     @Override
     public int delete(BaseEntity entity) throws Exception {
         Class clazz = entity.getClass();
-        String tableName = this.getTableName(clazz);
+        String tableName = reflectUtils.getTableName(clazz);
         BaseEntity garbage = this.findOne(clazz, entity.getUuid());
         if (garbage != null) {
             String sql = "DELETE FROM " + tableName + " WHERE UUID = ?";
@@ -139,11 +144,11 @@ public class MysqlInventoryManager extends AbstractInventoryManager {
     @Cacheable(value = "inventory", key = "#clazz.getName()+#uuid")
     public BaseEntity findOne(Class clazz, Long uuid) throws Exception {
         StringBuilder sql = new StringBuilder("SELECT ");
-        Field[] fields = this.getMappingField(clazz);
+        Field[] fields = reflectUtils.getMappingField(clazz);
         Field[] childrenFields = Arrays.stream(clazz.getDeclaredFields())
                 .filter(FIND_CHILDREN)
                 .toArray(Field[]::new);
-        sql.append(this.getColumnNames(fields)).append(" FROM ").append(this.getTableName(clazz))
+        sql.append(reflectUtils.getColumnNames(fields)).append(" FROM ").append(reflectUtils.getTableName(clazz))
                 .append(" WHERE UUID = ?");
         //TODO: 日志收集打印
         System.out.println(sql);
@@ -226,9 +231,9 @@ public class MysqlInventoryManager extends AbstractInventoryManager {
         Class clazz = oneToMany.clazz();
         String columnName = oneToMany.name();
         Entity entityAnnotation = (Entity) clazz.getAnnotation(Entity.class);
-        Field[] fields = this.getMappingField(clazz);
+        Field[] fields = reflectUtils.getMappingField(clazz);
         String sql = "SELECT "
-                + this.getColumnNames(fields)
+                + reflectUtils.getColumnNames(fields)
                 + " FROM "
                 + entityAnnotation.table()
                 + " WHERE "

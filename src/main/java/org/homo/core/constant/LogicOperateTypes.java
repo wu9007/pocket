@@ -3,7 +3,7 @@ package org.homo.core.constant;
 /**
  * @author wujianchuan 2018/12/27
  */
-public enum OperateTypes {
+public enum LogicOperateTypes {
     /**
      * 新增操作
      */
@@ -11,7 +11,7 @@ public enum OperateTypes {
     UPDATE("更新"),
     DELETE("删除");
 
-    OperateTypes(String name) {
+    LogicOperateTypes(String name) {
         this.name = name;
     }
 
