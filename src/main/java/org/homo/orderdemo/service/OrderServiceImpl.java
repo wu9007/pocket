@@ -15,7 +15,7 @@ import java.util.function.BiFunction;
 /**
  * @author wujianchuan 2018/12/29
  */
-@Service(database = "mysql", session = "homo")
+@Service(database = "mysql")
 public class OrderServiceImpl extends AbstractService {
 
     @Message(type = Order.class)

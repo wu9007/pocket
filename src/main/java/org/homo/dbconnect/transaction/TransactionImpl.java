@@ -1,5 +1,6 @@
 package org.homo.dbconnect.transaction;
 
+import org.homo.config.AbstractDatabaseConfig;
 import org.homo.dbconnect.DatabaseManager;
 
 import java.sql.Connection;
@@ -12,8 +13,8 @@ public class TransactionImpl implements Transaction {
     private Connection connection;
     private DatabaseManager databaseManager;
 
-    public TransactionImpl(String databaseName) {
-        this.databaseManager = DatabaseManager.getInstance(databaseName);
+    public TransactionImpl(AbstractDatabaseConfig databaseConfig) {
+        this.databaseManager = DatabaseManager.getInstance(databaseConfig);
     }
 
     @Override

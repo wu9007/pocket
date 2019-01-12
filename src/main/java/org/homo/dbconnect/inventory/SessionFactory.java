@@ -1,6 +1,7 @@
 package org.homo.dbconnect.inventory;
 
-import java.util.List;
+import org.homo.config.AbstractDatabaseConfig;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -10,14 +11,16 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SessionFactory {
     private static final Map<String, Session> SESSION_POOL = new ConcurrentHashMap<>(5);
 
-    private SessionFactory(List<Session> inventoryManagerList) {
-        inventoryManagerList.forEach(inventoryManager -> {
-            SESSION_POOL.put(inventoryManager.getDbName(), inventoryManager);
-        });
+    private SessionFactory() {
     }
 
-    public static Session getSession(String databaseName, String sessionName) {
-        // TODO: 根据不同的数据源和缓存名称返回不同的缓存对象
-        return SESSION_POOL.get(databaseName + sessionName);
+    //TODO: 启动时导入多有Session对象
+    public static void register(AbstractDatabaseConfig databaseConfig) {
+        Session session = new SessionImpl(databaseConfig);
+        SESSION_POOL.put(databaseConfig.getDatabaseName(), session);
+    }
+
+    public static Session getSession(String databaseName) {
+        return SESSION_POOL.get(databaseName);
     }
 }

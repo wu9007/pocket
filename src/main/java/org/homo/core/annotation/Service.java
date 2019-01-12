@@ -19,8 +19,6 @@ import java.lang.annotation.Target;
 public @interface Service {
     String database();
 
-    String session();
-
     @AliasFor(annotation = Component.class)
     String value() default "";
 }

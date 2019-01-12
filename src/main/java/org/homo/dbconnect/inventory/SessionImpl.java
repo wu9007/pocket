@@ -1,5 +1,6 @@
 package org.homo.dbconnect.inventory;
 
+import org.homo.config.AbstractDatabaseConfig;
 import org.homo.dbconnect.criteria.AbstractCriteria;
 import org.homo.dbconnect.transaction.TransactionImpl;
 import org.homo.dbconnect.transaction.Transaction;
@@ -11,8 +12,8 @@ import org.homo.dbconnect.query.HomoQuery;
  */
 public class SessionImpl extends AbstractSession {
 
-    SessionImpl(String databaseName) {
-        this.transaction = new TransactionImpl(databaseName);
+    SessionImpl(AbstractDatabaseConfig databaseConfig) {
+        this.transaction = new TransactionImpl(databaseConfig);
     }
 
     @Override

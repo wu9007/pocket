@@ -1,7 +1,6 @@
 package org.homo.dbconnect;
 
 import org.homo.config.AbstractDatabaseConfig;
-import org.homo.config.MysqlConfig;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -25,12 +24,12 @@ public class DatabaseManager {
         }
     }
 
-    public static DatabaseManager getInstance(String databaseName) {
-        return managerMap.get(databaseName);
-    }
-
-    public void registerConfig(AbstractDatabaseConfig config) {
-        managerMap.put(config.getDatabaseName(), new DatabaseManager(config));
+    public static DatabaseManager getInstance(AbstractDatabaseConfig config) {
+        DatabaseManager databaseManager = managerMap.get(config.getDatabaseName());
+        if (databaseManager == null) {
+            managerMap.put(config.getDatabaseName(), new DatabaseManager(config));
+        }
+        return managerMap.get(config.getDatabaseName());
     }
 
     public Connection getConn() {

@@ -2,6 +2,7 @@ package org.homo.dbconnect;
 
 import org.homo.Application;
 import org.homo.authority.model.User;
+import org.homo.config.AbstractDatabaseConfig;
 import org.homo.dbconnect.query.Query;
 import org.homo.dbconnect.inventory.Session;
 import org.homo.dbconnect.inventory.SessionFactory;
@@ -22,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author wujianchuan 2018/12/26
@@ -31,9 +33,7 @@ import java.util.List;
 public class DBTest {
 
     @Autowired
-    DatabaseManager manager;
-    @Autowired
-    SessionFactory sessionFactory;
+    Map<String, AbstractDatabaseConfig> databaseConfigMap;
 
     @Before
     public void setup() {
@@ -41,7 +41,13 @@ public class DBTest {
 
     @Test
     public void test1() {
-        Connection connection = manager.getConn();
+        databaseConfigMap.forEach((k, v) -> {
+            SessionFactory.register(v);
+        });
+        Session session = SessionFactory.getSession("mysql");
+        Transaction transaction = session.getTransaction();
+        transaction.connect();
+        Connection connection = transaction.getConnection();
         PreparedStatement preparedStatement;
         ResultSet resultSet;
         try {
@@ -61,7 +67,7 @@ public class DBTest {
 
     @Test
     public void test2() throws Exception {
-        Session manager = sessionFactory.getManager();
+        Session manager = SessionFactory.getSession("mysql");
         Transaction transaction = manager.getTransaction();
         transaction.connect();
         transaction.transactionOn();
@@ -73,7 +79,7 @@ public class DBTest {
 
     @Test
     public void test3() throws SQLException {
-        Session manager = sessionFactory.getManager();
+        Session manager = SessionFactory.getSession("mysql");
         manager.getTransaction().connect();
         Query query = manager.createSQLQuery("select avatar, name from TBL_user");
         Object[] result = (Object[]) query.unique();
@@ -83,7 +89,7 @@ public class DBTest {
 
     @Test
     public void test4() throws Exception {
-        Session manager = sessionFactory.getManager();
+        Session manager = SessionFactory.getSession("mysql");
         manager.getTransaction().connect();
         System.out.println(((User) manager.findOne(User.class, 5L)).getName());
         manager.getTransaction().closeConnection();
@@ -91,7 +97,7 @@ public class DBTest {
 
     @Test
     public void test5() throws Exception {
-        Session manager = sessionFactory.getManager();
+        Session manager = SessionFactory.getSession("mysql");
         manager.getTransaction().connect();
         User user = (User) manager.findOne(User.class, 5L);
         user.setAvatar("ANT");
@@ -102,7 +108,7 @@ public class DBTest {
 
     @Test
     public void test6() throws Exception {
-        Session manager = sessionFactory.getManager();
+        Session manager = SessionFactory.getSession("mysql");
         manager.getTransaction().connect();
         User user = (User) manager.findOne(User.class, manager.getMaxUuid(User.class));
         manager.delete(user);
@@ -111,7 +117,7 @@ public class DBTest {
 
     @Test
     public void test7() throws Exception {
-        Session manager = sessionFactory.getManager();
+        Session manager = SessionFactory.getSession("mysql");
         manager.getTransaction().connect();
         manager.getTransaction().transactionOn();
         Order order = Order.newInstance("A-002", new BigDecimal("12.6"));
@@ -132,7 +138,7 @@ public class DBTest {
 
     @Test
     public void test8() throws Exception {
-        Session manager = sessionFactory.getManager();
+        Session manager = SessionFactory.getSession("mysql");
         manager.getTransaction().connect();
         System.out.println(((Order) manager.findOne(Order.class, 11L)).getCommodities());
         manager.getTransaction().closeConnection();

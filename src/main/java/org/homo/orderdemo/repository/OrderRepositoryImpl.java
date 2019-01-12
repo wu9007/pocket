@@ -9,7 +9,7 @@ import org.springframework.cache.annotation.Cacheable;
 /**
  * @author wujianchuan 2018/12/26
  */
-@Repository(database = "mysql", session = "homo")
+@Repository(database = "mysql")
 public class OrderRepositoryImpl extends AbstractRepository<Order> implements OrderRepository {
 
     @Override

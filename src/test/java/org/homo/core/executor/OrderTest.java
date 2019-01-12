@@ -41,9 +41,6 @@ public class OrderTest {
     @Autowired
     HomoConfig homoConfig;
 
-    @Autowired
-    SessionFactory sessionFactory;
-
     private MockMvc mockMvc;
 
     @Before
@@ -56,7 +53,7 @@ public class OrderTest {
         Order order = Order.newInstance("ABC-001", new BigDecimal("12.58"));
         order.setUuid(5L);
         User user = User.newInstance("Home", "霍姆");
-        Session manager = sessionFactory.getManager();
+        Session manager = SessionFactory.getSession("mysql");
         manager.getTransaction().connect();
         Order repositoryOrder = repository.getProxy().update(order, user);
         manager.getTransaction().closeConnection();

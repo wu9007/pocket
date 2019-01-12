@@ -20,7 +20,7 @@ public abstract class AbstractRepository<T extends BaseEntity> implements HomoRe
 
     public AbstractRepository() {
         Repository repository = this.getClass().getAnnotation(Repository.class);
-        this.inventoryManager = SessionFactory.getSession(repository.database(), repository.session());
+        this.inventoryManager = SessionFactory.getSession(repository.database());
     }
 
     public RepositoryProxy<T> getProxy() {
