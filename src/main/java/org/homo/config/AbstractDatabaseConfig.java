@@ -1,17 +1,14 @@
 package org.homo.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
-
 /**
  * @author wujianchuan 2018/12/31
  */
-@Component
-@ConfigurationProperties(prefix = "homo.datasource")
-public class DatabaseConfig {
+
+public abstract class AbstractDatabaseConfig {
 
     private String url;
-    private String name;
+    private String databaseName;
+    private String driverName;
     private String user;
     private String password;
 
@@ -23,12 +20,20 @@ public class DatabaseConfig {
         this.url = url;
     }
 
-    public String getName() {
-        return name;
+    public String getDatabaseName() {
+        return databaseName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setDatabaseName(String databaseName) {
+        this.databaseName = databaseName;
+    }
+
+    public String getDriverName() {
+        return driverName;
+    }
+
+    public void setDriverName(String driverName) {
+        this.driverName = driverName;
     }
 
     public String getUser() {

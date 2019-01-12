@@ -1,10 +1,11 @@
 package org.homo.core.service;
 
+import org.homo.core.annotation.Service;
 import org.homo.core.annotation.Transaction;
 import org.homo.core.evens.ServiceEven;
 import org.homo.core.executor.HomoRequest;
-import org.homo.dbconnect.inventory.InventoryFactory;
-import org.homo.dbconnect.inventory.InventoryManager;
+import org.homo.dbconnect.inventory.SessionFactory;
+import org.homo.dbconnect.inventory.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -26,9 +27,9 @@ public abstract class AbstractService {
     private Transaction homoTransactionAnnotation;
     private org.homo.dbconnect.transaction.Transaction transaction;
 
-    @Autowired
-    public AbstractService(InventoryFactory inventoryFactory) {
-        InventoryManager inventoryManager = inventoryFactory.getManager();
+    public AbstractService() {
+        Service service = this.getClass().getAnnotation(Service.class);
+        Session inventoryManager = SessionFactory.getSession(service.database(), service.session());
         this.transaction = inventoryManager.getTransaction();
     }
 

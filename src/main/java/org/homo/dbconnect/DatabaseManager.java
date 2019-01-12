@@ -1,29 +1,36 @@
 package org.homo.dbconnect;
 
-import org.homo.config.DatabaseConfig;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.homo.config.AbstractDatabaseConfig;
+import org.homo.config.MysqlConfig;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author wujianchuan 2018/12/31
  */
-@Component
 public class DatabaseManager {
-    private final
-    DatabaseConfig config;
+    private static Map<String, DatabaseManager> managerMap = new HashMap<>(2);
+    private AbstractDatabaseConfig config;
     private static Connection conn = null;
 
-    @Autowired
-    private DatabaseManager(DatabaseConfig config) {
+    private DatabaseManager(AbstractDatabaseConfig config) {
         this.config = config;
         try {
-            Class.forName(config.getName());
+            Class.forName(config.getDriverName());
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    public static DatabaseManager getInstance(String databaseName) {
+        return managerMap.get(databaseName);
+    }
+
+    public void registerConfig(AbstractDatabaseConfig config) {
+        managerMap.put(config.getDatabaseName(), new DatabaseManager(config));
     }
 
     public Connection getConn() {

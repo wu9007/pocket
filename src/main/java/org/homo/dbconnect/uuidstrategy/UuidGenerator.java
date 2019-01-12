@@ -1,6 +1,6 @@
 package org.homo.dbconnect.uuidstrategy;
 
-import org.homo.dbconnect.inventory.InventoryManager;
+import org.homo.dbconnect.inventory.Session;
 
 /**
  * @author wujianchuan 2019/1/2
@@ -15,5 +15,5 @@ public interface UuidGenerator {
      * @return 数据标识
      * @throws Exception sql语句异常
      */
-    long getUuid(Class clazz, InventoryManager session) throws Exception;
+    long getUuid(Class clazz, Session session) throws Exception;
 }

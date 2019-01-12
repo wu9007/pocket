@@ -1,14 +1,13 @@
 package org.homo.orderdemo.service;
 
 import org.homo.core.annotation.Message;
+import org.homo.core.annotation.Service;
 import org.homo.core.annotation.Transaction;
 import org.homo.core.service.AbstractService;
 import org.homo.core.executor.HomoRequest;
-import org.homo.dbconnect.inventory.InventoryFactory;
 import org.homo.orderdemo.model.Order;
 import org.homo.orderdemo.repository.OrderRepositoryImpl;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.function.BiFunction;
@@ -16,12 +15,8 @@ import java.util.function.BiFunction;
 /**
  * @author wujianchuan 2018/12/29
  */
-@Service
+@Service(database = "mysql", session = "homo")
 public class OrderServiceImpl extends AbstractService {
-
-    public OrderServiceImpl(InventoryFactory inventoryFactory) {
-        super(inventoryFactory);
-    }
 
     @Message(type = Order.class)
     public BiFunction<HomoRequest, ApplicationContext, Object> getCode = (request, context) -> "A-001";

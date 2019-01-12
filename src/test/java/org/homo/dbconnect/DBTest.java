@@ -3,8 +3,8 @@ package org.homo.dbconnect;
 import org.homo.Application;
 import org.homo.authority.model.User;
 import org.homo.dbconnect.query.Query;
-import org.homo.dbconnect.inventory.InventoryManager;
-import org.homo.dbconnect.inventory.InventoryFactory;
+import org.homo.dbconnect.inventory.Session;
+import org.homo.dbconnect.inventory.SessionFactory;
 import org.homo.dbconnect.transaction.Transaction;
 import org.homo.orderdemo.model.Commodity;
 import org.homo.orderdemo.model.Order;
@@ -33,7 +33,7 @@ public class DBTest {
     @Autowired
     DatabaseManager manager;
     @Autowired
-    InventoryFactory sessionFactory;
+    SessionFactory sessionFactory;
 
     @Before
     public void setup() {
@@ -61,7 +61,7 @@ public class DBTest {
 
     @Test
     public void test2() throws Exception {
-        InventoryManager manager = sessionFactory.getManager();
+        Session manager = sessionFactory.getManager();
         Transaction transaction = manager.getTransaction();
         transaction.connect();
         transaction.transactionOn();
@@ -73,7 +73,7 @@ public class DBTest {
 
     @Test
     public void test3() throws SQLException {
-        InventoryManager manager = sessionFactory.getManager();
+        Session manager = sessionFactory.getManager();
         manager.getTransaction().connect();
         Query query = manager.createSQLQuery("select avatar, name from TBL_user");
         Object[] result = (Object[]) query.unique();
@@ -83,7 +83,7 @@ public class DBTest {
 
     @Test
     public void test4() throws Exception {
-        InventoryManager manager = sessionFactory.getManager();
+        Session manager = sessionFactory.getManager();
         manager.getTransaction().connect();
         System.out.println(((User) manager.findOne(User.class, 5L)).getName());
         manager.getTransaction().closeConnection();
@@ -91,7 +91,7 @@ public class DBTest {
 
     @Test
     public void test5() throws Exception {
-        InventoryManager manager = sessionFactory.getManager();
+        Session manager = sessionFactory.getManager();
         manager.getTransaction().connect();
         User user = (User) manager.findOne(User.class, 5L);
         user.setAvatar("ANT");
@@ -102,7 +102,7 @@ public class DBTest {
 
     @Test
     public void test6() throws Exception {
-        InventoryManager manager = sessionFactory.getManager();
+        Session manager = sessionFactory.getManager();
         manager.getTransaction().connect();
         User user = (User) manager.findOne(User.class, manager.getMaxUuid(User.class));
         manager.delete(user);
@@ -111,7 +111,7 @@ public class DBTest {
 
     @Test
     public void test7() throws Exception {
-        InventoryManager manager = sessionFactory.getManager();
+        Session manager = sessionFactory.getManager();
         manager.getTransaction().connect();
         manager.getTransaction().transactionOn();
         Order order = Order.newInstance("A-002", new BigDecimal("12.6"));
@@ -132,7 +132,7 @@ public class DBTest {
 
     @Test
     public void test8() throws Exception {
-        InventoryManager manager = sessionFactory.getManager();
+        Session manager = sessionFactory.getManager();
         manager.getTransaction().connect();
         System.out.println(((Order) manager.findOne(Order.class, 11L)).getCommodities());
         manager.getTransaction().closeConnection();

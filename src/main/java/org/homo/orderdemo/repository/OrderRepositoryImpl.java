@@ -1,21 +1,16 @@
 package org.homo.orderdemo.repository;
 
 import org.homo.authority.model.User;
-import org.homo.dbconnect.inventory.InventoryFactory;
+import org.homo.core.annotation.Repository;
 import org.homo.orderdemo.model.Order;
 import org.homo.core.repository.AbstractRepository;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Repository;
 
 /**
  * @author wujianchuan 2018/12/26
  */
-@Repository
+@Repository(database = "mysql", session = "homo")
 public class OrderRepositoryImpl extends AbstractRepository<Order> implements OrderRepository {
-
-    public OrderRepositoryImpl(InventoryFactory inventoryFactory) {
-        super(inventoryFactory);
-    }
 
     @Override
     public Order save(Order entity, User operator) throws Exception {

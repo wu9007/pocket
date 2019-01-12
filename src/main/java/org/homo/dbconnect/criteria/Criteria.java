@@ -1,4 +1,4 @@
-package org.homo.dbconnect.query;
+package org.homo.dbconnect.criteria;
 
 import org.homo.core.model.BaseEntity;
 

@@ -5,15 +5,10 @@ import org.homo.core.annotation.Entity;
 import org.homo.core.annotation.ManyToOne;
 import org.homo.core.annotation.OneToMany;
 import org.homo.core.model.BaseEntity;
-import org.homo.dbconnect.DatabaseManager;
-import org.homo.dbconnect.transaction.HomoTransaction;
 import org.homo.dbconnect.transaction.Transaction;
-import org.homo.dbconnect.query.AbstractQuery;
-import org.homo.dbconnect.query.HomoQuery;
 import org.homo.dbconnect.utils.ReflectUtils;
 import org.homo.dbconnect.uuidstrategy.HomoUuidGenerator;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
@@ -27,28 +22,16 @@ import static org.homo.dbconnect.utils.ReflectUtils.FIND_CHILDREN;
 import static org.homo.dbconnect.utils.ReflectUtils.FIND_PARENT;
 
 /**
- * @author wujianchuan 2019/1/1
+ * @author wujianchuan 2019/1/9
  */
-@Component
-public class MysqlInventoryManager extends AbstractInventoryManager {
+abstract class AbstractSession implements Session {
 
-    private Transaction transaction;
+    static final String MYSQL_DB_NAME = "com.mysql.cj.jdbc.Driver";
+    static final String ORACLE_DB_NAME = "com.oracle.jdbc.Driver";
+
+    Transaction transaction;
     private FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
     private ReflectUtils reflectUtils = ReflectUtils.getInstance();
-
-    MysqlInventoryManager(DatabaseManager databaseManager) {
-        this.transaction = new HomoTransaction(databaseManager);
-    }
-
-    @Override
-    public String getDbName() {
-        return MYSQL_DB_NAME;
-    }
-
-    @Override
-    public Transaction getTransaction() {
-        return this.transaction;
-    }
 
     @Override
     public BaseEntity save(BaseEntity entity) throws Exception {
@@ -180,11 +163,6 @@ public class MysqlInventoryManager extends AbstractInventoryManager {
             preparedStatement.close();
             return null;
         }
-    }
-
-    @Override
-    public AbstractQuery createSQLQuery(String sql) {
-        return new HomoQuery(sql, this.transaction.getConnection());
     }
 
     @Override

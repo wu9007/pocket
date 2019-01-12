@@ -6,22 +6,42 @@
       "description": "service describe."
     },
     {
-      "name": "homo.datasource.url",
+      "name": "datasource.mysql.url",
       "type": "java.lang.String",
       "description": "database url."
     },
     {
-      "name": "homo.datasource.name",
+      "name": "datasource.mysql.name",
       "type": "java.lang.String",
       "description": "database name."
     },
     {
-      "name": "homo.datasource.user",
+      "name": "datasource.mysql.user",
       "type": "java.lang.String",
       "description": "database user."
     },
     {
-      "name": "homo.datasource.password",
+      "name": "datasource.mysql.password",
+      "type": "java.lang.String",
+      "description": "database password."
+    },
+    {
+      "name": "datasource.oracle.url",
+      "type": "java.lang.String",
+      "description": "database url."
+    },
+    {
+      "name": "datasource.oracle.name",
+      "type": "java.lang.String",
+      "description": "database name."
+    },
+    {
+      "name": "datasource.oracle.user",
+      "type": "java.lang.String",
+      "description": "database user."
+    },
+    {
+      "name": "datasource.oracle.password",
       "type": "java.lang.String",
       "description": "database password."
     }

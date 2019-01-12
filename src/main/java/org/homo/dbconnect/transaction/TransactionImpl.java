@@ -8,12 +8,12 @@ import java.sql.SQLException;
 /**
  * @author wujianchuan 2019/1/1
  */
-public class HomoTransaction implements Transaction {
+public class TransactionImpl implements Transaction {
     private Connection connection;
     private DatabaseManager databaseManager;
 
-    public HomoTransaction(DatabaseManager databaseManager) {
-        this.databaseManager = databaseManager;
+    public TransactionImpl(String databaseName) {
+        this.databaseManager = DatabaseManager.getInstance(databaseName);
     }
 
     @Override

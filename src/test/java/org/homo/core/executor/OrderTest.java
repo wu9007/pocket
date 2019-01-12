@@ -4,8 +4,8 @@ import org.homo.Application;
 import org.homo.authority.model.User;
 import org.homo.config.HomoConfig;
 import org.homo.core.constant.LogicOperateTypes;
-import org.homo.dbconnect.inventory.InventoryFactory;
-import org.homo.dbconnect.inventory.InventoryManager;
+import org.homo.dbconnect.inventory.SessionFactory;
+import org.homo.dbconnect.inventory.Session;
 import org.homo.orderdemo.model.Order;
 import org.homo.core.repository.AbstractRepository;
 import org.junit.Before;
@@ -42,7 +42,7 @@ public class OrderTest {
     HomoConfig homoConfig;
 
     @Autowired
-    InventoryFactory sessionFactory;
+    SessionFactory sessionFactory;
 
     private MockMvc mockMvc;
 
@@ -56,7 +56,7 @@ public class OrderTest {
         Order order = Order.newInstance("ABC-001", new BigDecimal("12.58"));
         order.setUuid(5L);
         User user = User.newInstance("Home", "霍姆");
-        InventoryManager manager = sessionFactory.getManager();
+        Session manager = sessionFactory.getManager();
         manager.getTransaction().connect();
         Order repositoryOrder = repository.getProxy().update(order, user);
         manager.getTransaction().closeConnection();
