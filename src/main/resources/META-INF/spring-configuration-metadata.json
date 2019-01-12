@@ -11,9 +11,14 @@
       "description": "database url."
     },
     {
-      "name": "datasource.mysql.name",
+      "name": "datasource.mysql.databaseName",
       "type": "java.lang.String",
-      "description": "database name."
+      "description": "database databaseName."
+    },
+    {
+      "name": "datasource.mysql.driverName",
+      "type": "java.lang.String",
+      "description": "database driverName."
     },
     {
       "name": "datasource.mysql.user",
@@ -31,9 +36,14 @@
       "description": "database url."
     },
     {
-      "name": "datasource.oracle.name",
+      "name": "datasource.oracle.databaseName",
       "type": "java.lang.String",
-      "description": "database name."
+      "description": "database databaseName."
+    },
+    {
+      "name": "datasource.oracle.driverName",
+      "type": "java.lang.String",
+      "description": "database driverName."
     },
     {
       "name": "datasource.oracle.user",

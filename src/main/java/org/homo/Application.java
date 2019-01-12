@@ -1,6 +1,5 @@
 package org.homo;
 
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringApplicationRunListener;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -23,11 +22,6 @@ public class Application {
     }
 
     @Bean
-    public CommandLineRunner init() {
-        return args -> System.out.println("启动程序");
-    }
-
-    @Bean
     public ServletContextListener contextListener() {
         return new ServletContextListener() {
             @Override
@@ -43,7 +37,7 @@ public class Application {
     }
 
     @Bean
-    public SpringApplicationRunListener runListener(){
+    public SpringApplicationRunListener runListener() {
         return new SpringApplicationRunListener() {
             @Override
             public void starting() {

@@ -16,11 +16,11 @@ public abstract class AbstractRepository<T extends BaseEntity> implements HomoRe
 
     private RepositoryProxy<T> proxy;
 
-    protected Session inventoryManager;
+    protected Session session;
 
-    public AbstractRepository() {
+    public void installSession() {
         Repository repository = this.getClass().getAnnotation(Repository.class);
-        this.inventoryManager = SessionFactory.getSession(repository.database());
+        this.session = SessionFactory.getSession(repository.database());
     }
 
     public RepositoryProxy<T> getProxy() {

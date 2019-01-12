@@ -1,4 +1,4 @@
-package org.homo.core.annotation;
+package org.homo.dbconnect.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

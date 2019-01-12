@@ -1,6 +1,6 @@
 package org.homo.dbconnect.transaction;
 
-import org.homo.config.AbstractDatabaseConfig;
+import org.homo.dbconnect.config.AbstractDatabaseConfig;
 import org.homo.dbconnect.DatabaseManager;
 
 import java.sql.Connection;

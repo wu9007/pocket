@@ -2,7 +2,7 @@ package org.homo.dbconnect;
 
 import org.homo.Application;
 import org.homo.authority.model.User;
-import org.homo.config.AbstractDatabaseConfig;
+import org.homo.dbconnect.config.AbstractDatabaseConfig;
 import org.homo.dbconnect.query.Query;
 import org.homo.dbconnect.inventory.Session;
 import org.homo.dbconnect.inventory.SessionFactory;
@@ -37,13 +37,13 @@ public class DBTest {
 
     @Before
     public void setup() {
+        databaseConfigMap.forEach((k, v) -> {
+            SessionFactory.register(v);
+        });
     }
 
     @Test
     public void test1() {
-        databaseConfigMap.forEach((k, v) -> {
-            SessionFactory.register(v);
-        });
         Session session = SessionFactory.getSession("mysql");
         Transaction transaction = session.getTransaction();
         transaction.connect();
@@ -101,7 +101,7 @@ public class DBTest {
         manager.getTransaction().connect();
         User user = (User) manager.findOne(User.class, 5L);
         user.setAvatar("ANT");
-        user.setName("蚂蚁2号");
+        user.setName("蚂蚁3o号");
         manager.update(user);
         manager.getTransaction().closeConnection();
     }

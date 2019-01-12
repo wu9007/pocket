@@ -1,8 +1,8 @@
 package org.homo.orderdemo.model;
 
-import org.homo.core.annotation.OneToMany;
-import org.homo.core.annotation.Column;
-import org.homo.core.annotation.Entity;
+import org.homo.dbconnect.annotation.OneToMany;
+import org.homo.dbconnect.annotation.Column;
+import org.homo.dbconnect.annotation.Entity;
 import org.homo.core.model.BaseEntity;
 
 import java.math.BigDecimal;

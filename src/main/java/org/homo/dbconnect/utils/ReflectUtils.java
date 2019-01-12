@@ -1,9 +1,9 @@
 package org.homo.dbconnect.utils;
 
-import org.homo.core.annotation.Column;
-import org.homo.core.annotation.Entity;
-import org.homo.core.annotation.ManyToOne;
-import org.homo.core.annotation.OneToMany;
+import org.homo.dbconnect.annotation.Column;
+import org.homo.dbconnect.annotation.Entity;
+import org.homo.dbconnect.annotation.ManyToOne;
+import org.homo.dbconnect.annotation.OneToMany;
 import org.homo.core.model.BaseEntity;
 
 import java.lang.reflect.Field;

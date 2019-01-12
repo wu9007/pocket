@@ -1,6 +1,6 @@
 package org.homo.dbconnect;
 
-import org.homo.config.AbstractDatabaseConfig;
+import org.homo.dbconnect.config.AbstractDatabaseConfig;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

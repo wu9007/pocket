@@ -1,6 +1,6 @@
 package org.homo.dbconnect.inventory;
 
-import org.homo.config.AbstractDatabaseConfig;
+import org.homo.dbconnect.config.AbstractDatabaseConfig;
 import org.homo.dbconnect.criteria.AbstractCriteria;
 import org.homo.dbconnect.transaction.TransactionImpl;
 import org.homo.dbconnect.transaction.Transaction;

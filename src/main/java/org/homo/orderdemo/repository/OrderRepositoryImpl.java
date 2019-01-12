@@ -14,22 +14,22 @@ public class OrderRepositoryImpl extends AbstractRepository<Order> implements Or
 
     @Override
     public Order save(Order entity, User operator) throws Exception {
-        return (Order) this.inventoryManager.save(entity);
+        return (Order) this.session.save(entity);
     }
 
     @Override
     public Order update(Order entity, User operator) throws Exception {
-        return (Order) this.inventoryManager.update(entity);
+        return (Order) this.session.update(entity);
     }
 
     @Override
     public int delete(Order entity, User operator) throws Exception {
-        return this.inventoryManager.delete(entity);
+        return this.session.delete(entity);
     }
 
     @Override
     @Cacheable(value = "homo", key = "#root.method.getReturnType().getName()+#uuid")
     public Order findOne(long uuid) throws Exception {
-        return (Order) inventoryManager.findOne(Order.class, uuid);
+        return (Order) session.findOne(Order.class, uuid);
     }
 }

@@ -1,4 +1,4 @@
-package org.homo.core.annotation;
+package org.homo.dbconnect.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -7,12 +7,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * @author wujianchuan 2019/1/9
+ * @author wujianchuan 2018/12/29
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface OneToMany {
-    Class clazz();
-    String name();
+public @interface Transaction {
+    boolean open() default true;
 }

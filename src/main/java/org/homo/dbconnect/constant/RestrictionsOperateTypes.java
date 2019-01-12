@@ -1,4 +1,4 @@
-package org.homo.core.constant;
+package org.homo.dbconnect.constant;
 
 /**
  * @author wujianchuan 2019/1/10

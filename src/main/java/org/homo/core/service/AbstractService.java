@@ -1,7 +1,7 @@
 package org.homo.core.service;
 
 import org.homo.core.annotation.Service;
-import org.homo.core.annotation.Transaction;
+import org.homo.dbconnect.annotation.Transaction;
 import org.homo.core.evens.ServiceEven;
 import org.homo.core.executor.HomoRequest;
 import org.homo.dbconnect.inventory.SessionFactory;
@@ -27,6 +27,12 @@ public abstract class AbstractService {
     private Transaction homoTransactionAnnotation;
     private org.homo.dbconnect.transaction.Transaction transaction;
 
+    public void installTransaction() {
+        Service service = this.getClass().getAnnotation(Service.class);
+        Session session = SessionFactory.getSession(service.database());
+        this.transaction = session.getTransaction();
+    }
+
     public Object handle(BiFunction<HomoRequest, ApplicationContext, Object> function, HomoRequest request) throws SQLException {
 
         this.before(function);
@@ -45,11 +51,6 @@ public abstract class AbstractService {
      * @param function 执行函数
      */
     private void before(BiFunction<HomoRequest, ApplicationContext, Object> function) throws SQLException {
-        if (this.transaction == null) {
-            Service service = this.getClass().getAnnotation(Service.class);
-            Session inventoryManager = SessionFactory.getSession(service.database());
-            this.transaction = inventoryManager.getTransaction();
-        }
 
         this.transactionAnnotation(function.toString());
         this.transaction.connect();

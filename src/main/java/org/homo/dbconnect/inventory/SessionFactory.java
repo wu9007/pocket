@@ -1,6 +1,6 @@
 package org.homo.dbconnect.inventory;
 
-import org.homo.config.AbstractDatabaseConfig;
+import org.homo.dbconnect.config.AbstractDatabaseConfig;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

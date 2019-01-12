@@ -1,7 +1,7 @@
 package org.homo.dbconnect.inventory;
 
-import org.homo.core.annotation.Column;
-import org.homo.core.annotation.ManyToOne;
+import org.homo.dbconnect.annotation.Column;
+import org.homo.dbconnect.annotation.ManyToOne;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;

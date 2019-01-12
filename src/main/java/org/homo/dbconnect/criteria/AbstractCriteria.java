@@ -1,6 +1,6 @@
 package org.homo.dbconnect.criteria;
 
-import org.homo.core.annotation.Entity;
+import org.homo.dbconnect.annotation.Entity;
 import org.homo.dbconnect.utils.ReflectUtils;
 
 import java.lang.reflect.Field;

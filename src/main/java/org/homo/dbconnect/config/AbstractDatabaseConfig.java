@@ -1,4 +1,4 @@
-package org.homo.config;
+package org.homo.dbconnect.config;
 
 /**
  * @author wujianchuan 2018/12/31
