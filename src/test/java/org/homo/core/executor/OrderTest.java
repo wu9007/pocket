@@ -54,8 +54,9 @@ public class OrderTest {
         order.setUuid(5L);
         User user = User.newInstance("Home", "霍姆");
         Session manager = SessionFactory.getSession("mysql");
+
         manager.getTransaction().connect();
-        Order repositoryOrder = repository.getProxy().update(order, user);
+        Order repositoryOrder = repository.getProxy().save(order, user);
         manager.getTransaction().closeConnection();
         System.out.println(repositoryOrder.getCode());
     }

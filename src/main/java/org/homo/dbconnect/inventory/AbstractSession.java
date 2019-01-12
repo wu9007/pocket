@@ -188,7 +188,7 @@ abstract class AbstractSession implements Session {
                 childField.setAccessible(true);
                 OneToMany oneToMany = childField.getAnnotation(OneToMany.class);
                 Collection child = (Collection) childField.get(entity);
-                if (child.size() > 0) {
+                if (child != null && child.size() > 0) {
                     Field[] detailFields = childField.getAnnotation(OneToMany.class).clazz().getDeclaredFields();
                     Field mappingField = Arrays.stream(detailFields)
                             .filter(FIND_PARENT)

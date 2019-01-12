@@ -100,9 +100,9 @@ public class DBTest {
         Session manager = SessionFactory.getSession("mysql");
         manager.getTransaction().connect();
         User user = (User) manager.findOne(User.class, 5L);
-        user.setAvatar("ANT");
-        user.setName("蚂蚁3o号");
-        manager.update(user);
+        Order order = (Order) manager.findOne(Order.class, 1L);
+        order.setPrice(order.getPrice().add(new BigDecimal("1")));
+        manager.update(order);
         manager.getTransaction().closeConnection();
     }
 
