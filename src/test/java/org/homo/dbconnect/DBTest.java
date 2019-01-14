@@ -15,6 +15,8 @@ import org.homo.orderdemo.model.Order;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -34,6 +36,8 @@ import java.util.Map;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 public class DBTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DBTest.class);
 
     @Autowired
     Map<String, AbstractDatabaseConfig> databaseConfigMap;
@@ -167,7 +171,7 @@ public class DBTest {
         Criteria criteria = session.creatCriteria(Order.class);
         criteria.add(Restrictions.equ("price", 12.6D));
         List<BaseEntity> orderList = criteria.list();
-        System.out.println(orderList);
+        LOGGER.info("结果集大小：" + orderList.size());
         session.getTransaction().closeConnection();
     }
 }

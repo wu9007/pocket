@@ -34,7 +34,7 @@ public class FieldMapper {
         this.fieldName = fieldName;
     }
 
-    public String getColumnName() {
+    String getColumnName() {
         return columnName;
     }
 

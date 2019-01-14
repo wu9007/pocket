@@ -37,12 +37,13 @@ abstract class AbstractCriteria {
         this.clazz = clazz;
         this.transaction = transaction;
         this.databaseConfig = databaseConfig;
-        Entity entity = (Entity) clazz.getAnnotation(Entity.class);
         this.fields = reflectUtils.getMappingField(clazz);
         this.childrenFields = Arrays.stream(clazz.getDeclaredFields())
                 .filter(FIND_CHILDREN)
                 .toArray(Field[]::new);
         this.fieldMapper = reflectUtils.getFieldMapperMap(clazz);
-        sql.append(reflectUtils.getColumnNames(fields)).append(" FROM ").append(entity.table());
+
+        Entity entity = (Entity) clazz.getAnnotation(Entity.class);
+        this.sql.append(reflectUtils.getColumnNames(fields)).append(" FROM ").append(entity.table());
     }
 }

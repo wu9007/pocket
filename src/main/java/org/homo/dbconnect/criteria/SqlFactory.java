@@ -33,7 +33,7 @@ public class SqlFactory {
     private SqlFactory() {
     }
 
-    public String getSql(String driverName, String sqlOperateType) {
+    String getSql(String driverName, String sqlOperateType) {
         return SQL_POOL.get(driverName).get(sqlOperateType);
     }
 }
