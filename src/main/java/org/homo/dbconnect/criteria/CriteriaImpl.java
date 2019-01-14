@@ -145,9 +145,14 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     private String parseSql(Restrictions restrictions) {
         StringBuilder sql = new StringBuilder();
         if (restrictions.getLeftRestrictions() == null) {
+            String targetType = restrictions.getTarget().getClass().getSimpleName();
             sql.append(fieldMapper.get(restrictions.getSource()).getColumnName())
-                    .append(this.sqlFactory.getSql(this.databaseConfig.getDriverName(), restrictions.getSqlOperate()))
-                    .append(restrictions.getTarget());
+                    .append(this.sqlFactory.getSql(this.databaseConfig.getDriverName(), restrictions.getSqlOperate()));
+            if ("String".equals(targetType)) {
+                sql.append("'").append(restrictions.getTarget()).append("'");
+            } else {
+                sql.append(restrictions.getTarget());
+            }
         } else {
             sql.append("(")
                     .append(this.parseSql(restrictions.getLeftRestrictions()))

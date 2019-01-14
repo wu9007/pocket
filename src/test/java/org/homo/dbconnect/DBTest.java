@@ -171,7 +171,7 @@ public class DBTest {
         transaction.connect();
         transaction.transactionOn();
         Criteria criteria = session.creatCriteria(Order.class);
-        criteria.add(Restrictions.equ("price", 12.6D));
+        criteria.add(Restrictions.and(Restrictions.equ("code", "A-002"), Restrictions.equ("price", 12.6D)));
         List<BaseEntity> orderList = criteria.list();
         LOGGER.info("结果集大小：{}", orderList.size());
         Order order = Order.newInstance("B-001", new BigDecimal("15.5"));
