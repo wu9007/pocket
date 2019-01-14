@@ -2,12 +2,13 @@
 
 <configuration>
 
-    <property name="LOG_PATTERN" value="%date{HH:mm:ss.SSS} [%thread] %-5level %logger{36}   %msg%n" />
+    <property name="FILE_LOG_PATTERN" value="%date{HH:mm:ss.SSS} [%thread] %-5level %logger{36}   %msg%n"/>
+    <property name="CONSOLE_LOG_PATTERN" value="%msg%n"/>
 
     <appender name="consoleLog" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
             <pattern>
-                ${LOG_PATTERN}
+                ${CONSOLE_LOG_PATTERN}
             </pattern>
         </layout>
     </appender>
@@ -20,7 +21,7 @@
         </filter>
         <encoder>
             <pattern>
-                ${LOG_PATTERN}
+                ${FILE_LOG_PATTERN}
             </pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -34,7 +35,7 @@
         </filter>
         <encoder>
             <pattern>
-                ${LOG_PATTERN}
+                ${FILE_LOG_PATTERN}
             </pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">

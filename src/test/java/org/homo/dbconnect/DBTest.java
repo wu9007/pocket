@@ -166,12 +166,19 @@ public class DBTest {
 
     @Test
     public void test10() throws Exception {
-        Session session = SessionFactory.getSession("mysql");
-        session.getTransaction().connect();
+        Session session = SessionFactory.getSession("oracle");
+        Transaction transaction = session.getTransaction();
+        transaction.connect();
+        transaction.transactionOn();
         Criteria criteria = session.creatCriteria(Order.class);
         criteria.add(Restrictions.equ("price", 12.6D));
         List<BaseEntity> orderList = criteria.list();
-        LOGGER.info("结果集大小：" + orderList.size());
-        session.getTransaction().closeConnection();
+        LOGGER.info("结果集大小：{}", orderList.size());
+        Order order = Order.newInstance("B-001", new BigDecimal("15.5"));
+        Order newOrder = (Order) session.save(order);
+        newOrder.setPrice(newOrder.getPrice().multiply(new BigDecimal("1.5")));
+        session.update(newOrder);
+        transaction.commit();
+        transaction.closeConnection();
     }
 }

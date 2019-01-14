@@ -5,6 +5,8 @@ import org.homo.dbconnect.config.AbstractDatabaseConfig;
 import org.homo.dbconnect.inventory.FieldTypeStrategy;
 import org.homo.dbconnect.transaction.Transaction;
 import org.homo.dbconnect.utils.ReflectUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ import static org.homo.dbconnect.utils.ReflectUtils.FIND_CHILDREN;
  */
 abstract class AbstractCriteria {
 
+    private Logger logger = LoggerFactory.getLogger(AbstractCriteria.class);
     ReflectUtils reflectUtils = ReflectUtils.getInstance();
     FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
     SqlFactory sqlFactory = SqlFactory.getInstance();
@@ -46,4 +49,11 @@ abstract class AbstractCriteria {
         Entity entity = (Entity) clazz.getAnnotation(Entity.class);
         this.sql.append(reflectUtils.getColumnNames(fields)).append(" FROM ").append(entity.table());
     }
+
+    void before() {
+        if (this.databaseConfig.getShowSql()) {
+            this.logger.info("SQL: {}", this.sql);
+        }
+    }
+
 }

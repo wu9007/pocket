@@ -1,6 +1,9 @@
 package org.homo.dbconnect;
 
 import org.homo.dbconnect.config.AbstractDatabaseConfig;
+import org.homo.dbconnect.transaction.TransactionImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -12,6 +15,7 @@ import java.util.Map;
  */
 public class DatabaseManager {
     private static Map<String, DatabaseManager> managerMap = new HashMap<>(2);
+    private Logger logger = LoggerFactory.getLogger(TransactionImpl.class);
     private AbstractDatabaseConfig config;
     private static Connection conn = null;
 
@@ -35,7 +39,7 @@ public class DatabaseManager {
     public Connection getConn() {
         try {
             conn = DriverManager.getConnection(config.getUrl(), config.getUser(), config.getPassword());
-            System.out.println("开启数据库连接");
+            this.logger.info("CONNECTION: open - {}", this.config.getDatabaseName());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -46,7 +50,7 @@ public class DatabaseManager {
         try {
             if (conn != null) {
                 conn.close();
-                System.out.println("关闭数据库连接");
+                this.logger.info("CONNECTION: close - {}", this.config.getDatabaseName());
             }
         } catch (Exception e) {
             e.printStackTrace();

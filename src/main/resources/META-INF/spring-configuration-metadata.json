@@ -21,6 +21,11 @@
       "description": "database driverName."
     },
     {
+      "name": "datasource.mysql.showSql",
+      "type": "java.lang.Boolean",
+      "description": "database show sql."
+    },
+    {
       "name": "datasource.mysql.user",
       "type": "java.lang.String",
       "description": "database user."
@@ -44,6 +49,11 @@
       "name": "datasource.oracle.driverName",
       "type": "java.lang.String",
       "description": "database driverName."
+    },
+    {
+      "name": "datasource.oracle.showSql",
+      "type": "java.lang.Boolean",
+      "description": "database show sql."
     },
     {
       "name": "datasource.oracle.user",

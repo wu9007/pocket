@@ -33,8 +33,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public List<BaseEntity> list() throws Exception {
-        //TODO: 更换日志打印
-        System.out.println(sql.toString());
+        this.before();
         List<BaseEntity> result = new ArrayList<>();
         PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement(sql.toString());
         ResultSet resultSet = preparedStatement.executeQuery();
@@ -61,7 +60,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public BaseEntity unique() throws Exception {
-        System.out.println(sql.toString());
+        this.before();
         PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement(sql.toString());
         ResultSet resultSet = preparedStatement.executeQuery();
         BaseEntity entity = (BaseEntity) clazz.newInstance();

@@ -9,6 +9,7 @@ public abstract class AbstractDatabaseConfig {
     private String url;
     private String databaseName;
     private String driverName;
+    private Boolean showSql;
     private String user;
     private String password;
 
@@ -34,6 +35,14 @@ public abstract class AbstractDatabaseConfig {
 
     public void setDriverName(String driverName) {
         this.driverName = driverName;
+    }
+
+    public Boolean getShowSql() {
+        return showSql;
+    }
+
+    public void setShowSql(Boolean showSql) {
+        this.showSql = showSql;
     }
 
     public String getUser() {
