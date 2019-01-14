@@ -1,7 +1,7 @@
 package org.homo.dbconnect.inventory;
 
 import org.homo.core.model.BaseEntity;
-import org.homo.dbconnect.criteria.AbstractCriteria;
+import org.homo.dbconnect.criteria.Criteria;
 import org.homo.dbconnect.transaction.Transaction;
 import org.homo.dbconnect.query.AbstractQuery;
 
@@ -10,13 +10,6 @@ import org.homo.dbconnect.query.AbstractQuery;
  */
 
 public interface Session {
-
-    /**
-     * 对应的数据库名称
-     *
-     * @return 数据库名称
-     */
-    String getDbName();
 
     /**
      * 获取事务对象
@@ -39,7 +32,7 @@ public interface Session {
      * @param clazz 实体类类型
      * @return SQL规范对象
      */
-    AbstractCriteria creatCriteria(Class clazz);
+    Criteria creatCriteria(Class clazz);
 
     /**
      * 保存

@@ -1,6 +1,7 @@
 package org.homo.dbconnect.inventory;
 
 import org.homo.dbconnect.config.AbstractDatabaseConfig;
+import org.homo.dbconnect.constant.DatasourceDriverTypes;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,9 +15,13 @@ public class SessionFactory {
     private SessionFactory() {
     }
 
-    //TODO: 启动时导入多有Session对象
     public static void register(AbstractDatabaseConfig databaseConfig) {
-        Session session = new SessionImpl(databaseConfig);
+        Session session;
+        if (DatasourceDriverTypes.MYSQL_DRIVER.equals(databaseConfig.getDriverName()) || DatasourceDriverTypes.ORACLE_DRIVER.equals(databaseConfig.getDriverName())) {
+            session = new SessionImpl(databaseConfig);
+        } else {
+            throw new RuntimeException("I'm sorry about that I don't support this database now.");
+        }
         SESSION_POOL.put(databaseConfig.getDatabaseName(), session);
     }
 

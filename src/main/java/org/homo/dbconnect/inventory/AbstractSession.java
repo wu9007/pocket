@@ -5,18 +5,19 @@ import org.homo.dbconnect.annotation.Entity;
 import org.homo.dbconnect.annotation.ManyToOne;
 import org.homo.dbconnect.annotation.OneToMany;
 import org.homo.core.model.BaseEntity;
+import org.homo.dbconnect.config.AbstractDatabaseConfig;
+import org.homo.dbconnect.criteria.Criteria;
+import org.homo.dbconnect.criteria.Restrictions;
 import org.homo.dbconnect.transaction.Transaction;
+import org.homo.dbconnect.transaction.TransactionImpl;
 import org.homo.dbconnect.utils.ReflectUtils;
 import org.homo.dbconnect.uuidstrategy.HomoUuidGenerator;
-import org.springframework.cache.annotation.Cacheable;
 
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import static org.homo.dbconnect.utils.ReflectUtils.FIND_CHILDREN;
 import static org.homo.dbconnect.utils.ReflectUtils.FIND_PARENT;
@@ -26,12 +27,15 @@ import static org.homo.dbconnect.utils.ReflectUtils.FIND_PARENT;
  */
 abstract class AbstractSession implements Session {
 
-    static final String MYSQL_DB_NAME = "com.mysql.cj.jdbc.Driver";
-    static final String ORACLE_DB_NAME = "com.oracle.jdbc.Driver";
-
     Transaction transaction;
+    AbstractDatabaseConfig databaseConfig;
     private FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
     private ReflectUtils reflectUtils = ReflectUtils.getInstance();
+
+    AbstractSession(AbstractDatabaseConfig databaseConfig) {
+        this.databaseConfig = databaseConfig;
+        this.transaction = new TransactionImpl(databaseConfig);
+    }
 
     @Override
     public BaseEntity save(BaseEntity entity) throws Exception {
@@ -124,45 +128,10 @@ abstract class AbstractSession implements Session {
     }
 
     @Override
-    @Cacheable(value = "inventory", key = "#clazz.getName()+#uuid")
     public BaseEntity findOne(Class clazz, Long uuid) throws Exception {
-        StringBuilder sql = new StringBuilder("SELECT ");
-        Field[] fields = reflectUtils.getMappingField(clazz);
-        Field[] childrenFields = Arrays.stream(clazz.getDeclaredFields())
-                .filter(FIND_CHILDREN)
-                .toArray(Field[]::new);
-        sql.append(reflectUtils.getColumnNames(fields)).append(" FROM ").append(reflectUtils.getTableName(clazz))
-                .append(" WHERE UUID = ?");
-        //TODO: 日志收集打印
-        System.out.println(sql);
-        PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement(sql.toString());
-        preparedStatement.setLong(1, uuid);
-        ResultSet resultSet = preparedStatement.executeQuery();
-        BaseEntity entity = (BaseEntity) clazz.newInstance();
-        entity.setUuid(uuid);
-        if (resultSet.next()) {
-            for (Field field : fields) {
-                field.setAccessible(true);
-                if (field.getAnnotation(Column.class) != null) {
-                    field.set(entity, fieldTypeStrategy.getColumnValue(field, resultSet));
-                }
-            }
-            if (childrenFields.length > 0) {
-                for (Field childField : childrenFields) {
-                    childField.setAccessible(true);
-                    if (childField.getAnnotation(OneToMany.class) != null) {
-                        childField.set(entity, this.getChildren(childField, uuid));
-                    }
-                }
-            }
-            resultSet.close();
-            preparedStatement.close();
-            return entity;
-        } else {
-            resultSet.close();
-            preparedStatement.close();
-            return null;
-        }
+        Criteria criteria = this.creatCriteria(clazz);
+        criteria.add(Restrictions.equ("uuid", uuid));
+        return criteria.unique();
     }
 
     @Override
@@ -202,39 +171,5 @@ abstract class AbstractSession implements Session {
                 }
             }
         }
-    }
-
-    private Collection getChildren(Field field, Long uuid) throws Exception {
-        OneToMany oneToMany = field.getAnnotation(OneToMany.class);
-        Class clazz = oneToMany.clazz();
-        String columnName = oneToMany.name();
-        Entity entityAnnotation = (Entity) clazz.getAnnotation(Entity.class);
-        Field[] fields = reflectUtils.getMappingField(clazz);
-        String sql = "SELECT "
-                + reflectUtils.getColumnNames(fields)
-                + " FROM "
-                + entityAnnotation.table()
-                + " WHERE "
-                + columnName
-                + " = ?";
-        PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement(sql);
-        preparedStatement.setLong(1, uuid);
-        ResultSet resultSet = preparedStatement.executeQuery();
-        List<BaseEntity> collection = new ArrayList<>();
-        while (resultSet.next()) {
-            BaseEntity entity = (BaseEntity) clazz.newInstance();
-            for (Field childField : fields) {
-                childField.setAccessible(true);
-                if (childField.getAnnotation(OneToMany.class) != null) {
-                    childField.set(entity, this.getChildren(childField, entity.getUuid()));
-                } else {
-                    childField.set(entity, fieldTypeStrategy.getColumnValue(childField, resultSet));
-                }
-            }
-            collection.add(entity);
-        }
-        resultSet.close();
-        preparedStatement.close();
-        return collection;
     }
 }

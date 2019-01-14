@@ -2,7 +2,10 @@ package org.homo.dbconnect;
 
 import org.homo.Application;
 import org.homo.authority.model.User;
+import org.homo.core.model.BaseEntity;
 import org.homo.dbconnect.config.AbstractDatabaseConfig;
+import org.homo.dbconnect.criteria.Criteria;
+import org.homo.dbconnect.criteria.Restrictions;
 import org.homo.dbconnect.query.Query;
 import org.homo.dbconnect.inventory.Session;
 import org.homo.dbconnect.inventory.SessionFactory;
@@ -140,7 +143,31 @@ public class DBTest {
     public void test8() throws Exception {
         Session manager = SessionFactory.getSession("mysql");
         manager.getTransaction().connect();
+        Order order = (Order) manager.findOne(Order.class, 11L);
+        List<Commodity> commodities = order.getCommodities();
         System.out.println(((Order) manager.findOne(Order.class, 11L)).getCommodities());
         manager.getTransaction().closeConnection();
+    }
+
+    @Test
+    public void test9() throws Exception {
+        Session session = SessionFactory.getSession("mysql");
+        session.getTransaction().connect();
+        Criteria criteria = session.creatCriteria(Order.class);
+        criteria.add(Restrictions.and(Restrictions.equ("uuid", 11L), Restrictions.equ("price", 12.6D)));
+        Order order = (Order) criteria.unique();
+        System.out.println(order);
+        session.getTransaction().closeConnection();
+    }
+
+    @Test
+    public void test10() throws Exception {
+        Session session = SessionFactory.getSession("mysql");
+        session.getTransaction().connect();
+        Criteria criteria = session.creatCriteria(Order.class);
+        criteria.add(Restrictions.equ("price", 12.6D));
+        List<BaseEntity> orderList = criteria.list();
+        System.out.println(orderList);
+        session.getTransaction().closeConnection();
     }
 }

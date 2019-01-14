@@ -1,8 +1,8 @@
 package org.homo.dbconnect.inventory;
 
 import org.homo.dbconnect.config.AbstractDatabaseConfig;
-import org.homo.dbconnect.criteria.AbstractCriteria;
-import org.homo.dbconnect.transaction.TransactionImpl;
+import org.homo.dbconnect.criteria.Criteria;
+import org.homo.dbconnect.criteria.CriteriaImpl;
 import org.homo.dbconnect.transaction.Transaction;
 import org.homo.dbconnect.query.AbstractQuery;
 import org.homo.dbconnect.query.HomoQuery;
@@ -13,12 +13,7 @@ import org.homo.dbconnect.query.HomoQuery;
 public class SessionImpl extends AbstractSession {
 
     SessionImpl(AbstractDatabaseConfig databaseConfig) {
-        this.transaction = new TransactionImpl(databaseConfig);
-    }
-
-    @Override
-    public String getDbName() {
-        return MYSQL_DB_NAME;
+        super(databaseConfig);
     }
 
     @Override
@@ -32,7 +27,7 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public AbstractCriteria creatCriteria(Class clazz) {
-        return null;
+    public Criteria creatCriteria(Class clazz) {
+        return new CriteriaImpl(clazz, this.transaction, this.databaseConfig);
     }
 }
