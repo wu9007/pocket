@@ -1,11 +1,8 @@
 package org.homo.core.executor;
 
 import org.homo.Application;
-import org.homo.authority.model.User;
 import org.homo.config.HomoConfig;
 import org.homo.core.constant.LogicOperateTypes;
-import org.homo.dbconnect.inventory.SessionFactory;
-import org.homo.dbconnect.inventory.Session;
 import org.homo.orderdemo.model.Order;
 import org.homo.core.repository.AbstractRepository;
 import org.junit.Before;
@@ -19,8 +16,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.math.BigDecimal;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
@@ -46,19 +41,6 @@ public class OrderTest {
     @Before
     public void setupMockMvc() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
-    }
-
-    @Test
-    public void test1() throws Exception {
-        Order order = Order.newInstance("ABC-001", new BigDecimal("12.58"));
-        order.setUuid(5L);
-        User user = User.newInstance("Home", "霍姆");
-        Session manager = SessionFactory.getSession("mysql");
-
-        manager.getTransaction().connect();
-        Order repositoryOrder = repository.getProxy().save(order, user);
-        manager.getTransaction().closeConnection();
-        System.out.println(repositoryOrder.getCode());
     }
 
     @Test

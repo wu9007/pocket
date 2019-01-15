@@ -13,6 +13,10 @@ public abstract class AbstractDatabaseConfig {
     private String user;
     private String password;
 
+    private Integer poolMiniSize;
+    private Integer poolMaxSize;
+    private Long timeout;
+
     public String getUrl() {
         return url;
     }
@@ -59,5 +63,29 @@ public abstract class AbstractDatabaseConfig {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Integer getPoolMiniSize() {
+        return poolMiniSize;
+    }
+
+    public void setPoolMiniSize(Integer poolMiniSize) {
+        this.poolMiniSize = poolMiniSize;
+    }
+
+    public Integer getPoolMaxSize() {
+        return poolMaxSize;
+    }
+
+    public void setPoolMaxSize(Integer poolMaxSize) {
+        this.poolMaxSize = poolMaxSize;
+    }
+
+    public Long getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(Long timeout) {
+        this.timeout = timeout;
     }
 }

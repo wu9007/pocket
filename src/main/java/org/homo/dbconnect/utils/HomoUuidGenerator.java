@@ -1,6 +1,6 @@
-package org.homo.dbconnect.uuidstrategy;
+package org.homo.dbconnect.utils;
 
-import org.homo.dbconnect.inventory.Session;
+import org.homo.dbconnect.session.Session;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

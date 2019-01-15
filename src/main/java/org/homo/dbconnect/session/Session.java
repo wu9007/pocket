@@ -1,15 +1,26 @@
-package org.homo.dbconnect.inventory;
+package org.homo.dbconnect.session;
 
 import org.homo.core.model.BaseEntity;
 import org.homo.dbconnect.criteria.Criteria;
-import org.homo.dbconnect.transaction.Transaction;
 import org.homo.dbconnect.query.AbstractQuery;
+
+import java.sql.SQLException;
 
 /**
  * @author wujianchuan 2018/12/31
  */
 
 public interface Session {
+
+    /**
+     * 开启Session，拿到数据库链接并开启
+     */
+    void open();
+
+    /**
+     * 关闭数据库链接
+     */
+    void close() throws SQLException;
 
     /**
      * 获取事务对象
@@ -41,7 +52,7 @@ public interface Session {
      * @return 实体对象
      * @throws Exception 异常
      */
-    BaseEntity save(BaseEntity entity) throws Exception;
+    Object save(BaseEntity entity) throws Exception;
 
     /**
      * 更新实体
@@ -50,7 +61,7 @@ public interface Session {
      * @return 实体对象
      * @throws Exception 异常
      */
-    BaseEntity update(BaseEntity entity) throws Exception;
+    Object update(BaseEntity entity) throws Exception;
 
     /**
      * 删除实体
@@ -69,7 +80,7 @@ public interface Session {
      * @return 实体对象
      * @throws Exception 异常
      */
-    BaseEntity findOne(Class clazz, Long uuid) throws Exception;
+    Object findOne(Class clazz, Long uuid) throws Exception;
 
     /**
      * 获取最大数据标识

@@ -4,8 +4,8 @@ import org.homo.core.annotation.Service;
 import org.homo.dbconnect.annotation.Transaction;
 import org.homo.core.evens.ServiceEven;
 import org.homo.core.executor.HomoRequest;
-import org.homo.dbconnect.inventory.SessionFactory;
-import org.homo.dbconnect.inventory.Session;
+import org.homo.dbconnect.session.SessionFactory;
+import org.homo.dbconnect.session.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -25,12 +25,12 @@ public abstract class AbstractService {
 
     private Map<String, Field> fieldMapper = new HashMap<>(20);
     private Transaction homoTransactionAnnotation;
-    private org.homo.dbconnect.transaction.Transaction transaction;
+    private Session session;
+    private org.homo.dbconnect.session.Transaction transaction;
 
     public void installTransaction() {
         Service service = this.getClass().getAnnotation(Service.class);
-        Session session = SessionFactory.getSession(service.database());
-        this.transaction = session.getTransaction();
+        this.session = SessionFactory.getSession(service.database());
     }
 
     public Object handle(BiFunction<HomoRequest, ApplicationContext, Object> function, HomoRequest request) throws SQLException {
@@ -53,9 +53,10 @@ public abstract class AbstractService {
     private void before(BiFunction<HomoRequest, ApplicationContext, Object> function) throws SQLException {
 
         this.transactionAnnotation(function.toString());
-        this.transaction.connect();
+        this.session.open();
         if (this.homoTransactionAnnotation != null && this.homoTransactionAnnotation.open()) {
-            this.transaction.transactionOn();
+            this.transaction = this.session.getTransaction();
+            this.transaction.begin();
         }
     }
 
@@ -69,7 +70,7 @@ public abstract class AbstractService {
         if (this.homoTransactionAnnotation != null && this.homoTransactionAnnotation.open()) {
             this.transaction.commit();
         }
-        this.transaction.closeConnection();
+        this.session.close();
         this.notifyAllListener(function, result);
     }
 

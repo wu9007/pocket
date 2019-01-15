@@ -9,6 +9,8 @@ public interface SqlOperateTypes {
     String LIKE = "like";
     String GT = "greaterThan";
     String LT = "lessThan";
+    String GTE = "greaterThanOrEqual";
+    String LTE = "lessThanOrEqual";
     String AND = "and";
     String OR = "or";
 }

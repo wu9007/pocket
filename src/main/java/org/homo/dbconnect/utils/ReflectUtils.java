@@ -4,7 +4,6 @@ import org.homo.dbconnect.annotation.Column;
 import org.homo.dbconnect.annotation.Entity;
 import org.homo.dbconnect.annotation.ManyToOne;
 import org.homo.dbconnect.annotation.OneToMany;
-import org.homo.core.model.BaseEntity;
 import org.homo.dbconnect.criteria.FieldMapper;
 
 import java.lang.reflect.Field;
@@ -92,7 +91,7 @@ public class ReflectUtils {
      * @param older  老对象
      * @return 需要更新的属性
      */
-    public Field[] dirtyFieldFilter(BaseEntity modern, BaseEntity older) {
+    public Field[] dirtyFieldFilter(Object modern, Object older) {
         Field[] fields = this.getMappingField(modern.getClass());
         return Arrays.stream(fields)
                 .filter(field -> {

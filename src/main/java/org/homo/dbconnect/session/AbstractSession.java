@@ -1,16 +1,16 @@
-package org.homo.dbconnect.inventory;
+package org.homo.dbconnect.session;
 
 import org.homo.dbconnect.annotation.ManyToOne;
 import org.homo.dbconnect.annotation.OneToMany;
 import org.homo.core.model.BaseEntity;
 import org.homo.dbconnect.config.AbstractDatabaseConfig;
-import org.homo.dbconnect.transaction.Transaction;
-import org.homo.dbconnect.transaction.TransactionImpl;
+import org.homo.dbconnect.utils.FieldTypeStrategy;
 import org.homo.dbconnect.utils.ReflectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,16 +23,15 @@ import static org.homo.dbconnect.utils.ReflectUtils.FIND_PARENT;
  */
 abstract class AbstractSession implements Session {
 
-    private Logger logger = LoggerFactory.getLogger(AbstractSession.class);
+    Logger logger = LoggerFactory.getLogger(AbstractSession.class);
 
-    Transaction transaction;
+    Connection connection;
     AbstractDatabaseConfig databaseConfig;
     FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
     ReflectUtils reflectUtils = ReflectUtils.getInstance();
 
     AbstractSession(AbstractDatabaseConfig databaseConfig) {
         this.databaseConfig = databaseConfig;
-        this.transaction = new TransactionImpl(databaseConfig);
     }
 
     void showSql(String sql) {

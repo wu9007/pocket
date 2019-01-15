@@ -1,6 +1,5 @@
-package org.homo.dbconnect.transaction;
+package org.homo.dbconnect.session;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
@@ -9,28 +8,11 @@ import java.sql.SQLException;
 public interface Transaction {
 
     /**
-     * 连接数据库
-     */
-    void connect();
-
-    /**
-     * 获取当前数据库连接
-     *
-     * @return 数据库连接对象
-     */
-    Connection getConnection();
-
-    /**
-     * 关闭数据库连接
-     */
-    void closeConnection();
-
-    /**
      * 开启事务
      *
      * @throws SQLException 开启失败
      */
-    void transactionOn() throws SQLException;
+    void begin() throws SQLException;
 
     /**
      * 提交事务

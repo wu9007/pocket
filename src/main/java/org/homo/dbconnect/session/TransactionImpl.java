@@ -1,7 +1,5 @@
-package org.homo.dbconnect.transaction;
+package org.homo.dbconnect.session;
 
-import org.homo.dbconnect.config.AbstractDatabaseConfig;
-import org.homo.dbconnect.DatabaseManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,29 +12,13 @@ import java.sql.SQLException;
 public class TransactionImpl implements Transaction {
     private Logger logger = LoggerFactory.getLogger(TransactionImpl.class);
     private Connection connection;
-    private DatabaseManager databaseManager;
 
-    public TransactionImpl(AbstractDatabaseConfig databaseConfig) {
-        this.databaseManager = DatabaseManager.getInstance(databaseConfig);
+    TransactionImpl(Connection connection) {
+        this.connection = connection;
     }
 
     @Override
-    public void connect() {
-        this.connection = this.databaseManager.getConn();
-    }
-
-    @Override
-    public Connection getConnection() {
-        return this.connection;
-    }
-
-    @Override
-    public void closeConnection() {
-        this.databaseManager.closeConn(this.connection);
-    }
-
-    @Override
-    public void transactionOn() throws SQLException {
+    public void begin() throws SQLException {
         this.logger.info("TRANSACTION: open.");
         this.connection.setAutoCommit(false);
     }

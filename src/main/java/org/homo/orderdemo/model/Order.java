@@ -6,6 +6,7 @@ import org.homo.dbconnect.annotation.Entity;
 import org.homo.core.model.BaseEntity;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -19,6 +20,10 @@ public class Order extends BaseEntity {
     private String code;
     @Column(name = "PRICE")
     private BigDecimal price;
+    @Column(name = "DAY")
+    private Date day;
+    @Column(name = "TIME")
+    private Date time;
 
     @OneToMany(clazz = Commodity.class, name = "ORDER_UUID")
     private List<Commodity> commodities;
@@ -57,5 +62,21 @@ public class Order extends BaseEntity {
 
     public void setCommodities(List<Commodity> commodities) {
         this.commodities = commodities;
+    }
+
+    public Date getDay() {
+        return day;
+    }
+
+    public void setDay(Date day) {
+        this.day = day;
+    }
+
+    public Date getTime() {
+        return time;
+    }
+
+    public void setTime(Date time) {
+        this.time = time;
     }
 }

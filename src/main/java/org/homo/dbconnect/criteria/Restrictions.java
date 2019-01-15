@@ -28,11 +28,39 @@ public class Restrictions {
         return new Restrictions(source, SqlOperateTypes.EQ, target);
     }
 
+    public static Restrictions ne(String source, Object target) {
+        return new Restrictions(source, SqlOperateTypes.NE, target);
+    }
+
+    public static Restrictions gt(String source, Object target) {
+        return new Restrictions(source, SqlOperateTypes.GT, target);
+    }
+
+    public static Restrictions lt(String source, Object target) {
+        return new Restrictions(source, SqlOperateTypes.LTE, target);
+    }
+
+    public static Restrictions gte(String source, Object target) {
+        return new Restrictions(source, SqlOperateTypes.GT, target);
+    }
+
+    public static Restrictions lte(String source, Object target) {
+        return new Restrictions(source, SqlOperateTypes.LTE, target);
+    }
+
+    public static Restrictions like(String source, Object target) {
+        return new Restrictions(source, SqlOperateTypes.LIKE, target);
+    }
+
     public static Restrictions and(Restrictions leftRestrictions, Restrictions rightRestrictions) {
         return new Restrictions(leftRestrictions, SqlOperateTypes.AND, rightRestrictions);
     }
 
-    String getSource() {
+    public static Restrictions or(Restrictions leftRestrictions, Restrictions rightRestrictions) {
+        return new Restrictions(leftRestrictions, SqlOperateTypes.OR, rightRestrictions);
+    }
+
+    public String getSource() {
         return source;
     }
 
@@ -40,7 +68,7 @@ public class Restrictions {
         return sqlOperate;
     }
 
-    Object getTarget() {
+    public Object getTarget() {
         return target;
     }
 

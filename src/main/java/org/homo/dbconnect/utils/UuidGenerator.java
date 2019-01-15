@@ -1,6 +1,6 @@
-package org.homo.dbconnect.uuidstrategy;
+package org.homo.dbconnect.utils;
 
-import org.homo.dbconnect.inventory.Session;
+import org.homo.dbconnect.session.Session;
 
 /**
  * @author wujianchuan 2019/1/2

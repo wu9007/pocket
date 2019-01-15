@@ -2,13 +2,13 @@ package org.homo.dbconnect.criteria;
 
 import org.homo.dbconnect.annotation.Entity;
 import org.homo.dbconnect.config.AbstractDatabaseConfig;
-import org.homo.dbconnect.inventory.FieldTypeStrategy;
-import org.homo.dbconnect.transaction.Transaction;
+import org.homo.dbconnect.utils.FieldTypeStrategy;
 import org.homo.dbconnect.utils.ReflectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,7 +27,7 @@ abstract class AbstractCriteria {
     SqlFactory sqlFactory = SqlFactory.getInstance();
 
     Class clazz;
-    Transaction transaction;
+    Connection connection;
     AbstractDatabaseConfig databaseConfig;
 
     Field[] fields;
@@ -36,9 +36,9 @@ abstract class AbstractCriteria {
     List<Restrictions> restrictionsList = new ArrayList<>();
     StringBuilder sql = new StringBuilder("SELECT ");
 
-    AbstractCriteria(Class clazz, Transaction transaction, AbstractDatabaseConfig databaseConfig) {
+    AbstractCriteria(Class clazz, Connection connection, AbstractDatabaseConfig databaseConfig) {
         this.clazz = clazz;
-        this.transaction = transaction;
+        this.connection = connection;
         this.databaseConfig = databaseConfig;
         this.fields = reflectUtils.getMappingField(clazz);
         this.childrenFields = Arrays.stream(clazz.getDeclaredFields())

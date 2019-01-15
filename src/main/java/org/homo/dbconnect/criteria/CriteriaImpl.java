@@ -4,9 +4,9 @@ import org.homo.core.model.BaseEntity;
 import org.homo.dbconnect.annotation.Entity;
 import org.homo.dbconnect.annotation.OneToMany;
 import org.homo.dbconnect.config.AbstractDatabaseConfig;
-import org.homo.dbconnect.transaction.Transaction;
 
 import java.lang.reflect.Field;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -18,24 +18,27 @@ import java.util.List;
  */
 public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
-    public CriteriaImpl(Class clazz, Transaction transaction, AbstractDatabaseConfig databaseConfig) {
-        super(clazz, transaction, databaseConfig);
+    public CriteriaImpl(Class clazz, Connection connection, AbstractDatabaseConfig databaseConfig) {
+        super(clazz, connection, databaseConfig);
     }
 
     @Override
-    public void add(Restrictions restrictions) {
+    public Criteria add(Restrictions restrictions) {
         if (this.restrictionsList.size() == 0) {
             this.sql.append(" WHERE ");
+        } else {
+            this.sql.append(" AND ");
         }
         this.sql.append(this.parseSql(restrictions));
-        this.restrictionsList.add(restrictions);
+        return this;
     }
 
     @Override
-    public List<BaseEntity> list() throws Exception {
+    public List list() throws Exception {
         this.before();
         List<BaseEntity> result = new ArrayList<>();
-        PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement(sql.toString());
+        PreparedStatement preparedStatement = this.connection.prepareStatement(sql.toString());
+        fieldTypeStrategy.setPreparedStatement(preparedStatement, this.restrictionsList);
         ResultSet resultSet = preparedStatement.executeQuery();
         try {
             while (resultSet.next()) {
@@ -59,9 +62,10 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
-    public BaseEntity unique() throws Exception {
+    public Object unique() throws Exception {
         this.before();
-        PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement(sql.toString());
+        PreparedStatement preparedStatement = this.connection.prepareStatement(sql.toString());
+        fieldTypeStrategy.setPreparedStatement(preparedStatement, this.restrictionsList);
         ResultSet resultSet = preparedStatement.executeQuery();
         BaseEntity entity = (BaseEntity) clazz.newInstance();
         try {
@@ -112,7 +116,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                 + columnName
                 + " = ?";
 
-        PreparedStatement preparedStatement = this.transaction.getConnection().prepareStatement(sql);
+        PreparedStatement preparedStatement = this.connection.prepareStatement(sql);
         preparedStatement.setLong(1, uuid);
         ResultSet resultSet = preparedStatement.executeQuery();
         List<BaseEntity> collection = new ArrayList<>();
@@ -143,16 +147,13 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
      * @return SQL
      */
     private String parseSql(Restrictions restrictions) {
+        Object target = restrictions.getTarget();
         StringBuilder sql = new StringBuilder();
         if (restrictions.getLeftRestrictions() == null) {
-            String targetType = restrictions.getTarget().getClass().getSimpleName();
             sql.append(fieldMapper.get(restrictions.getSource()).getColumnName())
-                    .append(this.sqlFactory.getSql(this.databaseConfig.getDriverName(), restrictions.getSqlOperate()));
-            if ("String".equals(targetType)) {
-                sql.append("'").append(restrictions.getTarget()).append("'");
-            } else {
-                sql.append(restrictions.getTarget());
-            }
+                    .append(this.sqlFactory.getSql(this.databaseConfig.getDriverName(), restrictions.getSqlOperate()))
+                    .append("?");
+            this.restrictionsList.add(restrictions);
         } else {
             sql.append("(")
                     .append(this.parseSql(restrictions.getLeftRestrictions()))

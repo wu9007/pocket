@@ -20,6 +20,8 @@ public class SqlFactory {
         mysqlSyntax.put(SqlOperateTypes.LIKE, " LIKE ");
         mysqlSyntax.put(SqlOperateTypes.GT, " > ");
         mysqlSyntax.put(SqlOperateTypes.LT, " < ");
+        mysqlSyntax.put(SqlOperateTypes.GTE, " >= ");
+        mysqlSyntax.put(SqlOperateTypes.LTE, " <= ");
         mysqlSyntax.put(SqlOperateTypes.OR, " OR ");
         SQL_POOL.put(DatasourceDriverTypes.MYSQL_DRIVER, mysqlSyntax);
     }

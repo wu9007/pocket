@@ -1,7 +1,7 @@
 package org.homo.dbconnect.lunch;
 
 import org.homo.dbconnect.config.AbstractDatabaseConfig;
-import org.homo.dbconnect.inventory.SessionFactory;
+import org.homo.dbconnect.session.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;

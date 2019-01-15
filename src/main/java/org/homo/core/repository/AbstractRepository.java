@@ -2,8 +2,8 @@ package org.homo.core.repository;
 
 import org.homo.core.annotation.Repository;
 import org.homo.core.model.BaseEntity;
-import org.homo.dbconnect.inventory.SessionFactory;
-import org.homo.dbconnect.inventory.Session;
+import org.homo.dbconnect.session.SessionFactory;
+import org.homo.dbconnect.session.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 

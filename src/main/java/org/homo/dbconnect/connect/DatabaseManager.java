@@ -1,12 +1,10 @@
-package org.homo.dbconnect;
+package org.homo.dbconnect.connect;
 
 import org.homo.dbconnect.config.AbstractDatabaseConfig;
-import org.homo.dbconnect.transaction.TransactionImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +13,6 @@ import java.util.Map;
  */
 public class DatabaseManager {
     private static Map<String, DatabaseManager> managerMap = new HashMap<>(2);
-    private Logger logger = LoggerFactory.getLogger(TransactionImpl.class);
     private AbstractDatabaseConfig config;
     private static Connection conn = null;
 
@@ -36,24 +33,16 @@ public class DatabaseManager {
         return managerMap.get(config.getDatabaseName());
     }
 
-    public Connection getConn() {
+    Connection newConnection() {
         try {
             conn = DriverManager.getConnection(config.getUrl(), config.getUser(), config.getPassword());
-            this.logger.info("CONNECTION: open - {}", this.config.getDatabaseName());
         } catch (Exception e) {
             e.printStackTrace();
         }
         return conn;
     }
 
-    public void closeConn(Connection conn) {
-        try {
-            if (conn != null) {
-                conn.close();
-                this.logger.info("CONNECTION: close - {}", this.config.getDatabaseName());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    Boolean isValidConnection(Connection connection) throws SQLException {
+        return connection != null && !connection.isClosed();
     }
 }

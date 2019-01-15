@@ -13,8 +13,9 @@ public interface Criteria {
      * 添加约束条件
      *
      * @param restrictions 约束条件SQL
+     * @return Criteria
      */
-    void add(Restrictions restrictions);
+    Criteria add(Restrictions restrictions);
 
     /**
      * 获取所有数据
@@ -22,7 +23,7 @@ public interface Criteria {
      * @return 对象集合
      * @throws Exception 异常
      */
-    List<BaseEntity> list() throws Exception;
+    List list() throws Exception;
 
     /**
      * 获取一条数据
@@ -30,5 +31,5 @@ public interface Criteria {
      * @return 对象
      * @throws Exception 异常
      */
-    BaseEntity unique() throws Exception;
+    Object unique() throws Exception;
 }

@@ -1,4 +1,4 @@
-package org.homo.dbconnect.inventory;
+package org.homo.dbconnect.session;
 
 import org.homo.dbconnect.config.AbstractDatabaseConfig;
 import org.homo.dbconnect.constant.DatasourceDriverTypes;
