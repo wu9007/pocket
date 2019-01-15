@@ -16,7 +16,7 @@ interface ConnectionPool {
 
     Connection getCurrentConnection();
 
-    void releaseConn(Connection conn) throws SQLException;
+    void releaseConn(Connection connection) throws SQLException;
 
     void destroy();
 

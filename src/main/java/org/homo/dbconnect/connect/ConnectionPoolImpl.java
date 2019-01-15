@@ -48,7 +48,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
     }
 
     @Override
-    public Connection getConnection() {
+    public synchronized Connection getConnection() {
         Connection connection;
         if (activatedCount.incrementAndGet() < this.databaseConfig.getPoolMaxSize()) {
             if (this.freeConnections.size() > 0) {
@@ -92,16 +92,32 @@ public class ConnectionPoolImpl implements ConnectionPool {
 
     @Override
     public Connection getCurrentConnection() {
-        return null;
+        Connection connection = this.currentConnection.get();
+        try {
+            if (!this.databaseManager.isValidConnection(connection)) {
+                connection = this.getConnection();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return connection;
     }
 
     @Override
-    public void releaseConn(Connection conn) throws SQLException {
-
+    public synchronized void releaseConn(Connection connection) throws SQLException {
+        logger.info("{} release connection: {}", Thread.currentThread().getName(), connection);
+        this.activeConnections.remove(connection);
+        this.currentConnection.remove();
+        if (this.databaseManager.isValidConnection(connection)) {
+            this.freeConnections.add(connection);
+        } else {
+            this.freeConnections.add(this.newConnection());
+        }
+        this.notifyAll();
     }
 
     @Override
-    public void destroy() {
+    public synchronized void destroy() {
         currentConnection.remove();
     }
 
