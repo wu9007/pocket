@@ -37,8 +37,8 @@ public class ConnectionManager {
         return ourInstance;
     }
 
-    public Connection getConnection(DatabaseNodeConfig databaseConfig) {
-        return this.connectionPoolMap.get(databaseConfig.getNodeName()).getConnection();
+    public Connection getConnection(DatabaseNodeConfig databaseNodeConfig) {
+        return this.connectionPoolMap.get(databaseNodeConfig.getNodeName()).getConnection();
     }
 
     public void closeConnection(String node, Connection connection) {
