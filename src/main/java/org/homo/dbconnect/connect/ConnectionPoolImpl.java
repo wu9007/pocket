@@ -1,5 +1,6 @@
 package org.homo.dbconnect.connect;
 
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.homo.dbconnect.config.AbstractDatabaseConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,6 +8,10 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.LinkedList;
+import java.util.TimerTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -38,25 +43,25 @@ public class ConnectionPoolImpl implements ConnectionPool {
 
     @Override
     public void init() {
-        int initSize = this.databaseConfig.getPoolMaxSize();
+        int initSize = this.databaseConfig.getPoolMiniSize();
         for (int index = 0; index < initSize; index++) {
             Connection connection = this.newConnection();
             this.freeConnections.add(connection);
             this.activatedCount.addAndGet(1);
         }
-        this.activated.compareAndSet(true, false);
+        this.activated.compareAndSet(false, true);
     }
 
     @Override
     public synchronized Connection getConnection() {
         Connection connection;
-        if (activatedCount.incrementAndGet() < this.databaseConfig.getPoolMaxSize()) {
+        if (activatedCount.get() < this.databaseConfig.getPoolMaxSize()) {
             if (this.freeConnections.size() > 0) {
                 connection = this.freeConnections.pollFirst();
                 try {
                     if (this.databaseManager.isValidConnection(connection)) {
                         this.activeConnections.add(connection);
-                        this.currentConnection.set(connection);
+                        currentConnection.set(connection);
                     } else {
                         connection = this.getConnection();
                     }
@@ -66,7 +71,8 @@ public class ConnectionPoolImpl implements ConnectionPool {
             } else {
                 connection = this.newConnection();
                 this.activeConnections.add(connection);
-                this.currentConnection.set(connection);
+                currentConnection.set(connection);
+                this.activatedCount.incrementAndGet();
             }
         } else {
             long startTime = System.currentTimeMillis();
@@ -92,7 +98,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
 
     @Override
     public Connection getCurrentConnection() {
-        Connection connection = this.currentConnection.get();
+        Connection connection = currentConnection.get();
         try {
             if (!this.databaseManager.isValidConnection(connection)) {
                 connection = this.getConnection();
@@ -105,9 +111,9 @@ public class ConnectionPoolImpl implements ConnectionPool {
 
     @Override
     public synchronized void releaseConn(Connection connection) throws SQLException {
-        logger.info("{} release connection: {}", Thread.currentThread().getName(), connection);
+        logger.info("{} release connection node: {}", Thread.currentThread().getName(), this.getDatabaseConfig().getNode());
         this.activeConnections.remove(connection);
-        this.currentConnection.remove();
+        currentConnection.remove();
         if (this.databaseManager.isValidConnection(connection)) {
             this.freeConnections.add(connection);
         } else {
@@ -118,26 +124,80 @@ public class ConnectionPoolImpl implements ConnectionPool {
 
     @Override
     public synchronized void destroy() {
-        currentConnection.remove();
+        try {
+            for (Connection freeConnection : this.freeConnections) {
+                freeConnection.close();
+            }
+            for (Connection activeConnection : this.activeConnections) {
+                activeConnection.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        this.activated.compareAndSet(true, false);
+        this.freeConnections.clear();
+        this.activeConnections.clear();
     }
 
     @Override
     public boolean isActive() {
-        return false;
+        return this.activated.get();
     }
 
     @Override
     public void checkPool() {
+        String node = this.databaseConfig.getNode();
+        ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(2, new BasicThreadFactory.Builder().namingPattern(node + "-schedule-pool-%d").daemon(true).build());
 
+        scheduledExecutorService.scheduleAtFixedRate(() -> {
+            logger.info("{} - free connection count: {}", node, this.getFreeNum());
+            logger.info("{} - activated connection count: {}", node, this.getActiveNum());
+        }, 1, 1, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(() -> {
+
+        }, 1, 5, TimeUnit.SECONDS);
     }
 
     @Override
     public int getActiveNum() {
-        return 0;
+        return this.activeConnections.size();
     }
 
     @Override
     public int getFreeNum() {
-        return 0;
+        return this.freeConnections.size();
+    }
+
+    @Override
+    public void pushToFreePool(Connection connection) {
+        this.freeConnections.add(connection);
+    }
+
+    @Override
+    public AbstractDatabaseConfig getDatabaseConfig() {
+        return this.databaseConfig;
+    }
+
+    class CheckFreePool extends TimerTask {
+        private ConnectionPool connectionPool;
+
+        public CheckFreePool(ConnectionPool connectionPool) {
+            this.connectionPool = connectionPool;
+        }
+
+        @Override
+        public void run() {
+            if (this.connectionPool != null && this.connectionPool.isActive()) {
+                AbstractDatabaseConfig config = this.connectionPool.getDatabaseConfig();
+                int totalConnection = this.connectionPool.getActiveNum() + this.connectionPool.getFreeNum();
+                int lackConnection = config.getPoolMiniSize() - totalConnection;
+                if (lackConnection > 0) {
+                    logger.info("{} - The database connection pool has {} connections that need to be supplemented ", config.getNode(), lackConnection);
+                    for (int index = 0; index < lackConnection; index++) {
+                        this.connectionPool.pushToFreePool(connectionPool.newConnection());
+                    }
+                }
+            }
+        }
     }
 }

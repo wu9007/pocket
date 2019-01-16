@@ -3,6 +3,7 @@ package org.homo.dbconnect.session;
 import org.homo.dbconnect.config.AbstractDatabaseConfig;
 import org.homo.dbconnect.constant.DatasourceDriverTypes;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,16 +17,16 @@ public class SessionFactory {
     }
 
     public static void register(AbstractDatabaseConfig databaseConfig) {
-        Session session;
         if (DatasourceDriverTypes.MYSQL_DRIVER.equals(databaseConfig.getDriverName()) || DatasourceDriverTypes.ORACLE_DRIVER.equals(databaseConfig.getDriverName())) {
-            session = new SessionImpl(databaseConfig);
+            Arrays.stream(databaseConfig.getSession().split(",")).forEach(name -> {
+                SESSION_POOL.put(name, new SessionImpl(databaseConfig));
+            });
         } else {
             throw new RuntimeException("I'm sorry about that I don't support this database now.");
         }
-        SESSION_POOL.put(databaseConfig.getDatabaseName(), session);
     }
 
-    public static Session getSession(String databaseName) {
-        return SESSION_POOL.get(databaseName);
+    public static Session getSession(String node) {
+        return SESSION_POOL.get(node);
     }
 }

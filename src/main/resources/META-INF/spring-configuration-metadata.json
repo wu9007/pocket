@@ -11,9 +11,9 @@
       "description": "database url."
     },
     {
-      "name": "datasource.mysql.databaseName",
+      "name": "datasource.mysql.node",
       "type": "java.lang.String",
-      "description": "database databaseName."
+      "description": "database node."
     },
     {
       "name": "datasource.mysql.driverName",
@@ -36,14 +36,34 @@
       "description": "database password."
     },
     {
+      "name": "datasource.mysql.poolMiniSize",
+      "type": "java.lang.Integer",
+      "description": "database poolMiniSize."
+    },
+    {
+      "name": "datasource.mysql.poolMaxSize",
+      "type": "java.lang.Integer",
+      "description": "database poolMaxSize."
+    },
+    {
+      "name": "datasource.mysql.timeout",
+      "type": "java.lang.Long",
+      "description": "database timeout."
+    },
+    {
+      "name": "datasource.mysql.session",
+      "type": "java.lang.String",
+      "description": "database session."
+    },
+    {
       "name": "datasource.oracle.url",
       "type": "java.lang.String",
       "description": "database url."
     },
     {
-      "name": "datasource.oracle.databaseName",
+      "name": "datasource.oracle.node",
       "type": "java.lang.String",
-      "description": "database databaseName."
+      "description": "database node."
     },
     {
       "name": "datasource.oracle.driverName",
@@ -64,6 +84,26 @@
       "name": "datasource.oracle.password",
       "type": "java.lang.String",
       "description": "database password."
+    },
+    {
+      "name": "datasource.oracle.poolMiniSize",
+      "type": "java.lang.Integer",
+      "description": "database poolMiniSize."
+    },
+    {
+      "name": "datasource.oracle.poolMaxSize",
+      "type": "java.lang.Integer",
+      "description": "database poolMaxSize."
+    },
+    {
+      "name": "datasource.oracle.timeout",
+      "type": "java.lang.Long",
+      "description": "database timeout."
+    },
+    {
+      "name": "datasource.oracle.session",
+      "type": "java.lang.String",
+      "description": "database session."
     }
   ]
 }

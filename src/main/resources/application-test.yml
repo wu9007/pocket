@@ -3,18 +3,26 @@ homo:
 datasource:
   mysql:
     url: jdbc:mysql://127.0.0.1:3306/homo?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8
-    databaseName: mysql
+    node: mysql
     driverName: com.mysql.cj.jdbc.Driver
     showSql: false
     user: root
     password: root
+    poolMiniSize: 10
+    poolMaxSize: 15
+    timeout: 100
+    session: mysql
   oracle:
     url: jdbc:mysql://127.0.0.1:3306/homo?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8
-    databaseName: oracle
+    node: oracle
     driverName: com.mysql.cj.jdbc.Driver
     showSql: true
     user: root
     password: root
+    poolMiniSize: 10
+    poolMaxSize: 15
+    timeout: 10000
+    session: oracle
 server:
   port: 8081
   servlet:

@@ -26,11 +26,11 @@ public class DatabaseManager {
     }
 
     public static DatabaseManager getInstance(AbstractDatabaseConfig config) {
-        DatabaseManager databaseManager = managerMap.get(config.getDatabaseName());
+        DatabaseManager databaseManager = managerMap.get(config.getNode());
         if (databaseManager == null) {
-            managerMap.put(config.getDatabaseName(), new DatabaseManager(config));
+            managerMap.put(config.getNode(), new DatabaseManager(config));
         }
-        return managerMap.get(config.getDatabaseName());
+        return managerMap.get(config.getNode());
     }
 
     Connection newConnection() {

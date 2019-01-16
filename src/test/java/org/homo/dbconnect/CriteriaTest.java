@@ -1,6 +1,7 @@
 package org.homo.dbconnect;
 
 import org.homo.Application;
+import org.homo.dbconnect.connect.ConnectionManager;
 import org.homo.dbconnect.criteria.Criteria;
 import org.homo.dbconnect.criteria.Restrictions;
 import org.homo.dbconnect.session.Session;
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author wujianchuan 2019/1/15

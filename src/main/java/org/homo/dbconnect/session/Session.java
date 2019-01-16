@@ -20,7 +20,7 @@ public interface Session {
     /**
      * 关闭数据库链接
      */
-    void close() throws SQLException;
+    void close();
 
     /**
      * 获取事务对象

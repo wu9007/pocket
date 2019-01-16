@@ -1,7 +1,7 @@
 package org.homo.dbconnect.session;
 
 import org.homo.core.model.BaseEntity;
-import org.homo.dbconnect.connect.ConnectionFactory;
+import org.homo.dbconnect.connect.ConnectionManager;
 import org.homo.dbconnect.annotation.Column;
 import org.homo.dbconnect.annotation.Entity;
 import org.homo.dbconnect.config.AbstractDatabaseConfig;
@@ -15,7 +15,6 @@ import org.homo.dbconnect.utils.HomoUuidGenerator;
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * @author wujianchuan 2019/1/1
@@ -28,14 +27,12 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public void open() {
-        this.connection = ConnectionFactory.getInstance().getConnection(databaseConfig);
-        this.logger.info("CONNECTION: open - {}", this.databaseConfig.getDatabaseName());
+        this.connection = ConnectionManager.getInstance().getConnection(databaseConfig);
     }
 
     @Override
-    public void close() throws SQLException {
-        this.connection.close();
-        this.logger.info("CONNECTION: close - {}", this.databaseConfig.getDatabaseName());
+    public void close() {
+        ConnectionManager.getInstance().closeConnection(this.databaseConfig.getNode(), this.connection);
     }
 
     @Override

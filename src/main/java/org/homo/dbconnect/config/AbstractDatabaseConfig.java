@@ -7,7 +7,7 @@ package org.homo.dbconnect.config;
 public abstract class AbstractDatabaseConfig {
 
     private String url;
-    private String databaseName;
+    private String node;
     private String driverName;
     private Boolean showSql;
     private String user;
@@ -17,6 +17,8 @@ public abstract class AbstractDatabaseConfig {
     private Integer poolMaxSize;
     private Long timeout;
 
+    private String session;
+
     public String getUrl() {
         return url;
     }
@@ -25,12 +27,12 @@ public abstract class AbstractDatabaseConfig {
         this.url = url;
     }
 
-    public String getDatabaseName() {
-        return databaseName;
+    public String getNode() {
+        return node;
     }
 
-    public void setDatabaseName(String databaseName) {
-        this.databaseName = databaseName;
+    public void setNode(String node) {
+        this.node = node;
     }
 
     public String getDriverName() {
@@ -87,5 +89,13 @@ public abstract class AbstractDatabaseConfig {
 
     public void setTimeout(Long timeout) {
         this.timeout = timeout;
+    }
+
+    public String getSession() {
+        return session;
+    }
+
+    public void setSession(String session) {
+        this.session = session;
     }
 }

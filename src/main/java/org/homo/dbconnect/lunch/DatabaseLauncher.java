@@ -1,6 +1,7 @@
 package org.homo.dbconnect.lunch;
 
 import org.homo.dbconnect.config.AbstractDatabaseConfig;
+import org.homo.dbconnect.connect.ConnectionManager;
 import org.homo.dbconnect.session.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -25,6 +26,8 @@ public class DatabaseLauncher implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        ConnectionManager connectionFactory = ConnectionManager.getInstance();
+        databaseConfigMap.forEach((key, value) -> connectionFactory.register(value));
         databaseConfigMap.forEach((key, value) -> SessionFactory.register(value));
     }
 }
