@@ -11,34 +11,59 @@ Little scaffold
 
 ## 多数据源配置
 **这里以MySQL数据库为例**
-### 配置类
-```java
-@Component
-@ConfigurationProperties(prefix = "datasource.mysql1")
-    public class MysqlConfig extends AbstractDatabaseConfig {
-}
 
-@Component
-@ConfigurationProperties(prefix = "datasource.mysql2")
-    public class MysqlConfig extends AbstractDatabaseConfig {
-}
-```
 ### 配置信息
 ```json
-datasource:
-  mysql:
-    url: jdbc:mysql://127.0.0.1:3306/homo1?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8
-    databaseName: mysql1
-    driverName: com.mysql.cj.jdbc.Driver
-    user: root
-    password: root
-  mysql:
-    url: jdbc:mysql://127.0.0.1:3306/homo2?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8
-    databaseName: mysql2
-    driverName: com.mysql.cj.jdbc.Driver
-    user: root
-    password: root
+pocket:
+  datasource:
+    node:
+      - url: jdbc:mysql://127.0.0.1:3306/homo?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8
+        nodeName: mysql-01
+        driverName: com.mysql.cj.jdbc.Driver
+        showSql: false
+        user: root
+        password: root
+        poolMiniSize: 10
+        poolMaxSize: 15
+        timeout: 1000
+        session: homo,user
+      - url: jdbc:mysql://127.0.0.1:3306/homo?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8
+        nodeName: mysql-01-02
+        driverName: com.mysql.cj.jdbc.Driver
+        showSql: true
+        user: root
+        password: root
+        poolMiniSize: 10
+        poolMaxSize: 15
+        timeout: 1000
+        session: order,commodity
 ```
+### 数据操作
+#### 获取数据库链接
+调用`ConnectionManager`的`getConnection(DatabaseNodeConfig databaseNodeConfig)`API即可从连接池中拿到一个闲置状态的数据库链接对象。
+看栗子：
+```java
+ConnectionManager.getInstance().getConnection(databaseNodeConfig);
+```
+#### 获取缓存对象
+通过`SessionFactory`的静态方法`Session getSession(String sessionName)`获取对象。
+#### 查询数据
+```java
+private Session session = SessionFactory.getSession("homo");
+session.open();
+private Transaction transaction = session.getTransaction();
+transaction.begin();
+
+Criteria criteria = this.session.creatCriteria(Order.class);
+criteria.add(Restrictions.like("code", "%A%"))
+        .add(Restrictions.ne("code", "A-002"))
+        .add(Restrictions.or(Restrictions.gt("price", 13), Restrictions.lt("price", 12.58)));
+List orderList = criteria.list();
+
+transaction.commit();
+session.close();
+```
+
 ## 实体类规范
 - 继承`BaseEntity`抽象类
 - 类注解`@Entity`，`history` 属性控制历史保存功能是否开启，`table` 对应代表对应数据库表
