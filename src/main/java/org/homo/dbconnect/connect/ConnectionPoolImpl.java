@@ -1,7 +1,7 @@
 package org.homo.dbconnect.connect;
 
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.homo.dbconnect.config.AbstractDatabaseConfig;
+import org.homo.dbconnect.config.DatabaseNodeConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,18 +24,18 @@ public class ConnectionPoolImpl implements ConnectionPool {
     private AtomicBoolean activated = new AtomicBoolean(false);
     private AtomicInteger activatedCount = new AtomicInteger(0);
 
-    private AbstractDatabaseConfig databaseConfig;
+    private DatabaseNodeConfig databaseConfig;
     private DatabaseManager databaseManager;
     private LinkedList<Connection> freeConnections = new LinkedList<>();
     private LinkedList<Connection> activeConnections = new LinkedList<>();
     private ThreadLocal<Connection> currentConnection = new ThreadLocal<>();
 
-    private ConnectionPoolImpl(AbstractDatabaseConfig databaseConfig) {
+    private ConnectionPoolImpl(DatabaseNodeConfig databaseConfig) {
         this.databaseConfig = databaseConfig;
         this.databaseManager = DatabaseManager.getInstance(this.databaseConfig);
     }
 
-    public static ConnectionPool newInstance(AbstractDatabaseConfig databaseConfig) {
+    public static ConnectionPool newInstance(DatabaseNodeConfig databaseConfig) {
         ConnectionPool instance = new ConnectionPoolImpl(databaseConfig);
         instance.init();
         return instance;
@@ -111,7 +111,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
 
     @Override
     public synchronized void releaseConn(Connection connection) throws SQLException {
-        logger.info("{} release connection node: {}", Thread.currentThread().getName(), this.getDatabaseConfig().getNode());
+        logger.info("{} release connection node: {}", Thread.currentThread().getName(), this.getDatabaseConfig().getNodeName());
         this.activeConnections.remove(connection);
         currentConnection.remove();
         if (this.databaseManager.isValidConnection(connection)) {
@@ -146,7 +146,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
 
     @Override
     public void checkPool() {
-        String node = this.databaseConfig.getNode();
+        String node = this.databaseConfig.getNodeName();
         ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(2, new BasicThreadFactory.Builder().namingPattern(node + "-schedule-pool-%d").daemon(true).build());
 
         scheduledExecutorService.scheduleAtFixedRate(() -> {
@@ -174,7 +174,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
     }
 
     @Override
-    public AbstractDatabaseConfig getDatabaseConfig() {
+    public DatabaseNodeConfig getDatabaseConfig() {
         return this.databaseConfig;
     }
 
@@ -188,11 +188,11 @@ public class ConnectionPoolImpl implements ConnectionPool {
         @Override
         public void run() {
             if (this.connectionPool != null && this.connectionPool.isActive()) {
-                AbstractDatabaseConfig config = this.connectionPool.getDatabaseConfig();
+                DatabaseNodeConfig config = this.connectionPool.getDatabaseConfig();
                 int totalConnection = this.connectionPool.getActiveNum() + this.connectionPool.getFreeNum();
                 int lackConnection = config.getPoolMiniSize() - totalConnection;
                 if (lackConnection > 0) {
-                    logger.info("{} - The database connection pool has {} connections that need to be supplemented ", config.getNode(), lackConnection);
+                    logger.info("{} - The database connection pool has {} connections that need to be supplemented ", config.getNodeName(), lackConnection);
                     for (int index = 0; index < lackConnection; index++) {
                         this.connectionPool.pushToFreePool(connectionPool.newConnection());
                     }

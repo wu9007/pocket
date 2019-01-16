@@ -1,13 +1,13 @@
 package org.homo.dbconnect.config;
 
+
 /**
  * @author wujianchuan 2018/12/31
  */
-
-public abstract class AbstractDatabaseConfig {
+public class DatabaseNodeConfig {
 
     private String url;
-    private String node;
+    private String nodeName;
     private String driverName;
     private Boolean showSql;
     private String user;
@@ -27,12 +27,12 @@ public abstract class AbstractDatabaseConfig {
         this.url = url;
     }
 
-    public String getNode() {
-        return node;
+    public String getNodeName() {
+        return nodeName;
     }
 
-    public void setNode(String node) {
-        this.node = node;
+    public void setNodeName(String nodeName) {
+        this.nodeName = nodeName;
     }
 
     public String getDriverName() {

@@ -1,7 +1,7 @@
 package org.homo.dbconnect;
 
 import org.homo.Application;
-import org.homo.dbconnect.config.AbstractDatabaseConfig;
+import org.homo.dbconnect.config.DatabaseConfig;
 import org.homo.dbconnect.connect.ConnectionManager;
 import org.junit.After;
 import org.junit.Before;
@@ -12,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.sql.SQLException;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -25,7 +24,7 @@ public class ConnectionTest {
     private long start;
 
     @Autowired
-    List<AbstractDatabaseConfig> databaseConfigs;
+    DatabaseConfig databaseConfigs;
 
     @Before
     public void setup() {
@@ -44,7 +43,7 @@ public class ConnectionTest {
             Thread thread = new Thread(() -> {
                 try {
                     countDownLatch.await();
-                    ConnectionManager.getInstance().getConnection(databaseConfigs.get(0));
+                    ConnectionManager.getInstance().getConnection(databaseConfigs.getNode().get(0));
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

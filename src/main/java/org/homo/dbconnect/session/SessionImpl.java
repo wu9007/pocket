@@ -4,7 +4,7 @@ import org.homo.core.model.BaseEntity;
 import org.homo.dbconnect.connect.ConnectionManager;
 import org.homo.dbconnect.annotation.Column;
 import org.homo.dbconnect.annotation.Entity;
-import org.homo.dbconnect.config.AbstractDatabaseConfig;
+import org.homo.dbconnect.config.DatabaseNodeConfig;
 import org.homo.dbconnect.criteria.Criteria;
 import org.homo.dbconnect.criteria.CriteriaImpl;
 import org.homo.dbconnect.criteria.Restrictions;
@@ -21,18 +21,18 @@ import java.sql.ResultSet;
  */
 public class SessionImpl extends AbstractSession {
 
-    SessionImpl(AbstractDatabaseConfig databaseConfig) {
-        super(databaseConfig);
+    SessionImpl(DatabaseNodeConfig databaseNodeConfig) {
+        super(databaseNodeConfig);
     }
 
     @Override
     public void open() {
-        this.connection = ConnectionManager.getInstance().getConnection(databaseConfig);
+        this.connection = ConnectionManager.getInstance().getConnection(databaseNodeConfig);
     }
 
     @Override
     public void close() {
-        ConnectionManager.getInstance().closeConnection(this.databaseConfig.getNode(), this.connection);
+        ConnectionManager.getInstance().closeConnection(this.databaseNodeConfig.getNodeName(), this.connection);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public Criteria creatCriteria(Class clazz) {
-        return new CriteriaImpl(clazz, this.connection, this.databaseConfig);
+        return new CriteriaImpl(clazz, this.connection, this.databaseNodeConfig);
     }
 
     @Override

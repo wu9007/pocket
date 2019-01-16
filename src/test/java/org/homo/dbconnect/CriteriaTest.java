@@ -19,7 +19,6 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * @author wujianchuan 2019/1/15
@@ -35,7 +34,7 @@ public class CriteriaTest {
     @Before
     public void setup() throws SQLException {
         start = System.currentTimeMillis();
-        this.session = SessionFactory.getSession("oracle");
+        this.session = SessionFactory.getSession("homo");
         this.session.open();
         this.transaction = session.getTransaction();
         this.transaction.begin();

@@ -3,7 +3,7 @@ package org.homo.dbconnect.criteria;
 import org.homo.core.model.BaseEntity;
 import org.homo.dbconnect.annotation.Entity;
 import org.homo.dbconnect.annotation.OneToMany;
-import org.homo.dbconnect.config.AbstractDatabaseConfig;
+import org.homo.dbconnect.config.DatabaseNodeConfig;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
-    public CriteriaImpl(Class clazz, Connection connection, AbstractDatabaseConfig databaseConfig) {
+    public CriteriaImpl(Class clazz, Connection connection, DatabaseNodeConfig databaseConfig) {
         super(clazz, connection, databaseConfig);
     }
 

@@ -1,7 +1,7 @@
 package org.homo.dbconnect.criteria;
 
 import org.homo.dbconnect.annotation.Entity;
-import org.homo.dbconnect.config.AbstractDatabaseConfig;
+import org.homo.dbconnect.config.DatabaseNodeConfig;
 import org.homo.dbconnect.utils.FieldTypeStrategy;
 import org.homo.dbconnect.utils.ReflectUtils;
 import org.slf4j.Logger;
@@ -28,7 +28,7 @@ abstract class AbstractCriteria {
 
     Class clazz;
     Connection connection;
-    AbstractDatabaseConfig databaseConfig;
+    DatabaseNodeConfig databaseConfig;
 
     Field[] fields;
     Field[] childrenFields;
@@ -36,7 +36,7 @@ abstract class AbstractCriteria {
     List<Restrictions> restrictionsList = new ArrayList<>();
     StringBuilder sql = new StringBuilder("SELECT ");
 
-    AbstractCriteria(Class clazz, Connection connection, AbstractDatabaseConfig databaseConfig) {
+    AbstractCriteria(Class clazz, Connection connection, DatabaseNodeConfig databaseConfig) {
         this.clazz = clazz;
         this.connection = connection;
         this.databaseConfig = databaseConfig;

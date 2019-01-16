@@ -1,6 +1,7 @@
 package org.homo.dbconnect.connect;
 
-import org.homo.dbconnect.config.AbstractDatabaseConfig;
+import org.homo.dbconnect.config.DatabaseConfig;
+import org.homo.dbconnect.config.DatabaseNodeConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,14 +18,16 @@ public class ConnectionManager {
     private static ConnectionManager ourInstance = new ConnectionManager();
     private Map<String, ConnectionPool> connectionPoolMap = new ConcurrentHashMap<>(4);
 
-    public synchronized void register(AbstractDatabaseConfig databaseConfig) {
-        ConnectionPool connectionPool = ConnectionPoolImpl.newInstance(databaseConfig);
-        boolean success = verify(databaseConfig);
-        if (success) {
-            this.connectionPoolMap.put(databaseConfig.getNode(), connectionPool);
-        } else {
-            throw new NullPointerException("Configuration error");
-        }
+    public synchronized void register(DatabaseConfig databaseConfig) {
+        databaseConfig.getNode().forEach(databaseNode -> {
+            ConnectionPool connectionPool = ConnectionPoolImpl.newInstance(databaseNode);
+            boolean success = verify(databaseNode);
+            if (success) {
+                this.connectionPoolMap.put(databaseNode.getNodeName(), connectionPool);
+            } else {
+                throw new NullPointerException("Configuration error");
+            }
+        });
     }
 
     private ConnectionManager() {
@@ -34,8 +37,8 @@ public class ConnectionManager {
         return ourInstance;
     }
 
-    public Connection getConnection(AbstractDatabaseConfig databaseConfig) {
-        return this.connectionPoolMap.get(databaseConfig.getNode()).getConnection();
+    public Connection getConnection(DatabaseNodeConfig databaseConfig) {
+        return this.connectionPoolMap.get(databaseConfig.getNodeName()).getConnection();
     }
 
     public void closeConnection(String node, Connection connection) {
@@ -59,8 +62,8 @@ public class ConnectionManager {
         logger.info("Database pool was destroy");
     }
 
-    private static boolean verify(AbstractDatabaseConfig config) {
-        if (!config.getNode().isEmpty()) {
+    private static boolean verify(DatabaseNodeConfig config) {
+        if (!config.getNodeName().isEmpty()) {
             if (!config.getUrl().isEmpty()) {
                 if (!config.getDriverName().isEmpty()) {
                     if (!config.getUser().isEmpty()) {

@@ -1,6 +1,6 @@
 package org.homo.dbconnect.connect;
 
-import org.homo.dbconnect.config.AbstractDatabaseConfig;
+import org.homo.dbconnect.config.DatabaseNodeConfig;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -87,5 +87,5 @@ interface ConnectionPool {
      *
      * @return 数据库配置对象
      */
-    AbstractDatabaseConfig getDatabaseConfig();
+    DatabaseNodeConfig getDatabaseConfig();
 }

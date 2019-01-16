@@ -3,7 +3,7 @@ package org.homo.dbconnect.session;
 import org.homo.dbconnect.annotation.ManyToOne;
 import org.homo.dbconnect.annotation.OneToMany;
 import org.homo.core.model.BaseEntity;
-import org.homo.dbconnect.config.AbstractDatabaseConfig;
+import org.homo.dbconnect.config.DatabaseNodeConfig;
 import org.homo.dbconnect.utils.FieldTypeStrategy;
 import org.homo.dbconnect.utils.ReflectUtils;
 import org.slf4j.Logger;
@@ -23,19 +23,19 @@ import static org.homo.dbconnect.utils.ReflectUtils.FIND_PARENT;
  */
 abstract class AbstractSession implements Session {
 
-    Logger logger = LoggerFactory.getLogger(AbstractSession.class);
+    private Logger logger = LoggerFactory.getLogger(AbstractSession.class);
 
     Connection connection;
-    AbstractDatabaseConfig databaseConfig;
+    DatabaseNodeConfig databaseNodeConfig;
     FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
     ReflectUtils reflectUtils = ReflectUtils.getInstance();
 
-    AbstractSession(AbstractDatabaseConfig databaseConfig) {
-        this.databaseConfig = databaseConfig;
+    AbstractSession(DatabaseNodeConfig databaseNodeConfig) {
+        this.databaseNodeConfig = databaseNodeConfig;
     }
 
     void showSql(String sql) {
-        if (this.databaseConfig.getShowSql()) {
+        if (this.databaseNodeConfig.getShowSql()) {
             this.logger.info("SQL: {}", sql);
         }
     }

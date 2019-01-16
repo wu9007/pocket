@@ -1,6 +1,6 @@
 package org.homo.dbconnect.session;
 
-import org.homo.dbconnect.config.AbstractDatabaseConfig;
+import org.homo.dbconnect.config.DatabaseConfig;
 import org.homo.dbconnect.constant.DatasourceDriverTypes;
 
 import java.util.Arrays;
@@ -16,17 +16,19 @@ public class SessionFactory {
     private SessionFactory() {
     }
 
-    public static void register(AbstractDatabaseConfig databaseConfig) {
-        if (DatasourceDriverTypes.MYSQL_DRIVER.equals(databaseConfig.getDriverName()) || DatasourceDriverTypes.ORACLE_DRIVER.equals(databaseConfig.getDriverName())) {
-            Arrays.stream(databaseConfig.getSession().split(",")).forEach(name -> {
-                SESSION_POOL.put(name, new SessionImpl(databaseConfig));
-            });
-        } else {
-            throw new RuntimeException("I'm sorry about that I don't support this database now.");
-        }
+    public static void register(DatabaseConfig databaseConfig) {
+        databaseConfig.getNode().forEach(databaseNodeConfig -> {
+            if (DatasourceDriverTypes.MYSQL_DRIVER.equals(databaseNodeConfig.getDriverName()) || DatasourceDriverTypes.ORACLE_DRIVER.equals(databaseNodeConfig.getDriverName())) {
+                Arrays.stream(databaseNodeConfig.getSession().split(",")).forEach(name -> {
+                    SESSION_POOL.put(name, new SessionImpl(databaseNodeConfig));
+                });
+            } else {
+                throw new RuntimeException("I'm sorry about that I don't support this database now.");
+            }
+        });
     }
 
-    public static Session getSession(String node) {
-        return SESSION_POOL.get(node);
+    public static Session getSession(String sessionName) {
+        return SESSION_POOL.get(sessionName);
     }
 }

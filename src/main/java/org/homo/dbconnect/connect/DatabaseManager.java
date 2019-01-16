@@ -1,6 +1,6 @@
 package org.homo.dbconnect.connect;
 
-import org.homo.dbconnect.config.AbstractDatabaseConfig;
+import org.homo.dbconnect.config.DatabaseNodeConfig;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,10 +13,10 @@ import java.util.Map;
  */
 public class DatabaseManager {
     private static Map<String, DatabaseManager> managerMap = new HashMap<>(2);
-    private AbstractDatabaseConfig config;
+    private DatabaseNodeConfig config;
     private static Connection conn = null;
 
-    private DatabaseManager(AbstractDatabaseConfig config) {
+    private DatabaseManager(DatabaseNodeConfig config) {
         this.config = config;
         try {
             Class.forName(config.getDriverName());
@@ -25,12 +25,12 @@ public class DatabaseManager {
         }
     }
 
-    public static DatabaseManager getInstance(AbstractDatabaseConfig config) {
-        DatabaseManager databaseManager = managerMap.get(config.getNode());
+    public static DatabaseManager getInstance(DatabaseNodeConfig config) {
+        DatabaseManager databaseManager = managerMap.get(config.getNodeName());
         if (databaseManager == null) {
-            managerMap.put(config.getNode(), new DatabaseManager(config));
+            managerMap.put(config.getNodeName(), new DatabaseManager(config));
         }
-        return managerMap.get(config.getNode());
+        return managerMap.get(config.getNodeName());
     }
 
     Connection newConnection() {

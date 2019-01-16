@@ -1,4 +1,11 @@
 {
+  "groups": [
+    {
+      "name": "datasource",
+      "type": "org.homo.dbconnect.config.DatabaseConfig",
+      "sourceType": "org.homo.dbconnect.config.DatabaseConfig"
+    }
+  ],
   "properties": [
     {
       "name": "homo.describe",
@@ -6,104 +13,9 @@
       "description": "service describe."
     },
     {
-      "name": "datasource.mysql.url",
-      "type": "java.lang.String",
-      "description": "database url."
-    },
-    {
-      "name": "datasource.mysql.node",
-      "type": "java.lang.String",
-      "description": "database node."
-    },
-    {
-      "name": "datasource.mysql.driverName",
-      "type": "java.lang.String",
-      "description": "database driverName."
-    },
-    {
-      "name": "datasource.mysql.showSql",
-      "type": "java.lang.Boolean",
-      "description": "database show sql."
-    },
-    {
-      "name": "datasource.mysql.user",
-      "type": "java.lang.String",
-      "description": "database user."
-    },
-    {
-      "name": "datasource.mysql.password",
-      "type": "java.lang.String",
-      "description": "database password."
-    },
-    {
-      "name": "datasource.mysql.poolMiniSize",
-      "type": "java.lang.Integer",
-      "description": "database poolMiniSize."
-    },
-    {
-      "name": "datasource.mysql.poolMaxSize",
-      "type": "java.lang.Integer",
-      "description": "database poolMaxSize."
-    },
-    {
-      "name": "datasource.mysql.timeout",
-      "type": "java.lang.Long",
-      "description": "database timeout."
-    },
-    {
-      "name": "datasource.mysql.session",
-      "type": "java.lang.String",
-      "description": "database session."
-    },
-    {
-      "name": "datasource.oracle.url",
-      "type": "java.lang.String",
-      "description": "database url."
-    },
-    {
-      "name": "datasource.oracle.node",
-      "type": "java.lang.String",
-      "description": "database node."
-    },
-    {
-      "name": "datasource.oracle.driverName",
-      "type": "java.lang.String",
-      "description": "database driverName."
-    },
-    {
-      "name": "datasource.oracle.showSql",
-      "type": "java.lang.Boolean",
-      "description": "database show sql."
-    },
-    {
-      "name": "datasource.oracle.user",
-      "type": "java.lang.String",
-      "description": "database user."
-    },
-    {
-      "name": "datasource.oracle.password",
-      "type": "java.lang.String",
-      "description": "database password."
-    },
-    {
-      "name": "datasource.oracle.poolMiniSize",
-      "type": "java.lang.Integer",
-      "description": "database poolMiniSize."
-    },
-    {
-      "name": "datasource.oracle.poolMaxSize",
-      "type": "java.lang.Integer",
-      "description": "database poolMaxSize."
-    },
-    {
-      "name": "datasource.oracle.timeout",
-      "type": "java.lang.Long",
-      "description": "database timeout."
-    },
-    {
-      "name": "datasource.oracle.session",
-      "type": "java.lang.String",
-      "description": "database session."
+      "name": "datasource.node",
+      "type": "java.util.List<org.homo.dbconnect.config.DatabaseNodeConfig>",
+      "description": "java.util.List<org.homo.dbconnect.config.DatabaseNode>."
     }
   ]
 }
