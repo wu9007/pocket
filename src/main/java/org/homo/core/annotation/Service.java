@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
 @Documented
 @org.springframework.stereotype.Service
 public @interface Service {
-    String database();
+    String session();
 
     @AliasFor(annotation = Component.class)
     String value() default "";

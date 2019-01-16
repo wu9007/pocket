@@ -30,7 +30,7 @@ public abstract class AbstractService {
 
     public void installTransaction() {
         Service service = this.getClass().getAnnotation(Service.class);
-        this.session = SessionFactory.getSession(service.database());
+        this.session = SessionFactory.getSession(service.session());
     }
 
     public Object handle(BiFunction<HomoRequest, ApplicationContext, Object> function, HomoRequest request) throws SQLException {

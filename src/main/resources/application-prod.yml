@@ -27,8 +27,3 @@ server:
   port: 80
   servlet:
     context-path: /homo
-spring:
-  cache:
-    cache-names: homo
-    caffeine:
-      spec: maximumSize=500,expireAfterAccess=600s

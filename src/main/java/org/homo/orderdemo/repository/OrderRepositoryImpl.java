@@ -4,12 +4,11 @@ import org.homo.authority.model.User;
 import org.homo.core.annotation.Repository;
 import org.homo.orderdemo.model.Order;
 import org.homo.core.repository.AbstractRepository;
-import org.springframework.cache.annotation.Cacheable;
 
 /**
  * @author wujianchuan 2018/12/26
  */
-@Repository(database = "mysql")
+@Repository(session = "order")
 public class OrderRepositoryImpl extends AbstractRepository<Order> implements OrderRepository {
 
     @Override
@@ -28,7 +27,6 @@ public class OrderRepositoryImpl extends AbstractRepository<Order> implements Or
     }
 
     @Override
-    @Cacheable(value = "homo", key = "#root.method.getReturnType().getName()+#uuid")
     public Order findOne(long uuid) throws Exception {
         return (Order) session.findOne(Order.class, uuid);
     }
