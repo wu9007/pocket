@@ -2,7 +2,7 @@ package org.homo.core.repository;
 
 
 import org.homo.authority.model.User;
-import org.homo.dbconnect.annotation.Entity;
+import org.homo.pocket.annotation.Entity;
 import org.homo.core.model.BaseEntity;
 import org.homo.core.constant.LogicOperateTypes;
 import org.homo.core.evens.RepositoryEven;

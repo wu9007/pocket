@@ -1,12 +1,11 @@
 package org.homo.dbconnect;
 
 import org.homo.Application;
-import org.homo.dbconnect.connect.ConnectionManager;
-import org.homo.dbconnect.criteria.Criteria;
-import org.homo.dbconnect.criteria.Restrictions;
-import org.homo.dbconnect.session.Session;
-import org.homo.dbconnect.session.SessionFactory;
-import org.homo.dbconnect.session.Transaction;
+import org.homo.pocket.criteria.Criteria;
+import org.homo.pocket.criteria.Restrictions;
+import org.homo.pocket.session.Session;
+import org.homo.pocket.session.SessionFactory;
+import org.homo.pocket.session.Transaction;
 import org.homo.orderdemo.model.Order;
 import org.junit.After;
 import org.junit.Before;

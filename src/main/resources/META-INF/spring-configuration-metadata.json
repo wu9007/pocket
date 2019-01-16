@@ -1,9 +1,9 @@
 {
   "groups": [
     {
-      "name": "datasource",
-      "type": "org.homo.dbconnect.config.DatabaseConfig",
-      "sourceType": "org.homo.dbconnect.config.DatabaseConfig"
+      "name": "pocket.datasource",
+      "type": "org.homo.pocket.config.DatabaseConfig",
+      "sourceType": "org.homo.pocket.config.DatabaseConfig"
     }
   ],
   "properties": [
@@ -13,8 +13,8 @@
       "description": "service describe."
     },
     {
-      "name": "datasource.node",
-      "type": "java.util.List<org.homo.dbconnect.config.DatabaseNodeConfig>",
+      "name": "pocket.datasource.node",
+      "type": "java.util.List<org.homo.pocket.config.DatabaseNodeConfig>",
       "description": "java.util.List<org.homo.dbconnect.config.DatabaseNode>."
     }
   ]

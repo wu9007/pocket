@@ -1,8 +1,8 @@
 package org.homo.dbconnect;
 
 import org.homo.Application;
-import org.homo.dbconnect.config.DatabaseConfig;
-import org.homo.dbconnect.connect.ConnectionManager;
+import org.homo.pocket.config.DatabaseConfig;
+import org.homo.pocket.connect.ConnectionManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

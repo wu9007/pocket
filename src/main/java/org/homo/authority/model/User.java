@@ -1,7 +1,7 @@
 package org.homo.authority.model;
 
-import org.homo.dbconnect.annotation.Column;
-import org.homo.dbconnect.annotation.Entity;
+import org.homo.pocket.annotation.Column;
+import org.homo.pocket.annotation.Entity;
 import org.homo.core.model.BaseEntity;
 
 /**

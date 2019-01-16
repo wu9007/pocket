@@ -2,7 +2,7 @@ package org.homo.core.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.homo.dbconnect.annotation.Column;
+import org.homo.pocket.annotation.Column;
 
 import java.io.Serializable;
 

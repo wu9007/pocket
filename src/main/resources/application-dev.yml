@@ -1,27 +1,28 @@
 homo:
   describe: this's a dev homo
-datasource:
-  node:
-    - url: jdbc:mysql://127.0.0.1:3306/homo?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8
-      nodeName: mysql-01
-      driverName: com.mysql.cj.jdbc.Driver
-      showSql: false
-      user: root
-      password: root
-      poolMiniSize: 10
-      poolMaxSize: 15
-      timeout: 1000
-      session: homo,user
-    - url: jdbc:mysql://127.0.0.1:3306/homo?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8
-      nodeName: mysql-01-02
-      driverName: com.mysql.cj.jdbc.Driver
-      showSql: true
-      user: root
-      password: root
-      poolMiniSize: 10
-      poolMaxSize: 15
-      timeout: 1000
-      session: order,commodity
+pocket:
+  datasource:
+    node:
+      - url: jdbc:mysql://127.0.0.1:3306/homo?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8
+        nodeName: mysql-01
+        driverName: com.mysql.cj.jdbc.Driver
+        showSql: false
+        user: root
+        password: root
+        poolMiniSize: 10
+        poolMaxSize: 15
+        timeout: 1000
+        session: homo,user
+      - url: jdbc:mysql://127.0.0.1:3306/homo?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8
+        nodeName: mysql-01-02
+        driverName: com.mysql.cj.jdbc.Driver
+        showSql: true
+        user: root
+        password: root
+        poolMiniSize: 10
+        poolMaxSize: 15
+        timeout: 1000
+        session: order,commodity
 server:
   port: 8080
   servlet:
