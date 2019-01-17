@@ -15,6 +15,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  */
 @Configuration
 public class BenchCacheConfig {
+
     @Bean
     @ConfigurationProperties(prefix = "pocket.cache.bench")
     public RedisStandaloneConfiguration benchRedisConfig() {
@@ -29,9 +30,13 @@ public class BenchCacheConfig {
 
     @Bean
     @ConditionalOnBean(name = "benchRedisConnectionFactory")
-    public RedisTemplate<String, String> benchRedisTemplate(@Qualifier(value = "benchRedisConnectionFactory") LettuceConnectionFactory benchRedisConnectionFactory) {
-        StringRedisTemplate template = new StringRedisTemplate();
-        template.setConnectionFactory(benchRedisConnectionFactory);
-        return template;
+    public StringRedisTemplate stringBenchRedisTemplate(@Qualifier(value = "benchRedisConnectionFactory") LettuceConnectionFactory benchRedisConnectionFactory) {
+        return CacheTemplateSerializer.createStringTemplate(benchRedisConnectionFactory);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "benchRedisConnectionFactory")
+    public RedisTemplate<String, Object> benchRedisTemplate(@Qualifier(value = "benchRedisConnectionFactory") LettuceConnectionFactory benchRedisConnectionFactory) {
+        return CacheTemplateSerializer.createObjectTemplate(benchRedisConnectionFactory);
     }
 }

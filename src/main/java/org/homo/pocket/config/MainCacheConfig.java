@@ -15,6 +15,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  */
 @Configuration
 public class MainCacheConfig {
+
     @Bean
     @Primary
     @ConfigurationProperties(prefix = "pocket.cache.main")
@@ -30,10 +31,15 @@ public class MainCacheConfig {
     }
 
     @Bean
+    @Primary
     @ConditionalOnBean(name = "mainRedisConnectionFactory")
-    public RedisTemplate<String, String> mainRedisTemplate(LettuceConnectionFactory mainRedisConnectionFactory) {
-        StringRedisTemplate template = new StringRedisTemplate();
-        template.setConnectionFactory(mainRedisConnectionFactory);
-        return template;
+    public StringRedisTemplate mainStringRedisTemplate(LettuceConnectionFactory mainRedisConnectionFactory) {
+        return CacheTemplateSerializer.createStringTemplate(mainRedisConnectionFactory);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "mainRedisConnectionFactory")
+    public RedisTemplate<String, Object> mainRedisTemplate(LettuceConnectionFactory mainRedisConnectionFactory) {
+        return CacheTemplateSerializer.createObjectTemplate(mainRedisConnectionFactory);
     }
 }
