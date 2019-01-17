@@ -1,7 +1,7 @@
 {
   "groups": [
     {
-      "name": "pocket.datasource",
+      "name": "pocket",
       "type": "org.homo.pocket.config.DatabaseConfig",
       "sourceType": "org.homo.pocket.config.DatabaseConfig"
     }
@@ -16,6 +16,36 @@
       "name": "pocket.datasource.node",
       "type": "java.util.List<org.homo.pocket.config.DatabaseNodeConfig>",
       "description": "java.util.List<org.homo.dbconnect.config.DatabaseNode>."
+    },
+    {
+      "name": "pocket.cache.main",
+      "type": "org.homo.pocket.config.CacheConfig",
+      "description": "main cache."
+    },
+    {
+      "name": "pocket.cache.main.hostName",
+      "type": "java.lang.String",
+      "description": "main cache hostName."
+    },
+    {
+      "name": "pocket.cache.main.password",
+      "type": "java.lang.String",
+      "description": "main cache password."
+    },
+    {
+      "name": "pocket.cache.bench",
+      "type": "org.homo.pocket.config.CacheConfig",
+      "description": "bak cache."
+    },
+    {
+      "name": "pocket.cache.bench.hostName",
+      "type": "java.lang.String",
+      "description": "bench cache hostName."
+    },
+    {
+      "name": "pocket.cache.bench.password",
+      "type": "java.lang.String",
+      "description": "bench cache password."
     }
   ]
 }
