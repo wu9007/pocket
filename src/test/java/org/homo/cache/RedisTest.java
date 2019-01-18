@@ -29,10 +29,10 @@ public class RedisTest {
     private Logger logger = LoggerFactory.getLogger(RedisTest.class);
 
     @Autowired
-    RedisTemplate<String, Object> mainRedisTemplate;
+    RedisTemplate<String, Object> baseRedisTemplate;
     @Autowired
-    @Qualifier(value = "stringBenchRedisTemplate")
-    StringRedisTemplate stringBenchRedisTemplate;
+    @Qualifier(value = "logicStringRedisTemplate")
+    StringRedisTemplate logicStringRedisTemplate;
     @Autowired
     private CacheUtils cache;
 
@@ -46,10 +46,10 @@ public class RedisTest {
 
     @Test
     public void test1() {
-        mainRedisTemplate.opsForValue().set("session", "123456");
-        stringBenchRedisTemplate.opsForValue().set("session", "654321");
-        logger.info((String) mainRedisTemplate.opsForValue().get("session"));
-        logger.info(stringBenchRedisTemplate.opsForValue().get("session"));
+        baseRedisTemplate.opsForValue().set("session", "123456");
+        logicStringRedisTemplate.opsForValue().set("session", "654321");
+        logger.info((String) baseRedisTemplate.opsForValue().get("session"));
+        logger.info(logicStringRedisTemplate.opsForValue().get("session"));
     }
 
     @Test
@@ -65,5 +65,16 @@ public class RedisTest {
         Order cacheOrder = (Order) cache.getObj("order");
         logger.info(String.valueOf(cacheOrder.getCode()));
         logger.info(String.valueOf(cache.exists("order")));
+    }
+
+    @Test
+    public void test4() {
+        cache.delete(this.getClass().getName());
+    }
+
+    @Test
+    public void test5() {
+        cache.set("a", "a");
+        cache.getValue("a");
     }
 }

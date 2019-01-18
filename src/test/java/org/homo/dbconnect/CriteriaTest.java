@@ -43,7 +43,7 @@ public class CriteriaTest {
     public void destroy() throws SQLException {
         this.transaction.commit();
         this.session.close();
-        System.out.println("耗时" + ((double) (System.currentTimeMillis() - this.start)) / 1000 + "秒");
+        System.out.println("总耗时" + ((double) (System.currentTimeMillis() - this.start)) / 1000 + "秒");
     }
 
     @Test
@@ -98,5 +98,30 @@ public class CriteriaTest {
         criteria.add(Restrictions.equ("uuid", 11L));
         Order order = (Order) criteria.unique(true);
         System.out.println(order.getCommodities().size());
+    }
+
+    @Test
+    public void test7() throws Exception {
+        long s1 = System.currentTimeMillis();
+        Order order = (Order) this.session.findOne(Order.class, 11L);
+        long e1 = System.currentTimeMillis();
+        System.out.println(e1 - s1 + "------" + order.getCode());
+
+        long s2 = System.currentTimeMillis();
+        Order order1 = (Order) this.session.findOne(Order.class, 11L);
+        long e2 = System.currentTimeMillis();
+        System.out.println(e2 - s2 + "------" + order1.getCode());
+
+
+        long s3 = System.currentTimeMillis();
+        Order order2 = (Order) this.session.findOne(Order.class, 11L);
+        long e3 = System.currentTimeMillis();
+        System.out.println(e3 - s3 + "------" + order2.getCode());
+
+        this.session.removeCache(order);
+        long s4 = System.currentTimeMillis();
+        Order order4 = (Order) this.session.findOne(Order.class, 11L);
+        long e4 = System.currentTimeMillis();
+        System.out.println(e4 - s4 + "------" + order4.getCode());
     }
 }

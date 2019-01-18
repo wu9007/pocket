@@ -24,10 +24,10 @@ pocket:
         timeout: 1000
         session: order,commodity
   cache:
-    main:
+    logic:
       hostName: 172.0.66.105
       password: tsxdtsxd
-    bench:
+    base:
       hostName: 127.0.0.1
 server:
   port: 8081

@@ -4,6 +4,7 @@ import org.homo.pocket.annotation.ManyToOne;
 import org.homo.pocket.annotation.OneToMany;
 import org.homo.pocket.model.BaseEntity;
 import org.homo.pocket.config.DatabaseNodeConfig;
+import org.homo.pocket.utils.CacheUtils;
 import org.homo.pocket.utils.FieldTypeStrategy;
 import org.homo.pocket.utils.ReflectUtils;
 import org.slf4j.Logger;
@@ -25,14 +26,18 @@ abstract class AbstractSession implements Session {
 
     private Logger logger = LoggerFactory.getLogger(AbstractSession.class);
 
+    DatabaseNodeConfig databaseNodeConfig;
+    String sessionName;
     Connection connection;
     Transaction transaction;
-    DatabaseNodeConfig databaseNodeConfig;
+    CacheUtils cacheUtils;
     FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
     ReflectUtils reflectUtils = ReflectUtils.getInstance();
 
-    AbstractSession(DatabaseNodeConfig databaseNodeConfig) {
+    AbstractSession(DatabaseNodeConfig databaseNodeConfig, String sessionName, CacheUtils cacheUtils) {
         this.databaseNodeConfig = databaseNodeConfig;
+        this.sessionName = sessionName;
+        this.cacheUtils = cacheUtils;
     }
 
     void showSql(String sql) {

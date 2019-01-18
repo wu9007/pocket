@@ -100,11 +100,6 @@ public interface Session {
     long getMaxUuid(Class clazz) throws Exception;
 
     /**
-     * 清空缓存
-     */
-    void clearCache();
-
-    /**
      * 删除该数据的缓存
      *
      * @param entity 实体对象

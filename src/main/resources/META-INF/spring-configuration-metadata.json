@@ -18,34 +18,34 @@
       "description": "java.util.List<org.homo.dbconnect.config.DatabaseNode>."
     },
     {
-      "name": "pocket.cache.main",
+      "name": "pocket.cache.base",
       "type": "org.homo.pocket.config.CacheConfig",
       "description": "main cache."
     },
     {
-      "name": "pocket.cache.main.hostName",
+      "name": "pocket.cache.base.hostName",
       "type": "java.lang.String",
-      "description": "main cache hostName."
+      "description": "base cache hostName."
     },
     {
-      "name": "pocket.cache.main.password",
+      "name": "pocket.cache.base.password",
       "type": "java.lang.String",
-      "description": "main cache password."
+      "description": "base cache password."
     },
     {
-      "name": "pocket.cache.bench",
+      "name": "pocket.cache.logic",
       "type": "org.homo.pocket.config.CacheConfig",
       "description": "bak cache."
     },
     {
-      "name": "pocket.cache.bench.hostName",
+      "name": "pocket.cache.logic.hostName",
       "type": "java.lang.String",
-      "description": "bench cache hostName."
+      "description": "logic cache hostName."
     },
     {
-      "name": "pocket.cache.bench.password",
+      "name": "pocket.cache.logic.password",
       "type": "java.lang.String",
-      "description": "bench cache password."
+      "description": "logic cache password."
     }
   ]
 }

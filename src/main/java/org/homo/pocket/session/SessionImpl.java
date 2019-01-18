@@ -10,6 +10,7 @@ import org.homo.pocket.criteria.CriteriaImpl;
 import org.homo.pocket.criteria.Restrictions;
 import org.homo.pocket.query.AbstractQuery;
 import org.homo.pocket.query.HomoQuery;
+import org.homo.pocket.utils.CacheUtils;
 import org.homo.pocket.utils.HomoUuidGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +25,8 @@ import java.sql.ResultSet;
 public class SessionImpl extends AbstractSession {
     private Logger logger = LoggerFactory.getLogger(SessionImpl.class);
 
-    SessionImpl(DatabaseNodeConfig databaseNodeConfig) {
-        super(databaseNodeConfig);
+    SessionImpl(DatabaseNodeConfig databaseNodeConfig, String sessionName, CacheUtils cacheUtils) {
+        super(databaseNodeConfig, sessionName, cacheUtils);
     }
 
     @Override
@@ -120,6 +121,7 @@ public class SessionImpl extends AbstractSession {
                 //TODO: 封装异常类型
                 throw new RuntimeException("数据未发生变化");
             }
+            this.removeCache(entity);
             return this.findOne(entity.getClass(), entity.getUuid());
         } else {
             //TODO: 封装异常类型
@@ -139,6 +141,7 @@ public class SessionImpl extends AbstractSession {
             preparedStatement.setLong(1, entity.getUuid());
             int effectRow = preparedStatement.executeUpdate();
             preparedStatement.close();
+            this.removeCache(entity);
             return effectRow;
         } else {
             //TODO: 封装异常类型
@@ -148,7 +151,28 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public Object findOne(Class clazz, Long uuid) throws Exception {
-        return this.findDirect(clazz, uuid);
+        String cacheKey = cacheUtils.generateKey(this.sessionName, clazz, uuid);
+        Object result = cacheUtils.getObj(cacheKey);
+        if (result != null) {
+            return result;
+        }
+
+        boolean lock = false;
+        try {
+            lock = cacheUtils.mapLock.putIfAbsent(cacheKey, cacheKey) == null;
+            if (lock) {
+                result = this.findDirect(clazz, uuid);
+                cacheUtils.set(cacheKey, result, 360L);
+            } else {
+                this.wait(10);
+                result = this.findOne(clazz, uuid);
+            }
+        } finally {
+            if (lock) {
+                cacheUtils.mapLock.remove(cacheKey);
+            }
+        }
+        return result;
     }
 
     @Override
@@ -175,12 +199,8 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public void clearCache() {
-
-    }
-
-    @Override
     public void removeCache(BaseEntity entity) {
-
+        String cacheKey = this.cacheUtils.generateKey(this.sessionName, entity.getClass(), entity.getUuid());
+        this.cacheUtils.delete(cacheKey);
     }
 }
