@@ -53,9 +53,17 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             resultSet.close();
             preparedStatement.close();
         }
-        if (result.size() > 0) {
-            for (BaseEntity entity : result) {
-                this.applyChildren(entity);
+        return result;
+    }
+
+    @Override
+    public List list(boolean cascade) throws Exception {
+        List result = this.list();
+        if (cascade) {
+            if (result.size() > 0) {
+                for (Object entity : result) {
+                    this.applyChildren((BaseEntity) entity);
+                }
             }
         }
         return result;
@@ -81,8 +89,16 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             resultSet.close();
             preparedStatement.close();
         }
-        applyChildren(entity);
         return entity;
+    }
+
+    @Override
+    public Object unique(boolean cascade) throws Exception {
+        BaseEntity obj = (BaseEntity) this.unique();
+        if (cascade) {
+            this.applyChildren(obj);
+        }
+        return obj;
     }
 
     /**

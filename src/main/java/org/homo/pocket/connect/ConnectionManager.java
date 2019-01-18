@@ -68,17 +68,22 @@ public class ConnectionManager {
                 if (!config.getDriverName().isEmpty()) {
                     if (!config.getUser().isEmpty()) {
                         if (!config.getPassword().isEmpty()) {
-                            if (config.getShowSql() == null) {
-                                config.setShowSql(false);
-                            }
-                            if (config.getPoolMiniSize() == null) {
-                                config.setPoolMiniSize(5);
-                            }
-                            if (config.getPoolMaxSize() == null) {
-                                config.setPoolMaxSize(20);
-                            }
-                            if (config.getTimeout() == null) {
-                                config.setTimeout(2000L);
+                            if (!config.getSession().isEmpty()) {
+                                if (config.getShowSql() == null) {
+                                    config.setShowSql(false);
+                                }
+                                if (config.getPoolMiniSize() == null) {
+                                    config.setPoolMiniSize(20);
+                                }
+                                if (config.getPoolMaxSize() == null) {
+                                    config.setPoolMaxSize(100);
+                                }
+                                if (config.getTimeout() == null) {
+                                    config.setTimeout(2000L);
+                                }
+                            } else {
+                                logger.error("Please configure the session correctly");
+                                return false;
                             }
                         } else {
                             logger.error("Please configure the password correctly");

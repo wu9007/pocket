@@ -69,7 +69,7 @@ public class CriteriaTest {
     public void test3() throws Exception {
         Criteria criteria = this.session.creatCriteria(Order.class);
         criteria.add(Restrictions.lt("time", new Date()));
-        List orderList = criteria.list();
+        List orderList = criteria.list(true);
         System.out.println(orderList.size());
     }
 
@@ -84,5 +84,19 @@ public class CriteriaTest {
         Criteria criteria = this.session.creatCriteria(Order.class);
         criteria.add(Restrictions.lt("time", new Date()));
         List orderList = criteria.list();
+    }
+
+    @Test
+    public void test5() throws Exception {
+        Order order = (Order) this.session.findDirect(Order.class, 11L);
+        System.out.println(order.getPrice());
+    }
+
+    @Test
+    public void test6() throws Exception {
+        Criteria criteria = this.session.creatCriteria(Order.class);
+        criteria.add(Restrictions.equ("uuid", 11L));
+        Order order = (Order) criteria.unique(true);
+        System.out.println(order.getCommodities().size());
     }
 }

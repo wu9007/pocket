@@ -11,6 +11,8 @@ import org.homo.pocket.criteria.Restrictions;
 import org.homo.pocket.query.AbstractQuery;
 import org.homo.pocket.query.HomoQuery;
 import org.homo.pocket.utils.HomoUuidGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
@@ -20,24 +22,38 @@ import java.sql.ResultSet;
  * @author wujianchuan 2019/1/1
  */
 public class SessionImpl extends AbstractSession {
+    private Logger logger = LoggerFactory.getLogger(SessionImpl.class);
 
     SessionImpl(DatabaseNodeConfig databaseNodeConfig) {
         super(databaseNodeConfig);
     }
 
     @Override
-    public void open() {
-        this.connection = ConnectionManager.getInstance().getConnection(databaseNodeConfig);
+    public synchronized void open() {
+        if (this.connection == null) {
+            this.connection = ConnectionManager.getInstance().getConnection(databaseNodeConfig);
+        } else {
+            this.logger.warn("This session is connected. Please don't try again.");
+        }
     }
 
     @Override
-    public void close() {
-        ConnectionManager.getInstance().closeConnection(this.databaseNodeConfig.getNodeName(), this.connection);
+    public synchronized void close() {
+        if (this.connection != null) {
+            ConnectionManager.getInstance().closeConnection(this.databaseNodeConfig.getNodeName(), this.connection);
+            this.transaction = null;
+            this.connection = null;
+        } else {
+            this.logger.warn("This session is closed. Please don't try again.");
+        }
     }
 
     @Override
-    public Transaction getTransaction() {
-        return new TransactionImpl(this.connection);
+    public synchronized Transaction getTransaction() {
+        if (this.transaction == null) {
+            this.transaction = new TransactionImpl(this.connection);
+        }
+        return this.transaction;
     }
 
     @Override
@@ -139,7 +155,7 @@ public class SessionImpl extends AbstractSession {
     public Object findDirect(Class clazz, Long uuid) throws Exception {
         Criteria criteria = this.creatCriteria(clazz);
         criteria.add(Restrictions.equ("uuid", uuid));
-        return criteria.unique();
+        return criteria.unique(true);
     }
 
     @Override

@@ -26,6 +26,7 @@ abstract class AbstractSession implements Session {
     private Logger logger = LoggerFactory.getLogger(AbstractSession.class);
 
     Connection connection;
+    Transaction transaction;
     DatabaseNodeConfig databaseNodeConfig;
     FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
     ReflectUtils reflectUtils = ReflectUtils.getInstance();

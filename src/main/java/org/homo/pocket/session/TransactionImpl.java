@@ -18,20 +18,34 @@ public class TransactionImpl implements Transaction {
     }
 
     @Override
-    public void begin() throws SQLException {
-        this.logger.info("transaction open.");
-        this.connection.setAutoCommit(false);
+    public synchronized void begin() throws SQLException {
+        if (this.connection.getAutoCommit()) {
+            this.connection.setAutoCommit(false);
+            this.logger.info("transaction open.");
+        } else {
+            logger.warn("This transaction has already begun. Please do not try again.");
+        }
     }
 
     @Override
-    public void commit() throws SQLException {
-        this.connection.commit();
-        System.out.println("transaction commit.");
+    public synchronized void commit() throws SQLException {
+        if (this.connection != null) {
+            this.connection.commit();
+            this.connection = null;
+            this.logger.info("Transaction commit.");
+        } else {
+            logger.warn("This transaction has been committed. Please do not try again.");
+        }
     }
 
     @Override
-    public void rollBack() throws SQLException {
-        System.out.println("transaction roll back.");
-        this.connection.rollback();
+    public synchronized void rollBack() throws SQLException {
+        if (this.connection != null) {
+            this.connection.rollback();
+            this.connection = null;
+            this.logger.info("Transaction rollback.");
+        } else {
+            logger.warn("This transaction has been rolled back. Please do not try again.");
+        }
     }
 }
