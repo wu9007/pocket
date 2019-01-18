@@ -1,6 +1,6 @@
 package org.homo.pocket.session;
 
-import org.homo.core.model.BaseEntity;
+import org.homo.pocket.model.BaseEntity;
 import org.homo.pocket.criteria.Criteria;
 import org.homo.pocket.query.AbstractQuery;
 

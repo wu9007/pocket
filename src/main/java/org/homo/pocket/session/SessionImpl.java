@@ -1,6 +1,6 @@
 package org.homo.pocket.session;
 
-import org.homo.core.model.BaseEntity;
+import org.homo.pocket.model.BaseEntity;
 import org.homo.pocket.connect.ConnectionManager;
 import org.homo.pocket.annotation.Column;
 import org.homo.pocket.annotation.Entity;

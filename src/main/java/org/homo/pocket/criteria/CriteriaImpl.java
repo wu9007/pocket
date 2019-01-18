@@ -1,6 +1,6 @@
 package org.homo.pocket.criteria;
 
-import org.homo.core.model.BaseEntity;
+import org.homo.pocket.model.BaseEntity;
 import org.homo.pocket.annotation.Entity;
 import org.homo.pocket.annotation.OneToMany;
 import org.homo.pocket.config.DatabaseNodeConfig;

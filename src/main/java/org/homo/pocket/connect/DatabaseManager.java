@@ -7,6 +7,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author wujianchuan 2018/12/31
@@ -15,6 +16,7 @@ public class DatabaseManager {
     private static Map<String, DatabaseManager> managerMap = new HashMap<>(2);
     private DatabaseNodeConfig config;
     private static Connection conn = null;
+    private static AtomicInteger connectionCount = new AtomicInteger(0);
 
     private DatabaseManager(DatabaseNodeConfig config) {
         this.config = config;

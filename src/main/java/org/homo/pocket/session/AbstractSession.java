@@ -2,7 +2,7 @@ package org.homo.pocket.session;
 
 import org.homo.pocket.annotation.ManyToOne;
 import org.homo.pocket.annotation.OneToMany;
-import org.homo.core.model.BaseEntity;
+import org.homo.pocket.model.BaseEntity;
 import org.homo.pocket.config.DatabaseNodeConfig;
 import org.homo.pocket.utils.FieldTypeStrategy;
 import org.homo.pocket.utils.ReflectUtils;

@@ -1,4 +1,4 @@
-package org.homo.core.model;
+package org.homo.pocket.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;

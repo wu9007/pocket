@@ -2,7 +2,7 @@ package org.homo.authority.model;
 
 import org.homo.pocket.annotation.Column;
 import org.homo.pocket.annotation.Entity;
-import org.homo.core.model.BaseEntity;
+import org.homo.pocket.model.BaseEntity;
 
 /**
  * @author wujianchuan 2018/12/27

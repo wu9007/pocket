@@ -3,7 +3,7 @@ package org.homo.orderdemo.model;
 import org.homo.pocket.annotation.OneToMany;
 import org.homo.pocket.annotation.Column;
 import org.homo.pocket.annotation.Entity;
-import org.homo.core.model.BaseEntity;
+import org.homo.pocket.model.BaseEntity;
 
 import java.math.BigDecimal;
 import java.util.Date;
