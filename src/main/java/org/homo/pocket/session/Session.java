@@ -47,19 +47,19 @@ public interface Session {
      * 保存
      *
      * @param entity 实体对象
-     * @return 实体对象
+     * @return 影响行数
      * @throws Exception 异常
      */
-    Object save(BaseEntity entity) throws Exception;
+    int save(BaseEntity entity) throws Exception;
 
     /**
      * 更新实体
      *
      * @param entity 实体对象
-     * @return 实体对象
+     * @return 影响行数
      * @throws Exception 异常
      */
-    Object update(BaseEntity entity) throws Exception;
+    int update(BaseEntity entity) throws Exception;
 
     /**
      * 删除实体

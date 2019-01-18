@@ -68,7 +68,7 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public Object save(BaseEntity entity) throws Exception {
+    public int save(BaseEntity entity) throws Exception {
         Class clazz = entity.getClass();
         String tableName = reflectUtils.getTableName(clazz);
 
@@ -88,17 +88,18 @@ public class SessionImpl extends AbstractSession {
         entity.setUuid(uuid);
         PreparedStatement preparedStatement = this.connection.prepareStatement(sql.toString());
         statementApplyValue(entity, fields, preparedStatement);
-        preparedStatement.executeUpdate();
+        int effectRow = preparedStatement.executeUpdate();
         preparedStatement.close();
         this.adoptChildren(entity);
-        return this.findOne(entity.getClass(), entity.getUuid());
+        return effectRow;
     }
 
     @Override
-    public Object update(BaseEntity entity) throws Exception {
+    public int update(BaseEntity entity) throws Exception {
         Class clazz = entity.getClass();
         String tableName = reflectUtils.getTableName(clazz);
         Object older = this.findOne(clazz, entity.getUuid());
+        int effectRow;
         if (older != null) {
             Field[] fields = reflectUtils.dirtyFieldFilter(entity, older);
             if (fields.length > 0) {
@@ -115,14 +116,14 @@ public class SessionImpl extends AbstractSession {
                 PreparedStatement preparedStatement = this.connection.prepareStatement(sql.toString());
                 statementApplyValue(entity, fields, preparedStatement);
                 preparedStatement.setObject(fields.length + 1, entity.getUuid());
-                preparedStatement.executeUpdate();
+                effectRow = preparedStatement.executeUpdate();
                 preparedStatement.close();
             } else {
                 //TODO: 封装异常类型
                 throw new RuntimeException("数据未发生变化");
             }
             this.removeCache(entity);
-            return this.findOne(entity.getClass(), entity.getUuid());
+            return effectRow;
         } else {
             //TODO: 封装异常类型
             throw new RuntimeException("未找到数据");

@@ -61,7 +61,8 @@ public class CriteriaTest {
         Order order = Order.newInstance("C-001", new BigDecimal("50.25"));
         order.setDay(new Date());
         order.setTime(new Date());
-        Order newOrder = (Order) this.session.save(order);
+        this.session.save(order);
+        Order newOrder = (Order) this.session.findOne(Order.class, order.getUuid());
         System.out.println(newOrder.getDay());
     }
 
@@ -78,7 +79,8 @@ public class CriteriaTest {
         Order order = Order.newInstance("C-001", new BigDecimal("50.25"));
         order.setDay(new Date());
         order.setTime(new Date());
-        Order newOrder = (Order) this.session.save(order);
+        this.session.save(order);
+        Order newOrder = (Order) this.session.findOne(Order.class, order.getUuid());
         newOrder.setPrice(newOrder.getPrice().multiply(new BigDecimal("1.5")));
         this.session.update(newOrder);
         Criteria criteria = this.session.creatCriteria(Order.class);

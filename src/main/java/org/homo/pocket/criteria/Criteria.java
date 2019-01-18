@@ -48,4 +48,7 @@ public interface Criteria {
      * @throws Exception 异常
      */
     Object unique(boolean cascade) throws Exception;
+
+    //TODO 批量更新
+    //int update();
 }
