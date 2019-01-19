@@ -1,19 +1,8 @@
-buildscript {
-    ext {
-        springBootVersion = '2.1.1.RELEASE'
-    }
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-    }
-}
-
 apply plugin: 'java'
 apply plugin: 'eclipse'
-apply plugin: 'org.springframework.boot'
-apply plugin: 'io.spring.dependency-management'
+apply plugin: 'jdepend'
+apply plugin: "jacoco"
+apply plugin: 'build-dashboard'
 apply plugin: 'maven-publish'
 
 group = 'org.homo'
@@ -30,12 +19,15 @@ compileTestJava {
 
 jar {
     manifest {
-        attributes 'Implementation-Title': 'org homo pocket',
+        attributes 'Implementation-Title': 'pocket',
                 'Implementation-Version': version
     }
 
     exclude "org/homo/Application.class"
-    exclude "application-*.yml"
+    exclude "org/homo/authority"
+    exclude "org/homo/config"
+    exclude "org/homo/orderdemo"
+    exclude "application*.yml"
     exclude "logback-spring.xml"
 }
 
@@ -46,9 +38,6 @@ javadoc {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId project.group
-            artifactId project.name
-            version project.version
             from components.java
             pom.withXml {
                 asNode().remove(asNode().get("dependencies"))
@@ -65,12 +54,12 @@ repositories {
 compileJava.dependsOn(processResources)
 
 dependencies {
-    implementation('org.springframework.boot:spring-boot-starter-web')
-    implementation('org.springframework.boot:spring-boot-starter-cache')
-    implementation('org.springframework.boot:spring-boot-starter-data-redis')
+    implementation('org.springframework.boot:spring-boot-starter-web:2.1.1.RELEASE')
+    implementation('org.springframework.boot:spring-boot-starter-cache:2.1.1.RELEASE')
+    implementation('org.springframework.boot:spring-boot-starter-data-redis:2.1.1.RELEASE')
     implementation('org.apache.commons:commons-lang3:3.8.1')
 
-    implementation('mysql:mysql-connector-java')
-    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-    testImplementation('org.springframework.boot:spring-boot-starter-test')
+    implementation('mysql:mysql-connector-java:8.0.13')
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor:2.1.1.RELEASE")
+    testImplementation('org.springframework.boot:spring-boot-starter-test:2.1.1.RELEASE')
 }
