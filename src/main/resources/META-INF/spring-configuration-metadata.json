@@ -2,8 +2,8 @@
   "groups": [
     {
       "name": "pocket",
-      "type": "org.homo.pocket.config.DatabaseConfig",
-      "sourceType": "org.homo.pocket.config.DatabaseConfig"
+      "type": "org.hunter.pocket.config.DatabaseConfig",
+      "sourceType": "org.hunter.pocket.config.DatabaseConfig"
     }
   ],
   "properties": [
@@ -14,12 +14,12 @@
     },
     {
       "name": "pocket.datasource.node",
-      "type": "java.util.List<org.homo.pocket.config.DatabaseNodeConfig>",
+      "type": "java.util.List<org.hunter.pocket.config.DatabaseNodeConfig>",
       "description": "java.util.List<org.homo.dbconnect.config.DatabaseNode>."
     },
     {
       "name": "pocket.cache.base",
-      "type": "org.homo.pocket.config.CacheConfig",
+      "type": "org.hunter.pocket.config.CacheConfig",
       "description": "main cache."
     },
     {
@@ -34,7 +34,7 @@
     },
     {
       "name": "pocket.cache.logic",
-      "type": "org.homo.pocket.config.CacheConfig",
+      "type": "org.hunter.pocket.config.CacheConfig",
       "description": "bak cache."
     },
     {
