@@ -14,12 +14,51 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'maven-publish'
 
-group = 'com.example'
-version = '0.0.1-SNAPSHOT'
+group = 'org.homo'
+version = '0.0.1-PRE-RELEASE'
 sourceCompatibility = 1.8
 
+compileJava {
+    options.encoding = 'UTF-8'
+}
+
+compileTestJava {
+    options.encoding = 'UTF-8'
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'org homo pocket',
+                'Implementation-Version': version
+    }
+
+    exclude "org/homo/Application.class"
+    exclude "application-*.yml"
+    exclude "logback-spring.xml"
+}
+
+javadoc {
+    options.encoding = 'UTF-8'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId project.group
+            artifactId project.name
+            version project.version
+            from components.java
+            pom.withXml {
+                asNode().remove(asNode().get("dependencies"))
+            }
+        }
+    }
+}
+
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
