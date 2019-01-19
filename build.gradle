@@ -31,7 +31,6 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-data-redis')
     implementation('org.apache.commons:commons-lang3:3.8.1')
 
-    implementation('com.github.ben-manes.caffeine:caffeine:2.6.2')
     implementation('mysql:mysql-connector-java')
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     testImplementation('org.springframework.boot:spring-boot-starter-test')

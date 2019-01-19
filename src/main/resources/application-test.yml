@@ -25,8 +25,7 @@ pocket:
         session: order,commodity
   cache:
     logic:
-      hostName: 172.0.66.105
-      password: tsxdtsxd
+      hostName: 127.0.0.1
     base:
       hostName: 127.0.0.1
 
