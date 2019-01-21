@@ -106,6 +106,6 @@ public class Commodity extends BaseEntity {
     @ManyToOne(name = "ORDER_UUID")
     private Long order;
 
-    // 这里省略 getter setter
+    // getter setter
 }
 ```
