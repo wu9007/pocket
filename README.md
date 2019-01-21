@@ -1,13 +1,11 @@
-# Homo
-[![Version](https://img.shields.io/badge/Version-0.0.1-brightgreen.svg)](https://github.com/leyan95/Homo)
-[![Build Status](https://travis-ci.org/leyan95/Homo.svg?branch=master)](https://travis-ci.org/leyan95/Homo)
+# POCKET
+[![Version](https://img.shields.io/badge/Version-0.0.1-brightgreen.svg)](https://github.com/leyan95/pocket)
+[![Build Status](https://travis-ci.org/leyan95/pocket.svg?branch=master)](https://travis-ci.org/leyan95/pocket)
 
-Little scaffold
+Little Scaffold
 
 #### About me
 [![github](https://img.shields.io/badge/GitHub-leyan95-blue.svg)](https://github.com/leyan95)
-
-> 一个清新脱俗的小框架，欢迎 request
 
 ## 多数据源配置
 **这里以MySQL数据库为例**
@@ -108,6 +106,6 @@ public class Commodity extends BaseEntity {
     @ManyToOne(name = "ORDER_UUID")
     private Long order;
 
-    // 这里省略 getter setter
+    // getter setter
 }
 ```
