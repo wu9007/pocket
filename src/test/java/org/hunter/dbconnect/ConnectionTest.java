@@ -20,7 +20,7 @@ import java.util.concurrent.CountDownLatch;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 public class ConnectionTest {
-    private static final int THREAD_NUM = 10000;
+    private static final int THREAD_NUM = 100;
     private long start;
 
     @Autowired

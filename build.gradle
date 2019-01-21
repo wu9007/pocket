@@ -41,6 +41,11 @@ publishing {
             from components.java
             pom.withXml {
                 asNode().remove(asNode().get("dependencies"))
+                def dependenciesNode = asNode().appendNode("dependencies")
+                def dependencyNode = dependenciesNode.appendNode('dependency')
+                dependencyNode.appendNode('groupId', 'org.apache.commons')
+                dependencyNode.appendNode('artifactId', 'commons-lang3')
+                dependencyNode.appendNode('version', '3.8.1')
             }
         }
     }
@@ -58,7 +63,6 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-cache:2.1.1.RELEASE')
     implementation('org.springframework.boot:spring-boot-starter-data-redis:2.1.1.RELEASE')
     implementation('org.apache.commons:commons-lang3:3.8.1')
-
     implementation('mysql:mysql-connector-java:8.0.13')
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor:2.1.1.RELEASE")
     testImplementation('org.springframework.boot:spring-boot-starter-test:2.1.1.RELEASE')
