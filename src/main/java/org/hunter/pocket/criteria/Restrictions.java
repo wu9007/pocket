@@ -5,7 +5,7 @@ import org.hunter.pocket.constant.SqlOperateTypes;
 /**
  * @author wujianchuan 2019/1/10
  */
-public class Restrictions {
+public class Restrictions implements SqlBean {
     private String source;
     private String sqlOperate;
     private Object target;
@@ -68,6 +68,7 @@ public class Restrictions {
         return sqlOperate;
     }
 
+    @Override
     public Object getTarget() {
         return target;
     }

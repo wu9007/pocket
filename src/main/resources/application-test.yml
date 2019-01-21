@@ -6,7 +6,7 @@ pocket:
       - url: jdbc:mysql://127.0.0.1:3306/homo?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8
         nodeName: mysql-01
         driverName: com.mysql.cj.jdbc.Driver
-        showSql: false
+        showSql: true
         user: root
         password: root
         poolMiniSize: 10

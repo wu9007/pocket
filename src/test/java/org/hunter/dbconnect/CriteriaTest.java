@@ -2,6 +2,7 @@ package org.hunter.dbconnect;
 
 import org.hunter.Application;
 import org.hunter.pocket.criteria.Criteria;
+import org.hunter.pocket.criteria.Modern;
 import org.hunter.pocket.criteria.Restrictions;
 import org.hunter.pocket.session.Session;
 import org.hunter.pocket.session.SessionFactory;
@@ -127,5 +128,14 @@ public class CriteriaTest {
         Order order4 = (Order) this.session.findOne(Order.class, 11L);
         long e4 = System.currentTimeMillis();
         System.out.println(e4 - s4 + "------" + order4.getCode());
+    }
+
+    @Test
+    public void test8() throws Exception {
+        Criteria criteria = this.session.creatCriteria(Order.class);
+        criteria.add(Modern.set("price", 500.5D))
+                .add(Restrictions.equ("code", "C-001"))
+                .add(Modern.set("day", new Date()));
+        System.out.println(criteria.update());
     }
 }

@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author wujianchuan 2019/1/10
@@ -25,21 +26,32 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     @Override
     public Criteria add(Restrictions restrictions) {
         if (this.restrictionsList.size() == 0) {
-            this.sql.append(" WHERE ");
+            this.sqlRestriction.append(" WHERE ");
         } else {
-            this.sql.append(" AND ");
+            this.sqlRestriction.append(" AND ");
         }
-        this.sql.append(this.parseSql(restrictions));
+        this.sqlRestriction.append(this.parseSql(restrictions));
+        return this;
+    }
+
+    @Override
+    public Criteria add(Modern modern) {
+        this.modernList.add(modern);
         return this;
     }
 
     @Override
     public List list() throws Exception {
-        this.before();
-        List<BaseEntity> result = new ArrayList<>();
-        PreparedStatement preparedStatement = this.connection.prepareStatement(sql.toString());
-        fieldTypeStrategy.setPreparedStatement(preparedStatement, this.restrictionsList);
+        completeSql.append("SELECT ")
+                .append(this.reflectUtils.getColumnNames(this.fields))
+                .append(" FROM ")
+                .append(this.tableName)
+                .append(this.sqlRestriction);
+        this.showSql();
+        PreparedStatement preparedStatement = this.connection.prepareStatement(completeSql.toString());
+        fieldTypeStrategy.setPreparedStatement(preparedStatement, this.modernList, this.restrictionsList);
         ResultSet resultSet = preparedStatement.executeQuery();
+        List<BaseEntity> result = new ArrayList<>();
         try {
             while (resultSet.next()) {
                 BaseEntity entity = (BaseEntity) clazz.newInstance();
@@ -71,9 +83,14 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public Object unique() throws Exception {
-        this.before();
-        PreparedStatement preparedStatement = this.connection.prepareStatement(sql.toString());
-        fieldTypeStrategy.setPreparedStatement(preparedStatement, this.restrictionsList);
+        completeSql.append("SELECT ")
+                .append(this.reflectUtils.getColumnNames(this.fields))
+                .append(" FROM ")
+                .append(this.tableName)
+                .append(this.sqlRestriction);
+        this.showSql();
+        PreparedStatement preparedStatement = this.connection.prepareStatement(completeSql.toString());
+        fieldTypeStrategy.setPreparedStatement(preparedStatement, this.modernList, this.restrictionsList);
         ResultSet resultSet = preparedStatement.executeQuery();
         BaseEntity entity = (BaseEntity) clazz.newInstance();
         try {
@@ -99,6 +116,21 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             this.applyChildren(obj);
         }
         return obj;
+    }
+
+    @Override
+    public int update() throws Exception {
+        completeSql.append("UPDATE ")
+                .append(this.tableName)
+                .append(" SET ")
+                .append(this.modernList.stream()
+                        .map(modern -> fieldMapper.get(modern.getSource()).getColumnName() + " = ?")
+                        .collect(Collectors.joining(", ")))
+                .append(this.sqlRestriction);
+        this.showSql();
+        PreparedStatement preparedStatement = this.connection.prepareStatement(completeSql.toString());
+        fieldTypeStrategy.setPreparedStatement(preparedStatement, this.modernList, this.restrictionsList);
+        return preparedStatement.executeUpdate();
     }
 
     /**
@@ -163,7 +195,6 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
      * @return SQL
      */
     private String parseSql(Restrictions restrictions) {
-        Object target = restrictions.getTarget();
         StringBuilder sql = new StringBuilder();
         if (restrictions.getLeftRestrictions() == null) {
             sql.append(fieldMapper.get(restrictions.getSource()).getColumnName())

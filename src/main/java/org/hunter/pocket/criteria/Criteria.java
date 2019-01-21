@@ -16,6 +16,14 @@ public interface Criteria {
     Criteria add(Restrictions restrictions);
 
     /**
+     * 添加更新实体
+     *
+     * @param modern 更新实体
+     * @return Criteria
+     */
+    Criteria add(Modern modern);
+
+    /**
      * 获取所有数据
      *
      * @return 对象集合
@@ -49,6 +57,11 @@ public interface Criteria {
      */
     Object unique(boolean cascade) throws Exception;
 
-    //TODO 批量更新
-    //int update();
+    /**
+     * 批量更新操作
+     *
+     * @return 影响行数
+     * @throws Exception 异常
+     */
+    int update() throws Exception;
 }

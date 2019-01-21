@@ -29,12 +29,16 @@ abstract class AbstractCriteria {
     Class clazz;
     Connection connection;
     DatabaseNodeConfig databaseConfig;
+    String tableName;
 
     Field[] fields;
     Field[] childrenFields;
     Map<String, FieldMapper> fieldMapper;
     List<Restrictions> restrictionsList = new ArrayList<>();
-    StringBuilder sql = new StringBuilder("SELECT ");
+    List<Modern> modernList = new ArrayList<>();
+    StringBuilder completeSql = new StringBuilder();
+    StringBuilder sqlRestriction = new StringBuilder();
+    StringBuilder sqlModern = new StringBuilder("UPDATE ");
 
     AbstractCriteria(Class clazz, Connection connection, DatabaseNodeConfig databaseConfig) {
         this.clazz = clazz;
@@ -45,14 +49,12 @@ abstract class AbstractCriteria {
                 .filter(FIND_CHILDREN)
                 .toArray(Field[]::new);
         this.fieldMapper = reflectUtils.getFieldMapperMap(clazz);
-
-        Entity entity = (Entity) clazz.getAnnotation(Entity.class);
-        this.sql.append(reflectUtils.getColumnNames(fields)).append(" FROM ").append(entity.table());
+        this.tableName = ((Entity) this.clazz.getAnnotation(Entity.class)).table();
     }
 
-    void before() {
+    void showSql() {
         if (this.databaseConfig.getShowSql()) {
-            this.logger.info("SQL: {}", this.sql);
+            this.logger.info("SQL: {}", this.completeSql);
         }
     }
 
