@@ -28,7 +28,6 @@ jar {
     exclude "org/hunter/config"
     exclude "org/hunter/orderdemo"
     exclude "application*.yml"
-    exclude "logback-spring.xml"
 }
 
 javadoc {

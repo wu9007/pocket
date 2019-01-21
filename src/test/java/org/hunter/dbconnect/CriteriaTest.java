@@ -13,7 +13,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -26,7 +25,6 @@ import java.util.List;
  * @author wujianchuan 2019/1/15
  */
 @RunWith(SpringRunner.class)
-@ConditionalOnBean(name = "databaseLauncher")
 @SpringBootTest(classes = Application.class)
 public class CriteriaTest {
 
@@ -159,5 +157,13 @@ public class CriteriaTest {
                 .add(Sort.asc("uuid"))
                 .list();
         System.out.println(list);
+    }
+
+    @Test
+    public void test11() throws Exception {
+        this.session.findDirect(Order.class, 11L);
+        Order order = (Order) this.session.findOne(Order.class, 11L);
+        order.setPrice(order.getPrice().add(new BigDecimal("20.1")));
+        this.session.update(order);
     }
 }
