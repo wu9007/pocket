@@ -24,6 +24,14 @@ public interface Criteria {
     Criteria add(Modern modern);
 
     /**
+     * 添加排序实体
+     *
+     * @param order 排序实体
+     * @return Criteria
+     */
+    Criteria add(Sort order);
+
+    /**
      * 获取所有数据
      *
      * @return 对象集合
@@ -39,6 +47,10 @@ public interface Criteria {
      * @throws Exception 异常
      */
     List list(boolean cascade) throws Exception;
+
+    Object max(String field) throws Exception;
+
+    long count() throws Exception;
 
     /**
      * 获取一条数据

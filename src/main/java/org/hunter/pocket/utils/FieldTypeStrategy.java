@@ -197,6 +197,5 @@ public class FieldTypeStrategy {
             PreparedSupplierValue preparedSupplierValue = new PreparedSupplierValue(preparedStatement, modernList.size() + index + 1, restrictions);
             PREPARED_STRATEGY_POOL.get(restrictions.getTarget().getClass().getName()).accept(preparedSupplierValue);
         }
-        restrictionsList.clear();
     }
 }

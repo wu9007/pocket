@@ -4,6 +4,7 @@ import org.hunter.Application;
 import org.hunter.pocket.criteria.Criteria;
 import org.hunter.pocket.criteria.Modern;
 import org.hunter.pocket.criteria.Restrictions;
+import org.hunter.pocket.criteria.Sort;
 import org.hunter.pocket.session.Session;
 import org.hunter.pocket.session.SessionFactory;
 import org.hunter.pocket.session.Transaction;
@@ -25,6 +26,7 @@ import java.util.List;
  * @author wujianchuan 2019/1/15
  */
 @RunWith(SpringRunner.class)
+@ConditionalOnBean(name = "databaseLauncher")
 @SpringBootTest(classes = Application.class)
 public class CriteriaTest {
 
@@ -33,7 +35,6 @@ public class CriteriaTest {
     private long start;
 
     @Before
-    @ConditionalOnBean(name = "databaseLauncher")
     public void setup() throws SQLException {
         start = System.currentTimeMillis();
         this.session = SessionFactory.getSession("homo");
@@ -137,5 +138,26 @@ public class CriteriaTest {
                 .add(Restrictions.equ("code", "C-001"))
                 .add(Modern.set("day", new Date()));
         System.out.println(criteria.update());
+    }
+
+    @Test
+    public void test9() throws Exception {
+        Criteria criteria = this.session.creatCriteria(Order.class);
+        criteria.add(Restrictions.equ("code", "C-001"));
+        System.out.println(criteria.max("price"));
+
+        long count = criteria.add(Restrictions.like("code", "%001%"))
+                .count();
+        System.out.println(count);
+    }
+
+    @Test
+    public void test10() throws Exception {
+        Criteria criteria = this.session.creatCriteria(Order.class);
+        List list = criteria.add(Restrictions.like("code", "%001%"))
+                .add(Sort.desc("price"))
+                .add(Sort.asc("uuid"))
+                .list();
+        System.out.println(list);
     }
 }

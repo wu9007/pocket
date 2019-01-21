@@ -1,5 +1,6 @@
 package org.hunter.pocket.criteria;
 
+import org.hunter.pocket.constant.SqlOperateTypes;
 import org.hunter.pocket.model.BaseEntity;
 import org.hunter.pocket.annotation.Entity;
 import org.hunter.pocket.annotation.OneToMany;
@@ -41,13 +42,39 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
+    public Criteria add(Sort order) {
+        this.orderList.add(order);
+        return this;
+    }
+
+    @Override
+    public int update() throws Exception {
+        completeSql.append("UPDATE ")
+                .append(this.tableName)
+                .append(" SET ")
+                .append(this.modernList.stream()
+                        .map(modern -> fieldMapper.get(modern.getSource()).getColumnName() + " = ?")
+                        .collect(Collectors.joining(", ")))
+                .append(this.sqlRestriction);
+        this.before();
+        PreparedStatement preparedStatement = this.connection.prepareStatement(completeSql.toString());
+        fieldTypeStrategy.setPreparedStatement(preparedStatement, this.modernList, this.restrictionsList);
+        this.after();
+        return preparedStatement.executeUpdate();
+    }
+
+    @Override
     public List list() throws Exception {
         completeSql.append("SELECT ")
                 .append(this.reflectUtils.getColumnNames(this.fields))
                 .append(" FROM ")
                 .append(this.tableName)
                 .append(this.sqlRestriction);
-        this.showSql();
+        if (this.orderList.size() > 0) {
+            completeSql.append(" ORDER BY ")
+                    .append(this.orderList.stream().map(order -> fieldMapper.get(order.getSource()).getColumnName() + " " + order.getSortType()).collect(Collectors.joining(",")));
+        }
+        this.before();
         PreparedStatement preparedStatement = this.connection.prepareStatement(completeSql.toString());
         fieldTypeStrategy.setPreparedStatement(preparedStatement, this.modernList, this.restrictionsList);
         ResultSet resultSet = preparedStatement.executeQuery();
@@ -64,6 +91,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         } finally {
             resultSet.close();
             preparedStatement.close();
+            this.after();
         }
         return result;
     }
@@ -88,7 +116,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                 .append(" FROM ")
                 .append(this.tableName)
                 .append(this.sqlRestriction);
-        this.showSql();
+        this.before();
         PreparedStatement preparedStatement = this.connection.prepareStatement(completeSql.toString());
         fieldTypeStrategy.setPreparedStatement(preparedStatement, this.modernList, this.restrictionsList);
         ResultSet resultSet = preparedStatement.executeQuery();
@@ -105,6 +133,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         } finally {
             resultSet.close();
             preparedStatement.close();
+            this.after();
         }
         return entity;
     }
@@ -115,22 +144,50 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         if (cascade) {
             this.applyChildren(obj);
         }
+        this.after();
         return obj;
     }
 
     @Override
-    public int update() throws Exception {
-        completeSql.append("UPDATE ")
+    public long count() throws Exception {
+        completeSql.append("SELECT ")
+                .append(SqlOperateTypes.COUNT)
+                .append("(0)")
+                .append(" FROM ")
                 .append(this.tableName)
-                .append(" SET ")
-                .append(this.modernList.stream()
-                        .map(modern -> fieldMapper.get(modern.getSource()).getColumnName() + " = ?")
-                        .collect(Collectors.joining(", ")))
                 .append(this.sqlRestriction);
-        this.showSql();
+        this.before();
         PreparedStatement preparedStatement = this.connection.prepareStatement(completeSql.toString());
         fieldTypeStrategy.setPreparedStatement(preparedStatement, this.modernList, this.restrictionsList);
-        return preparedStatement.executeUpdate();
+        ResultSet resultSet = preparedStatement.executeQuery();
+        this.after();
+        if (resultSet.next()) {
+            return (long) resultSet.getObject(1);
+        } else {
+            throw new RuntimeException("No data found");
+        }
+    }
+
+    @Override
+    public Object max(String fieldName) throws Exception {
+        completeSql.append("SELECT ")
+                .append(SqlOperateTypes.MAX)
+                .append("(")
+                .append(fieldMapper.get(fieldName).getColumnName())
+                .append(") ")
+                .append(" FROM ")
+                .append(this.tableName)
+                .append(this.sqlRestriction);
+        this.before();
+        PreparedStatement preparedStatement = this.connection.prepareStatement(completeSql.toString());
+        fieldTypeStrategy.setPreparedStatement(preparedStatement, this.modernList, this.restrictionsList);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        this.after();
+        if (resultSet.next()) {
+            return resultSet.getObject(1);
+        } else {
+            throw new RuntimeException("No data found");
+        }
     }
 
     /**

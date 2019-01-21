@@ -13,4 +13,8 @@ public interface SqlOperateTypes {
     String LTE = "lessThanOrEqual";
     String AND = "and";
     String OR = "or";
+    String MAX = "max";
+    String COUNT = "count";
+    String DESC = "desc";
+    String ASC = "asc";
 }

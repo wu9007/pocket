@@ -36,9 +36,9 @@ abstract class AbstractCriteria {
     Map<String, FieldMapper> fieldMapper;
     List<Restrictions> restrictionsList = new ArrayList<>();
     List<Modern> modernList = new ArrayList<>();
+    List<Sort> orderList = new ArrayList<>();
     StringBuilder completeSql = new StringBuilder();
     StringBuilder sqlRestriction = new StringBuilder();
-    StringBuilder sqlModern = new StringBuilder("UPDATE ");
 
     AbstractCriteria(Class clazz, Connection connection, DatabaseNodeConfig databaseConfig) {
         this.clazz = clazz;
@@ -52,10 +52,24 @@ abstract class AbstractCriteria {
         this.tableName = ((Entity) this.clazz.getAnnotation(Entity.class)).table();
     }
 
-    void showSql() {
+    void before() {
+        this.showSql();
+    }
+
+    void after() {
+        this.clear();
+    }
+
+    private void showSql() {
         if (this.databaseConfig.getShowSql()) {
             this.logger.info("SQL: {}", this.completeSql);
         }
     }
 
+    private void clear() {
+        this.completeSql = new StringBuilder();
+        this.sqlRestriction = new StringBuilder();
+        this.modernList.clear();
+        this.restrictionsList.clear();
+    }
 }
