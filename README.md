@@ -43,7 +43,7 @@ pocket:
         hostName: 127.0.0.1
         port: 6666
 ```
-### 数据操作
+### 数据操作(具体操作参考测试类)
 #### 获取数据库链接
 调用`ConnectionManager`的`getConnection(DatabaseNodeConfig databaseNodeConfig)`API即可从连接池中拿到一个闲置状态的数据库链接对象。
 看栗子：
