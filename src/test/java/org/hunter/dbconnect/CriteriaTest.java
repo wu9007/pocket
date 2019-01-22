@@ -8,7 +8,7 @@ import org.hunter.pocket.criteria.Sort;
 import org.hunter.pocket.session.Session;
 import org.hunter.pocket.session.SessionFactory;
 import org.hunter.pocket.session.Transaction;
-import org.hunter.orderdemo.model.Order;
+import org.hunter.demo.model.Order;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

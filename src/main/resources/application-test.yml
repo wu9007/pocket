@@ -1,5 +1,3 @@
-homo:
-  describe: this's a test homo
 pocket:
   datasource:
     node:

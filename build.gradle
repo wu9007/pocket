@@ -24,10 +24,9 @@ jar {
     }
 
     exclude "org/hunter/Application.class"
-    exclude "org/hunter/authority"
-    exclude "org/hunter/config"
-    exclude "org/hunter/orderdemo"
+    exclude "org/hunter/demo"
     exclude "application*.yml"
+    exclude "pocket.sql"
 }
 
 javadoc {
