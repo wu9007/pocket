@@ -1,4 +1,4 @@
-package org.hunter.orderdemo.model;
+package org.hunter.demo.model;
 
 import org.hunter.pocket.annotation.OneToMany;
 import org.hunter.pocket.annotation.Column;

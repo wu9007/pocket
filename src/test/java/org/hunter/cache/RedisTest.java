@@ -1,7 +1,7 @@
 package org.hunter.cache;
 
 import org.hunter.Application;
-import org.hunter.orderdemo.model.Order;
+import org.hunter.demo.model.Order;
 import org.hunter.pocket.utils.CacheUtils;
 import org.junit.After;
 import org.junit.Before;

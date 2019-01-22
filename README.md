@@ -26,45 +26,24 @@ pocket:
         poolMiniSize: 10
         poolMaxSize: 15
         timeout: 1000
+        ##根据session找到数据库并从数据库对应的连接池中获取数据库链接，故所有session不可重复
         session: order,commodity
+  ##redis服务
   cache:
+      ##应用层缓存
       logic:
         hostName: 127.0.0.1
         port: 6079
+      ##数据库层缓存
       base:
         hostName: 127.0.0.1
         port: 6666
 ```
-### 数据操作
-#### 获取数据库链接
-调用`ConnectionManager`的`getConnection(DatabaseNodeConfig databaseNodeConfig)`API即可从连接池中拿到一个闲置状态的数据库链接对象。
-看栗子：
-```java
-ConnectionManager.getInstance().getConnection(databaseNodeConfig);
-```
-#### 获取缓存对象
-通过`SessionFactory`的静态方法`Session getSession(String sessionName)`获取对象。
-#### 查询数据
-```java
-private Session session = SessionFactory.getSession("homo");
-session.open();
-private Transaction transaction = session.getTransaction();
-transaction.begin();
-
-Criteria criteria = this.session.creatCriteria(Order.class);
-criteria.add(Restrictions.like("code", "%A%"))
-        .add(Restrictions.ne("code", "A-002"))
-        .add(Restrictions.or(Restrictions.gt("price", 13), Restrictions.lt("price", 12.58)));
-List orderList = criteria.list();
-
-transaction.commit();
-session.close();
-```
 
 ## 实体类规范
 - 继承`BaseEntity`抽象类
-- 类注解`@Entity`，`history` 属性控制历史保存功能是否开启，`table` 对应代表对应数据库表
-- 属性注解`@column`，`name` 对应数据库中对应的列名称
+- 类注解`@Entity`，`table` 对应代表对应数据库表
+- 属性注解`@Column`，`name` 对应数据库中对应的列名称
 - 属性注解`@OneToMany`， `clazz` 对应子类的类类型，`name` 对应该表数据标识在其子表中的字段名称
 - 属性注解`@ManyToOne`，`name` 关联主表数据标识的列名称
 ### 主类
@@ -100,4 +79,24 @@ public class Commodity extends BaseEntity {
 
     // getter setter
 }
+```
+
+### 数据操作(具体操作请参考测试类)
+#### 获取缓存对象
+通过`SessionFactory`的静态方法`Session getSession(String sessionName)`获取对象。
+#### 查询数据
+```java
+private Session session = SessionFactory.getSession("homo");
+session.open();
+private Transaction transaction = session.getTransaction();
+transaction.begin();
+
+Criteria criteria = this.session.creatCriteria(Order.class);
+criteria.add(Restrictions.like("code", "%A%"))
+        .add(Restrictions.ne("code", "A-002"))
+        .add(Restrictions.or(Restrictions.gt("price", 13), Restrictions.lt("price", 12.58)));
+List orderList = criteria.list();
+
+transaction.commit();
+session.close();
 ```
