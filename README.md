@@ -1,7 +1,4 @@
 # POCKET
-[![Version](https://img.shields.io/badge/Version-0.0.1-brightgreen.svg)](https://github.com/leyan95/pocket)
-[![Build Status](https://travis-ci.org/leyan95/pocket.svg?branch=master)](https://travis-ci.org/leyan95/pocket)
-
 ## 多数据源配置
 **这里以MySQL数据库为例**
 
