@@ -52,6 +52,8 @@ public interface Criteria {
 
     long count() throws Exception;
 
+    long delete() throws Exception;
+
     /**
      * 获取一条数据
      *

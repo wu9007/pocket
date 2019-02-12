@@ -10,6 +10,7 @@ import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -56,9 +57,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                         .map(modern -> fieldMapper.get(modern.getSource()).getColumnName() + " = ?")
                         .collect(Collectors.joining(", ")))
                 .append(this.sqlRestriction);
-        this.before();
-        PreparedStatement preparedStatement = this.connection.prepareStatement(completeSql.toString());
-        fieldTypeStrategy.setPreparedStatement(preparedStatement, this.modernList, this.restrictionsList);
+        PreparedStatement preparedStatement = getPreparedStatement();
         this.after();
         return preparedStatement.executeUpdate();
     }
@@ -74,9 +73,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             completeSql.append(" ORDER BY ")
                     .append(this.orderList.stream().map(order -> fieldMapper.get(order.getSource()).getColumnName() + " " + order.getSortType()).collect(Collectors.joining(",")));
         }
-        this.before();
-        PreparedStatement preparedStatement = this.connection.prepareStatement(completeSql.toString());
-        fieldTypeStrategy.setPreparedStatement(preparedStatement, this.modernList, this.restrictionsList);
+        PreparedStatement preparedStatement = getPreparedStatement();
         ResultSet resultSet = preparedStatement.executeQuery();
         List<BaseEntity> result = new ArrayList<>();
         try {
@@ -116,9 +113,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                 .append(" FROM ")
                 .append(this.tableName)
                 .append(this.sqlRestriction);
-        this.before();
-        PreparedStatement preparedStatement = this.connection.prepareStatement(completeSql.toString());
-        fieldTypeStrategy.setPreparedStatement(preparedStatement, this.modernList, this.restrictionsList);
+        PreparedStatement preparedStatement = getPreparedStatement();
         ResultSet resultSet = preparedStatement.executeQuery();
         BaseEntity entity = (BaseEntity) clazz.newInstance();
         try {
@@ -156,9 +151,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                 .append(" FROM ")
                 .append(this.tableName)
                 .append(this.sqlRestriction);
-        this.before();
-        PreparedStatement preparedStatement = this.connection.prepareStatement(completeSql.toString());
-        fieldTypeStrategy.setPreparedStatement(preparedStatement, this.modernList, this.restrictionsList);
+        PreparedStatement preparedStatement = getPreparedStatement();
         ResultSet resultSet = preparedStatement.executeQuery();
         this.after();
         if (resultSet.next()) {
@@ -166,6 +159,16 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         } else {
             throw new RuntimeException("No data found");
         }
+    }
+
+    @Override
+    public long delete() throws Exception {
+        completeSql.append("DELETE FROM ")
+                .append(this.tableName)
+                .append(this.sqlRestriction);
+        PreparedStatement preparedStatement = getPreparedStatement();
+        this.after();
+        return preparedStatement.executeUpdate();
     }
 
     @Override
@@ -178,9 +181,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                 .append(" FROM ")
                 .append(this.tableName)
                 .append(this.sqlRestriction);
-        this.before();
-        PreparedStatement preparedStatement = this.connection.prepareStatement(completeSql.toString());
-        fieldTypeStrategy.setPreparedStatement(preparedStatement, this.modernList, this.restrictionsList);
+        PreparedStatement preparedStatement = getPreparedStatement();
         ResultSet resultSet = preparedStatement.executeQuery();
         this.after();
         if (resultSet.next()) {
@@ -266,5 +267,12 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                     .append(")");
         }
         return sql.toString();
+    }
+
+    private PreparedStatement getPreparedStatement() throws SQLException {
+        this.before();
+        PreparedStatement preparedStatement = this.connection.prepareStatement(completeSql.toString());
+        fieldTypeStrategy.setPreparedStatement(preparedStatement, this.modernList, this.restrictionsList);
+        return preparedStatement;
     }
 }
