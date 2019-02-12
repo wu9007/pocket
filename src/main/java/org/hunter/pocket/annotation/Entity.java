@@ -19,4 +19,6 @@ public @interface Entity {
     boolean history() default true;
 
     String table() default "";
+
+    String businessName() default "";
 }

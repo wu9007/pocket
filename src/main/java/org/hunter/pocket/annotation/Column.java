@@ -14,4 +14,6 @@ import java.lang.annotation.Target;
 @Documented
 public @interface Column {
     String name();
+
+    String businessName() default "";
 }

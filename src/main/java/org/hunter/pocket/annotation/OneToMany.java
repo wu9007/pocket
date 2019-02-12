@@ -14,5 +14,8 @@ import java.lang.annotation.Target;
 @Documented
 public @interface OneToMany {
     Class clazz();
+
     String name();
+
+    String businessName() default "";
 }
