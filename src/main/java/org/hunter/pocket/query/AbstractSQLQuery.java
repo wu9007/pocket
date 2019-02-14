@@ -5,7 +5,7 @@ import java.sql.Connection;
 /**
  * @author wujianchuan 2019/1/3
  */
-public abstract class AbstractSQLQuery {
+abstract class AbstractSQLQuery {
     Connection connection;
     String sql;
 

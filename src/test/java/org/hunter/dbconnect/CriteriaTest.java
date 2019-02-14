@@ -216,4 +216,11 @@ public class CriteriaTest {
         Order order = processQuery.unique(mapperFunction);
         System.out.println(order.getCode());
     }
+
+    @Test
+    public void test14() throws Exception {
+        Criteria criteria = session.creatCriteria(Order.class);
+        criteria.add(Restrictions.equ("uuid", 1011011L));
+        criteria.delete();
+    }
 }
