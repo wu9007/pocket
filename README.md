@@ -140,4 +140,4 @@ Order order = processQuery.unique(mapperFunction);
 System.out.println(order.getCode());
 ```
 
-> 笔者不建议在程序中拼 `SQL`, 故未对 `SQL` 做过多的支持，此处就不做赘述。
+> 笔者不建议在程序中拼 `SQL`, 故未对 `SQLQuery` 做过多的支持，此处就不做赘述。
