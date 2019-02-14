@@ -93,11 +93,12 @@ public interface Session {
     /**
      * 获取最大数据标识
      *
+     * @param serverId 服务名
      * @param clazz 实体类型
      * @return 最大值
      * @throws Exception 语句异常
      */
-    long getMaxUuid(Class clazz) throws Exception;
+    long getMaxUuid(Integer serverId, Class clazz) throws Exception;
 
     /**
      * 删除该数据的缓存

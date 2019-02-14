@@ -136,7 +136,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     @Override
     public Object unique(boolean cascade) throws Exception {
         BaseEntity obj = (BaseEntity) this.unique();
-        if (cascade) {
+        if (obj != null && cascade) {
             this.applyChildren(obj);
         }
         this.after();

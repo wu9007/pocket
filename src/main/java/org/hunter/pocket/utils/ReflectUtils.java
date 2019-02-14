@@ -48,9 +48,8 @@ public class ReflectUtils {
      * @param clazz 类类型
      * @return 表名
      */
-    public String getTableName(Class clazz) {
-        Entity annotation = (Entity) clazz.getAnnotation(Entity.class);
-        return annotation.table();
+    public Entity getEntityAnnotation(Class clazz) {
+        return (Entity) clazz.getAnnotation(Entity.class);
     }
 
     /**

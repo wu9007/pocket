@@ -1,4 +1,4 @@
-package org.hunter.pocket.utils;
+package org.hunter.pocket.uuid;
 
 import org.hunter.pocket.session.Session;
 
@@ -6,6 +6,25 @@ import org.hunter.pocket.session.Session;
  * @author wujianchuan 2019/1/2
  */
 public interface UuidGenerator {
+
+    /**
+     * 保存服务ID
+     *
+     * @param serverId server id.
+     */
+    void setServerId(Integer serverId);
+
+    /**
+     * 获取生成策略标识
+     *
+     * @return 策略标识
+     */
+    String getGeneratorId();
+
+    /**
+     * 生成策略标识
+     */
+    void setGeneratorId();
 
     /**
      * 获取数据标识

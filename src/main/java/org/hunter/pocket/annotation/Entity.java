@@ -1,6 +1,7 @@
 package org.hunter.pocket.annotation;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -15,10 +16,15 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Bean
+@Component
 public @interface Entity {
-    boolean history() default true;
+    String table();
 
-    String table() default "";
+    int tableId();
+
+    String uuidGenerator() default "increment";
+
+    boolean history() default true;
 
     String businessName() default "";
 }

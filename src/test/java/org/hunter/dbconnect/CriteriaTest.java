@@ -1,6 +1,7 @@
 package org.hunter.dbconnect;
 
 import org.hunter.Application;
+import org.hunter.pocket.connect.ConnectionManager;
 import org.hunter.pocket.criteria.Criteria;
 import org.hunter.pocket.criteria.Modern;
 import org.hunter.pocket.criteria.Restrictions;
@@ -20,6 +21,7 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author wujianchuan 2019/1/15
@@ -93,7 +95,9 @@ public class CriteriaTest {
     @Test
     public void test5() throws Exception {
         Order order = (Order) this.session.findDirect(Order.class, 11L);
-        System.out.println(order.getPrice());
+        if (order != null) {
+            System.out.println(order.getPrice());
+        }
     }
 
     @Test
@@ -101,32 +105,9 @@ public class CriteriaTest {
         Criteria criteria = this.session.creatCriteria(Order.class);
         criteria.add(Restrictions.equ("uuid", 11L));
         Order order = (Order) criteria.unique(true);
-        System.out.println(order.getCommodities().size());
-    }
-
-    @Test
-    public void test7() throws Exception {
-        long s1 = System.currentTimeMillis();
-        Order order = (Order) this.session.findOne(Order.class, 11L);
-        long e1 = System.currentTimeMillis();
-        System.out.println(e1 - s1 + "------" + order.getCode());
-
-        long s2 = System.currentTimeMillis();
-        Order order1 = (Order) this.session.findOne(Order.class, 11L);
-        long e2 = System.currentTimeMillis();
-        System.out.println(e2 - s2 + "------" + order1.getCode());
-
-
-        long s3 = System.currentTimeMillis();
-        Order order2 = (Order) this.session.findOne(Order.class, 11L);
-        long e3 = System.currentTimeMillis();
-        System.out.println(e3 - s3 + "------" + order2.getCode());
-
-        this.session.removeCache(order);
-        long s4 = System.currentTimeMillis();
-        Order order4 = (Order) this.session.findOne(Order.class, 11L);
-        long e4 = System.currentTimeMillis();
-        System.out.println(e4 - s4 + "------" + order4.getCode());
+        if (order != null) {
+            System.out.println(order.getCommodities().size());
+        }
     }
 
     @Test
@@ -163,7 +144,9 @@ public class CriteriaTest {
     public void test11() throws Exception {
         this.session.findDirect(Order.class, 11L);
         Order order = (Order) this.session.findOne(Order.class, 11L);
-        order.setPrice(order.getPrice().add(new BigDecimal("20.1")));
-        this.session.update(order);
+        if (order != null) {
+            order.setPrice(order.getPrice().add(new BigDecimal("20.1")));
+            this.session.update(order);
+        }
     }
 }
