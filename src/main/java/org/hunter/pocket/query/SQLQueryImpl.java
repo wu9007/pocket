@@ -8,9 +8,9 @@ import java.sql.SQLException;
 /**
  * @author wujianchuan 2019/1/3
  */
-public class HomoQuery extends AbstractQuery implements Query {
+public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
 
-    public HomoQuery(String sql, Connection connection) {
+    public SQLQueryImpl(String sql, Connection connection) {
         super(sql, connection);
     }
 

@@ -5,6 +5,7 @@
 ### 配置信息
 ```json
 pocket:
+  serverId: 200
   datasource:
     node:
       - url: jdbc:mysql://127.0.0.1:3306/pocket1
@@ -48,7 +49,7 @@ pocket:
 - 属性注解`@ManyToOne`，`name` 关联主表数据标识的列名称
 ### 主类
 ```java
-@Entity(table = "TBL_ORDER")
+@Entity(table = "TBL_ORDER", tableId = 200)
 public class Order extends BaseEntity {
     private static final long serialVersionUID = 2560385391551524826L;
 
@@ -65,7 +66,7 @@ public class Order extends BaseEntity {
 ```
 ### 子类
 ```java
-@Entity(table = "TBL_COMMODITY")
+@Entity(table = "TBL_COMMODITY", tblId = 201)
 public class Commodity extends BaseEntity {
     private static final long serialVersionUID = -6711578420837877371L;
 

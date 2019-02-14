@@ -5,7 +5,7 @@ import java.sql.SQLException;
 /**
  * @author wujianchuan 2019/1/3
  */
-public interface Query {
+public interface SQLQuery {
 
     /**
      * 单条查询
