@@ -5,5 +5,10 @@ package org.hunter.pocket.criteria;
  */
 public interface SqlBean {
 
+    /**
+     * 获取作为条件传递给`Criteria`或`Modern`的值
+     *
+     * @return target
+     */
     Object getTarget();
 }

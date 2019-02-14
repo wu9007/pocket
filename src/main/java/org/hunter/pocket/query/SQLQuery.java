@@ -11,6 +11,7 @@ public interface SQLQuery {
      * 单条查询
      *
      * @return 查询结果
+     * @throws SQLException e
      */
     abstract Object unique() throws SQLException;
 }

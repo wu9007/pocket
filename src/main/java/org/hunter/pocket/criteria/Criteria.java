@@ -48,10 +48,29 @@ public interface Criteria {
      */
     List list(boolean cascade) throws Exception;
 
+    /**
+     * 获取最大值
+     *
+     * @param field 类型的属性
+     * @return 返回对象
+     * @throws Exception e
+     */
     Object max(String field) throws Exception;
 
+    /**
+     * 查询总数
+     *
+     * @return long
+     * @throws Exception e
+     */
     long count() throws Exception;
 
+    /**
+     * 删除数据
+     *
+     * @return 影响行数
+     * @throws Exception e
+     */
     long delete() throws Exception;
 
     /**
