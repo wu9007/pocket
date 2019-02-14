@@ -11,7 +11,8 @@ import org.hunter.pocket.criteria.Restrictions;
 import org.hunter.pocket.query.AbstractQuery;
 import org.hunter.pocket.query.HomoQuery;
 import org.hunter.pocket.utils.CacheUtils;
-import org.hunter.pocket.utils.HomoUuidGenerator;
+import org.hunter.pocket.uuid.IncrementGenerator;
+import org.hunter.pocket.uuid.UuidGeneratorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,11 +73,11 @@ public class SessionImpl extends AbstractSession {
     @Override
     public int save(BaseEntity entity) throws Exception {
         Class clazz = entity.getClass();
-        String tableName = reflectUtils.getTableName(clazz);
+        Entity entityAnnotation = reflectUtils.getEntityAnnotation(clazz);
 
         Field[] fields = reflectUtils.getMappingField(clazz);
         StringBuilder sql = new StringBuilder("INSERT INTO ")
-                .append(tableName)
+                .append(entityAnnotation.table())
                 .append("(")
                 .append(reflectUtils.getColumnNames(fields))
                 .append(") ");
@@ -86,7 +87,9 @@ public class SessionImpl extends AbstractSession {
         sql.append(valuesSql);
 
         this.showSql(sql.toString());
-        long uuid = HomoUuidGenerator.getInstance().getUuid(entity.getClass(), this);
+        long uuid = UuidGeneratorFactory.getInstance()
+                .getUuidGenerator(entityAnnotation.uuidGenerator())
+                .getUuid(entity.getClass(), this);
         entity.setUuid(uuid);
         PreparedStatement preparedStatement = this.connection.prepareStatement(sql.toString());
         statementApplyValue(entity, fields, preparedStatement);
@@ -99,13 +102,13 @@ public class SessionImpl extends AbstractSession {
     @Override
     public int update(BaseEntity entity) throws Exception {
         Class clazz = entity.getClass();
-        String tableName = reflectUtils.getTableName(clazz);
+        Entity entityAnnotation = reflectUtils.getEntityAnnotation(clazz);
         Object older = this.findOne(clazz, entity.getUuid());
         int effectRow;
         if (older != null) {
             Field[] fields = reflectUtils.dirtyFieldFilter(entity, older);
             if (fields.length > 0) {
-                StringBuilder sql = new StringBuilder("UPDATE ").append(tableName).append(" SET ");
+                StringBuilder sql = new StringBuilder("UPDATE ").append(entityAnnotation.table()).append(" SET ");
                 for (int index = 0; index < fields.length; index++) {
                     if (index < fields.length - 1) {
                         sql.append(fields[index].getAnnotation(Column.class).name()).append(" = ?, ");
@@ -135,10 +138,10 @@ public class SessionImpl extends AbstractSession {
     @Override
     public int delete(BaseEntity entity) throws Exception {
         Class clazz = entity.getClass();
-        String tableName = reflectUtils.getTableName(clazz);
+        Entity entityAnnotation = reflectUtils.getEntityAnnotation(clazz);
         Object garbage = this.findOne(clazz, entity.getUuid());
         if (garbage != null) {
-            String sql = "DELETE FROM " + tableName + " WHERE UUID = ?";
+            String sql = "DELETE FROM " + entityAnnotation.table() + " WHERE UUID = ?";
             this.showSql(sql);
             PreparedStatement preparedStatement = this.connection.prepareStatement(sql);
             preparedStatement.setLong(1, entity.getUuid());
@@ -186,9 +189,9 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public long getMaxUuid(Class clazz) throws Exception {
+    public long getMaxUuid(Integer serverId, Class clazz) throws Exception {
         Entity annotation = (Entity) clazz.getAnnotation(Entity.class);
-        PreparedStatement preparedStatement = this.connection.prepareStatement("SELECT MAX(UUID) FROM " + annotation.table());
+        PreparedStatement preparedStatement = this.connection.prepareStatement("SELECT MAX(UUID) FROM " + annotation.table() + " WHERE UUID REGEXP '^[" + serverId + annotation.tableId() + "]'");
         ResultSet resultSet = preparedStatement.executeQuery();
         long uuid;
         if (resultSet.next()) {

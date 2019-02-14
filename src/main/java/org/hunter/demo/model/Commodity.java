@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 /**
  * @author wujianchuan 2019/1/9
  */
-@Entity(table = "TBL_COMMODITY")
+@Entity(table = "TBL_COMMODITY", tableId = 102)
 public class Commodity extends BaseEntity {
     private static final long serialVersionUID = -6711578420837877371L;
     @Column(name = "NAME")

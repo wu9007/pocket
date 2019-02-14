@@ -8,6 +8,11 @@
   ],
   "properties": [
     {
+      "name": "pocket.serverId",
+      "type": "server id",
+      "description": "server id."
+    },
+    {
       "name": "pocket.datasource.node",
       "type": "java.util.List<org.hunter.pocket.config.DatabaseNodeConfig>",
       "description": "java.util.List<org.homo.dbconnect.config.DatabaseNode>."

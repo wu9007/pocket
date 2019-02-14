@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * @author wujianchuan 2018/12/26
  */
-@Entity(table = "TBL_ORDER")
+@Entity(table = "TBL_ORDER", tableId = 101)
 public class Order extends BaseEntity {
     private static final long serialVersionUID = 2560385391551524826L;
 

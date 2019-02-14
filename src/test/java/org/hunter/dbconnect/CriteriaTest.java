@@ -1,6 +1,7 @@
 package org.hunter.dbconnect;
 
 import org.hunter.Application;
+import org.hunter.pocket.connect.ConnectionManager;
 import org.hunter.pocket.criteria.Criteria;
 import org.hunter.pocket.criteria.Modern;
 import org.hunter.pocket.criteria.Restrictions;
@@ -20,6 +21,7 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author wujianchuan 2019/1/15
@@ -165,5 +167,31 @@ public class CriteriaTest {
         Order order = (Order) this.session.findOne(Order.class, 11L);
         order.setPrice(order.getPrice().add(new BigDecimal("20.1")));
         this.session.update(order);
+    }
+
+    @Test
+    public void test12() throws Exception {
+        CountDownLatch countDownLatch = new CountDownLatch(100);
+        for (int index = 0; index < 100; index++) {
+            Thread thread = new Thread(() -> {
+                try {
+                    Order order = Order.newInstance("C-001", new BigDecimal("50.25"));
+                    order.setDay(new Date());
+                    order.setTime(new Date());
+                    this.session.save(order);
+                    Order newOrder = (Order) this.session.findOne(Order.class, order.getUuid());
+                    System.out.println(newOrder.getDay());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+            thread.start();
+            countDownLatch.countDown();
+        }
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

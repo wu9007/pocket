@@ -16,9 +16,13 @@ import java.lang.annotation.Target;
 @Documented
 @Bean
 public @interface Entity {
-    boolean history() default true;
+    String table();
 
-    String table() default "";
+    int tableId();
+
+    String uuidGenerator() default "increment";
+
+    boolean history() default true;
 
     String businessName() default "";
 }
