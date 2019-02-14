@@ -2,7 +2,8 @@ package org.hunter.pocket.session;
 
 import org.hunter.pocket.model.BaseEntity;
 import org.hunter.pocket.criteria.Criteria;
-import org.hunter.pocket.query.AbstractQuery;
+import org.hunter.pocket.query.ProcessQuery;
+import org.hunter.pocket.query.SQLQuery;
 
 /**
  * @author wujianchuan 2018/12/31
@@ -28,20 +29,28 @@ public interface Session {
     Transaction getTransaction();
 
     /**
-     * 获取SQL查询对象
-     *
-     * @param sql 查询语句
-     * @return 查询对象
-     */
-    AbstractQuery createSQLQuery(String sql);
-
-    /**
      * 获取SQL规范对象
      *
      * @param clazz 实体类类型
      * @return SQL规范对象
      */
     Criteria creatCriteria(Class clazz);
+
+    /**
+     * 获取SQL查询对象
+     *
+     * @param sql 查询语句
+     * @return 查询对象
+     */
+    SQLQuery createSQLQuery(String sql);
+
+    /**
+     * 获取ProcessSQL查询对象
+     *
+     * @param processSQL     存储过程SQL
+     * @return 查询对象
+     */
+    <T> ProcessQuery<T> createProcessQuery(String processSQL);
 
     /**
      * 保存
@@ -94,7 +103,7 @@ public interface Session {
      * 获取最大数据标识
      *
      * @param serverId 服务名
-     * @param clazz 实体类型
+     * @param clazz    实体类型
      * @return 最大值
      * @throws Exception 语句异常
      */

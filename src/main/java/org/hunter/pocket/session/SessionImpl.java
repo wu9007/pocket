@@ -8,10 +8,11 @@ import org.hunter.pocket.config.DatabaseNodeConfig;
 import org.hunter.pocket.criteria.Criteria;
 import org.hunter.pocket.criteria.CriteriaImpl;
 import org.hunter.pocket.criteria.Restrictions;
-import org.hunter.pocket.query.AbstractQuery;
-import org.hunter.pocket.query.HomoQuery;
+import org.hunter.pocket.query.ProcessQuery;
+import org.hunter.pocket.query.ProcessQueryImpl;
+import org.hunter.pocket.query.SQLQuery;
+import org.hunter.pocket.query.SQLQueryImpl;
 import org.hunter.pocket.utils.CacheUtils;
-import org.hunter.pocket.uuid.IncrementGenerator;
 import org.hunter.pocket.uuid.UuidGeneratorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,8 +62,13 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public AbstractQuery createSQLQuery(String sql) {
-        return new HomoQuery(sql, this.connection);
+    public SQLQuery createSQLQuery(String sql) {
+        return new SQLQueryImpl(sql, this.connection);
+    }
+
+    @Override
+    public <T> ProcessQuery<T> createProcessQuery(String processSQL) {
+        return new ProcessQueryImpl<>(processSQL, this.connection);
     }
 
     @Override

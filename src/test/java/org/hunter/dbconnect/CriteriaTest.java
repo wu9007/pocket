@@ -1,11 +1,13 @@
 package org.hunter.dbconnect;
 
 import org.hunter.Application;
+import org.hunter.pocket.config.DatabaseConfig;
 import org.hunter.pocket.connect.ConnectionManager;
 import org.hunter.pocket.criteria.Criteria;
 import org.hunter.pocket.criteria.Modern;
 import org.hunter.pocket.criteria.Restrictions;
 import org.hunter.pocket.criteria.Sort;
+import org.hunter.pocket.query.ProcessQuery;
 import org.hunter.pocket.session.Session;
 import org.hunter.pocket.session.SessionFactory;
 import org.hunter.pocket.session.Transaction;
@@ -14,14 +16,21 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * @author wujianchuan 2019/1/15
@@ -148,5 +157,62 @@ public class CriteriaTest {
             order.setPrice(order.getPrice().add(new BigDecimal("20.1")));
             this.session.update(order);
         }
+    }
+
+    @Autowired
+    DatabaseConfig databaseConfig;
+
+    @Test
+    public void test12() throws Exception {
+
+        Function<ResultSet, Order> mapperFunction = (resultSet) -> {
+            try {
+                Order order = new Order();
+                order.setCode(resultSet.getString(1));
+                return order;
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return null;
+            }
+        };
+
+        List<Object> resultList = new ArrayList<>();
+
+        Connection connection = ConnectionManager.getInstance().getConnection(databaseConfig.getNode().get(0));
+
+        String procStr = "{call test(?)}";
+        CallableStatement callableStatement = connection.prepareCall(procStr);
+        callableStatement.setString(1, "霍姆");
+        callableStatement.execute();
+        ResultSet resultSet = callableStatement.getResultSet();
+        while (resultSet.next()) {
+            resultList.add(mapperFunction.apply(resultSet));
+        }
+
+        resultList.forEach(item -> {
+            System.out.println(item.getClass());
+        });
+
+        resultSet.close();
+        callableStatement.close();
+        connection.close();
+    }
+
+    @Test
+    public void test13() throws Exception {
+        ProcessQuery<Order> processQuery = this.session.createProcessQuery("{call test(?)}");
+        processQuery.setParameters(new String[]{"蚂蚁"});
+        Function<ResultSet, Order> mapperFunction = (resultSet) -> {
+            try {
+                Order order = new Order();
+                order.setCode(resultSet.getString(1));
+                return order;
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return null;
+            }
+        };
+        Order order = processQuery.unique(mapperFunction);
+        System.out.println(order.getCode());
     }
 }
