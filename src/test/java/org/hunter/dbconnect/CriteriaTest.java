@@ -74,6 +74,7 @@ public class CriteriaTest {
         Order order = Order.newInstance("C-001", new BigDecimal("50.25"));
         order.setDay(new Date());
         order.setTime(new Date());
+        order.setState(false);
         this.session.save(order);
         Order newOrder = (Order) this.session.findOne(Order.class, order.getUuid());
         System.out.println(newOrder.getDay());

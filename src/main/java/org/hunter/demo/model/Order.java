@@ -24,6 +24,8 @@ public class Order extends BaseEntity {
     private Date day;
     @Column(name = "TIME")
     private Date time;
+    @Column(name = "STATE")
+    private Boolean state;
 
     @OneToMany(clazz = Commodity.class, name = "ORDER_UUID")
     private List<Commodity> commodities;
@@ -78,5 +80,13 @@ public class Order extends BaseEntity {
 
     public void setTime(Date time) {
         this.time = time;
+    }
+
+    public Boolean getState() {
+        return state;
+    }
+
+    public void setState(Boolean state) {
+        this.state = state;
     }
 }

@@ -107,6 +107,14 @@ public class FieldTypeStrategy {
                 return null;
             }
         });
+        RESULT_STRATEGY_POOL.put(Boolean.class.getName(), (resultSet, columnName) -> {
+            try {
+                return resultSet.getBoolean(columnName);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
 
         PREPARED_STRATEGY_POOL.put(String.class.getName(), (value) -> {
             PreparedStatement preparedStatement = value.getPreparedStatement();
@@ -159,6 +167,15 @@ public class FieldTypeStrategy {
             SqlBean sqlBean = value.getSqlBean();
             try {
                 preparedStatement.setDouble(value.getIndex(), (Double) sqlBean.getTarget());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+        PREPARED_STRATEGY_POOL.put(Boolean.class.getName(), (value) -> {
+            PreparedStatement preparedStatement = value.getPreparedStatement();
+            SqlBean sqlBean = value.getSqlBean();
+            try {
+                preparedStatement.setBoolean(value.getIndex(), (Boolean) sqlBean.getTarget());
             } catch (SQLException e) {
                 e.printStackTrace();
             }
