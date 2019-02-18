@@ -33,7 +33,7 @@ public class IncrementGenerator extends AbstractUuidGenerator {
             tailNumber++;
         } else {
             long maxUuid = session.getMaxUuid(serverId, clazz);
-            if (maxUuid == 0) {
+            if (maxUuid == 0 || !String.valueOf(maxUuid).startsWith(leaderNum)) {
                 tailNumber = 0L;
             } else {
                 tailNumber = Long.parseLong(String.valueOf(maxUuid).substring(leaderNum.length()));

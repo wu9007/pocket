@@ -28,7 +28,7 @@ public class Order extends BaseEntity {
     private Boolean state;
 
     @OneToMany(clazz = Commodity.class, name = "ORDER_UUID")
-    private List<Commodity> commodities;
+    public List<Commodity> commodities;
 
     public static Order newInstance(String code, BigDecimal price) {
         Order order = new Order();
