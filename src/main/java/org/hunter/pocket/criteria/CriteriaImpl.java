@@ -243,7 +243,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             resultSet.close();
             preparedStatement.close();
         }
-        return collection;
+        return collection.size() > 0 ? collection : null;
     }
 
     /**

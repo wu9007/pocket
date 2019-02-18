@@ -31,6 +31,7 @@ public class TransactionImpl implements Transaction {
     public synchronized void commit() throws SQLException {
         if (this.connection != null) {
             this.connection.commit();
+            this.connection.setAutoCommit(true);
             this.connection = null;
             this.logger.info("Transaction commit.");
         } else {
@@ -42,6 +43,7 @@ public class TransactionImpl implements Transaction {
     public synchronized void rollBack() throws SQLException {
         if (this.connection != null) {
             this.connection.rollback();
+            this.connection.setAutoCommit(true);
             this.connection = null;
             this.logger.info("Transaction rollback.");
         } else {

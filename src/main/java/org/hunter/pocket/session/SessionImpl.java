@@ -197,7 +197,7 @@ public class SessionImpl extends AbstractSession {
     @Override
     public long getMaxUuid(Integer serverId, Class clazz) throws Exception {
         Entity annotation = (Entity) clazz.getAnnotation(Entity.class);
-        PreparedStatement preparedStatement = this.connection.prepareStatement("SELECT MAX(UUID) FROM " + annotation.table() + " WHERE UUID REGEXP '^[" + serverId + annotation.tableId() + "]'");
+        PreparedStatement preparedStatement = this.connection.prepareStatement("SELECT MAX(UUID) FROM " + annotation.table() + " WHERE UUID REGEXP '^" + serverId + annotation.tableId() + "'");
         ResultSet resultSet = preparedStatement.executeQuery();
         long uuid;
         if (resultSet.next()) {
