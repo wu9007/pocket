@@ -15,7 +15,7 @@ public interface Session {
      *
      * @return boolean
      */
-    boolean closed();
+    boolean getClosed();
 
     /**
      * 开启Session，拿到数据库链接并开启

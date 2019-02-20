@@ -36,7 +36,7 @@ abstract class AbstractSession implements Session {
     Boolean closed = true;
 
     @Override
-    public boolean closed() {
+    public boolean getClosed() {
         return this.closed;
     }
 
