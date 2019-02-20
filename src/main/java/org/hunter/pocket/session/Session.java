@@ -10,6 +10,12 @@ import org.hunter.pocket.query.SQLQuery;
  */
 
 public interface Session {
+    /**
+     * 是否已关闭
+     *
+     * @return boolean
+     */
+    boolean closed();
 
     /**
      * 开启Session，拿到数据库链接并开启
@@ -47,7 +53,7 @@ public interface Session {
     /**
      * 获取ProcessSQL查询对象
      *
-     * @param processSQL     存储过程SQL
+     * @param processSQL 存储过程SQL
      * @return 查询对象
      */
     <T> ProcessQuery<T> createProcessQuery(String processSQL);

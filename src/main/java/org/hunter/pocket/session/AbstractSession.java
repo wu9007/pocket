@@ -33,6 +33,16 @@ abstract class AbstractSession implements Session {
     CacheUtils cacheUtils;
     FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
     ReflectUtils reflectUtils = ReflectUtils.getInstance();
+    Boolean closed = true;
+
+    @Override
+    public boolean closed() {
+        return this.closed;
+    }
+
+    void setClosed(boolean closed) {
+        this.closed = closed;
+    }
 
     AbstractSession(DatabaseNodeConfig databaseNodeConfig, String sessionName, CacheUtils cacheUtils) {
         this.databaseNodeConfig = databaseNodeConfig;

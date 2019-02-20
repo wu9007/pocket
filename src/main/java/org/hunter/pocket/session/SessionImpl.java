@@ -35,6 +35,7 @@ public class SessionImpl extends AbstractSession {
     public synchronized void open() {
         if (this.connection == null) {
             this.connection = ConnectionManager.getInstance().getConnection(databaseNodeConfig);
+            this.setClosed(false);
             this.logger.info("Session: {} turned on.", this.sessionName);
         } else {
             this.logger.warn("This session is connected. Please don't try again.");
@@ -47,6 +48,7 @@ public class SessionImpl extends AbstractSession {
             ConnectionManager.getInstance().closeConnection(this.databaseNodeConfig.getNodeName(), this.connection);
             this.transaction = null;
             this.connection = null;
+            this.setClosed(true);
             this.logger.info("Session: {} turned off.", this.sessionName);
         } else {
             this.logger.warn("This session is closed. Please don't try again.");
