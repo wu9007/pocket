@@ -1,5 +1,6 @@
 package org.hunter.pocket.criteria;
 
+import org.hunter.pocket.connect.ConnectionManager;
 import org.hunter.pocket.constant.SqlOperateTypes;
 import org.hunter.pocket.model.BaseEntity;
 import org.hunter.pocket.annotation.Entity;
@@ -107,16 +108,19 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
-    public Object unique() throws Exception {
+    public Object unique() {
         completeSql.append("SELECT ")
                 .append(this.reflectUtils.getColumnNames(this.fields))
                 .append(" FROM ")
                 .append(this.tableName)
                 .append(this.sqlRestriction);
-        PreparedStatement preparedStatement = getPreparedStatement();
-        ResultSet resultSet = preparedStatement.executeQuery();
-        BaseEntity entity = (BaseEntity) clazz.newInstance();
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        BaseEntity entity;
         try {
+            preparedStatement = getPreparedStatement();
+            resultSet = preparedStatement.executeQuery();
+            entity = (BaseEntity) clazz.newInstance();
             if (resultSet.next()) {
                 for (Field field : this.fields) {
                     field.setAccessible(true);
@@ -125,19 +129,24 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             } else {
                 return null;
             }
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
         } finally {
-            resultSet.close();
-            preparedStatement.close();
+            ConnectionManager.closeIO(preparedStatement, resultSet);
             this.after();
         }
         return entity;
     }
 
     @Override
-    public Object unique(boolean cascade) throws Exception {
+    public Object unique(boolean cascade) {
         BaseEntity obj = (BaseEntity) this.unique();
         if (obj != null && cascade) {
-            this.applyChildren(obj);
+            try {
+                this.applyChildren(obj);
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage());
+            }
         }
         this.after();
         return obj;
