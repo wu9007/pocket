@@ -91,9 +91,8 @@ public interface Session {
      * @param clazz 类类型
      * @param uuid  数据标识
      * @return 实体对象
-     * @throws Exception 异常
      */
-    Object findOne(Class clazz, Long uuid) throws Exception;
+    Object findOne(Class clazz, Long uuid);
 
     /**
      * 强制通过数据库查询数据

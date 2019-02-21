@@ -164,7 +164,7 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public Object findOne(Class clazz, Long uuid) throws Exception {
+    public Object findOne(Class clazz, Long uuid) {
         String cacheKey = cacheUtils.generateKey(this.sessionName, clazz, uuid);
         Object result = cacheUtils.getObj(cacheKey);
         if (result != null) {
@@ -181,6 +181,9 @@ public class SessionImpl extends AbstractSession {
                 this.wait(10);
                 result = this.findOne(clazz, uuid);
             }
+        } catch (Exception e) {
+            //TODO 自定义异常
+            e.printStackTrace();
         } finally {
             if (lock) {
                 cacheUtils.mapLock.remove(cacheKey);
