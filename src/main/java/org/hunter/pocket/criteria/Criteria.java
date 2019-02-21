@@ -77,18 +77,16 @@ public interface Criteria {
      * 获取一条数据
      *
      * @return 对象
-     * @throws Exception 异常
      */
-    Object unique() throws Exception;
+    Object unique();
 
     /**
      * 获取一条数据
      *
      * @param cascade 是否级联查询
      * @return 对象
-     * @throws Exception 异常
      */
-    Object unique(boolean cascade) throws Exception;
+    Object unique(boolean cascade);
 
     /**
      * 批量更新操作
