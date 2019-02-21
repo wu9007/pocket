@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * @author wujianchuan 2019/1/1
@@ -79,7 +80,7 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public int save(BaseEntity entity) throws Exception {
+    public int save(BaseEntity entity) {
         Class clazz = entity.getClass();
         Entity entityAnnotation = reflectUtils.getEntityAnnotation(clazz);
 
@@ -95,28 +96,34 @@ public class SessionImpl extends AbstractSession {
         sql.append(valuesSql);
 
         this.showSql(sql.toString());
-        long uuid = UuidGeneratorFactory.getInstance()
-                .getUuidGenerator(entityAnnotation.uuidGenerator())
-                .getUuid(entity.getClass(), this);
-        entity.setUuid(uuid);
-        PreparedStatement preparedStatement = this.connection.prepareStatement(sql.toString());
-        statementApplyValue(entity, fields, preparedStatement);
-        int effectRow = preparedStatement.executeUpdate();
-        preparedStatement.close();
-        this.adoptChildren(entity);
+        int effectRow = 0;
+        PreparedStatement preparedStatement = null;
+        try {
+            long uuid = UuidGeneratorFactory.getInstance()
+                    .getUuidGenerator(entityAnnotation.uuidGenerator())
+                    .getUuid(entity.getClass(), this);
+            entity.setUuid(uuid);
+            preparedStatement = this.connection.prepareStatement(sql.toString());
+            statementApplyValue(entity, fields, preparedStatement);
+            effectRow = preparedStatement.executeUpdate();
+            this.adoptChildren(entity);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        } finally {
+            ConnectionManager.closeIO(preparedStatement, null);
+        }
         return effectRow;
     }
 
     @Override
-    public int update(BaseEntity entity) throws Exception {
+    public int update(BaseEntity entity) {
         Class clazz = entity.getClass();
-        Entity entityAnnotation = reflectUtils.getEntityAnnotation(clazz);
         Object older = this.findOne(clazz, entity.getUuid());
-        int effectRow;
+        int effectRow = 0;
         if (older != null) {
             Field[] fields = reflectUtils.dirtyFieldFilter(entity, older);
             if (fields.length > 0) {
-                StringBuilder sql = new StringBuilder("UPDATE ").append(entityAnnotation.table()).append(" SET ");
+                StringBuilder sql = new StringBuilder("UPDATE ").append(reflectUtils.getEntityAnnotation(clazz).table()).append(" SET ");
                 for (int index = 0; index < fields.length; index++) {
                     if (index < fields.length - 1) {
                         sql.append(fields[index].getAnnotation(Column.class).name()).append(" = ?, ");
@@ -126,41 +133,44 @@ public class SessionImpl extends AbstractSession {
                 }
                 sql.append(" WHERE UUID = ?");
                 this.showSql(sql.toString());
-                PreparedStatement preparedStatement = this.connection.prepareStatement(sql.toString());
-                statementApplyValue(entity, fields, preparedStatement);
-                preparedStatement.setObject(fields.length + 1, entity.getUuid());
-                effectRow = preparedStatement.executeUpdate();
-                preparedStatement.close();
-            } else {
-                //TODO: 封装异常类型
-                throw new RuntimeException("数据未发生变化");
+                PreparedStatement preparedStatement = null;
+                try {
+                    preparedStatement = this.connection.prepareStatement(sql.toString());
+                    statementApplyValue(entity, fields, preparedStatement);
+                    preparedStatement.setObject(fields.length + 1, entity.getUuid());
+                    effectRow = preparedStatement.executeUpdate();
+                } catch (Exception e) {
+                    throw new RuntimeException(e.getMessage());
+                } finally {
+                    ConnectionManager.closeIO(preparedStatement, null);
+                }
             }
             this.removeCache(entity);
-            return effectRow;
-        } else {
-            //TODO: 封装异常类型
-            throw new RuntimeException("未找到数据");
         }
+        return effectRow;
     }
 
     @Override
-    public int delete(BaseEntity entity) throws Exception {
+    public int delete(BaseEntity entity) {
         Class clazz = entity.getClass();
-        Entity entityAnnotation = reflectUtils.getEntityAnnotation(clazz);
         Object garbage = this.findOne(clazz, entity.getUuid());
+        int effectRow = 0;
         if (garbage != null) {
-            String sql = "DELETE FROM " + entityAnnotation.table() + " WHERE UUID = ?";
+            String sql = "DELETE FROM " + reflectUtils.getEntityAnnotation(clazz).table() + " WHERE UUID = ?";
             this.showSql(sql);
-            PreparedStatement preparedStatement = this.connection.prepareStatement(sql);
-            preparedStatement.setLong(1, entity.getUuid());
-            int effectRow = preparedStatement.executeUpdate();
-            preparedStatement.close();
+            PreparedStatement preparedStatement = null;
+            try {
+                preparedStatement = this.connection.prepareStatement(sql);
+                preparedStatement.setLong(1, entity.getUuid());
+                effectRow = preparedStatement.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException(e.getMessage());
+            } finally {
+                ConnectionManager.closeIO(preparedStatement, null);
+            }
             this.removeCache(entity);
-            return effectRow;
-        } else {
-            //TODO: 封装异常类型
-            throw new RuntimeException("未找到数据");
         }
+        return effectRow;
     }
 
     @Override
@@ -182,8 +192,7 @@ public class SessionImpl extends AbstractSession {
                 result = this.findOne(clazz, uuid);
             }
         } catch (Exception e) {
-            //TODO 自定义异常
-            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
         } finally {
             if (lock) {
                 cacheUtils.mapLock.remove(cacheKey);
@@ -193,7 +202,7 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public Object findDirect(Class clazz, Long uuid) throws Exception {
+    public Object findDirect(Class clazz, Long uuid){
         Criteria criteria = this.creatCriteria(clazz);
         criteria.add(Restrictions.equ("uuid", uuid));
         return criteria.unique(true);

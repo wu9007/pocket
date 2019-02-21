@@ -63,27 +63,24 @@ public interface Session {
      *
      * @param entity 实体对象
      * @return 影响行数
-     * @throws Exception 异常
      */
-    int save(BaseEntity entity) throws Exception;
+    int save(BaseEntity entity);
 
     /**
      * 更新实体
      *
      * @param entity 实体对象
      * @return 影响行数
-     * @throws Exception 异常
      */
-    int update(BaseEntity entity) throws Exception;
+    int update(BaseEntity entity);
 
     /**
      * 删除实体
      *
      * @param entity 实体对象
      * @return 影响行数
-     * @throws Exception 异常
      */
-    int delete(BaseEntity entity) throws Exception;
+    int delete(BaseEntity entity);
 
     /**
      * 查询对象
@@ -100,9 +97,8 @@ public interface Session {
      * @param clazz 类类型
      * @param uuid  数据标识
      * @return 实体对象
-     * @throws Exception 异常
      */
-    Object findDirect(Class clazz, Long uuid) throws Exception;
+    Object findDirect(Class clazz, Long uuid);
 
     /**
      * 获取最大数据标识
