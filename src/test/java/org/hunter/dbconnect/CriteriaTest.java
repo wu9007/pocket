@@ -28,9 +28,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * @author wujianchuan 2019/1/15

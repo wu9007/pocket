@@ -4,6 +4,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -26,7 +27,7 @@ public class CacheUtils {
         this.baseStringRedisTemplate = baseStringRedisTemplate;
     }
 
-    public String generateKey(String sessionName, Class clazz, Long uuid) {
+    public String generateKey(String sessionName, Class clazz, Serializable uuid) {
         return sessionName + clazz.getName() + uuid;
     }
 

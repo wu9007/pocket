@@ -2,8 +2,8 @@ package org.hunter.pocket.session;
 
 import org.hunter.pocket.annotation.ManyToOne;
 import org.hunter.pocket.annotation.OneToMany;
-import org.hunter.pocket.model.BaseEntity;
 import org.hunter.pocket.config.DatabaseNodeConfig;
+import org.hunter.pocket.model.PocketEntity;
 import org.hunter.pocket.utils.CacheUtils;
 import org.hunter.pocket.utils.FieldTypeStrategy;
 import org.hunter.pocket.utils.ReflectUtils;
@@ -56,7 +56,7 @@ abstract class AbstractSession implements Session {
         }
     }
 
-    void adoptChildren(BaseEntity entity) throws Exception {
+    void adoptChildren(PocketEntity entity) throws Exception {
         Field[] childrenFields = Arrays.stream(entity.getClass().getDeclaredFields()).filter(FIND_CHILDREN).toArray(Field[]::new);
         if (childrenFields.length > 0) {
             for (Field childField : childrenFields) {
@@ -71,15 +71,15 @@ abstract class AbstractSession implements Session {
                             .findFirst().orElseThrow(() -> new NullPointerException("子表实体未配置ManyToOne(name = \"" + oneToMany.name() + "\")注解"));
                     for (Object detail : child) {
                         mappingField.setAccessible(true);
-                        mappingField.set(detail, entity.getUuid());
-                        this.save((BaseEntity) detail);
+                        mappingField.set(detail, reflectUtils.getUuidValue(entity));
+                        this.save((PocketEntity) detail);
                     }
                 }
             }
         }
     }
 
-    void statementApplyValue(BaseEntity entity, Field[] fields, PreparedStatement preparedStatement) throws Exception {
+    void statementApplyValue(PocketEntity entity, Field[] fields, PreparedStatement preparedStatement) throws Exception {
         for (int valueIndex = 0; valueIndex < fields.length; valueIndex++) {
             Field field = fields[valueIndex];
             field.setAccessible(true);

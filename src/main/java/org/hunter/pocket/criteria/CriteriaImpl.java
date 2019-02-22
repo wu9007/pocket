@@ -1,12 +1,13 @@
 package org.hunter.pocket.criteria;
 
+import org.hunter.pocket.annotation.Entity;
 import org.hunter.pocket.connect.ConnectionManager;
 import org.hunter.pocket.constant.SqlOperateTypes;
-import org.hunter.pocket.model.BaseEntity;
-import org.hunter.pocket.annotation.Entity;
 import org.hunter.pocket.annotation.OneToMany;
 import org.hunter.pocket.config.DatabaseNodeConfig;
+import org.hunter.pocket.model.PocketEntity;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -76,10 +77,10 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         }
         PreparedStatement preparedStatement = getPreparedStatement();
         ResultSet resultSet = preparedStatement.executeQuery();
-        List<BaseEntity> result = new ArrayList<>();
+        List<PocketEntity> result = new ArrayList<>();
         try {
             while (resultSet.next()) {
-                BaseEntity entity = (BaseEntity) clazz.newInstance();
+                PocketEntity entity = (PocketEntity) clazz.newInstance();
                 for (Field field : this.fields) {
                     field.setAccessible(true);
                     field.set(entity, this.fieldTypeStrategy.getColumnValue(field, resultSet));
@@ -100,7 +101,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         if (cascade) {
             if (result.size() > 0) {
                 for (Object entity : result) {
-                    this.applyChildren((BaseEntity) entity);
+                    this.applyChildren((PocketEntity) entity);
                 }
             }
         }
@@ -116,12 +117,12 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                 .append(this.sqlRestriction);
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
-        BaseEntity entity;
+        PocketEntity entity;
         try {
             preparedStatement = getPreparedStatement();
             resultSet = preparedStatement.executeQuery();
-            entity = (BaseEntity) clazz.newInstance();
             if (resultSet.next()) {
+                entity = (PocketEntity) clazz.newInstance();
                 for (Field field : this.fields) {
                     field.setAccessible(true);
                     field.set(entity, this.fieldTypeStrategy.getColumnValue(field, resultSet));
@@ -140,7 +141,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public Object unique(boolean cascade) {
-        BaseEntity obj = (BaseEntity) this.unique();
+        PocketEntity obj = (PocketEntity) this.unique();
         if (obj != null && cascade) {
             try {
                 this.applyChildren(obj);
@@ -206,18 +207,20 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
      * @param entity 实体
      * @throws Exception 异常
      */
-    private void applyChildren(BaseEntity entity) throws Exception {
-        if (entity.getUuid() != null && childrenFields.length > 0) {
+    private void applyChildren(PocketEntity entity) throws Exception {
+        Serializable uuid = reflectUtils.getUuidValue(entity);
+
+        if (uuid != null && childrenFields.length > 0) {
             for (Field childField : childrenFields) {
                 childField.setAccessible(true);
                 if (childField.getAnnotation(OneToMany.class) != null) {
-                    childField.set(entity, this.getChildren(childField, entity.getUuid()));
+                    childField.set(entity, this.getChildren(childField, uuid));
                 }
             }
         }
     }
 
-    private Collection getChildren(Field field, Long uuid) throws Exception {
+    private Collection getChildren(Field field, Serializable uuid) throws Exception {
         OneToMany oneToMany = field.getAnnotation(OneToMany.class);
         Class clazz = oneToMany.clazz();
         String columnName = oneToMany.name();
@@ -232,16 +235,17 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                 + " = ?";
 
         PreparedStatement preparedStatement = this.connection.prepareStatement(sql);
-        preparedStatement.setLong(1, uuid);
+        preparedStatement.setObject(1, uuid);
         ResultSet resultSet = preparedStatement.executeQuery();
-        List<BaseEntity> collection = new ArrayList<>();
+        List<PocketEntity> collection = new ArrayList<>();
         try {
             while (resultSet.next()) {
-                BaseEntity entity = (BaseEntity) clazz.newInstance();
+                PocketEntity entity = (PocketEntity) clazz.newInstance();
                 for (Field childField : fields) {
                     childField.setAccessible(true);
                     if (childField.getAnnotation(OneToMany.class) != null) {
-                        childField.set(entity, this.getChildren(childField, entity.getUuid()));
+                        Serializable childUuid = reflectUtils.getUuidValue(entity);
+                        childField.set(entity, this.getChildren(childField, childUuid));
                     } else {
                         childField.set(entity, fieldTypeStrategy.getColumnValue(childField, resultSet));
                     }

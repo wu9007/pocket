@@ -6,6 +6,7 @@ import org.hunter.pocket.annotation.ManyToOne;
 import org.hunter.pocket.annotation.OneToMany;
 import org.hunter.pocket.criteria.FieldMapper;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Map;
@@ -50,6 +51,46 @@ public class ReflectUtils {
      */
     public Entity getEntityAnnotation(Class clazz) {
         return (Entity) clazz.getAnnotation(Entity.class);
+    }
+
+    /**
+     * 获取数据标识
+     *
+     * @param obj 实体
+     * @return 数据标识
+     */
+    public Serializable getUuidValue(Object obj) {
+        Serializable value;
+        Class clazz = obj.getClass();
+        Field uuid;
+        try {
+            uuid = clazz.getSuperclass().getDeclaredField("uuid");
+            uuid.setAccessible(true);
+            value = (Serializable) uuid.get(obj);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException("no uuid fond.");
+        }
+        return value;
+    }
+
+    /**
+     * 数据标识赋值
+     *
+     * @param obj   实体
+     * @param value 数据标识
+     * @return 实体
+     */
+    public Object setUuidValue(Object obj, Serializable value) {
+        Class clazz = obj.getClass();
+        Field uuid;
+        try {
+            uuid = clazz.getSuperclass().getDeclaredField("uuid");
+            uuid.setAccessible(true);
+            uuid.set(obj, value);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException("no uuid fond.");
+        }
+        return obj;
     }
 
     /**
