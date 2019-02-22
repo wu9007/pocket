@@ -1,9 +1,11 @@
 package org.hunter.pocket.session;
 
+import org.hunter.pocket.config.DatabaseNodeConfig;
 import org.hunter.pocket.criteria.Criteria;
 import org.hunter.pocket.model.PocketEntity;
 import org.hunter.pocket.query.ProcessQuery;
 import org.hunter.pocket.query.SQLQuery;
+import org.hunter.pocket.utils.CacheUtils;
 
 import java.io.Serializable;
 
@@ -12,6 +14,23 @@ import java.io.Serializable;
  */
 
 public interface Session {
+
+    /**
+     * 注入重要信息
+     *
+     * @param databaseNodeConfig 数据库节点配置信息
+     * @param sessionName        session name.
+     * @param cacheUtils         缓存工具
+     */
+    void setEssential(DatabaseNodeConfig databaseNodeConfig, String sessionName, CacheUtils cacheUtils);
+
+    /**
+     * 设置上层session（旨在当嵌套使用 session 时仅使用最上层的 session）
+     *
+     * @param upperStorySession 上层 session.
+     */
+    void setUpperStorySession(Session upperStorySession);
+
     /**
      * 是否已关闭
      *

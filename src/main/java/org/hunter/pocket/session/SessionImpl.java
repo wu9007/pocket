@@ -29,16 +29,20 @@ import java.sql.SQLException;
 public class SessionImpl extends AbstractSession {
     private Logger logger = LoggerFactory.getLogger(SessionImpl.class);
 
+    public SessionImpl() {
+    }
+
     SessionImpl(DatabaseNodeConfig databaseNodeConfig, String sessionName, CacheUtils cacheUtils) {
         super(databaseNodeConfig, sessionName, cacheUtils);
     }
 
     @Override
     public synchronized void open() {
-        if (this.connection == null) {
-            this.connection = ConnectionManager.getInstance().getConnection(databaseNodeConfig);
-            this.setClosed(false);
-            this.logger.info("Session: {} turned on.", this.sessionName);
+        AbstractSession session = this.getAvailableSession();
+        if (session.connection == null) {
+            session.connection = ConnectionManager.getInstance().getConnection(databaseNodeConfig);
+            session.setClosed(false);
+            this.logger.info("Session: {} turned on.", session.sessionName);
         } else {
             this.logger.warn("This session is connected. Please don't try again.");
         }
@@ -46,12 +50,13 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public synchronized void close() {
-        if (this.connection != null) {
-            ConnectionManager.getInstance().closeConnection(this.databaseNodeConfig.getNodeName(), this.connection);
-            this.transaction = null;
-            this.connection = null;
-            this.setClosed(true);
-            this.logger.info("Session: {} turned off.", this.sessionName);
+        AbstractSession session = this.getAvailableSession();
+        if (session.connection != null) {
+            ConnectionManager.getInstance().closeConnection(session.databaseNodeConfig.getNodeName(), session.connection);
+            session.transaction = null;
+            session.connection = null;
+            session.setClosed(true);
+            this.logger.info("Session: {} turned off.", session.sessionName);
         } else {
             this.logger.warn("This session is closed. Please don't try again.");
         }
@@ -59,29 +64,34 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public synchronized Transaction getTransaction() {
-        if (this.transaction == null) {
-            this.transaction = new TransactionImpl(this.connection);
+        AbstractSession session = this.getAvailableSession();
+        if (session.transaction == null) {
+            session.transaction = new TransactionImpl(session.connection);
         }
-        return this.transaction;
+        return session.transaction;
     }
 
     @Override
     public SQLQuery createSQLQuery(String sql) {
-        return new SQLQueryImpl(sql, this.connection);
+        AbstractSession session = this.getAvailableSession();
+        return new SQLQueryImpl(sql, session.connection);
     }
 
     @Override
     public <T> ProcessQuery<T> createProcessQuery(String processSQL) {
-        return new ProcessQueryImpl<>(processSQL, this.connection);
+        AbstractSession session = this.getAvailableSession();
+        return new ProcessQueryImpl<>(processSQL, session.connection);
     }
 
     @Override
     public Criteria creatCriteria(Class clazz) {
-        return new CriteriaImpl(clazz, this.connection, this.databaseNodeConfig);
+        AbstractSession session = this.getAvailableSession();
+        return new CriteriaImpl(clazz, session.connection, session.databaseNodeConfig);
     }
 
     @Override
     public int save(PocketEntity entity) {
+        AbstractSession session = this.getAvailableSession();
         Class clazz = entity.getClass();
         Entity entityAnnotation = reflectUtils.getEntityAnnotation(clazz);
 
@@ -96,18 +106,18 @@ public class SessionImpl extends AbstractSession {
                 .append(") ");
         sql.append(valuesSql);
 
-        this.showSql(sql.toString());
+        session.showSql(sql.toString());
         int effectRow;
         PreparedStatement preparedStatement = null;
         try {
             Serializable uuid = UuidGeneratorFactory.getInstance()
                     .getUuidGenerator(entityAnnotation.uuidGenerator())
-                    .getUuid(entity.getClass(), this);
+                    .getUuid(entity.getClass(), session);
             reflectUtils.setUuidValue(entity, uuid);
-            preparedStatement = this.connection.prepareStatement(sql.toString());
+            preparedStatement = session.connection.prepareStatement(sql.toString());
             statementApplyValue(entity, fields, preparedStatement);
             effectRow = preparedStatement.executeUpdate();
-            this.adoptChildren(entity);
+            session.adoptChildren(entity);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         } finally {
@@ -118,8 +128,9 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public int update(PocketEntity entity) {
+        AbstractSession session = this.getAvailableSession();
         Class clazz = entity.getClass();
-        Object older = this.findOne(clazz, reflectUtils.getUuidValue(entity));
+        Object older = session.findOne(clazz, reflectUtils.getUuidValue(entity));
         int effectRow = 0;
         if (older != null) {
             Field[] fields = reflectUtils.dirtyFieldFilter(entity, older);
@@ -133,10 +144,10 @@ public class SessionImpl extends AbstractSession {
                     }
                 }
                 sql.append(" WHERE UUID = ?");
-                this.showSql(sql.toString());
+                session.showSql(sql.toString());
                 PreparedStatement preparedStatement = null;
                 try {
-                    preparedStatement = this.connection.prepareStatement(sql.toString());
+                    preparedStatement = session.connection.prepareStatement(sql.toString());
                     statementApplyValue(entity, fields, preparedStatement);
                     preparedStatement.setObject(fields.length + 1, reflectUtils.getUuidValue(entity));
                     effectRow = preparedStatement.executeUpdate();
@@ -146,23 +157,24 @@ public class SessionImpl extends AbstractSession {
                     ConnectionManager.closeIO(preparedStatement, null);
                 }
             }
-            this.removeCache(entity);
+            session.removeCache(entity);
         }
         return effectRow;
     }
 
     @Override
     public int delete(PocketEntity entity) {
+        AbstractSession session = this.getAvailableSession();
         Class clazz = entity.getClass();
         Serializable uuid = reflectUtils.getUuidValue(entity);
-        Object garbage = this.findOne(clazz, uuid);
+        Object garbage = session.findOne(clazz, uuid);
         int effectRow = 0;
         if (garbage != null) {
             String sql = "DELETE FROM " + reflectUtils.getEntityAnnotation(clazz).table() + " WHERE UUID = ?";
-            this.showSql(sql);
+            session.showSql(sql);
             PreparedStatement preparedStatement = null;
             try {
-                preparedStatement = this.connection.prepareStatement(sql);
+                preparedStatement = session.connection.prepareStatement(sql);
                 preparedStatement.setObject(1, uuid);
                 effectRow = preparedStatement.executeUpdate();
             } catch (SQLException e) {
@@ -170,34 +182,35 @@ public class SessionImpl extends AbstractSession {
             } finally {
                 ConnectionManager.closeIO(preparedStatement, null);
             }
-            this.removeCache(entity);
+            session.removeCache(entity);
         }
         return effectRow;
     }
 
     @Override
     public Object findOne(Class clazz, Serializable uuid) {
-        String cacheKey = cacheUtils.generateKey(this.sessionName, clazz, uuid);
-        Object result = cacheUtils.getObj(cacheKey);
+        AbstractSession session = this.getAvailableSession();
+        String cacheKey = session.cacheUtils.generateKey(session.sessionName, clazz, uuid);
+        Object result = session.cacheUtils.getObj(cacheKey);
         if (result != null) {
             return result;
         }
 
         boolean lock = false;
         try {
-            lock = cacheUtils.mapLock.putIfAbsent(cacheKey, cacheKey) == null;
+            lock = session.cacheUtils.mapLock.putIfAbsent(cacheKey, cacheKey) == null;
             if (lock) {
-                result = this.findDirect(clazz, uuid);
-                cacheUtils.set(cacheKey, result, 360L);
+                result = session.findDirect(clazz, uuid);
+                session.cacheUtils.set(cacheKey, result, 360L);
             } else {
-                this.wait(10);
-                result = this.findOne(clazz, uuid);
+                session.wait(10);
+                result = session.findOne(clazz, uuid);
             }
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         } finally {
             if (lock) {
-                cacheUtils.mapLock.remove(cacheKey);
+                session.cacheUtils.mapLock.remove(cacheKey);
             }
         }
         return result;
@@ -205,15 +218,17 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public Object findDirect(Class clazz, Serializable uuid) {
-        Criteria criteria = this.creatCriteria(clazz);
+        AbstractSession session = this.getAvailableSession();
+        Criteria criteria = session.creatCriteria(clazz);
         criteria.add(Restrictions.equ("uuid", uuid));
         return criteria.unique(true);
     }
 
     @Override
     public long getMaxUuid(Integer serverId, Class clazz) throws Exception {
+        AbstractSession session = this.getAvailableSession();
         Entity annotation = (Entity) clazz.getAnnotation(Entity.class);
-        PreparedStatement preparedStatement = this.connection.prepareStatement("SELECT MAX(UUID) FROM " + annotation.table() + " WHERE UUID REGEXP '^" + serverId + annotation.tableId() + "'");
+        PreparedStatement preparedStatement = session.connection.prepareStatement("SELECT MAX(UUID) FROM " + annotation.table() + " WHERE UUID REGEXP '^" + serverId + annotation.tableId() + "'");
         ResultSet resultSet = preparedStatement.executeQuery();
         long uuid;
         if (resultSet.next()) {
@@ -228,7 +243,8 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public void removeCache(PocketEntity entity) {
-        String cacheKey = this.cacheUtils.generateKey(this.sessionName, entity.getClass(), reflectUtils.getUuidValue(entity));
-        this.cacheUtils.delete(cacheKey);
+        AbstractSession session = this.getAvailableSession();
+        String cacheKey = session.cacheUtils.generateKey(session.sessionName, entity.getClass(), reflectUtils.getUuidValue(entity));
+        session.cacheUtils.delete(cacheKey);
     }
 }
