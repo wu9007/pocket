@@ -33,7 +33,42 @@ abstract class AbstractSession implements Session {
     CacheUtils cacheUtils;
     FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
     ReflectUtils reflectUtils = ReflectUtils.getInstance();
-    Boolean closed = true;
+    private AbstractSession upperStorySession;
+    private Boolean closed = true;
+
+    AbstractSession() {
+    }
+
+    AbstractSession(DatabaseNodeConfig databaseNodeConfig, String sessionName, CacheUtils cacheUtils) {
+        this.databaseNodeConfig = databaseNodeConfig;
+        this.sessionName = sessionName;
+        this.cacheUtils = cacheUtils;
+    }
+
+    @Override
+    public void setEssential(DatabaseNodeConfig databaseNodeConfig, String sessionName, CacheUtils cacheUtils) {
+        this.databaseNodeConfig = databaseNodeConfig;
+        this.sessionName = sessionName;
+        this.cacheUtils = cacheUtils;
+    }
+
+    /**
+     * session 是否可用
+     *
+     * @return boolean
+     */
+    private boolean availability() {
+        return this.connection != null;
+    }
+
+    private AbstractSession getUpperStorySession() {
+        return upperStorySession;
+    }
+
+    @Override
+    public void setUpperStorySession(Session upperStorySession) {
+        this.upperStorySession = (AbstractSession) upperStorySession;
+    }
 
     @Override
     public boolean getClosed() {
@@ -44,10 +79,17 @@ abstract class AbstractSession implements Session {
         this.closed = closed;
     }
 
-    AbstractSession(DatabaseNodeConfig databaseNodeConfig, String sessionName, CacheUtils cacheUtils) {
-        this.databaseNodeConfig = databaseNodeConfig;
-        this.sessionName = sessionName;
-        this.cacheUtils = cacheUtils;
+    /**
+     * 获取可用的session（旨在当嵌套使用 session 时仅使用最上层的 session）
+     *
+     * @return session.
+     */
+    AbstractSession getAvailableSession() {
+        if (this.getUpperStorySession() != null) {
+            return this.getUpperStorySession().getAvailableSession();
+        } else {
+            return this;
+        }
     }
 
     void showSql(String sql) {

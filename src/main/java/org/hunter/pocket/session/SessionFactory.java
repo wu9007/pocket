@@ -5,6 +5,7 @@ import org.hunter.pocket.config.DatabaseNodeConfig;
 import org.hunter.pocket.constant.DatasourceDriverTypes;
 import org.hunter.pocket.utils.CacheUtils;
 
+import javax.validation.constraints.NotNull;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,7 +38,23 @@ public class SessionFactory {
         });
     }
 
+    /**
+     * 新建一个session对象
+     *
+     * @param sessionName session name
+     * @return session
+     */
     public static Session getSession(String sessionName) {
         return new SessionImpl(NODE_POOL.get(sessionName), sessionName, SessionFactory.cacheUtils);
+    }
+
+    /**
+     * 讲一个不可用的session设置为可用
+     *
+     * @param session     session.
+     * @param sessionName session name.
+     */
+    public static void sideEffect(@NotNull Session session, String sessionName) {
+        session.setEssential(NODE_POOL.get(sessionName), sessionName, SessionFactory.cacheUtils);
     }
 }

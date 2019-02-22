@@ -42,7 +42,7 @@ pocket:
 ```
 
 ## 实体类规范
-- 继承`BaseEntity`抽象类
+- 继承`BaseEntity`抽象类（数据标识为`Long`），或`AbstractEntity`（数据标识为`String`）
 - 类注解`@Entity`，`table` 对应数据库表名；`tableId` 对应数据库表标识，目的是为了在生成数据标识的时候区分表；`uuidGenerator` 对应主键生成策略，默认 `increment`，可通过集成 `AbstractUuidGenerator` 自定义主键生成策。
 - 属性注解`@Column`，`name` 对应数据库中对应的列名称
 - 属性注解`@OneToMany`， `clazz` 对应子类的类类型，`name` 对应该表数据标识在其子表中的字段名称
@@ -66,7 +66,7 @@ public class Order extends BaseEntity {
 ```
 ### 子类
 ```java
-@Entity(table = "TBL_COMMODITY", tblId = 201)
+@Entity(table = "TBL_COMMODITY", tblId = 201, businessName = "订单明细")
 public class Commodity extends BaseEntity {
     private static final long serialVersionUID = -6711578420837877371L;
 
@@ -140,4 +140,4 @@ Order order = processQuery.unique(mapperFunction);
 System.out.println(order.getCode());
 ```
 
-> 笔者不建议在程序中拼 `SQL`, 故未对 `SQLQuery` 做过多的支持，此处就不做赘述。
+> 笔者不建议在程序中拼写 `SQL`, 故未对 `SQLQuery` `ProcessQuery` 做过多的支持，此处就不做赘述。

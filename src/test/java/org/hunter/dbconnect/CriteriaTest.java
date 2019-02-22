@@ -3,6 +3,7 @@ package org.hunter.dbconnect;
 import org.hunter.Application;
 import org.hunter.pocket.config.DatabaseConfig;
 import org.hunter.pocket.connect.ConnectionManager;
+import org.hunter.pocket.connect.DatabaseManager;
 import org.hunter.pocket.criteria.Criteria;
 import org.hunter.pocket.criteria.Modern;
 import org.hunter.pocket.criteria.Restrictions;
@@ -194,7 +195,7 @@ public class CriteriaTest {
 
         resultSet.close();
         callableStatement.close();
-        connection.close();
+        ConnectionManager.getInstance().closeConnection(databaseConfig.getNode().get(0).getNodeName(), connection);
     }
 
     @Test
