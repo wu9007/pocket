@@ -6,22 +6,22 @@ import org.hunter.pocket.annotation.Column;
 import java.io.Serializable;
 
 /**
- * @author wujianchuan 2018/12/26
+ * @author wujianchuan 2019/2/22
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public abstract class BaseEntity implements PocketEntity {
-    private static final long serialVersionUID = -8735555543925687138L;
-    @Column(name = "UUID")
-    private Long uuid;
+public abstract class AbstractEntity implements PocketEntity {
 
-    public BaseEntity() {
+    @Column(name = "UUID")
+    private String uuid;
+
+    public AbstractEntity() {
     }
 
-    public Long getUuid() {
+    public String getUuid() {
         return uuid;
     }
 
-    public void setUuid(Long uuid) {
+    public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
@@ -39,7 +39,7 @@ public abstract class BaseEntity implements PocketEntity {
         } else if (this.getClass() != obj.getClass()) {
             return false;
         } else {
-            BaseEntity other = (BaseEntity) obj;
+            AbstractEntity other = (AbstractEntity) obj;
             if (this.uuid == null) {
                 return other.uuid == null;
             } else {

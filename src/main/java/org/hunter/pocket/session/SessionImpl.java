@@ -1,6 +1,5 @@
 package org.hunter.pocket.session;
 
-import org.hunter.pocket.model.BaseEntity;
 import org.hunter.pocket.connect.ConnectionManager;
 import org.hunter.pocket.annotation.Column;
 import org.hunter.pocket.annotation.Entity;
@@ -8,6 +7,7 @@ import org.hunter.pocket.config.DatabaseNodeConfig;
 import org.hunter.pocket.criteria.Criteria;
 import org.hunter.pocket.criteria.CriteriaImpl;
 import org.hunter.pocket.criteria.Restrictions;
+import org.hunter.pocket.model.PocketEntity;
 import org.hunter.pocket.query.ProcessQuery;
 import org.hunter.pocket.query.ProcessQueryImpl;
 import org.hunter.pocket.query.SQLQuery;
@@ -17,6 +17,7 @@ import org.hunter.pocket.uuid.UuidGeneratorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -80,7 +81,7 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public int save(BaseEntity entity) {
+    public int save(PocketEntity entity) {
         Class clazz = entity.getClass();
         Entity entityAnnotation = reflectUtils.getEntityAnnotation(clazz);
 
@@ -96,13 +97,13 @@ public class SessionImpl extends AbstractSession {
         sql.append(valuesSql);
 
         this.showSql(sql.toString());
-        int effectRow = 0;
+        int effectRow;
         PreparedStatement preparedStatement = null;
         try {
-            long uuid = UuidGeneratorFactory.getInstance()
+            Serializable uuid = UuidGeneratorFactory.getInstance()
                     .getUuidGenerator(entityAnnotation.uuidGenerator())
                     .getUuid(entity.getClass(), this);
-            entity.setUuid(uuid);
+            reflectUtils.setUuidValue(entity, uuid);
             preparedStatement = this.connection.prepareStatement(sql.toString());
             statementApplyValue(entity, fields, preparedStatement);
             effectRow = preparedStatement.executeUpdate();
@@ -116,9 +117,9 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public int update(BaseEntity entity) {
+    public int update(PocketEntity entity) {
         Class clazz = entity.getClass();
-        Object older = this.findOne(clazz, entity.getUuid());
+        Object older = this.findOne(clazz, reflectUtils.getUuidValue(entity));
         int effectRow = 0;
         if (older != null) {
             Field[] fields = reflectUtils.dirtyFieldFilter(entity, older);
@@ -137,7 +138,7 @@ public class SessionImpl extends AbstractSession {
                 try {
                     preparedStatement = this.connection.prepareStatement(sql.toString());
                     statementApplyValue(entity, fields, preparedStatement);
-                    preparedStatement.setObject(fields.length + 1, entity.getUuid());
+                    preparedStatement.setObject(fields.length + 1, reflectUtils.getUuidValue(entity));
                     effectRow = preparedStatement.executeUpdate();
                 } catch (Exception e) {
                     throw new RuntimeException(e.getMessage());
@@ -151,9 +152,10 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public int delete(BaseEntity entity) {
+    public int delete(PocketEntity entity) {
         Class clazz = entity.getClass();
-        Object garbage = this.findOne(clazz, entity.getUuid());
+        Serializable uuid = reflectUtils.getUuidValue(entity);
+        Object garbage = this.findOne(clazz, uuid);
         int effectRow = 0;
         if (garbage != null) {
             String sql = "DELETE FROM " + reflectUtils.getEntityAnnotation(clazz).table() + " WHERE UUID = ?";
@@ -161,7 +163,7 @@ public class SessionImpl extends AbstractSession {
             PreparedStatement preparedStatement = null;
             try {
                 preparedStatement = this.connection.prepareStatement(sql);
-                preparedStatement.setLong(1, entity.getUuid());
+                preparedStatement.setObject(1, uuid);
                 effectRow = preparedStatement.executeUpdate();
             } catch (SQLException e) {
                 throw new RuntimeException(e.getMessage());
@@ -174,7 +176,7 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public Object findOne(Class clazz, Long uuid) {
+    public Object findOne(Class clazz, Serializable uuid) {
         String cacheKey = cacheUtils.generateKey(this.sessionName, clazz, uuid);
         Object result = cacheUtils.getObj(cacheKey);
         if (result != null) {
@@ -202,7 +204,7 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public Object findDirect(Class clazz, Long uuid){
+    public Object findDirect(Class clazz, Serializable uuid) {
         Criteria criteria = this.creatCriteria(clazz);
         criteria.add(Restrictions.equ("uuid", uuid));
         return criteria.unique(true);
@@ -225,8 +227,8 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public void removeCache(BaseEntity entity) {
-        String cacheKey = this.cacheUtils.generateKey(this.sessionName, entity.getClass(), entity.getUuid());
+    public void removeCache(PocketEntity entity) {
+        String cacheKey = this.cacheUtils.generateKey(this.sessionName, entity.getClass(), reflectUtils.getUuidValue(entity));
         this.cacheUtils.delete(cacheKey);
     }
 }

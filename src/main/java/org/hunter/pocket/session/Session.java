@@ -1,9 +1,11 @@
 package org.hunter.pocket.session;
 
-import org.hunter.pocket.model.BaseEntity;
 import org.hunter.pocket.criteria.Criteria;
+import org.hunter.pocket.model.PocketEntity;
 import org.hunter.pocket.query.ProcessQuery;
 import org.hunter.pocket.query.SQLQuery;
+
+import java.io.Serializable;
 
 /**
  * @author wujianchuan 2018/12/31
@@ -64,7 +66,7 @@ public interface Session {
      * @param entity 实体对象
      * @return 影响行数
      */
-    int save(BaseEntity entity);
+    int save(PocketEntity entity);
 
     /**
      * 更新实体
@@ -72,7 +74,7 @@ public interface Session {
      * @param entity 实体对象
      * @return 影响行数
      */
-    int update(BaseEntity entity);
+    int update(PocketEntity entity);
 
     /**
      * 删除实体
@@ -80,7 +82,7 @@ public interface Session {
      * @param entity 实体对象
      * @return 影响行数
      */
-    int delete(BaseEntity entity);
+    int delete(PocketEntity entity);
 
     /**
      * 查询对象
@@ -89,7 +91,7 @@ public interface Session {
      * @param uuid  数据标识
      * @return 实体对象
      */
-    Object findOne(Class clazz, Long uuid);
+    Object findOne(Class clazz, Serializable uuid);
 
     /**
      * 强制通过数据库查询数据
@@ -98,7 +100,7 @@ public interface Session {
      * @param uuid  数据标识
      * @return 实体对象
      */
-    Object findDirect(Class clazz, Long uuid);
+    Object findDirect(Class clazz, Serializable uuid);
 
     /**
      * 获取最大数据标识
@@ -115,5 +117,5 @@ public interface Session {
      *
      * @param entity 实体对象
      */
-    void removeCache(BaseEntity entity);
+    void removeCache(PocketEntity entity);
 }

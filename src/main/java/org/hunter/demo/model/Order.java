@@ -53,11 +53,6 @@ public class Order extends BaseEntity {
         this.price = price;
     }
 
-    @Override
-    public String getDescribe() {
-        return super.getDescribe();
-    }
-
     public List<Commodity> getCommodities() {
         return commodities;
     }
