@@ -4,6 +4,8 @@ import org.hunter.pocket.session.Session;
 import org.hunter.pocket.utils.ReflectUtils;
 import org.springframework.stereotype.Component;
 
+import java.io.Serializable;
+
 /**
  * @author wujianchuan 2019/1/2
  */
@@ -24,7 +26,7 @@ public class IncrementGenerator extends AbstractUuidGenerator {
     }
 
     @Override
-    public synchronized long getUuid(Class clazz, Session session) throws Exception {
+    public synchronized Serializable getUuid(Class clazz, Session session) throws Exception {
         int tableId = ReflectUtils.getInstance().getEntityAnnotation(clazz).tableId();
         String mapKey = this.serverId + "_" + tableId;
         String leaderNum = "" + serverId + tableId;
@@ -40,6 +42,6 @@ public class IncrementGenerator extends AbstractUuidGenerator {
             }
         }
         POOL.put(mapKey, tailNumber++);
-        return Long.valueOf("" + leaderNum + tailNumber);
+        return "" + leaderNum + tailNumber;
     }
 }

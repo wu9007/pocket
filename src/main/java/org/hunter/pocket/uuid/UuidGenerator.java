@@ -2,6 +2,8 @@ package org.hunter.pocket.uuid;
 
 import org.hunter.pocket.session.Session;
 
+import java.io.Serializable;
+
 /**
  * @author wujianchuan 2019/1/2
  */
@@ -34,5 +36,5 @@ public interface UuidGenerator {
      * @return 数据标识
      * @throws Exception sql语句异常
      */
-    long getUuid(Class clazz, Session session) throws Exception;
+    Serializable getUuid(Class clazz, Session session) throws Exception;
 }
