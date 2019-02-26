@@ -10,19 +10,19 @@ import java.io.Serializable;
  * @author wujianchuan 2019/1/2
  */
 @Component
-public class IncrementGenerator extends AbstractUuidGenerator {
-    private final static UuidGenerator INSTANCE = new IncrementGenerator();
+public class IncrementLongGenerator extends AbstractUuidGenerator {
+    private final static UuidGenerator INSTANCE = new IncrementLongGenerator();
 
     public static UuidGenerator getInstance() {
         return INSTANCE;
     }
 
-    private IncrementGenerator() {
+    private IncrementLongGenerator() {
     }
 
     @Override
     public void setGeneratorId() {
-        this.generatorId = "increment";
+        this.generatorId = "long_increment";
     }
 
     @Override
@@ -42,6 +42,6 @@ public class IncrementGenerator extends AbstractUuidGenerator {
             }
         }
         POOL.put(mapKey, tailNumber++);
-        return "" + leaderNum + tailNumber;
+        return Long.valueOf("" + leaderNum + tailNumber);
     }
 }
