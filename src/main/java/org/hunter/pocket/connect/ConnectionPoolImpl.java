@@ -88,7 +88,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
             }
             connection = this.getConnection();
         }
-        System.out.println("获取连接：======================活动连接个数====  " + this.activatedCount + "  ===========================游离连接个数======  " + this.freeConnections.size() + "  ================================================");
+        logger.debug("获取连接：======================活动连接个数: " + this.activatedCount + "  ===========================游离连接个数: " + this.freeConnections.size() + "  ================================================");
         return connection;
     }
 
@@ -121,7 +121,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
             this.freeConnections.add(this.newConnection());
         }
         this.notifyAll();
-        System.out.println("释放链接：======================活动连接个数====  " + this.activatedCount + "  ===========================游离连接个数======  " + this.freeConnections.size() + "  ================================================");
+        logger.debug("释放链接：======================活动连接个数: " + this.activatedCount + "  ===========================游离连接个数: " + this.freeConnections.size() + "  ================================================");
     }
 
     @Override
