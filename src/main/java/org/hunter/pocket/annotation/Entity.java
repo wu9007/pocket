@@ -22,7 +22,7 @@ public @interface Entity {
 
     int tableId();
 
-    String uuidGenerator() default "increment";
+    String uuidGenerator() default "long_increment";
 
     boolean history() default true;
 
