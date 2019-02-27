@@ -51,7 +51,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
-    public int update() throws Exception {
+    public int update() {
         completeSql.append("UPDATE ")
                 .append(this.tableName)
                 .append(" SET ")
@@ -59,13 +59,19 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                         .map(modern -> fieldMapper.get(modern.getSource()).getColumnName() + " = ?")
                         .collect(Collectors.joining(", ")))
                 .append(this.sqlRestriction);
-        PreparedStatement preparedStatement = getPreparedStatement();
-        this.after();
-        return preparedStatement.executeUpdate();
+        PreparedStatement preparedStatement;
+        try {
+            preparedStatement = getPreparedStatement();
+            this.after();
+            return preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     @Override
-    public List list() throws Exception {
+    public List list() {
         completeSql.append("SELECT ")
                 .append(this.reflectUtils.getColumnNames(this.fields))
                 .append(" FROM ")
@@ -75,10 +81,13 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             completeSql.append(" ORDER BY ")
                     .append(this.orderList.stream().map(order -> fieldMapper.get(order.getSource()).getColumnName() + " " + order.getSortType()).collect(Collectors.joining(",")));
         }
-        PreparedStatement preparedStatement = getPreparedStatement();
-        ResultSet resultSet = preparedStatement.executeQuery();
-        List<PocketEntity> result = new ArrayList<>();
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
         try {
+            preparedStatement = getPreparedStatement();
+            resultSet = preparedStatement.executeQuery();
+            List<PocketEntity> result = new ArrayList<>();
+
             while (resultSet.next()) {
                 PocketEntity entity = (PocketEntity) clazz.newInstance();
                 for (Field field : this.fields) {
@@ -87,21 +96,27 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                 }
                 result.add(entity);
             }
+            return result;
+        } catch (SQLException | IllegalAccessException | InstantiationException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
         } finally {
-            resultSet.close();
-            preparedStatement.close();
+            ConnectionManager.closeIO(preparedStatement, resultSet);
             this.after();
         }
-        return result;
     }
 
     @Override
-    public List list(boolean cascade) throws Exception {
+    public List list(boolean cascade) {
         List result = this.list();
         if (cascade) {
             if (result.size() > 0) {
                 for (Object entity : result) {
-                    this.applyChildren((PocketEntity) entity);
+                    try {
+                        this.applyChildren((PocketEntity) entity);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -146,6 +161,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             try {
                 this.applyChildren(obj);
             } catch (Exception e) {
+                e.printStackTrace();
                 throw new RuntimeException(e.getMessage());
             }
         }
@@ -154,35 +170,53 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
-    public long count() throws Exception {
+    public long count() {
         completeSql.append("SELECT ")
                 .append(SqlOperateTypes.COUNT)
                 .append("(0)")
                 .append(" FROM ")
                 .append(this.tableName)
                 .append(this.sqlRestriction);
-        PreparedStatement preparedStatement = getPreparedStatement();
-        ResultSet resultSet = preparedStatement.executeQuery();
-        this.after();
-        if (resultSet.next()) {
-            return (long) resultSet.getObject(1);
-        } else {
-            throw new RuntimeException("No data found");
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        try {
+            preparedStatement = getPreparedStatement();
+            resultSet = preparedStatement.executeQuery();
+            this.after();
+            if (resultSet.next()) {
+                return (long) resultSet.getObject(1);
+            } else {
+                throw new RuntimeException("No data found");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        } finally {
+            ConnectionManager.closeIO(preparedStatement, resultSet);
         }
     }
 
     @Override
-    public long delete() throws Exception {
+    public long delete() {
         completeSql.append("DELETE FROM ")
                 .append(this.tableName)
                 .append(this.sqlRestriction);
-        PreparedStatement preparedStatement = getPreparedStatement();
-        this.after();
-        return preparedStatement.executeUpdate();
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = getPreparedStatement();
+            this.after();
+            return preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        } finally {
+            ConnectionManager.closeIO(preparedStatement, null);
+        }
     }
 
     @Override
-    public Object max(String fieldName) throws Exception {
+    public Object max(String fieldName) {
         completeSql.append("SELECT ")
                 .append(SqlOperateTypes.MAX)
                 .append("(")
@@ -191,13 +225,22 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                 .append(" FROM ")
                 .append(this.tableName)
                 .append(this.sqlRestriction);
-        PreparedStatement preparedStatement = getPreparedStatement();
-        ResultSet resultSet = preparedStatement.executeQuery();
-        this.after();
-        if (resultSet.next()) {
-            return resultSet.getObject(1);
-        } else {
-            throw new RuntimeException("No data found");
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            preparedStatement = getPreparedStatement();
+            resultSet = preparedStatement.executeQuery();
+            this.after();
+            if (resultSet.next()) {
+                return resultSet.getObject(1);
+            } else {
+                throw new RuntimeException("No data found");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        } finally {
+            ConnectionManager.closeIO(preparedStatement, resultSet);
         }
     }
 
@@ -207,20 +250,25 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
      * @param entity 实体
      * @throws Exception 异常
      */
-    private void applyChildren(PocketEntity entity) throws Exception {
+    private void applyChildren(PocketEntity entity) {
         Serializable uuid = reflectUtils.getUuidValue(entity);
 
         if (uuid != null && childrenFields.length > 0) {
             for (Field childField : childrenFields) {
                 childField.setAccessible(true);
                 if (childField.getAnnotation(OneToMany.class) != null) {
-                    childField.set(entity, this.getChildren(childField, uuid));
+                    try {
+                        childField.set(entity, this.getChildren(childField, uuid));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(e.getMessage());
+                    }
                 }
             }
         }
     }
 
-    private Collection getChildren(Field field, Serializable uuid) throws Exception {
+    private Collection getChildren(Field field, Serializable uuid) {
         OneToMany oneToMany = field.getAnnotation(OneToMany.class);
         Class clazz = oneToMany.clazz();
         String columnName = oneToMany.name();
@@ -234,11 +282,15 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                 + columnName
                 + " = ?";
 
-        PreparedStatement preparedStatement = this.connection.prepareStatement(sql);
-        preparedStatement.setObject(1, uuid);
-        ResultSet resultSet = preparedStatement.executeQuery();
-        List<PocketEntity> collection = new ArrayList<>();
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
         try {
+            preparedStatement = this.connection.prepareStatement(sql);
+
+            preparedStatement.setObject(1, uuid);
+            resultSet = preparedStatement.executeQuery();
+            List<PocketEntity> collection = new ArrayList<>();
+
             while (resultSet.next()) {
                 PocketEntity entity = (PocketEntity) clazz.newInstance();
                 for (Field childField : fields) {
@@ -252,11 +304,13 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                 }
                 collection.add(entity);
             }
+            return collection.size() > 0 ? collection : null;
+        } catch (SQLException | IllegalAccessException | InstantiationException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
         } finally {
-            resultSet.close();
-            preparedStatement.close();
+            ConnectionManager.closeIO(preparedStatement, resultSet);
         }
-        return collection.size() > 0 ? collection : null;
     }
 
     /**
@@ -282,9 +336,15 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         return sql.toString();
     }
 
-    private PreparedStatement getPreparedStatement() throws SQLException {
+    private PreparedStatement getPreparedStatement() {
         this.before();
-        PreparedStatement preparedStatement = this.connection.prepareStatement(completeSql.toString());
+        PreparedStatement preparedStatement;
+        try {
+            preparedStatement = this.connection.prepareStatement(completeSql.toString());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }
         fieldTypeStrategy.setPreparedStatement(preparedStatement, this.modernList, this.restrictionsList);
         return preparedStatement;
     }
