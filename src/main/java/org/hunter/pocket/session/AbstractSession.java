@@ -31,9 +31,8 @@ abstract class AbstractSession implements Session {
     Connection connection;
     Transaction transaction;
     CacheUtils cacheUtils;
-    FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
     ReflectUtils reflectUtils = ReflectUtils.getInstance();
-    private AbstractSession upperStorySession;
+    private ThreadLocal<Session> upperStorySessionLocal;
     private Boolean closed = true;
 
     AbstractSession() {
@@ -61,13 +60,14 @@ abstract class AbstractSession implements Session {
         return this.connection != null;
     }
 
-    private AbstractSession getUpperStorySession() {
-        return upperStorySession;
+    @Deprecated
+    private ThreadLocal<Session> getUpperStorySessionLocal() {
+        return this.upperStorySessionLocal;
     }
 
     @Override
-    public void setUpperStorySession(Session upperStorySession) {
-        this.upperStorySession = (AbstractSession) upperStorySession;
+    public void setUpperStorySessionLocal(ThreadLocal<Session> upperStorySessionLocal) {
+        this.upperStorySessionLocal = upperStorySessionLocal;
     }
 
     @Override
@@ -84,9 +84,10 @@ abstract class AbstractSession implements Session {
      *
      * @return session.
      */
+    @Deprecated
     AbstractSession getAvailableSession() {
-        if (this.getUpperStorySession() != null) {
-            return this.getUpperStorySession().getAvailableSession();
+        if (this.getUpperStorySessionLocal() != null && this.getUpperStorySessionLocal().get() != null) {
+            return ((AbstractSession) this.getUpperStorySessionLocal().get()).getAvailableSession();
         } else {
             return this;
         }

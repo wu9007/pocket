@@ -35,43 +35,38 @@ public interface Criteria {
      * 获取所有数据
      *
      * @return 对象集合
-     * @throws Exception 异常
      */
-    List list() throws Exception;
+    List list();
 
     /**
      * 获取所有数据
      *
      * @param cascade 是否级联查询
      * @return 对象集合
-     * @throws Exception 异常
      */
-    List list(boolean cascade) throws Exception;
+    List list(boolean cascade);
 
     /**
      * 获取最大值
      *
      * @param field 类型的属性
      * @return 返回对象
-     * @throws Exception e
      */
-    Object max(String field) throws Exception;
+    Object max(String field);
 
     /**
      * 查询总数
      *
      * @return long
-     * @throws Exception e
      */
-    long count() throws Exception;
+    long count();
 
     /**
      * 删除数据
      *
      * @return 影响行数
-     * @throws Exception e
      */
-    long delete() throws Exception;
+    long delete();
 
     /**
      * 获取一条数据
@@ -92,7 +87,6 @@ public interface Criteria {
      * 批量更新操作
      *
      * @return 影响行数
-     * @throws Exception 异常
      */
-    int update() throws Exception;
+    int update();
 }
