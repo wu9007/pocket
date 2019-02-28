@@ -49,11 +49,12 @@ public class SessionFactory {
     }
 
     /**
-     * 讲一个不可用的session设置为可用
+     * 将一个不可用的session设置为可用（引用传参）
      *
      * @param session     session.
      * @param sessionName session name.
      */
+    @Deprecated
     public static void sideEffect(@NotNull Session session, String sessionName) {
         session.setEssential(NODE_POOL.get(sessionName), sessionName, SessionFactory.cacheUtils);
     }

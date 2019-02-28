@@ -22,14 +22,16 @@ public interface Session {
      * @param sessionName        session name.
      * @param cacheUtils         缓存工具
      */
+    @Deprecated
     void setEssential(DatabaseNodeConfig databaseNodeConfig, String sessionName, CacheUtils cacheUtils);
 
     /**
-     * 设置上层session（旨在当嵌套使用 session 时仅使用最上层的 session）
+     * 设置上层session local（旨在当嵌套使用 session local 时仅使用最上层的 session local）
      *
-     * @param upperStorySession 上层 session.
+     * @param upperStorySessionLocal 上层 session local.
      */
-    void setUpperStorySession(Session upperStorySession);
+    @Deprecated
+    void setUpperStorySessionLocal(ThreadLocal<Session> upperStorySessionLocal);
 
     /**
      * 是否已关闭
