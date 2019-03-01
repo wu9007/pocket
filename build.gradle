@@ -5,7 +5,7 @@ apply plugin: "jacoco"
 apply plugin: 'build-dashboard'
 apply plugin: 'maven-publish'
 
-group = 'org.hunter'
+group = 'com.hunter'
 version = '0.0.1-PRE-RELEASE'
 sourceCompatibility = 1.8
 
@@ -51,10 +51,27 @@ publishing {
             }
         }
     }
+
+    repositories {
+        maven {
+            credentials {
+                username "${upload_username}"
+                password "${upload_password}"
+            }
+            url "${upload_url}"
+        }
+    }
 }
 
 repositories {
     mavenLocal()
+    maven {
+        url "${download_url}"
+        credentials {
+            username "${download_username}"
+            password "${download_password}"
+        }
+    }
     mavenCentral()
 }
 
