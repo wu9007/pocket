@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.Function;
 
 /**
@@ -221,5 +222,28 @@ public class CriteriaTest {
         Criteria criteria = session.creatCriteria(Order.class);
         criteria.add(Restrictions.equ("uuid", 1011011L));
         criteria.delete();
+    }
+
+    @Test
+    public void test15() throws Exception {
+        CountDownLatch countDownLatch = new CountDownLatch(5000);
+        for (int index = 0; index < 5000; index++) {
+            Thread thread = new Thread(() -> {
+                try {
+                    countDownLatch.await();
+                    Order order = (Order) session.findOne(Order.class, 1);
+                    System.out.println(order.getCode() + "=======================");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
+            thread.start();
+            countDownLatch.countDown();
+        }
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

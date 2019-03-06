@@ -203,10 +203,13 @@ public class SessionImpl extends AbstractSession {
                 result = session.findDirect(clazz, uuid);
                 session.cacheUtils.set(cacheKey, result, 360L);
             } else {
-                session.wait(10);
-                result = session.findOne(clazz, uuid);
+                synchronized (this) {
+                    wait(2);
+                    result = session.findOne(clazz, uuid);
+                }
             }
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
+            e.printStackTrace();
             throw new RuntimeException(e.getMessage());
         } finally {
             if (lock) {
