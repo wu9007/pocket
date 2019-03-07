@@ -61,7 +61,7 @@ public class DatabaseLauncher implements CommandLineRunner {
     private void verifyEntity() {
         Map<Integer, Boolean> counter = new HashMap<>(260);
         if (this.entityList != null) {
-            for (Entity entityAnnotation : entityList.stream().map(entity -> (Entity) entity.getClass().getAnnotation(Entity.class)).collect(Collectors.toList())) {
+            for (Entity entityAnnotation : entityList.stream().map(entity -> entity.getClass().getAnnotation(Entity.class)).collect(Collectors.toList())) {
                 if (counter.containsKey(entityAnnotation.tableId())) {
                     throw new RuntimeException("Table ID - " + entityAnnotation.tableId() + " repeated.");
                 } else {

@@ -51,10 +51,27 @@ publishing {
             }
         }
     }
+
+    repositories {
+        maven {
+            credentials {
+                username "${upload_username}"
+                password "${upload_password}"
+            }
+            url "${upload_url}"
+        }
+    }
 }
 
 repositories {
     mavenLocal()
+    maven {
+        url "${download_url}"
+        credentials {
+            username "${download_username}"
+            password "${download_password}"
+        }
+    }
     mavenCentral()
 }
 

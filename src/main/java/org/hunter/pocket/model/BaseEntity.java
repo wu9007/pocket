@@ -3,8 +3,6 @@ package org.hunter.pocket.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.hunter.pocket.annotation.Column;
 
-import java.io.Serializable;
-
 /**
  * @author wujianchuan 2018/12/26
  */

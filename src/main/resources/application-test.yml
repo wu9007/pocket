@@ -12,7 +12,7 @@ pocket:
         poolMaxSize: 60
         timeout: 1000
         session: homo,user
-      - url: jdbc:mysql://127.0.0.1:3306/homo_bak?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8
+      - url: jdbc:mysql://127.0.0.1:3306/homo?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8
         nodeName: mysql-01-02
         driverName: com.mysql.cj.jdbc.Driver
         showSql: true

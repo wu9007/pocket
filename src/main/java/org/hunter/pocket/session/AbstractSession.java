@@ -5,7 +5,6 @@ import org.hunter.pocket.annotation.OneToMany;
 import org.hunter.pocket.config.DatabaseNodeConfig;
 import org.hunter.pocket.model.PocketEntity;
 import org.hunter.pocket.utils.CacheUtils;
-import org.hunter.pocket.utils.FieldTypeStrategy;
 import org.hunter.pocket.utils.ReflectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,42 +31,12 @@ abstract class AbstractSession implements Session {
     Transaction transaction;
     CacheUtils cacheUtils;
     ReflectUtils reflectUtils = ReflectUtils.getInstance();
-    private ThreadLocal<Session> upperStorySessionLocal;
     private Boolean closed = true;
-
-    AbstractSession() {
-    }
 
     AbstractSession(DatabaseNodeConfig databaseNodeConfig, String sessionName, CacheUtils cacheUtils) {
         this.databaseNodeConfig = databaseNodeConfig;
         this.sessionName = sessionName;
         this.cacheUtils = cacheUtils;
-    }
-
-    @Override
-    public void setEssential(DatabaseNodeConfig databaseNodeConfig, String sessionName, CacheUtils cacheUtils) {
-        this.databaseNodeConfig = databaseNodeConfig;
-        this.sessionName = sessionName;
-        this.cacheUtils = cacheUtils;
-    }
-
-    /**
-     * session 是否可用
-     *
-     * @return boolean
-     */
-    private boolean availability() {
-        return this.connection != null;
-    }
-
-    @Deprecated
-    private ThreadLocal<Session> getUpperStorySessionLocal() {
-        return this.upperStorySessionLocal;
-    }
-
-    @Override
-    public void setUpperStorySessionLocal(ThreadLocal<Session> upperStorySessionLocal) {
-        this.upperStorySessionLocal = upperStorySessionLocal;
     }
 
     @Override
@@ -77,20 +46,6 @@ abstract class AbstractSession implements Session {
 
     void setClosed(boolean closed) {
         this.closed = closed;
-    }
-
-    /**
-     * 获取可用的session（旨在当嵌套使用 session 时仅使用最上层的 session）
-     *
-     * @return session.
-     */
-    @Deprecated
-    AbstractSession getAvailableSession() {
-        if (this.getUpperStorySessionLocal() != null && this.getUpperStorySessionLocal().get() != null) {
-            return ((AbstractSession) this.getUpperStorySessionLocal().get()).getAvailableSession();
-        } else {
-            return this;
-        }
     }
 
     void showSql(String sql) {

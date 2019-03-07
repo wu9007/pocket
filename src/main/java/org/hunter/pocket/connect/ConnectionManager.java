@@ -58,9 +58,7 @@ public class ConnectionManager {
     }
 
     public void destroy() {
-        this.connectionPoolMap.forEach((key, value) -> {
-            value.destroy();
-        });
+        this.connectionPoolMap.forEach((key, value) -> value.destroy());
         logger.info("Database pool was destroy");
     }
 
@@ -110,13 +108,13 @@ public class ConnectionManager {
         return true;
     }
 
-    public static void closeIO(PreparedStatement pstmt, ResultSet rs) {
+    public static void closeIO(PreparedStatement preparedStatement, ResultSet rs) {
         try {
             if (rs != null) {
                 rs.close();
             }
-            if (pstmt != null) {
-                pstmt.close();
+            if (preparedStatement != null) {
+                preparedStatement.close();
             }
         } catch (Exception e) {
             e.printStackTrace();
