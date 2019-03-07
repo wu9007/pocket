@@ -3,7 +3,6 @@ package org.hunter.dbconnect;
 import org.hunter.Application;
 import org.hunter.pocket.config.DatabaseConfig;
 import org.hunter.pocket.connect.ConnectionManager;
-import org.hunter.pocket.connect.DatabaseManager;
 import org.hunter.pocket.criteria.Criteria;
 import org.hunter.pocket.criteria.Modern;
 import org.hunter.pocket.criteria.Restrictions;
@@ -60,7 +59,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test1() throws Exception {
+    public void test1() {
         Criteria criteria = this.session.creatCriteria(Order.class);
         criteria.add(Restrictions.like("code", "%A%"))
                 .add(Restrictions.ne("code", "A-002"))
@@ -70,7 +69,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test2() throws Exception {
+    public void test2() {
         Order order = Order.newInstance("C-001", new BigDecimal("50.25"));
         order.setDay(new Date());
         order.setTime(new Date());
@@ -81,7 +80,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test3() throws Exception {
+    public void test3() {
         Criteria criteria = this.session.creatCriteria(Order.class);
         criteria.add(Restrictions.lt("time", new Date()));
         List orderList = criteria.list(true);
@@ -89,7 +88,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test4() throws Exception {
+    public void test4() {
         Order order = Order.newInstance("C-001", new BigDecimal("50.25"));
         order.setDay(new Date());
         order.setTime(new Date());
@@ -103,7 +102,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test5() throws Exception {
+    public void test5() {
         Order order = (Order) this.session.findDirect(Order.class, 11L);
         if (order != null) {
             System.out.println(order.getPrice());
@@ -111,7 +110,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test6() throws Exception {
+    public void test6() {
         Criteria criteria = this.session.creatCriteria(Order.class);
         criteria.add(Restrictions.equ("uuid", 11L));
         Order order = (Order) criteria.unique(true);
@@ -121,7 +120,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test8() throws Exception {
+    public void test8() {
         Criteria criteria = this.session.creatCriteria(Order.class);
         criteria.add(Modern.set("price", 500.5D))
                 .add(Restrictions.equ("code", "C-001"))
@@ -130,7 +129,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test9() throws Exception {
+    public void test9() {
         Criteria criteria = this.session.creatCriteria(Order.class);
         criteria.add(Restrictions.equ("code", "C-001"));
         System.out.println(criteria.max("price"));
@@ -141,7 +140,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test10() throws Exception {
+    public void test10() {
         Criteria criteria = this.session.creatCriteria(Order.class);
         List list = criteria.add(Restrictions.like("code", "%001%"))
                 .add(Sort.desc("price"))
@@ -151,7 +150,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test11() throws Exception {
+    public void test11() {
         this.session.findDirect(Order.class, 11L);
         Order order = (Order) this.session.findOne(Order.class, 11L);
         if (order != null) {
@@ -164,70 +163,16 @@ public class CriteriaTest {
     DatabaseConfig databaseConfig;
 
     @Test
-    public void test12() throws Exception {
-
-        Function<ResultSet, Order> mapperFunction = (resultSet) -> {
-            try {
-                Order order = new Order();
-                order.setCode(resultSet.getString(1));
-                return order;
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return null;
-            }
-        };
-
-        List<Object> resultList = new ArrayList<>();
-
-        Connection connection = ConnectionManager.getInstance().getConnection(databaseConfig.getNode().get(0));
-
-        String procStr = "{call test(?)}";
-        CallableStatement callableStatement = connection.prepareCall(procStr);
-        callableStatement.setString(1, "霍姆");
-        callableStatement.execute();
-        ResultSet resultSet = callableStatement.getResultSet();
-        while (resultSet.next()) {
-            resultList.add(mapperFunction.apply(resultSet));
-        }
-
-        resultList.forEach(item -> {
-            System.out.println(item.getClass());
-        });
-
-        resultSet.close();
-        callableStatement.close();
-        ConnectionManager.getInstance().closeConnection(databaseConfig.getNode().get(0).getNodeName(), connection);
-    }
-
-    @Test
-    public void test13() throws Exception {
-        ProcessQuery<Order> processQuery = this.session.createProcessQuery("{call test(?)}");
-        processQuery.setParameters(new String[]{"蚂蚁"});
-        Function<ResultSet, Order> mapperFunction = (resultSet) -> {
-            try {
-                Order order = new Order();
-                order.setCode(resultSet.getString(1));
-                return order;
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return null;
-            }
-        };
-        Order order = processQuery.unique(mapperFunction);
-        System.out.println(order.getCode());
-    }
-
-    @Test
-    public void test14() throws Exception {
+    public void test14() {
         Criteria criteria = session.creatCriteria(Order.class);
         criteria.add(Restrictions.equ("uuid", 1011011L));
         criteria.delete();
     }
 
     @Test
-    public void test15() throws Exception {
-        CountDownLatch countDownLatch = new CountDownLatch(5000);
-        for (int index = 0; index < 5000; index++) {
+    public void test15() {
+        CountDownLatch countDownLatch = new CountDownLatch(500);
+        for (int index = 0; index < 500; index++) {
             Thread thread = new Thread(() -> {
                 try {
                     countDownLatch.await();
@@ -241,7 +186,7 @@ public class CriteriaTest {
             countDownLatch.countDown();
         }
         try {
-            Thread.sleep(5000);
+            Thread.sleep(11000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
