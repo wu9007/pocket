@@ -248,7 +248,6 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
      * 给实体追加子表信息
      *
      * @param entity 实体
-     * @throws Exception 异常
      */
     private void applyChildren(PocketEntity entity) {
         Serializable uuid = reflectUtils.getUuidValue(entity);

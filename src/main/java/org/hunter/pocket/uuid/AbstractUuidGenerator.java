@@ -2,7 +2,6 @@ package org.hunter.pocket.uuid;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author wujianchuan 2019/2/14

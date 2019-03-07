@@ -2,12 +2,10 @@ package org.hunter.dbconnect;
 
 import org.hunter.Application;
 import org.hunter.pocket.config.DatabaseConfig;
-import org.hunter.pocket.connect.ConnectionManager;
 import org.hunter.pocket.criteria.Criteria;
 import org.hunter.pocket.criteria.Modern;
 import org.hunter.pocket.criteria.Restrictions;
 import org.hunter.pocket.criteria.Sort;
-import org.hunter.pocket.query.ProcessQuery;
 import org.hunter.pocket.session.Session;
 import org.hunter.pocket.session.SessionFactory;
 import org.hunter.pocket.session.Transaction;
@@ -21,15 +19,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.function.Function;
 
 /**
  * @author wujianchuan 2019/1/15
