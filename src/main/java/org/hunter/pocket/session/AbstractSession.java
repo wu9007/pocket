@@ -27,11 +27,11 @@ abstract class AbstractSession implements Session {
 
     DatabaseNodeConfig databaseNodeConfig;
     String sessionName;
-    Connection connection;
+    volatile Connection connection;
     Transaction transaction;
     CacheUtils cacheUtils;
     ReflectUtils reflectUtils = ReflectUtils.getInstance();
-    private Boolean closed = true;
+    private volatile Boolean closed = true;
 
     AbstractSession(DatabaseNodeConfig databaseNodeConfig, String sessionName, CacheUtils cacheUtils) {
         this.databaseNodeConfig = databaseNodeConfig;
