@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * @author wujianchuan 2019/1/10
  */
 public class ReflectUtils {
-    private static ReflectUtils ourInstance = new ReflectUtils();
+    private static final ReflectUtils ourInstance = new ReflectUtils();
     private static final String SERIAL_VERSION_UID = "serialVersionUID";
     private static final Predicate<Field> FIND_MAPPING_FILTER = field -> !SERIAL_VERSION_UID.equals(field.getName()) && (field.getAnnotation(Column.class) != null || field.getAnnotation(ManyToOne.class) != null);
     public static final Predicate<Field> FIND_CHILDREN = field -> !SERIAL_VERSION_UID.equals(field.getName()) && field.getAnnotation(OneToMany.class) != null;

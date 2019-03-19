@@ -6,8 +6,8 @@ import java.sql.Connection;
  * @author wujianchuan 2019/1/3
  */
 abstract class AbstractSQLQuery {
-    Connection connection;
-    String sql;
+    final Connection connection;
+    final String sql;
 
     AbstractSQLQuery(String sql, Connection connection) {
         this.sql = sql;

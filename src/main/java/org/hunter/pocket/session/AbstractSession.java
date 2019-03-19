@@ -23,14 +23,14 @@ import static org.hunter.pocket.utils.ReflectUtils.FIND_PARENT;
  */
 abstract class AbstractSession implements Session {
 
-    private Logger logger = LoggerFactory.getLogger(AbstractSession.class);
+    private final Logger logger = LoggerFactory.getLogger(AbstractSession.class);
 
-    DatabaseNodeConfig databaseNodeConfig;
-    String sessionName;
+    final DatabaseNodeConfig databaseNodeConfig;
+    final String sessionName;
     volatile Connection connection;
     Transaction transaction;
-    CacheUtils cacheUtils;
-    ReflectUtils reflectUtils = ReflectUtils.getInstance();
+    final CacheUtils cacheUtils;
+    final ReflectUtils reflectUtils = ReflectUtils.getInstance();
     private volatile Boolean closed = true;
 
     AbstractSession(DatabaseNodeConfig databaseNodeConfig, String sessionName, CacheUtils cacheUtils) {

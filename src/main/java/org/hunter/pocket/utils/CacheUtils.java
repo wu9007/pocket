@@ -15,10 +15,10 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class CacheUtils {
 
-    private RedisTemplate<String, Object> baseRedisTemplate;
-    private StringRedisTemplate baseStringRedisTemplate;
+    private final RedisTemplate<String, Object> baseRedisTemplate;
+    private final StringRedisTemplate baseStringRedisTemplate;
 
-    public Map<String, String> mapLock = new ConcurrentHashMap<>(100);
+    public final Map<String, String> mapLock = new ConcurrentHashMap<>(100);
 
     public CacheUtils(StringRedisTemplate baseStringRedisTemplate, RedisTemplate<String, Object> baseRedisTemplate) {
 

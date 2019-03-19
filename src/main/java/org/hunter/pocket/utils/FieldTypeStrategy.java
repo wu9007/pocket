@@ -70,7 +70,7 @@ public class FieldTypeStrategy {
         }
     }
 
-    private static FieldTypeStrategy strategy = new FieldTypeStrategy();
+    private static final FieldTypeStrategy strategy = new FieldTypeStrategy();
     private static final Map<String, BiFunction<ResultSet, String, Object>> RESULT_STRATEGY_POOL = new ConcurrentHashMap<>(20);
     private static final Map<String, Consumer<PreparedSupplierValue>> PREPARED_STRATEGY_POOL = new ConcurrentHashMap<>(20);
 

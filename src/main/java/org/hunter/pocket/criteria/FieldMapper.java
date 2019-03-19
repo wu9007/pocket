@@ -42,7 +42,7 @@ public class FieldMapper {
         this.columnName = columnName;
     }
 
-    public Field getField() {
+    private Field getField() {
         return field;
     }
 
