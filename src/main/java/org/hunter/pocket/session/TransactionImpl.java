@@ -10,7 +10,7 @@ import java.sql.SQLException;
  * @author wujianchuan 2019/1/1
  */
 public class TransactionImpl implements Transaction {
-    private Logger logger = LoggerFactory.getLogger(TransactionImpl.class);
+    private final Logger logger = LoggerFactory.getLogger(TransactionImpl.class);
     private volatile Connection connection;
 
     TransactionImpl(Connection connection) {

@@ -27,7 +27,7 @@ import java.sql.SQLException;
  * @author wujianchuan 2019/1/1
  */
 public class SessionImpl extends AbstractSession {
-    private Logger logger = LoggerFactory.getLogger(SessionImpl.class);
+    private final Logger logger = LoggerFactory.getLogger(SessionImpl.class);
     private static final String CACHE_LOCK = "CACHE_MONITOR";
     private static final String OPEN_LOCK = "OPEN_MONITOR";
     private static final String CLOSE_LOCK = "CLOSE_MONITOR";

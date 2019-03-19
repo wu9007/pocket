@@ -16,9 +16,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author wujianchuan 2019/1/15
  */
 public class ConnectionManager {
-    private static Logger logger = LoggerFactory.getLogger(ConnectionManager.class);
-    private static ConnectionManager ourInstance = new ConnectionManager();
-    private Map<String, ConnectionPool> connectionPoolMap = new ConcurrentHashMap<>(4);
+    private static final Logger logger = LoggerFactory.getLogger(ConnectionManager.class);
+    private static final ConnectionManager ourInstance = new ConnectionManager();
+    private final Map<String, ConnectionPool> connectionPoolMap = new ConcurrentHashMap<>(4);
 
     public synchronized void register(DatabaseConfig databaseConfig) {
         databaseConfig.getNode().forEach(databaseNode -> {

@@ -7,7 +7,7 @@ import org.hunter.pocket.constant.SqlOperateTypes;
  */
 public class Restrictions implements SqlBean {
     private String source;
-    private String sqlOperate;
+    private final String sqlOperate;
     private Object target;
     private Restrictions leftRestrictions;
     private Restrictions rightRestrictions;

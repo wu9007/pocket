@@ -21,22 +21,22 @@ import static org.hunter.pocket.utils.ReflectUtils.FIND_CHILDREN;
  */
 abstract class AbstractCriteria {
 
-    private Logger logger = LoggerFactory.getLogger(AbstractCriteria.class);
-    ReflectUtils reflectUtils = ReflectUtils.getInstance();
-    FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
-    SqlFactory sqlFactory = SqlFactory.getInstance();
+    private final Logger logger = LoggerFactory.getLogger(AbstractCriteria.class);
+    final ReflectUtils reflectUtils = ReflectUtils.getInstance();
+    final FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
+    final SqlFactory sqlFactory = SqlFactory.getInstance();
 
-    Class clazz;
-    Connection connection;
-    DatabaseNodeConfig databaseConfig;
-    String tableName;
+    final Class clazz;
+    final Connection connection;
+    final DatabaseNodeConfig databaseConfig;
+    final String tableName;
 
-    Field[] fields;
-    Field[] childrenFields;
-    Map<String, FieldMapper> fieldMapper;
-    List<Restrictions> restrictionsList = new ArrayList<>();
-    List<Modern> modernList = new ArrayList<>();
-    List<Sort> orderList = new ArrayList<>();
+    final Field[] fields;
+    final Field[] childrenFields;
+    final Map<String, FieldMapper> fieldMapper;
+    final List<Restrictions> restrictionsList = new ArrayList<>();
+    final List<Modern> modernList = new ArrayList<>();
+    final List<Sort> orderList = new ArrayList<>();
     StringBuilder completeSql = new StringBuilder();
     StringBuilder sqlRestriction = new StringBuilder();
 

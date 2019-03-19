@@ -7,8 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author wujianchuan 2019/2/14
  */
 public class UuidGeneratorFactory {
-    private static Map<String, UuidGenerator> GENERATOR_POOL = new ConcurrentHashMap<>(6);
-    private static UuidGeneratorFactory ourInstance = new UuidGeneratorFactory();
+    private static final Map<String, UuidGenerator> GENERATOR_POOL = new ConcurrentHashMap<>(6);
+    private static final UuidGeneratorFactory ourInstance = new UuidGeneratorFactory();
 
     public static UuidGeneratorFactory getInstance() {
         return ourInstance;

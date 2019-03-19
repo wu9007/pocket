@@ -19,19 +19,19 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author wujianchuan 2019/1/15
  */
 public class ConnectionPoolImpl implements ConnectionPool {
-    private Logger logger = LoggerFactory.getLogger(ConnectionPoolImpl.class);
+    private final Logger logger = LoggerFactory.getLogger(ConnectionPoolImpl.class);
     private static final String CONNECT_LOCK = "CONNECT_MONITOR";
     private static final String RELEASE_LOCK = "RELEASE_MONITOR";
     private static final String DESTROY_LOCK = "DESTROY_MONITOR";
 
-    private AtomicBoolean activated = new AtomicBoolean(false);
-    private AtomicInteger activatedCount = new AtomicInteger(0);
+    private final AtomicBoolean activated = new AtomicBoolean(false);
+    private final AtomicInteger activatedCount = new AtomicInteger(0);
 
-    private DatabaseNodeConfig databaseConfig;
-    private DatabaseManager databaseManager;
-    private LinkedList<Connection> freeConnections = new LinkedList<>();
-    private LinkedList<Connection> activeConnections = new LinkedList<>();
-    private ThreadLocal<Connection> currentConnection = new ThreadLocal<>();
+    private final DatabaseNodeConfig databaseConfig;
+    private final DatabaseManager databaseManager;
+    private final LinkedList<Connection> freeConnections = new LinkedList<>();
+    private final LinkedList<Connection> activeConnections = new LinkedList<>();
+    private final ThreadLocal<Connection> currentConnection = new ThreadLocal<>();
 
     private ConnectionPoolImpl(DatabaseNodeConfig databaseConfig) {
         this.databaseConfig = databaseConfig;
@@ -191,7 +191,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
     }
 
     class CheckFreePool extends TimerTask {
-        private ConnectionPool connectionPool;
+        private final ConnectionPool connectionPool;
 
         public CheckFreePool(ConnectionPool connectionPool) {
             this.connectionPool = connectionPool;

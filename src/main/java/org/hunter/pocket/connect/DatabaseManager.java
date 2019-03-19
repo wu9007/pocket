@@ -13,8 +13,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author wujianchuan 2018/12/31
  */
 public class DatabaseManager {
-    private static Map<String, DatabaseManager> managerMap = new HashMap<>(2);
-    private DatabaseNodeConfig config;
+    private static final Map<String, DatabaseManager> managerMap = new HashMap<>(2);
+    private final DatabaseNodeConfig config;
     private static Connection conn = null;
     private static AtomicInteger connectionCount = new AtomicInteger(0);
 
