@@ -215,7 +215,7 @@ public class SessionImpl extends AbstractSession {
                 }
             } else {
                 synchronized (CACHE_LOCK) {
-                    wait(10);
+                    CACHE_LOCK.wait(10);
                     result = this.findOne(clazz, uuid);
                 }
             }
