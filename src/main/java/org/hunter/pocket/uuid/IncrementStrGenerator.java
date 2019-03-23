@@ -38,10 +38,10 @@ public class IncrementStrGenerator extends AbstractUuidGenerator {
             if (maxUuid == 0 || !String.valueOf(maxUuid).startsWith(leaderNum)) {
                 tailNumber = 0L;
             } else {
-                tailNumber = Long.parseLong(String.valueOf(maxUuid).substring(leaderNum.length()));
+                tailNumber = Long.parseLong(String.valueOf(maxUuid).substring(leaderNum.length())) + 1;
             }
         }
-        POOL.put(mapKey, tailNumber++);
+        POOL.put(mapKey, tailNumber);
         return "" + leaderNum + tailNumber;
     }
 }
