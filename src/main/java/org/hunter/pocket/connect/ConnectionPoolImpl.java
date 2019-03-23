@@ -81,7 +81,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
             } else {
                 long startTime = System.currentTimeMillis();
                 try {
-                    this.wait(this.databaseConfig.getTimeout());
+                    CONNECT_LOCK.wait(this.databaseConfig.getTimeout());
                 } catch (InterruptedException e) {
                     logger.warn("the waiting thread is interrupted!");
                     e.printStackTrace();
@@ -126,7 +126,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
             } else {
                 this.freeConnections.add(this.newConnection());
             }
-            this.notifyAll();
+            RELEASE_LOCK.notifyAll();
             logger.debug("释放链接：======================活动连接个数: " + this.activatedCount + "  ===========================游离连接个数: " + this.freeConnections.size() + "  ================================================");
 
         }
