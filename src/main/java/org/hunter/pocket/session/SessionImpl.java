@@ -215,12 +215,12 @@ public class SessionImpl extends AbstractSession {
                 }
             } else {
                 synchronized (CACHE_LOCK) {
-                    wait(10);
+                    CACHE_LOCK.wait(10);
                     result = this.findOne(clazz, uuid);
                 }
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e.getMessage());
         } finally {
             if (lock) {
