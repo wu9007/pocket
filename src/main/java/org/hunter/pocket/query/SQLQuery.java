@@ -13,5 +13,5 @@ public interface SQLQuery {
      * @return 查询结果
      * @throws SQLException e
      */
-    abstract Object unique() throws SQLException;
+    Object unique() throws SQLException;
 }

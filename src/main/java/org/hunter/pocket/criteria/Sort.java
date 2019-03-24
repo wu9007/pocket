@@ -7,8 +7,8 @@ import org.hunter.pocket.constant.SqlOperateTypes;
  */
 public class Sort {
 
-    private String source;
-    private String sortType;
+    private final String source;
+    private final String sortType;
 
     private Sort(String source, String sortType) {
         this.source = source;

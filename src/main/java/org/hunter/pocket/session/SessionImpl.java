@@ -27,40 +27,61 @@ import java.sql.SQLException;
  * @author wujianchuan 2019/1/1
  */
 public class SessionImpl extends AbstractSession {
-    private Logger logger = LoggerFactory.getLogger(SessionImpl.class);
+    private final Logger logger = LoggerFactory.getLogger(SessionImpl.class);
+    private static final String CACHE_LOCK = "CACHE_INTO_MONITOR";
+    private static final String CACHE_UNLOCK = "CACHE_ESC_MONITOR";
+    private static final String OPEN_LOCK = "OPEN_MONITOR";
+    private static final String CLOSE_LOCK = "CLOSE_MONITOR";
+    private static final String TRANSACTION_LOCK = "TRANSACTION_MONITOR";
 
     SessionImpl(DatabaseNodeConfig databaseNodeConfig, String sessionName, CacheUtils cacheUtils) {
         super(databaseNodeConfig, sessionName, cacheUtils);
     }
 
     @Override
-    public synchronized void open() {
+    public void open() {
         if (this.connection == null) {
-            this.connection = ConnectionManager.getInstance().getConnection(databaseNodeConfig);
-            this.setClosed(false);
-            this.logger.info("Session: {} turned on.", this.sessionName);
+            synchronized (OPEN_LOCK) {
+                if (this.connection == null) {
+                    this.connection = ConnectionManager.getInstance().getConnection(databaseNodeConfig);
+                    this.setClosed(false);
+                    this.logger.info("Session: {} turned on.", this.sessionName);
+                } else {
+                    this.logger.warn("This session is connected. Please don't try again.");
+                }
+            }
         } else {
             this.logger.warn("This session is connected. Please don't try again.");
         }
     }
 
     @Override
-    public synchronized void close() {
+    public void close() {
         if (this.connection != null) {
-            ConnectionManager.getInstance().closeConnection(this.databaseNodeConfig.getNodeName(), this.connection);
-            this.transaction = null;
-            this.connection = null;
-            this.setClosed(true);
-            this.logger.info("Session: {} turned off.", this.sessionName);
+            synchronized (CLOSE_LOCK) {
+                if (this.connection != null) {
+                    ConnectionManager.getInstance().closeConnection(this.databaseNodeConfig.getNodeName(), this.connection);
+                    this.transaction = null;
+                    this.connection = null;
+                    this.setClosed(true);
+                    this.logger.info("Session: {} turned off.", this.sessionName);
+                } else {
+                    this.logger.warn("This session is closed. Please don't try again.");
+                }
+            }
         } else {
             this.logger.warn("This session is closed. Please don't try again.");
         }
     }
 
     @Override
-    public synchronized Transaction getTransaction() {
+    public Transaction getTransaction() {
         if (this.transaction == null) {
-            this.transaction = new TransactionImpl(this.connection);
+            synchronized (TRANSACTION_LOCK) {
+                if (this.transaction == null) {
+                    this.transaction = new TransactionImpl(this.connection);
+                }
+            }
         }
         return this.transaction;
     }
@@ -189,9 +210,12 @@ public class SessionImpl extends AbstractSession {
             if (lock) {
                 result = this.findDirect(clazz, uuid);
                 this.cacheUtils.set(cacheKey, result, 360L);
+                synchronized (CACHE_UNLOCK) {
+                    CACHE_UNLOCK.notifyAll();
+                }
             } else {
-                synchronized (this) {
-                    wait(2);
+                synchronized (CACHE_LOCK) {
+                    wait(10);
                     result = this.findOne(clazz, uuid);
                 }
             }
@@ -216,7 +240,7 @@ public class SessionImpl extends AbstractSession {
     @Override
     public long getMaxUuid(Integer serverId, Class clazz) throws Exception {
         Entity annotation = (Entity) clazz.getAnnotation(Entity.class);
-        PreparedStatement preparedStatement = this.connection.prepareStatement("SELECT MAX(UUID) FROM " + annotation.table() + " WHERE UUID REGEXP '^" + serverId + annotation.tableId() + "'");
+        PreparedStatement preparedStatement = this.connection.prepareStatement("SELECT MAX(CONVERT(UUID,SIGNED)) FROM " + annotation.table() + " WHERE UUID REGEXP '^" + serverId + annotation.tableId() + "'");
         ResultSet resultSet = preparedStatement.executeQuery();
         long uuid;
         if (resultSet.next()) {

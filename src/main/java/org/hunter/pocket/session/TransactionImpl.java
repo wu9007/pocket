@@ -10,15 +10,15 @@ import java.sql.SQLException;
  * @author wujianchuan 2019/1/1
  */
 public class TransactionImpl implements Transaction {
-    private Logger logger = LoggerFactory.getLogger(TransactionImpl.class);
-    private Connection connection;
+    private final Logger logger = LoggerFactory.getLogger(TransactionImpl.class);
+    private volatile Connection connection;
 
     TransactionImpl(Connection connection) {
         this.connection = connection;
     }
 
     @Override
-    public synchronized void begin() throws SQLException {
+    public void begin() throws SQLException {
         if (this.connection.getAutoCommit()) {
             this.connection.setAutoCommit(false);
             this.logger.info("transaction open.");
@@ -28,7 +28,7 @@ public class TransactionImpl implements Transaction {
     }
 
     @Override
-    public synchronized void commit() throws SQLException {
+    public void commit() throws SQLException {
         if (this.connection != null) {
             this.connection.commit();
             this.connection.setAutoCommit(true);
@@ -40,7 +40,7 @@ public class TransactionImpl implements Transaction {
     }
 
     @Override
-    public synchronized void rollBack() throws SQLException {
+    public void rollBack() throws SQLException {
         if (this.connection != null) {
             this.connection.rollback();
             this.connection.setAutoCommit(true);

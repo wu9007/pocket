@@ -19,23 +19,26 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author wujianchuan 2019/1/15
  */
 public class ConnectionPoolImpl implements ConnectionPool {
-    private Logger logger = LoggerFactory.getLogger(ConnectionPoolImpl.class);
+    private final Logger logger = LoggerFactory.getLogger(ConnectionPoolImpl.class);
+    private static final String CONNECT_LOCK = "CONNECT_MONITOR";
+    private static final String RELEASE_LOCK = "RELEASE_MONITOR";
+    private static final String DESTROY_LOCK = "DESTROY_MONITOR";
 
-    private AtomicBoolean activated = new AtomicBoolean(false);
-    private AtomicInteger activatedCount = new AtomicInteger(0);
+    private final AtomicBoolean activated = new AtomicBoolean(false);
+    private final AtomicInteger activatedCount = new AtomicInteger(0);
 
-    private DatabaseNodeConfig databaseConfig;
-    private DatabaseManager databaseManager;
-    private LinkedList<Connection> freeConnections = new LinkedList<>();
-    private LinkedList<Connection> activeConnections = new LinkedList<>();
-    private ThreadLocal<Connection> currentConnection = new ThreadLocal<>();
+    private final DatabaseNodeConfig databaseConfig;
+    private final DatabaseManager databaseManager;
+    private final LinkedList<Connection> freeConnections = new LinkedList<>();
+    private final LinkedList<Connection> activeConnections = new LinkedList<>();
+    private final ThreadLocal<Connection> currentConnection = new ThreadLocal<>();
 
     private ConnectionPoolImpl(DatabaseNodeConfig databaseConfig) {
         this.databaseConfig = databaseConfig;
         this.databaseManager = DatabaseManager.getInstance(this.databaseConfig);
     }
 
-    public static ConnectionPool newInstance(DatabaseNodeConfig databaseConfig) {
+    static ConnectionPool newInstance(DatabaseNodeConfig databaseConfig) {
         ConnectionPool instance = new ConnectionPoolImpl(databaseConfig);
         instance.init();
         return instance;
@@ -53,43 +56,45 @@ public class ConnectionPoolImpl implements ConnectionPool {
     }
 
     @Override
-    public synchronized Connection getConnection() {
-        Connection connection;
-        if (activatedCount.get() < this.databaseConfig.getPoolMaxSize()) {
-            if (this.freeConnections.size() > 0) {
-                connection = this.freeConnections.pollFirst();
-                try {
-                    if (this.databaseManager.isValidConnection(connection)) {
-                        this.activeConnections.add(connection);
-                        currentConnection.set(connection);
-                    } else {
-                        connection = this.getConnection();
+    public Connection getConnection() {
+        synchronized (CONNECT_LOCK) {
+            Connection connection;
+            if (activatedCount.get() < this.databaseConfig.getPoolMaxSize()) {
+                if (this.freeConnections.size() > 0) {
+                    connection = this.freeConnections.pollFirst();
+                    try {
+                        if (this.databaseManager.isValidConnection(connection)) {
+                            this.activeConnections.add(connection);
+                            currentConnection.set(connection);
+                        } else {
+                            connection = this.getConnection();
+                        }
+                    } catch (SQLException e) {
+                        e.printStackTrace();
                     }
-                } catch (SQLException e) {
-                    e.printStackTrace();
+                } else {
+                    connection = this.newConnection();
+                    this.activeConnections.add(connection);
+                    currentConnection.set(connection);
+                    this.activatedCount.incrementAndGet();
                 }
             } else {
-                connection = this.newConnection();
-                this.activeConnections.add(connection);
-                currentConnection.set(connection);
-                this.activatedCount.incrementAndGet();
+                long startTime = System.currentTimeMillis();
+                try {
+                    CONNECT_LOCK.wait(this.databaseConfig.getTimeout());
+                } catch (InterruptedException e) {
+                    logger.warn("the waiting thread is interrupted!");
+                    e.printStackTrace();
+                }
+                if (this.databaseConfig.getTimeout() != 0 && System.currentTimeMillis() - startTime > this.databaseConfig.getTimeout()) {
+                    logger.warn("thread waiting for connection was time out!");
+                    return null;
+                }
+                connection = this.getConnection();
             }
-        } else {
-            long startTime = System.currentTimeMillis();
-            try {
-                this.wait(this.databaseConfig.getTimeout());
-            } catch (InterruptedException e) {
-                logger.warn("the waiting thread is interrupted!");
-                e.printStackTrace();
-            }
-            if (this.databaseConfig.getTimeout() != 0 && System.currentTimeMillis() - startTime > this.databaseConfig.getTimeout()) {
-                logger.warn("thread waiting for connection was time out!");
-                return null;
-            }
-            connection = this.getConnection();
+            logger.debug("获取连接：======================活动连接个数: " + this.activatedCount + "  ===========================游离连接个数: " + this.freeConnections.size() + "  ================================================");
+            return connection;
         }
-        logger.debug("获取连接：======================活动连接个数: " + this.activatedCount + "  ===========================游离连接个数: " + this.freeConnections.size() + "  ================================================");
-        return connection;
     }
 
     @Override
@@ -111,34 +116,39 @@ public class ConnectionPoolImpl implements ConnectionPool {
     }
 
     @Override
-    public synchronized void releaseConn(Connection connection) throws SQLException {
-        logger.info("{} release connection node: {}", Thread.currentThread().getName(), this.getDatabaseConfig().getNodeName());
-        this.activeConnections.remove(connection);
-        currentConnection.remove();
-        if (this.databaseManager.isValidConnection(connection)) {
-            this.freeConnections.add(connection);
-        } else {
-            this.freeConnections.add(this.newConnection());
+    public void releaseConn(Connection connection) throws SQLException {
+        synchronized (RELEASE_LOCK) {
+            logger.info("{} release connection node: {}", Thread.currentThread().getName(), this.getDatabaseConfig().getNodeName());
+            this.activeConnections.remove(connection);
+            currentConnection.remove();
+            if (this.databaseManager.isValidConnection(connection)) {
+                this.freeConnections.add(connection);
+            } else {
+                this.freeConnections.add(this.newConnection());
+            }
+            RELEASE_LOCK.notifyAll();
+            logger.debug("释放链接：======================活动连接个数: " + this.activatedCount + "  ===========================游离连接个数: " + this.freeConnections.size() + "  ================================================");
+
         }
-        this.notifyAll();
-        logger.debug("释放链接：======================活动连接个数: " + this.activatedCount + "  ===========================游离连接个数: " + this.freeConnections.size() + "  ================================================");
     }
 
     @Override
-    public synchronized void destroy() {
-        try {
-            for (Connection freeConnection : this.freeConnections) {
-                freeConnection.close();
+    public void destroy() {
+        synchronized (DESTROY_LOCK) {
+            try {
+                for (Connection freeConnection : this.freeConnections) {
+                    freeConnection.close();
+                }
+                for (Connection activeConnection : this.activeConnections) {
+                    activeConnection.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-            for (Connection activeConnection : this.activeConnections) {
-                activeConnection.close();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+            this.activated.compareAndSet(true, false);
+            this.freeConnections.clear();
+            this.activeConnections.clear();
         }
-        this.activated.compareAndSet(true, false);
-        this.freeConnections.clear();
-        this.activeConnections.clear();
     }
 
     @Override
@@ -181,7 +191,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
     }
 
     class CheckFreePool extends TimerTask {
-        private ConnectionPool connectionPool;
+        private final ConnectionPool connectionPool;
 
         public CheckFreePool(ConnectionPool connectionPool) {
             this.connectionPool = connectionPool;
