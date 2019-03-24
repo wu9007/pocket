@@ -6,7 +6,7 @@ apply plugin: 'build-dashboard'
 apply plugin: 'maven-publish'
 
 group = 'org.hunter'
-version = '0.0.2-PRE'
+version = '0.1.0-PRE'
 sourceCompatibility = 1.8
 
 compileJava {
@@ -51,27 +51,10 @@ publishing {
             }
         }
     }
-
-    repositories {
-        maven {
-            credentials {
-                username "${upload_username}"
-                password "${upload_password}"
-            }
-            url "${upload_url}"
-        }
-    }
 }
 
 repositories {
     mavenLocal()
-    maven {
-        url "${download_url}"
-        credentials {
-            username "${download_username}"
-            password "${download_password}"
-        }
-    }
     mavenCentral()
 }
 
