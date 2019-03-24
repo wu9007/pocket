@@ -163,25 +163,23 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test15() {
-        CountDownLatch countDownLatch = new CountDownLatch(500);
+    public void test15() throws InterruptedException {
+        CountDownLatch start = new CountDownLatch(500);
+        CountDownLatch done = new CountDownLatch(500);
         for (int index = 0; index < 500; index++) {
             Thread thread = new Thread(() -> {
                 try {
-                    countDownLatch.await();
+                    start.await();
                     Order order = (Order) session.findOne(Order.class, 1);
                     System.out.println(order.getCode() + "=======================");
+                    done.countDown();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             });
             thread.start();
-            countDownLatch.countDown();
+            start.countDown();
         }
-        try {
-            Thread.sleep(11000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        done.await();
     }
 }

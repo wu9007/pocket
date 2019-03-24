@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.sql.SQLException;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -28,35 +27,33 @@ public class ConnectionTest {
 
     @Before
     public void setup() {
-        start = System.currentTimeMillis();
+        start = System.nanoTime();
     }
 
     @After
-    public void destroy() throws SQLException {
-        System.out.println("耗时" + ((double) (System.currentTimeMillis() - this.start)) / 1000 + "秒");
+    public void destroy() {
+        System.out.println("耗时" + ((double) (System.nanoTime() - this.start)) / 1000000000 + "秒");
     }
 
     @Test
-    public void test5() {
-        CountDownLatch countDownLatch = new CountDownLatch(THREAD_NUM);
+    public void test5() throws InterruptedException {
+        CountDownLatch start = new CountDownLatch(THREAD_NUM);
+        CountDownLatch done = new CountDownLatch(THREAD_NUM);
         for (int index = 0; index < THREAD_NUM; index++) {
             Thread thread = new Thread(() -> {
                 try {
-                    countDownLatch.await();
+                    start.await();
                     ConnectionManager.getInstance().getConnection(databaseConfigs.getNode().get(0));
                     ConnectionManager.getInstance().getConnection(databaseConfigs.getNode().get(1));
+                    done.countDown();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             });
             thread.start();
-            countDownLatch.countDown();
+            start.countDown();
         }
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        done.await();
         ConnectionManager.getInstance().destroy();
     }
 }
