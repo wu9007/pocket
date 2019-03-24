@@ -220,7 +220,7 @@ public class SessionImpl extends AbstractSession {
                 }
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e.getMessage());
         } finally {
             if (lock) {
