@@ -37,6 +37,8 @@ abstract class AbstractCriteria {
     final List<Restrictions> restrictionsList = new ArrayList<>();
     final List<Modern> modernList = new ArrayList<>();
     final List<Sort> orderList = new ArrayList<>();
+    Integer start;
+    Integer limit;
     StringBuilder completeSql = new StringBuilder();
     StringBuilder sqlRestriction = new StringBuilder();
 
@@ -71,5 +73,22 @@ abstract class AbstractCriteria {
         this.sqlRestriction = new StringBuilder();
         this.modernList.clear();
         this.restrictionsList.clear();
+    }
+
+    void setLimit(int start, int limit) {
+        this.start = start;
+        this.limit = limit;
+    }
+
+    boolean limited() {
+        return this.start != null && this.limit != null;
+    }
+
+    public Integer getStart() {
+        return start;
+    }
+
+    public Integer getLimit() {
+        return limit;
     }
 }

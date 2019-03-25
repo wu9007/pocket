@@ -53,7 +53,7 @@ public class CriteriaTest {
 
     @Test
     public void test1() {
-        Criteria criteria = this.session.creatCriteria(Order.class);
+        Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.like("code", "%A%"))
                 .add(Restrictions.ne("code", "A-002"))
                 .add(Restrictions.or(Restrictions.gt("price", 13), Restrictions.lt("price", 12.58)));
@@ -74,7 +74,7 @@ public class CriteriaTest {
 
     @Test
     public void test3() {
-        Criteria criteria = this.session.creatCriteria(Order.class);
+        Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.lt("time", new Date()));
         List orderList = criteria.list(true);
         System.out.println(orderList.size());
@@ -89,7 +89,7 @@ public class CriteriaTest {
         Order newOrder = (Order) this.session.findOne(Order.class, order.getUuid());
         newOrder.setPrice(newOrder.getPrice().multiply(new BigDecimal("1.5")));
         this.session.update(newOrder);
-        Criteria criteria = this.session.creatCriteria(Order.class);
+        Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.lt("time", new Date()));
         List orderList = criteria.list();
     }
@@ -104,7 +104,7 @@ public class CriteriaTest {
 
     @Test
     public void test6() {
-        Criteria criteria = this.session.creatCriteria(Order.class);
+        Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.equ("uuid", 11L));
         Order order = (Order) criteria.unique(true);
         if (order != null) {
@@ -114,7 +114,7 @@ public class CriteriaTest {
 
     @Test
     public void test8() {
-        Criteria criteria = this.session.creatCriteria(Order.class);
+        Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Modern.set("price", 500.5D))
                 .add(Restrictions.equ("code", "C-001"))
                 .add(Modern.set("day", new Date()));
@@ -123,7 +123,7 @@ public class CriteriaTest {
 
     @Test
     public void test9() {
-        Criteria criteria = this.session.creatCriteria(Order.class);
+        Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.equ("code", "C-001"));
         System.out.println(criteria.max("price"));
 
@@ -135,7 +135,7 @@ public class CriteriaTest {
     @Test
     public void test10() throws InterruptedException {
         PocketExecutor.execute(Executors.newFixedThreadPool(100), 100, () -> {
-            Criteria criteria = this.session.creatCriteria(Order.class);
+            Criteria criteria = this.session.createCriteria(Order.class);
             List list = criteria.add(Restrictions.like("code", "%001%"))
                     .add(Sort.desc("price"))
                     .add(Sort.asc("uuid"))
@@ -159,7 +159,7 @@ public class CriteriaTest {
 
     @Test
     public void test14() {
-        Criteria criteria = session.creatCriteria(Order.class);
+        Criteria criteria = session.createCriteria(Order.class);
         criteria.add(Restrictions.equ("uuid", 1011011L));
         criteria.delete();
     }
@@ -172,5 +172,14 @@ public class CriteriaTest {
             System.out.println(order.getCode() + "=======================");
         });
         executor.shutdown();
+    }
+
+    @Test
+    public void test16() {
+        Criteria criteria = this.session.createCriteria(Order.class)
+                .add(Restrictions.equ("code", "C-001"))
+                .limit(0, 5);
+        List list = criteria.list();
+        list.size();
     }
 }
