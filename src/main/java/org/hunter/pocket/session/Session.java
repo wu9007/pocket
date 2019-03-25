@@ -43,7 +43,7 @@ public interface Session {
      * @param clazz 实体类类型
      * @return SQL规范对象
      */
-    Criteria creatCriteria(Class clazz);
+    Criteria createCriteria(Class clazz);
 
     /**
      * 获取SQL查询对象

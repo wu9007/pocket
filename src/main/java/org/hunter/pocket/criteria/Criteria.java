@@ -32,6 +32,15 @@ public interface Criteria {
     Criteria add(Sort order);
 
     /**
+     * 获取分页数据
+     *
+     * @param start 起始位置
+     * @param limit 数据条数
+     * @return Criteria
+     */
+    Criteria limit(int start, int limit);
+
+    /**
      * 获取所有数据
      *
      * @return 对象集合

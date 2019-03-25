@@ -51,6 +51,12 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
+    public Criteria limit(int start, int limit) {
+        this.setLimit(start, limit);
+        return this;
+    }
+
+    @Override
     public int update() {
         completeSql.append("UPDATE ")
                 .append(this.tableName)
@@ -80,6 +86,12 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         if (this.orderList.size() > 0) {
             completeSql.append(" ORDER BY ")
                     .append(this.orderList.stream().map(order -> fieldMapper.get(order.getSource()).getColumnName() + " " + order.getSortType()).collect(Collectors.joining(",")));
+        }
+        if (this.limited()) {
+            completeSql.append(" LIMIT ")
+                    .append(this.getStart())
+                    .append(", ")
+                    .append(this.getLimit());
         }
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
