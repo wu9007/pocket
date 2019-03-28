@@ -1,6 +1,7 @@
 package org.hunter.dbconnect;
 
 import org.hunter.Application;
+import org.hunter.PocketExecutor;
 import org.hunter.pocket.config.DatabaseConfig;
 import org.hunter.pocket.connect.ConnectionManager;
 import org.junit.After;
@@ -11,8 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.sql.SQLException;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
 
 /**
  * @author wujianchuan 2019/1/16
@@ -21,42 +21,24 @@ import java.util.concurrent.CountDownLatch;
 @SpringBootTest(classes = Application.class)
 public class ConnectionTest {
     private static final int THREAD_NUM = 100;
-    private long start;
 
     @Autowired
     DatabaseConfig databaseConfigs;
 
     @Before
     public void setup() {
-        start = System.currentTimeMillis();
     }
 
     @After
-    public void destroy() throws SQLException {
-        System.out.println("耗时" + ((double) (System.currentTimeMillis() - this.start)) / 1000 + "秒");
+    public void destroy() {
     }
 
     @Test
-    public void test5() {
-        CountDownLatch countDownLatch = new CountDownLatch(THREAD_NUM);
-        for (int index = 0; index < THREAD_NUM; index++) {
-            Thread thread = new Thread(() -> {
-                try {
-                    countDownLatch.await();
-                    ConnectionManager.getInstance().getConnection(databaseConfigs.getNode().get(0));
-                    ConnectionManager.getInstance().getConnection(databaseConfigs.getNode().get(1));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            });
-            thread.start();
-            countDownLatch.countDown();
-        }
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public void test5() throws InterruptedException {
+        PocketExecutor.execute(Executors.newFixedThreadPool(THREAD_NUM), THREAD_NUM, () -> {
+            ConnectionManager.getInstance().getConnection(databaseConfigs.getNode().get(0));
+            ConnectionManager.getInstance().getConnection(databaseConfigs.getNode().get(1));
+        });
         ConnectionManager.getInstance().destroy();
     }
 }

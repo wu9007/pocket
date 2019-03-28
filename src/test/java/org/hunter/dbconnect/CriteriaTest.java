@@ -1,6 +1,7 @@
 package org.hunter.dbconnect;
 
 import org.hunter.Application;
+import org.hunter.PocketExecutor;
 import org.hunter.pocket.config.DatabaseConfig;
 import org.hunter.pocket.criteria.Criteria;
 import org.hunter.pocket.criteria.Modern;
@@ -22,7 +23,8 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author wujianchuan 2019/1/15
@@ -37,7 +39,6 @@ public class CriteriaTest {
 
     @Before
     public void setup() throws SQLException {
-        start = System.currentTimeMillis();
         this.session = SessionFactory.getSession("homo");
         this.session.open();
         this.transaction = session.getTransaction();
@@ -48,12 +49,11 @@ public class CriteriaTest {
     public void destroy() throws SQLException {
         this.transaction.commit();
         this.session.close();
-        System.out.println("总耗时" + ((double) (System.currentTimeMillis() - this.start)) / 1000 + "秒");
     }
 
     @Test
     public void test1() {
-        Criteria criteria = this.session.creatCriteria(Order.class);
+        Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.like("code", "%A%"))
                 .add(Restrictions.ne("code", "A-002"))
                 .add(Restrictions.or(Restrictions.gt("price", 13), Restrictions.lt("price", 12.58)));
@@ -74,7 +74,7 @@ public class CriteriaTest {
 
     @Test
     public void test3() {
-        Criteria criteria = this.session.creatCriteria(Order.class);
+        Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.lt("time", new Date()));
         List orderList = criteria.list(true);
         System.out.println(orderList.size());
@@ -89,7 +89,7 @@ public class CriteriaTest {
         Order newOrder = (Order) this.session.findOne(Order.class, order.getUuid());
         newOrder.setPrice(newOrder.getPrice().multiply(new BigDecimal("1.5")));
         this.session.update(newOrder);
-        Criteria criteria = this.session.creatCriteria(Order.class);
+        Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.lt("time", new Date()));
         List orderList = criteria.list();
     }
@@ -104,7 +104,7 @@ public class CriteriaTest {
 
     @Test
     public void test6() {
-        Criteria criteria = this.session.creatCriteria(Order.class);
+        Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.equ("uuid", 11L));
         Order order = (Order) criteria.unique(true);
         if (order != null) {
@@ -114,7 +114,7 @@ public class CriteriaTest {
 
     @Test
     public void test8() {
-        Criteria criteria = this.session.creatCriteria(Order.class);
+        Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Modern.set("price", 500.5D))
                 .add(Restrictions.equ("code", "C-001"))
                 .add(Modern.set("day", new Date()));
@@ -123,7 +123,7 @@ public class CriteriaTest {
 
     @Test
     public void test9() {
-        Criteria criteria = this.session.creatCriteria(Order.class);
+        Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.equ("code", "C-001"));
         System.out.println(criteria.max("price"));
 
@@ -133,13 +133,15 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test10() {
-        Criteria criteria = this.session.creatCriteria(Order.class);
-        List list = criteria.add(Restrictions.like("code", "%001%"))
-                .add(Sort.desc("price"))
-                .add(Sort.asc("uuid"))
-                .list();
-        System.out.println(list);
+    public void test10() throws InterruptedException {
+        PocketExecutor.execute(Executors.newFixedThreadPool(100), 100, () -> {
+            Criteria criteria = this.session.createCriteria(Order.class);
+            List list = criteria.add(Restrictions.like("code", "%001%"))
+                    .add(Sort.desc("price"))
+                    .add(Sort.asc("uuid"))
+                    .list();
+            System.out.println(list);
+        });
     }
 
     @Test
@@ -157,31 +159,27 @@ public class CriteriaTest {
 
     @Test
     public void test14() {
-        Criteria criteria = session.creatCriteria(Order.class);
+        Criteria criteria = session.createCriteria(Order.class);
         criteria.add(Restrictions.equ("uuid", 1011011L));
         criteria.delete();
     }
 
     @Test
-    public void test15() {
-        CountDownLatch countDownLatch = new CountDownLatch(500);
-        for (int index = 0; index < 500; index++) {
-            Thread thread = new Thread(() -> {
-                try {
-                    countDownLatch.await();
-                    Order order = (Order) session.findOne(Order.class, 1);
-                    System.out.println(order.getCode() + "=======================");
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            });
-            thread.start();
-            countDownLatch.countDown();
-        }
-        try {
-            Thread.sleep(11000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public void test15() throws InterruptedException {
+        ExecutorService executor = Executors.newFixedThreadPool(500);
+        PocketExecutor.execute(executor, 500, () -> {
+            Order order = (Order) session.findOne(Order.class, 1);
+            System.out.println(order.getCode() + "=======================");
+        });
+        executor.shutdown();
+    }
+
+    @Test
+    public void test16() {
+        Criteria criteria = this.session.createCriteria(Order.class)
+                .add(Restrictions.equ("code", "C-001"))
+                .limit(0, 5);
+        List list = criteria.list();
+        list.size();
     }
 }

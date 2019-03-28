@@ -26,10 +26,10 @@ public class SqlFactory {
         SQL_POOL.put(DatasourceDriverTypes.MYSQL_DRIVER, mysqlSyntax);
     }
 
-    private static final SqlFactory ourInstance = new SqlFactory();
+    private static final SqlFactory OUR_INSTANCE = new SqlFactory();
 
     public static SqlFactory getInstance() {
-        return ourInstance;
+        return OUR_INSTANCE;
     }
 
     private SqlFactory() {

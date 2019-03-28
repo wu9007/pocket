@@ -83,6 +83,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
                 try {
                     CONNECT_LOCK.wait(this.databaseConfig.getTimeout());
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     logger.warn("the waiting thread is interrupted!");
                     e.printStackTrace();
                 }

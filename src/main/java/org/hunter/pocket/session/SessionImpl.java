@@ -97,7 +97,7 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public Criteria creatCriteria(Class clazz) {
+    public Criteria createCriteria(Class clazz) {
         return new CriteriaImpl(clazz, this.connection, this.databaseNodeConfig);
     }
 
@@ -220,7 +220,7 @@ public class SessionImpl extends AbstractSession {
                 }
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e.getMessage());
         } finally {
             if (lock) {
@@ -232,7 +232,7 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public Object findDirect(Class clazz, Serializable uuid) {
-        Criteria criteria = this.creatCriteria(clazz);
+        Criteria criteria = this.createCriteria(clazz);
         criteria.add(Restrictions.equ("uuid", uuid));
         return criteria.unique(true);
     }
