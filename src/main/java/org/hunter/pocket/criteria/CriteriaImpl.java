@@ -103,7 +103,6 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             while (resultSet.next()) {
                 PocketEntity entity = (PocketEntity) clazz.newInstance();
                 for (Field field : this.fields) {
-                    field.setAccessible(true);
                     field.set(entity, this.fieldTypeStrategy.getColumnValue(field, resultSet));
                 }
                 result.add(entity);
@@ -151,7 +150,6 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             if (resultSet.next()) {
                 entity = (PocketEntity) clazz.newInstance();
                 for (Field field : this.fields) {
-                    field.setAccessible(true);
                     field.set(entity, this.fieldTypeStrategy.getColumnValue(field, resultSet));
                 }
             } else {
@@ -305,9 +303,9 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             while (resultSet.next()) {
                 PocketEntity entity = (PocketEntity) clazz.newInstance();
                 for (Field childField : fields) {
-                    childField.setAccessible(true);
                     if (childField.getAnnotation(OneToMany.class) != null) {
                         Serializable childUuid = reflectUtils.getUuidValue(entity);
+                        childField.setAccessible(true);
                         childField.set(entity, this.getChildren(childField, childUuid));
                     } else {
                         childField.set(entity, fieldTypeStrategy.getColumnValue(childField, resultSet));

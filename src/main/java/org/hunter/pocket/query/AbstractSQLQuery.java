@@ -8,10 +8,16 @@ import java.sql.Connection;
 abstract class AbstractSQLQuery {
     final Connection connection;
     final String sql;
+    Class clazz;
 
     AbstractSQLQuery(String sql, Connection connection) {
         this.sql = sql;
         this.connection = connection;
     }
 
+    public AbstractSQLQuery(Connection connection, String sql, Class clazz) {
+        this.connection = connection;
+        this.sql = sql;
+        this.clazz = clazz;
+    }
 }

@@ -92,6 +92,11 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
+    public SQLQuery createSQLQuery(String sql, Class clazz) {
+        return new SQLQueryImpl(sql, connection, clazz);
+    }
+
+    @Override
     public <T> ProcessQuery<T> createProcessQuery(String processSQL) {
         return new ProcessQueryImpl<>(processSQL, this.connection);
     }

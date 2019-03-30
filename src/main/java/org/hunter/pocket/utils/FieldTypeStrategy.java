@@ -234,6 +234,7 @@ public class FieldTypeStrategy {
         } else {
             throw new NullPointerException("未找到注解");
         }
+        field.setAccessible(true);
         return RESULT_STRATEGY_POOL.get(field.getType().getName()).apply(resultSet, columnName);
     }
 
