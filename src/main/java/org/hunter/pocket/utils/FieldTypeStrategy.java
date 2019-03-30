@@ -224,6 +224,11 @@ public class FieldTypeStrategy {
     }
 
     public Object getColumnValue(Field field, ResultSet resultSet) {
+        field.setAccessible(true);
+        return RESULT_STRATEGY_POOL.get(field.getType().getName()).apply(resultSet, field.getName());
+    }
+
+    public Object getMappingColumnValue(Field field, ResultSet resultSet) {
         Column column = field.getAnnotation(Column.class);
         ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);
         String columnName;
@@ -234,6 +239,7 @@ public class FieldTypeStrategy {
         } else {
             throw new NullPointerException("未找到注解");
         }
+        field.setAccessible(true);
         return RESULT_STRATEGY_POOL.get(field.getType().getName()).apply(resultSet, columnName);
     }
 

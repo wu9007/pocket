@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * @author wujianchuan 2019/1/10
  */
 public class ReflectUtils {
-    private static final ReflectUtils ourInstance = new ReflectUtils();
+    private static final ReflectUtils OUR_INSTANCE = new ReflectUtils();
     private static final String SERIAL_VERSION_UID = "serialVersionUID";
     private static final Predicate<Field> FIND_MAPPING_FILTER = field -> !SERIAL_VERSION_UID.equals(field.getName()) && (field.getAnnotation(Column.class) != null || field.getAnnotation(ManyToOne.class) != null);
     public static final Predicate<Field> FIND_CHILDREN = field -> !SERIAL_VERSION_UID.equals(field.getName()) && field.getAnnotation(OneToMany.class) != null;
@@ -37,7 +37,7 @@ public class ReflectUtils {
     };
 
     public static ReflectUtils getInstance() {
-        return ourInstance;
+        return OUR_INSTANCE;
     }
 
     private ReflectUtils() {
@@ -99,9 +99,21 @@ public class ReflectUtils {
      * @param clazz 实体类
      * @return 需持久化的属性
      */
-    public Field[] getMappingField(Class clazz) {
+    public Field[] getMappingFields(Class clazz) {
         Field[] superFields = Arrays.stream(clazz.getSuperclass().getDeclaredFields()).filter(FIND_MAPPING_FILTER).toArray(Field[]::new);
         Field[] fields = Arrays.stream(clazz.getDeclaredFields()).filter(FIND_MAPPING_FILTER).toArray(Field[]::new);
+        return (Field[]) this.combinedField(superFields, fields);
+    }
+
+    /**
+     * 获取需要持久化的属性
+     *
+     * @param clazz 实体类
+     * @return 需持久化的属性
+     */
+    public Field[] getFields(Class clazz) {
+        Field[] superFields = Arrays.stream(clazz.getSuperclass().getDeclaredFields()).filter(field -> !SERIAL_VERSION_UID.equals(field.getName())).toArray(Field[]::new);
+        Field[] fields = Arrays.stream(clazz.getDeclaredFields()).filter(field -> !SERIAL_VERSION_UID.equals(field.getName())).toArray(Field[]::new);
         return (Field[]) this.combinedField(superFields, fields);
     }
 
@@ -132,7 +144,7 @@ public class ReflectUtils {
      * @return 需要更新的属性
      */
     public Field[] dirtyFieldFilter(Object modern, Object older) {
-        Field[] fields = this.getMappingField(modern.getClass());
+        Field[] fields = this.getMappingFields(modern.getClass());
         return Arrays.stream(fields)
                 .filter(field -> {
                     try {

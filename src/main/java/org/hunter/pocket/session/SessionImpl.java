@@ -92,6 +92,11 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
+    public SQLQuery createSQLQuery(String sql, Class clazz) {
+        return new SQLQueryImpl(sql, connection, clazz);
+    }
+
+    @Override
     public <T> ProcessQuery<T> createProcessQuery(String processSQL) {
         return new ProcessQueryImpl<>(processSQL, this.connection);
     }
@@ -106,7 +111,7 @@ public class SessionImpl extends AbstractSession {
         Class clazz = entity.getClass();
         Entity entityAnnotation = reflectUtils.getEntityAnnotation(clazz);
 
-        Field[] fields = reflectUtils.getMappingField(clazz);
+        Field[] fields = reflectUtils.getMappingFields(clazz);
         StringBuilder sql = new StringBuilder("INSERT INTO ")
                 .append(entityAnnotation.table())
                 .append("(")
