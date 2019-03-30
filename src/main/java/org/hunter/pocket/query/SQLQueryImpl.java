@@ -54,7 +54,14 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
 
     @Override
     public List list() throws SQLException {
-        PreparedStatement preparedStatement = this.connection.prepareStatement(sql);
+        StringBuilder querySQL = new StringBuilder(this.sql);
+        if (this.limited()) {
+            querySQL.append(" LIMIT ")
+                    .append(this.getStart())
+                    .append(", ")
+                    .append(this.getLimit());
+        }
+        PreparedStatement preparedStatement = this.connection.prepareStatement(querySQL.toString());
         String str = sql.replaceAll("\\s*", "");
         ResultSet resultSet = preparedStatement.executeQuery();
         List<Object> results = new ArrayList<>();
@@ -74,6 +81,12 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
             }
         }
         return results;
+    }
+
+    @Override
+    public SQLQuery limit(int start, int limit) {
+        this.setLimit(start, limit);
+        return this;
     }
 
     private Object[] getObjects(ResultSet resultSet, String[] columnNames) throws SQLException {

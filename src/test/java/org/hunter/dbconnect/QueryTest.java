@@ -54,4 +54,11 @@ public class QueryTest {
         List<Order> orders = query.list();
         orders.forEach(order -> System.out.println(order.getCode()));
     }
+
+    @Test
+    public void test3() throws SQLException {
+        SQLQuery query = this.session.createSQLQuery("select uuid,code,price from tbl_order", Order.class);
+        List<Order> orders = query.limit(0, 5).list();
+        orders.forEach(order -> System.out.println(order.getCode()));
+    }
 }

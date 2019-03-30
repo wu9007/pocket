@@ -8,7 +8,6 @@ import java.sql.Connection;
 abstract class AbstractSQLQuery {
     final Connection connection;
     final String sql;
-    //TODO 分页
     private Integer start;
     private Integer limit;
     Class clazz;
@@ -18,9 +17,26 @@ abstract class AbstractSQLQuery {
         this.connection = connection;
     }
 
-    public AbstractSQLQuery(Connection connection, String sql, Class clazz) {
+    AbstractSQLQuery(Connection connection, String sql, Class clazz) {
         this.connection = connection;
         this.sql = sql;
         this.clazz = clazz;
+    }
+
+    void setLimit(int start, int limit) {
+        this.start = start;
+        this.limit = limit;
+    }
+
+    boolean limited() {
+        return this.start != null && this.limit != null;
+    }
+
+    Integer getStart() {
+        return start;
+    }
+
+    Integer getLimit() {
+        return limit;
     }
 }

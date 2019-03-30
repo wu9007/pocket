@@ -84,11 +84,11 @@ abstract class AbstractCriteria {
         return this.start != null && this.limit != null;
     }
 
-    public Integer getStart() {
+    Integer getStart() {
         return start;
     }
 
-    public Integer getLimit() {
+    Integer getLimit() {
         return limit;
     }
 }
