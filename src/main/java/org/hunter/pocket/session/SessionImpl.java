@@ -111,7 +111,7 @@ public class SessionImpl extends AbstractSession {
         Class clazz = entity.getClass();
         Entity entityAnnotation = reflectUtils.getEntityAnnotation(clazz);
 
-        Field[] fields = reflectUtils.getMappingField(clazz);
+        Field[] fields = reflectUtils.getMappingFields(clazz);
         StringBuilder sql = new StringBuilder("INSERT INTO ")
                 .append(entityAnnotation.table())
                 .append("(")

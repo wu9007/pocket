@@ -8,6 +8,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author wujianchuan 2019/1/3
@@ -28,34 +32,67 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
     @Override
     public Object unique() throws SQLException {
         PreparedStatement preparedStatement = this.connection.prepareStatement(sql);
-        String str = sql.replaceAll("\\s*", "").toUpperCase();
-        int columnCount = str
-                .substring(str.indexOf("SELECT") + 6, str.indexOf("FROM"))
-                .split(",")
-                .length;
+        String str = sql.replaceAll("\\s*", "");
         ResultSet resultSet = preparedStatement.executeQuery();
         if (resultSet.next()) {
+            String[] columnNames = str
+                    .substring(str.indexOf("SELECT") + str.indexOf("select") + 6, str.indexOf("FROM") + str.indexOf("from"))
+                    .split(",");
             if (clazz != null) {
                 try {
-                    Object result = clazz.newInstance();
-                    Field[] fields = reflectUtils.getMappingField(clazz);
-                    for (Field field : fields) {
-                        field.set(result, fieldTypeStrategy.getColumnValue(field, resultSet));
-                    }
-                    return result;
+                    return getEntity(resultSet, columnNames);
                 } catch (InstantiationException | IllegalAccessException e) {
                     throw new IllegalAccessError();
                 }
-
             } else {
-                Object[] result = new Object[columnCount];
-                for (int index = 1; index <= columnCount; index++) {
-                    result[index - 1] = resultSet.getObject(index);
-                }
-                return result;
+                return getObjects(resultSet, columnNames);
             }
         } else {
             return null;
         }
+    }
+
+    @Override
+    public List list() throws SQLException {
+        PreparedStatement preparedStatement = this.connection.prepareStatement(sql);
+        String str = sql.replaceAll("\\s*", "");
+        ResultSet resultSet = preparedStatement.executeQuery();
+        List<Object> results = new ArrayList<>();
+        while (resultSet.next()) {
+            String[] columnNames = str
+                    .substring(str.indexOf("SELECT") + str.indexOf("select") + 6, str.indexOf("FROM") + str.indexOf("from"))
+                    .split(",");
+            if (clazz != null) {
+                try {
+                    Object result = getEntity(resultSet, columnNames);
+                    results.add(result);
+                } catch (InstantiationException | IllegalAccessException e) {
+                    throw new IllegalAccessError();
+                }
+            } else {
+                results.add(getObjects(resultSet, columnNames));
+            }
+        }
+        return results;
+    }
+
+    private Object[] getObjects(ResultSet resultSet, String[] columnNames) throws SQLException {
+        int columnCount = columnNames.length;
+        Object[] result = new Object[columnCount];
+        for (int index = 1; index <= columnCount; index++) {
+            result[index - 1] = resultSet.getObject(index);
+        }
+        return result;
+    }
+
+    private Object getEntity(ResultSet resultSet, String[] columnNames) throws InstantiationException, IllegalAccessException {
+        Object result = clazz.newInstance();
+        List<Field> fields = Arrays.stream(reflectUtils.getFields(clazz))
+                .filter(field -> Arrays.asList(columnNames).contains(field.getName()))
+                .collect(Collectors.toList());
+        for (Field field : fields) {
+            field.set(result, fieldTypeStrategy.getColumnValue(field, resultSet));
+        }
+        return result;
     }
 }

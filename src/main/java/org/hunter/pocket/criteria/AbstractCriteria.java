@@ -37,8 +37,8 @@ abstract class AbstractCriteria {
     final List<Restrictions> restrictionsList = new ArrayList<>();
     final List<Modern> modernList = new ArrayList<>();
     final List<Sort> orderList = new ArrayList<>();
-    Integer start;
-    Integer limit;
+    private Integer start;
+    private Integer limit;
     StringBuilder completeSql = new StringBuilder();
     StringBuilder sqlRestriction = new StringBuilder();
 
@@ -46,7 +46,7 @@ abstract class AbstractCriteria {
         this.clazz = clazz;
         this.connection = connection;
         this.databaseConfig = databaseConfig;
-        this.fields = reflectUtils.getMappingField(clazz);
+        this.fields = reflectUtils.getMappingFields(clazz);
         this.childrenFields = Arrays.stream(clazz.getDeclaredFields())
                 .filter(FIND_CHILDREN)
                 .toArray(Field[]::new);

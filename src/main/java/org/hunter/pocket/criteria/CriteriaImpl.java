@@ -103,7 +103,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             while (resultSet.next()) {
                 PocketEntity entity = (PocketEntity) clazz.newInstance();
                 for (Field field : this.fields) {
-                    field.set(entity, this.fieldTypeStrategy.getColumnValue(field, resultSet));
+                    field.set(entity, this.fieldTypeStrategy.getMappingColumnValue(field, resultSet));
                 }
                 result.add(entity);
             }
@@ -150,7 +150,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             if (resultSet.next()) {
                 entity = (PocketEntity) clazz.newInstance();
                 for (Field field : this.fields) {
-                    field.set(entity, this.fieldTypeStrategy.getColumnValue(field, resultSet));
+                    field.set(entity, this.fieldTypeStrategy.getMappingColumnValue(field, resultSet));
                 }
             } else {
                 return null;
@@ -282,7 +282,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         Class clazz = oneToMany.clazz();
         String columnName = oneToMany.name();
         Entity entityAnnotation = (Entity) clazz.getAnnotation(Entity.class);
-        Field[] fields = reflectUtils.getMappingField(clazz);
+        Field[] fields = reflectUtils.getMappingFields(clazz);
         String sql = "SELECT "
                 + reflectUtils.getColumnNames(fields)
                 + " FROM "
@@ -308,7 +308,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                         childField.setAccessible(true);
                         childField.set(entity, this.getChildren(childField, childUuid));
                     } else {
-                        childField.set(entity, fieldTypeStrategy.getColumnValue(childField, resultSet));
+                        childField.set(entity, fieldTypeStrategy.getMappingColumnValue(childField, resultSet));
                     }
                 }
                 collection.add(entity);

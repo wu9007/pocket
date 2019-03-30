@@ -8,6 +8,9 @@ import java.sql.Connection;
 abstract class AbstractSQLQuery {
     final Connection connection;
     final String sql;
+    //TODO 分页
+    private Integer start;
+    private Integer limit;
     Class clazz;
 
     AbstractSQLQuery(String sql, Connection connection) {

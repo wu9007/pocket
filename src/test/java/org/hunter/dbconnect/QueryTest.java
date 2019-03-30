@@ -2,8 +2,6 @@ package org.hunter.dbconnect;
 
 import org.hunter.Application;
 import org.hunter.demo.model.Order;
-import org.hunter.pocket.criteria.Criteria;
-import org.hunter.pocket.criteria.Restrictions;
 import org.hunter.pocket.query.SQLQuery;
 import org.hunter.pocket.session.Session;
 import org.hunter.pocket.session.SessionFactory;
@@ -48,5 +46,12 @@ public class QueryTest {
         SQLQuery query = this.session.createSQLQuery("select uuid,code,price from tbl_order", Order.class);
         Order order = (Order) query.unique();
         System.out.println(order.getCode());
+    }
+
+    @Test
+    public void test2() throws SQLException {
+        SQLQuery query = this.session.createSQLQuery("select uuid,code,price from tbl_order", Order.class);
+        List<Order> orders = query.list();
+        orders.forEach(order -> System.out.println(order.getCode()));
     }
 }
