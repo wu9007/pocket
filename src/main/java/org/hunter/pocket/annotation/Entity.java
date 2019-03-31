@@ -24,7 +24,5 @@ public @interface Entity {
 
     String uuidGenerator() default "long_increment";
 
-    boolean history() default true;
-
     String businessName() default "";
 }
