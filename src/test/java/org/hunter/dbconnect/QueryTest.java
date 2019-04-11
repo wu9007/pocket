@@ -25,7 +25,6 @@ public class QueryTest {
 
     private Session session;
     private Transaction transaction;
-    private long start;
 
     @Before
     public void setup() throws SQLException {
