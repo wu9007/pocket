@@ -6,6 +6,7 @@ import org.hunter.pocket.criteria.Modern;
 import org.hunter.pocket.criteria.Restrictions;
 import org.hunter.pocket.criteria.SqlBean;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
@@ -131,6 +132,14 @@ public class FieldTypeStrategy {
                 return null;
             }
         });
+        RESULT_STRATEGY_POOL.put(Serializable.class.getName(), (resultSet, columnName) -> {
+            try {
+                return resultSet.getObject(columnName);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
 
         PREPARED_STRATEGY_POOL.put(String.class.getName(), (value) -> {
             PreparedStatement preparedStatement = value.getPreparedStatement();
@@ -210,6 +219,15 @@ public class FieldTypeStrategy {
             SqlBean sqlBean = value.getSqlBean();
             try {
                 preparedStatement.setDouble(value.getIndex(), (Double) sqlBean.getTarget());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+        PREPARED_STRATEGY_POOL.put(Serializable.class.getName(), (value) -> {
+            PreparedStatement preparedStatement = value.getPreparedStatement();
+            SqlBean sqlBean = value.getSqlBean();
+            try {
+                preparedStatement.setObject(value.getIndex(), sqlBean.getTarget());
             } catch (SQLException e) {
                 e.printStackTrace();
             }

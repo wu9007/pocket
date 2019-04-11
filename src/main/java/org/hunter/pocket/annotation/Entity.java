@@ -22,9 +22,10 @@ public @interface Entity {
 
     int tableId();
 
-    String uuidGenerator() default "long_increment";
-
-    boolean history() default true;
+    /*
+     [str_increment, long_increment]
+      */
+    String uuidGenerator() default "str_increment";
 
     String businessName() default "";
 }
