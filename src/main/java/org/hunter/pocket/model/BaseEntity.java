@@ -3,8 +3,6 @@ package org.hunter.pocket.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.hunter.pocket.annotation.Column;
 
-import java.io.Serializable;
-
 /**
  * @author wujianchuan 2018/12/26
  */
@@ -12,16 +10,16 @@ import java.io.Serializable;
 public abstract class BaseEntity implements PocketEntity {
     private static final long serialVersionUID = -8735555543925687138L;
     @Column(name = "UUID")
-    private Serializable uuid;
+    private String uuid;
 
     public BaseEntity() {
     }
 
-    public Serializable getUuid() {
+    public String getUuid() {
         return uuid;
     }
 
-    public void setUuid(Serializable uuid) {
+    public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
