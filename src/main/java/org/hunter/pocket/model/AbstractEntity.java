@@ -5,7 +5,9 @@ import org.hunter.pocket.annotation.Column;
 
 /**
  * @author wujianchuan 2019/2/22
+ * @deprecated 未来版本将废弃使用
  */
+@Deprecated
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public abstract class AbstractEntity implements PocketEntity {
 
