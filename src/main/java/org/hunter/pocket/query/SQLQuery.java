@@ -12,17 +12,15 @@ public interface SQLQuery {
      * 单条查询
      *
      * @return 查询结果
-     * @throws SQLException e
      */
-    Object unique() throws SQLException;
+    Object unique();
 
     /**
      * 查询所有数据
      *
      * @return list
-     * @throws SQLException e
      */
-    List list() throws SQLException;
+    List list();
 
     /**
      * 分页
