@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -42,8 +43,8 @@ public class QueryTest {
 
     @Test
     public void test1() {
-        SQLQuery query = this.session.createSQLQuery("select uuid as uuid,code as code,price as price from tbl_order", Order.class);
-        Order order = (Order) query.unique();
+        SQLQuery query = this.session.createSQLQuery("select uuid as uuid,code as code,price as price from tbl_order where uuid = :uuid", Order.class);
+        Order order = (Order) query.setParameter("uuid", "1011010").unique();
         System.out.println(order.getCode());
     }
 
@@ -59,5 +60,14 @@ public class QueryTest {
         SQLQuery query = this.session.createSQLQuery("select uuid,code,price from tbl_order", Order.class);
         List<Order> orders = query.limit(0, 5).list();
         orders.forEach(order -> System.out.println(order.getCode()));
+    }
+
+    @Test
+    public void test4() {
+        SQLQuery query = this.session.createSQLQuery("select uuid as uuid,code as code,price as price, day as day,time as time from tbl_order where CODE = :ORDER_CODE AND DAY < :DAY");
+        List<Order> orders = query.setParameter("ORDER_CODE", "C-001")
+                .setParameter("DAY", new Date())
+                .list();
+        System.out.println(orders.size());
     }
 }

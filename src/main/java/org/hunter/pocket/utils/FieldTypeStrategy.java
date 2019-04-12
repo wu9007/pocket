@@ -3,6 +3,7 @@ package org.hunter.pocket.utils;
 import org.hunter.pocket.annotation.Column;
 import org.hunter.pocket.annotation.ManyToOne;
 import org.hunter.pocket.criteria.Modern;
+import org.hunter.pocket.criteria.ParameterTranslator;
 import org.hunter.pocket.criteria.Restrictions;
 import org.hunter.pocket.criteria.SqlBean;
 
@@ -29,6 +30,7 @@ public class FieldTypeStrategy {
         private Integer index;
         private Restrictions restrictions;
         private Modern modern;
+        private ParameterTranslator parameterTranslator;
 
         PreparedSupplierValue(PreparedStatement preparedStatement, Integer index, Restrictions restrictions) {
             this.preparedStatement = preparedStatement;
@@ -42,36 +44,32 @@ public class FieldTypeStrategy {
             this.modern = modern;
         }
 
-        PreparedStatement getPreparedStatement() {
-            return preparedStatement;
+        PreparedSupplierValue(PreparedStatement preparedStatement, Integer index, ParameterTranslator parameterTranslator) {
+            this.preparedStatement = preparedStatement;
+            this.index = index;
+            this.parameterTranslator = parameterTranslator;
         }
 
-        public void setPreparedStatement(PreparedStatement preparedStatement) {
-            this.preparedStatement = preparedStatement;
+        PreparedStatement getPreparedStatement() {
+            return preparedStatement;
         }
 
         Integer getIndex() {
             return index;
         }
 
-        public void setIndex(Integer index) {
-            this.index = index;
-        }
-
         SqlBean getSqlBean() {
             if (this.restrictions != null) {
                 return restrictions;
-            } else {
+            } else if (this.modern != null) {
                 return this.modern;
+            } else {
+                return this.parameterTranslator;
             }
-        }
-
-        public void setRestrictions(Restrictions restrictions) {
-            this.restrictions = restrictions;
         }
     }
 
-    private static final FieldTypeStrategy strategy = new FieldTypeStrategy();
+    private static final FieldTypeStrategy STRATEGY = new FieldTypeStrategy();
     private static final Map<String, BiFunction<ResultSet, String, Object>> RESULT_STRATEGY_POOL = new ConcurrentHashMap<>(20);
     private static final Map<String, Consumer<PreparedSupplierValue>> PREPARED_STRATEGY_POOL = new ConcurrentHashMap<>(20);
 
@@ -238,7 +236,7 @@ public class FieldTypeStrategy {
     }
 
     public static FieldTypeStrategy getInstance() {
-        return strategy;
+        return STRATEGY;
     }
 
     public Object getColumnValue(Field field, ResultSet resultSet) {
@@ -271,6 +269,14 @@ public class FieldTypeStrategy {
             Restrictions restrictions = restrictionsList.get(index);
             PreparedSupplierValue preparedSupplierValue = new PreparedSupplierValue(preparedStatement, modernList.size() + index + 1, restrictions);
             PREPARED_STRATEGY_POOL.get(restrictions.getTarget().getClass().getName()).accept(preparedSupplierValue);
+        }
+    }
+
+    public void setPreparedStatement(PreparedStatement preparedStatement, List<ParameterTranslator> parameterTranslatorList) {
+        for (int index = 0; index < parameterTranslatorList.size(); index++) {
+            ParameterTranslator parameterTranslator = parameterTranslatorList.get(index);
+            PreparedSupplierValue preparedSupplierValue = new PreparedSupplierValue(preparedStatement, index + 1, parameterTranslator);
+            PREPARED_STRATEGY_POOL.get(parameterTranslator.getTarget().getClass().getName()).accept(preparedSupplierValue);
         }
     }
 }

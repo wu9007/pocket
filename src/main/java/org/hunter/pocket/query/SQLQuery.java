@@ -8,6 +8,8 @@ import java.util.List;
  */
 public interface SQLQuery {
 
+    String PARAMETER_REGEX = ":[a-zA-Z\\w-_]+";
+
     /**
      * 单条查询
      *
@@ -30,4 +32,13 @@ public interface SQLQuery {
      * @return SQLQuery
      */
     SQLQuery limit(int start, int limit);
+
+    /**
+     * 参数赋值
+     *
+     * @param key   键
+     * @param value 值
+     * @return SQLQuery
+     */
+    SQLQuery setParameter(String key, Object value);
 }

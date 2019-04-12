@@ -1,6 +1,10 @@
 package org.hunter.pocket.query;
 
+import org.hunter.pocket.utils.FieldTypeStrategy;
+
 import java.sql.Connection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author wujianchuan 2019/1/3
@@ -11,6 +15,7 @@ abstract class AbstractSQLQuery {
     private Integer start;
     private Integer limit;
     Class clazz;
+    Map<String, Object> parameterMap = new HashMap<>();
 
     AbstractSQLQuery(String sql, Connection connection) {
         this.sql = sql;
