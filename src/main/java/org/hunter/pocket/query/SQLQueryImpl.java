@@ -10,7 +10,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -27,8 +30,23 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
 
     @Override
     public Object unique() {
+        LinkedList<QueryParameter> queryParameters = new LinkedList<>();
+        if (this.parameterMap.size() > 0) {
+            Pattern pattern = Pattern.compile(PARAMETER_REGEX);
+            Matcher matcher = pattern.matcher(sql);
+            while (matcher.find()) {
+                String name = matcher.group().substring(1);
+                queryParameters.add(new QueryParameter(name, this.parameterMap.get(name)));
+            }
+        }
         try {
-            PreparedStatement preparedStatement = this.connection.prepareStatement(sql);
+            String executeSql = sql.replaceAll(PARAMETER_REGEX, "?");
+            System.out.println(executeSql);
+            PreparedStatement preparedStatement = this.connection.prepareStatement(executeSql);
+            for (int index = 0; index < queryParameters.size(); index++) {
+                // TODO 兼容多种数据了类型
+                preparedStatement.setString(index + 1, (String) queryParameters.get(index).getValue());
+            }
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 List<String> columnNames = this.getColumnNames();
@@ -45,7 +63,8 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Your SQL grammar is incorrect.");
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -59,7 +78,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
                     .append(this.getLimit());
         }
         try {
-            PreparedStatement preparedStatement = this.connection.prepareStatement(querySQL.toString());
+            PreparedStatement preparedStatement = this.connection.prepareStatement(querySQL.toString().replaceAll(PARAMETER_REGEX, "?"));
             ResultSet resultSet = preparedStatement.executeQuery();
             List<Object> results = new ArrayList<>();
             while (resultSet.next()) {
@@ -86,6 +105,13 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
         this.setLimit(start, limit);
         return this;
     }
+
+    @Override
+    public SQLQuery setParameter(String key, Object value) {
+        this.parameterMap.put(key, value);
+        return this;
+    }
+
 
     private Object[] getObjects(ResultSet resultSet, int columnCount) throws SQLException {
         Object[] result = new Object[columnCount];

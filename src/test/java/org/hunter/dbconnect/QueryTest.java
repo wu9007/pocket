@@ -42,8 +42,8 @@ public class QueryTest {
 
     @Test
     public void test1() {
-        SQLQuery query = this.session.createSQLQuery("select uuid as uuid,code as code,price as price from tbl_order", Order.class);
-        Order order = (Order) query.unique();
+        SQLQuery query = this.session.createSQLQuery("select uuid as uuid,code as code,price as price from tbl_order where uuid = :uuid", Order.class);
+        Order order = (Order) query.setParameter("uuid","1011010").unique();
         System.out.println(order.getCode());
     }
 
