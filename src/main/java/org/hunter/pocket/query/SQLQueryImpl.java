@@ -29,12 +29,9 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
     public Object unique() {
         try {
             PreparedStatement preparedStatement = this.connection.prepareStatement(sql);
-            String str = sql.replaceAll("\\s*", "");
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                String[] columnNames = str
-                        .substring(str.indexOf("SELECT") + str.indexOf("select") + 6, str.indexOf("FROM") + str.indexOf("from"))
-                        .split(",");
+                List<String> columnNames = this.getColumnNames();
                 if (clazz != null) {
                     try {
                         return getEntity(resultSet, columnNames);
@@ -42,7 +39,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
                         throw new IllegalAccessError();
                     }
                 } else {
-                    return getObjects(resultSet, columnNames);
+                    return getObjects(resultSet, columnNames.size());
                 }
             } else {
                 return null;
@@ -63,13 +60,10 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
         }
         try {
             PreparedStatement preparedStatement = this.connection.prepareStatement(querySQL.toString());
-            String str = sql.replaceAll("\\s*", "");
             ResultSet resultSet = preparedStatement.executeQuery();
             List<Object> results = new ArrayList<>();
             while (resultSet.next()) {
-                String[] columnNames = str
-                        .substring(str.indexOf("SELECT") + str.indexOf("select") + 6, str.indexOf("FROM") + str.indexOf("from"))
-                        .split(",");
+                List<String> columnNames = this.getColumnNames();
                 if (clazz != null) {
                     try {
                         Object result = getEntity(resultSet, columnNames);
@@ -78,7 +72,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
                         throw new IllegalAccessError();
                     }
                 } else {
-                    results.add(getObjects(resultSet, columnNames));
+                    results.add(getObjects(resultSet, columnNames.size()));
                 }
             }
             return results;
@@ -93,8 +87,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
         return this;
     }
 
-    private Object[] getObjects(ResultSet resultSet, String[] columnNames) throws SQLException {
-        int columnCount = columnNames.length;
+    private Object[] getObjects(ResultSet resultSet, int columnCount) throws SQLException {
         Object[] result = new Object[columnCount];
         for (int index = 1; index <= columnCount; index++) {
             result[index - 1] = resultSet.getObject(index);
@@ -102,10 +95,21 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
         return result;
     }
 
-    private Object getEntity(ResultSet resultSet, String[] columnNames) throws InstantiationException, IllegalAccessException {
+    private List<String> getColumnNames() {
+        String str = this.sql.replaceAll("\\s*", "");
+        String[] columnStrArray = str
+                .substring(str.toUpperCase().indexOf("SELECT") + 7, str.toUpperCase().indexOf("FROM"))
+                .split(",");
+        return Arrays
+                .stream(columnStrArray)
+                .map(columnStr -> columnStr.substring(columnStr.toUpperCase().indexOf("AS") + 2))
+                .collect(Collectors.toList());
+    }
+
+    private Object getEntity(ResultSet resultSet, List<String> columnNames) throws InstantiationException, IllegalAccessException {
         Object result = clazz.newInstance();
         List<Field> fields = Arrays.stream(reflectUtils.getFields(clazz))
-                .filter(field -> Arrays.asList(columnNames).contains(field.getName()))
+                .filter(field -> columnNames.contains(field.getName()))
                 .collect(Collectors.toList());
         for (Field field : fields) {
             field.set(result, fieldTypeStrategy.getColumnValue(field, resultSet));

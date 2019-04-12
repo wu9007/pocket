@@ -42,7 +42,7 @@ public class QueryTest {
 
     @Test
     public void test1() {
-        SQLQuery query = this.session.createSQLQuery("select uuid,code,price from tbl_order", Order.class);
+        SQLQuery query = this.session.createSQLQuery("select uuid as uuid,code as code,price as price from tbl_order", Order.class);
         Order order = (Order) query.unique();
         System.out.println(order.getCode());
     }
