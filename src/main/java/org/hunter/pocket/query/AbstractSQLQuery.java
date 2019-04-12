@@ -1,5 +1,7 @@
 package org.hunter.pocket.query;
 
+import org.hunter.pocket.utils.FieldTypeStrategy;
+
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;

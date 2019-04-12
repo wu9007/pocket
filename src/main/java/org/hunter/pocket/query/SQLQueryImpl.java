@@ -1,5 +1,6 @@
 package org.hunter.pocket.query;
 
+import org.hunter.pocket.criteria.ParameterTranslator;
 import org.hunter.pocket.utils.FieldTypeStrategy;
 import org.hunter.pocket.utils.ReflectUtils;
 
@@ -24,30 +25,17 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
     private final FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
     private final ReflectUtils reflectUtils = ReflectUtils.getInstance();
 
+    public SQLQueryImpl(String sql, Connection connection) {
+        super(sql, connection);
+    }
     public SQLQueryImpl(String sql, Connection connection, Class clazz) {
         super(connection, sql, clazz);
     }
 
     @Override
     public Object unique() {
-        LinkedList<QueryParameter> queryParameters = new LinkedList<>();
-        if (this.parameterMap.size() > 0) {
-            Pattern pattern = Pattern.compile(PARAMETER_REGEX);
-            Matcher matcher = pattern.matcher(sql);
-            while (matcher.find()) {
-                String name = matcher.group().substring(1);
-                queryParameters.add(new QueryParameter(name, this.parameterMap.get(name)));
-            }
-        }
         try {
-            String executeSql = sql.replaceAll(PARAMETER_REGEX, "?");
-            System.out.println(executeSql);
-            PreparedStatement preparedStatement = this.connection.prepareStatement(executeSql);
-            for (int index = 0; index < queryParameters.size(); index++) {
-                // TODO 兼容多种数据了类型
-                preparedStatement.setString(index + 1, (String) queryParameters.get(index).getValue());
-            }
-            ResultSet resultSet = preparedStatement.executeQuery();
+            ResultSet resultSet = execute(sql);
             if (resultSet.next()) {
                 List<String> columnNames = this.getColumnNames();
                 if (clazz != null) {
@@ -78,8 +66,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
                     .append(this.getLimit());
         }
         try {
-            PreparedStatement preparedStatement = this.connection.prepareStatement(querySQL.toString().replaceAll(PARAMETER_REGEX, "?"));
-            ResultSet resultSet = preparedStatement.executeQuery();
+            ResultSet resultSet = execute(querySQL.toString());
             List<Object> results = new ArrayList<>();
             while (resultSet.next()) {
                 List<String> columnNames = this.getColumnNames();
@@ -112,6 +99,21 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
         return this;
     }
 
+    private ResultSet execute(String sql) throws SQLException {
+        String executeSql = sql.replaceAll(PARAMETER_REGEX, "?");
+        PreparedStatement preparedStatement = this.connection.prepareStatement(executeSql);
+        if (this.parameterMap.size() > 0) {
+            List<ParameterTranslator> queryParameters = new LinkedList<>();
+            Pattern pattern = Pattern.compile(PARAMETER_REGEX);
+            Matcher matcher = pattern.matcher(sql);
+            while (matcher.find()) {
+                String name = matcher.group().substring(1);
+                queryParameters.add(new ParameterTranslator(name, this.parameterMap.get(name)));
+            }
+            fieldTypeStrategy.setPreparedStatement(preparedStatement, queryParameters);
+        }
+        return preparedStatement.executeQuery();
+    }
 
     private Object[] getObjects(ResultSet resultSet, int columnCount) throws SQLException {
         Object[] result = new Object[columnCount];

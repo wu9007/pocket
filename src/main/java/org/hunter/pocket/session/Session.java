@@ -38,6 +38,14 @@ public interface Session {
     Transaction getTransaction();
 
     /**
+     * 获取SQL查询对象
+     *
+     * @param sql 查询语句
+     * @return 查询对象
+     */
+    SQLQuery createSQLQuery(String sql);
+
+    /**
      * 获取SQL规范对象
      *
      * @param clazz 实体类类型
