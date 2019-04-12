@@ -21,39 +21,39 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
     private final FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
     private final ReflectUtils reflectUtils = ReflectUtils.getInstance();
 
-    public SQLQueryImpl(String sql, Connection connection) {
-        super(sql, connection);
-    }
-
     public SQLQueryImpl(String sql, Connection connection, Class clazz) {
         super(connection, sql, clazz);
     }
 
     @Override
-    public Object unique() throws SQLException {
-        PreparedStatement preparedStatement = this.connection.prepareStatement(sql);
-        String str = sql.replaceAll("\\s*", "");
-        ResultSet resultSet = preparedStatement.executeQuery();
-        if (resultSet.next()) {
-            String[] columnNames = str
-                    .substring(str.indexOf("SELECT") + str.indexOf("select") + 6, str.indexOf("FROM") + str.indexOf("from"))
-                    .split(",");
-            if (clazz != null) {
-                try {
-                    return getEntity(resultSet, columnNames);
-                } catch (InstantiationException | IllegalAccessException e) {
-                    throw new IllegalAccessError();
+    public Object unique() {
+        try {
+            PreparedStatement preparedStatement = this.connection.prepareStatement(sql);
+            String str = sql.replaceAll("\\s*", "");
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                String[] columnNames = str
+                        .substring(str.indexOf("SELECT") + str.indexOf("select") + 6, str.indexOf("FROM") + str.indexOf("from"))
+                        .split(",");
+                if (clazz != null) {
+                    try {
+                        return getEntity(resultSet, columnNames);
+                    } catch (InstantiationException | IllegalAccessException e) {
+                        throw new IllegalAccessError();
+                    }
+                } else {
+                    return getObjects(resultSet, columnNames);
                 }
             } else {
-                return getObjects(resultSet, columnNames);
+                return null;
             }
-        } else {
-            return null;
+        } catch (SQLException e) {
+            throw new RuntimeException("Your SQL grammar is incorrect.");
         }
     }
 
     @Override
-    public List list() throws SQLException {
+    public List list() {
         StringBuilder querySQL = new StringBuilder(this.sql);
         if (this.limited()) {
             querySQL.append(" LIMIT ")
@@ -61,26 +61,30 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
                     .append(", ")
                     .append(this.getLimit());
         }
-        PreparedStatement preparedStatement = this.connection.prepareStatement(querySQL.toString());
-        String str = sql.replaceAll("\\s*", "");
-        ResultSet resultSet = preparedStatement.executeQuery();
-        List<Object> results = new ArrayList<>();
-        while (resultSet.next()) {
-            String[] columnNames = str
-                    .substring(str.indexOf("SELECT") + str.indexOf("select") + 6, str.indexOf("FROM") + str.indexOf("from"))
-                    .split(",");
-            if (clazz != null) {
-                try {
-                    Object result = getEntity(resultSet, columnNames);
-                    results.add(result);
-                } catch (InstantiationException | IllegalAccessException e) {
-                    throw new IllegalAccessError();
+        try {
+            PreparedStatement preparedStatement = this.connection.prepareStatement(querySQL.toString());
+            String str = sql.replaceAll("\\s*", "");
+            ResultSet resultSet = preparedStatement.executeQuery();
+            List<Object> results = new ArrayList<>();
+            while (resultSet.next()) {
+                String[] columnNames = str
+                        .substring(str.indexOf("SELECT") + str.indexOf("select") + 6, str.indexOf("FROM") + str.indexOf("from"))
+                        .split(",");
+                if (clazz != null) {
+                    try {
+                        Object result = getEntity(resultSet, columnNames);
+                        results.add(result);
+                    } catch (InstantiationException | IllegalAccessException e) {
+                        throw new IllegalAccessError();
+                    }
+                } else {
+                    results.add(getObjects(resultSet, columnNames));
                 }
-            } else {
-                results.add(getObjects(resultSet, columnNames));
             }
+            return results;
+        } catch (SQLException e) {
+            throw new RuntimeException("Your SQL grammar is incorrect.");
         }
-        return results;
     }
 
     @Override
