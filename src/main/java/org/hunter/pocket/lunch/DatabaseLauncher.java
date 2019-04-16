@@ -6,7 +6,7 @@ import org.hunter.pocket.config.ServerConfig;
 import org.hunter.pocket.connect.ConnectionManager;
 import org.hunter.pocket.model.BaseEntity;
 import org.hunter.pocket.session.SessionFactory;
-import org.hunter.pocket.utils.CacheUtils;
+import org.hunter.pocket.cache.BaseCacheUtils;
 import org.hunter.pocket.uuid.UuidGenerator;
 import org.hunter.pocket.uuid.UuidGeneratorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,12 +39,12 @@ public class DatabaseLauncher implements CommandLineRunner {
     List<BaseEntity> entityList;
 
     private final
-    CacheUtils cacheUtils;
+    BaseCacheUtils baseCacheUtils;
 
     @Autowired
-    public DatabaseLauncher(DatabaseConfig databaseConfig, CacheUtils cacheUtils, ServerConfig serverConfig, List<UuidGenerator> uuidGeneratorList, @Nullable List<BaseEntity> entityList) {
+    public DatabaseLauncher(DatabaseConfig databaseConfig, BaseCacheUtils baseCacheUtils, ServerConfig serverConfig, List<UuidGenerator> uuidGeneratorList, @Nullable List<BaseEntity> entityList) {
         this.databaseConfig = databaseConfig;
-        this.cacheUtils = cacheUtils;
+        this.baseCacheUtils = baseCacheUtils;
         this.serverConfig = serverConfig;
         this.uuidGeneratorList = uuidGeneratorList;
         this.entityList = entityList;
@@ -77,7 +77,7 @@ public class DatabaseLauncher implements CommandLineRunner {
     }
 
     private void initSessionFactory() {
-        SessionFactory.register(databaseConfig, cacheUtils);
+        SessionFactory.register(databaseConfig, baseCacheUtils);
     }
 
     private void initUuidGenerator() {

@@ -35,7 +35,6 @@ public class CriteriaTest {
 
     private Session session;
     private Transaction transaction;
-    private long start;
 
     @Before
     public void setup() throws SQLException {
@@ -168,7 +167,7 @@ public class CriteriaTest {
     public void test15() throws InterruptedException {
         ExecutorService executor = Executors.newFixedThreadPool(500);
         PocketExecutor.execute(executor, 500, () -> {
-            Order order = (Order) session.findOne(Order.class, 1);
+            Order order = (Order) session.findOne(Order.class, "1011010");
             System.out.println(order.getCode() + "=======================");
         });
         executor.shutdown();

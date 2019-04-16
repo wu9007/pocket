@@ -12,7 +12,7 @@ import org.hunter.pocket.query.ProcessQuery;
 import org.hunter.pocket.query.ProcessQueryImpl;
 import org.hunter.pocket.query.SQLQuery;
 import org.hunter.pocket.query.SQLQueryImpl;
-import org.hunter.pocket.utils.CacheUtils;
+import org.hunter.pocket.cache.BaseCacheUtils;
 import org.hunter.pocket.uuid.UuidGeneratorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +34,8 @@ public class SessionImpl extends AbstractSession {
     private static final String CLOSE_LOCK = "CLOSE_MONITOR";
     private static final String TRANSACTION_LOCK = "TRANSACTION_MONITOR";
 
-    SessionImpl(DatabaseNodeConfig databaseNodeConfig, String sessionName, CacheUtils cacheUtils) {
-        super(databaseNodeConfig, sessionName, cacheUtils);
+    SessionImpl(DatabaseNodeConfig databaseNodeConfig, String sessionName, BaseCacheUtils baseCacheUtils) {
+        super(databaseNodeConfig, sessionName, baseCacheUtils);
     }
 
     @Override
@@ -203,18 +203,18 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public Object findOne(Class clazz, Serializable uuid) {
-        String cacheKey = this.cacheUtils.generateKey(this.sessionName, clazz, uuid);
-        Object result = this.cacheUtils.getObj(cacheKey);
+        String cacheKey = this.baseCacheUtils.generateKey(this.sessionName, clazz, uuid);
+        Object result = this.baseCacheUtils.getObj(cacheKey);
         if (result != null) {
             return result;
         }
 
         boolean lock = false;
         try {
-            lock = this.cacheUtils.mapLock.putIfAbsent(cacheKey, cacheKey) == null;
+            lock = this.baseCacheUtils.getMapLock().putIfAbsent(cacheKey, cacheKey) == null;
             if (lock) {
                 result = this.findDirect(clazz, uuid);
-                this.cacheUtils.set(cacheKey, result, 360L);
+                this.baseCacheUtils.set(cacheKey, result, 360L);
                 synchronized (CACHE_UNLOCK) {
                     CACHE_UNLOCK.notifyAll();
                 }
@@ -229,7 +229,7 @@ public class SessionImpl extends AbstractSession {
             throw new RuntimeException(e.getMessage());
         } finally {
             if (lock) {
-                this.cacheUtils.mapLock.remove(cacheKey);
+                this.baseCacheUtils.getMapLock().remove(cacheKey);
             }
         }
         return result;
@@ -260,7 +260,7 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public void removeCache(PocketEntity entity) {
-        String cacheKey = this.cacheUtils.generateKey(this.sessionName, entity.getClass(), reflectUtils.getUuidValue(entity));
-        this.cacheUtils.delete(cacheKey);
+        String cacheKey = this.baseCacheUtils.generateKey(this.sessionName, entity.getClass(), reflectUtils.getUuidValue(entity));
+        this.baseCacheUtils.delete(cacheKey);
     }
 }

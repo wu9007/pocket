@@ -2,7 +2,7 @@ package org.hunter.cache;
 
 import org.hunter.Application;
 import org.hunter.demo.model.Order;
-import org.hunter.pocket.utils.CacheUtils;
+import org.hunter.pocket.cache.BaseCacheUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +34,7 @@ public class RedisTest {
     @Qualifier(value = "logicStringRedisTemplate")
     StringRedisTemplate logicStringRedisTemplate;
     @Autowired
-    private CacheUtils cache;
+    private BaseCacheUtils cache;
 
     @Before
     public void setup() throws SQLException {

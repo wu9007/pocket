@@ -12,16 +12,16 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
  * @author wujianchuan 2019/1/17
  */
 class CacheTemplateSerializer {
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     static {
-        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+        OBJECT_MAPPER.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+        OBJECT_MAPPER.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
     }
 
     static StringRedisTemplate createStringTemplate(LettuceConnectionFactory factory) {
         Jackson2JsonRedisSerializer<String> stringSerializer = new Jackson2JsonRedisSerializer<>(String.class);
-        stringSerializer.setObjectMapper(objectMapper);
+        stringSerializer.setObjectMapper(OBJECT_MAPPER);
 
         StringRedisTemplate template = new StringRedisTemplate(factory);
         template.setValueSerializer(stringSerializer);
@@ -31,7 +31,7 @@ class CacheTemplateSerializer {
 
     static RedisTemplate<String, Object> createObjectTemplate(LettuceConnectionFactory factory) {
         Jackson2JsonRedisSerializer<Object> objectSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
-        objectSerializer.setObjectMapper(objectMapper);
+        objectSerializer.setObjectMapper(OBJECT_MAPPER);
 
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(factory);
