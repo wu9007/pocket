@@ -22,16 +22,14 @@ public interface ProcessQuery<T> {
      *
      * @param rowMapperFunction 对象映射
      * @return 要查询的对象
-     * @throws SQLException e
      */
-    T unique(Function<ResultSet, T> rowMapperFunction) throws SQLException;
+    T unique(Function<ResultSet, T> rowMapperFunction);
 
     /**
      * 查询多条记录
      *
      * @param rowMapperFunction 对象映射
      * @return 要查询的对象集合
-     * @throws SQLException e
      */
-    List<T> list(Function<ResultSet, T> rowMapperFunction) throws SQLException;
+    List<T> list(Function<ResultSet, T> rowMapperFunction);
 }

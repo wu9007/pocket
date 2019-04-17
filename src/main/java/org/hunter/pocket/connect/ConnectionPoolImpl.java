@@ -62,15 +62,11 @@ public class ConnectionPoolImpl implements ConnectionPool {
             if (activatedCount.get() < this.databaseConfig.getPoolMaxSize()) {
                 if (this.freeConnections.size() > 0) {
                     connection = this.freeConnections.pollFirst();
-                    try {
-                        if (this.databaseManager.isValidConnection(connection)) {
-                            this.activeConnections.add(connection);
-                            currentConnection.set(connection);
-                        } else {
-                            connection = this.getConnection();
-                        }
-                    } catch (SQLException e) {
-                        e.printStackTrace();
+                    if (this.databaseManager.isValidConnection(connection)) {
+                        this.activeConnections.add(connection);
+                        currentConnection.set(connection);
+                    } else {
+                        connection = this.getConnection();
                     }
                 } else {
                     connection = this.newConnection();
@@ -106,12 +102,8 @@ public class ConnectionPoolImpl implements ConnectionPool {
     @Override
     public Connection getCurrentConnection() {
         Connection connection = currentConnection.get();
-        try {
-            if (!this.databaseManager.isValidConnection(connection)) {
-                connection = this.getConnection();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (!this.databaseManager.isValidConnection(connection)) {
+            connection = this.getConnection();
         }
         return connection;
     }
@@ -166,9 +158,6 @@ public class ConnectionPoolImpl implements ConnectionPool {
             logger.info("{} - free connection count: {}", node, this.getFreeNum());
             logger.info("{} - activated connection count: {}", node, this.getActiveNum());
         }, 1, 1, TimeUnit.SECONDS);
-        scheduledExecutorService.scheduleAtFixedRate(() -> {
-
-        }, 1, 5, TimeUnit.SECONDS);
     }
 
     @Override

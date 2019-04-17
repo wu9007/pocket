@@ -7,6 +7,7 @@ import org.hunter.pocket.config.DatabaseNodeConfig;
 import org.hunter.pocket.criteria.Criteria;
 import org.hunter.pocket.criteria.CriteriaImpl;
 import org.hunter.pocket.criteria.Restrictions;
+import org.hunter.pocket.exception.SessionException;
 import org.hunter.pocket.model.PocketEntity;
 import org.hunter.pocket.query.ProcessQuery;
 import org.hunter.pocket.query.ProcessQueryImpl;
@@ -135,7 +136,7 @@ public class SessionImpl extends AbstractSession {
             effectRow = preparedStatement.executeUpdate();
             this.adoptChildren(entity);
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            throw new SessionException(e.getMessage(), e, true, true);
         } finally {
             ConnectionManager.closeIO(preparedStatement, null);
         }
@@ -167,7 +168,7 @@ public class SessionImpl extends AbstractSession {
                     preparedStatement.setObject(fields.length + 1, reflectUtils.getUuidValue(entity));
                     effectRow = preparedStatement.executeUpdate();
                 } catch (Exception e) {
-                    throw new RuntimeException(e.getMessage());
+                    throw new SessionException(e.getMessage(), e, true, true);
                 } finally {
                     ConnectionManager.closeIO(preparedStatement, null);
                 }
@@ -192,7 +193,7 @@ public class SessionImpl extends AbstractSession {
                 preparedStatement.setObject(1, uuid);
                 effectRow = preparedStatement.executeUpdate();
             } catch (SQLException e) {
-                throw new RuntimeException(e.getMessage());
+                throw new SessionException(e.getMessage(), e, true, true);
             } finally {
                 ConnectionManager.closeIO(preparedStatement, null);
             }
@@ -226,7 +227,7 @@ public class SessionImpl extends AbstractSession {
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new RuntimeException(e.getMessage());
+            throw new SessionException(e.getMessage(), e, true, true);
         } finally {
             if (lock) {
                 this.baseCacheUtils.getMapLock().remove(cacheKey);

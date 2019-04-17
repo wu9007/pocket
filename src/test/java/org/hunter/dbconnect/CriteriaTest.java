@@ -37,7 +37,7 @@ public class CriteriaTest {
     private Transaction transaction;
 
     @Before
-    public void setup() throws SQLException {
+    public void setup(){
         this.session = SessionFactory.getSession("homo");
         this.session.open();
         this.transaction = session.getTransaction();
@@ -72,7 +72,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test3() {
+    public void test3() throws InterruptedException {
         Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.lt("time", new Date()));
         List orderList = criteria.list(true);
@@ -180,5 +180,14 @@ public class CriteriaTest {
                 .limit(0, 5);
         List list = criteria.list();
         list.size();
+    }
+
+    @Test
+    public void test17() {
+        System.out.println(this.session.createCriteria(Order.class)
+                .add(Restrictions.equ("code", "A-002")).count());
+        this.session.createCriteria(Order.class).add(Restrictions.equ("code", "A-002")).delete();
+        System.out.println(this.session.createCriteria(Order.class)
+                .add(Restrictions.equ("code", "A-002")).count());
     }
 }

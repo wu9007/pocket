@@ -9,22 +9,16 @@ public interface Transaction {
 
     /**
      * 开启事务
-     *
-     * @throws SQLException 开启失败
      */
-    void begin() throws SQLException;
+    void begin();
 
     /**
      * 提交事务
-     *
-     * @throws SQLException 提交失败
      */
-    void commit() throws SQLException;
+    void commit();
 
     /**
      * 事务回滚
-     *
-     * @throws SQLException 回滚失败
      */
-    void rollBack() throws SQLException;
+    void rollBack();
 }
