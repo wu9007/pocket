@@ -1,14 +1,11 @@
 package org.hunter.pocket.query;
 
-import java.sql.SQLException;
 import java.util.List;
 
 /**
  * @author wujianchuan 2019/1/3
  */
 public interface SQLQuery {
-
-    String PARAMETER_REGEX = ":[a-zA-Z\\w-_]+";
 
     /**
      * 单条查询

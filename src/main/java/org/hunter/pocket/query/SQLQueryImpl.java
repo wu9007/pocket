@@ -18,6 +18,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.hunter.pocket.constant.RegexString.SQL_PARAMETER_REGEX;
+
 /**
  * @author wujianchuan 2019/1/3
  */
@@ -101,15 +103,15 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
     }
 
     private ResultSet execute(String sql) throws SQLException {
-        String executeSql = sql.replaceAll(PARAMETER_REGEX, "?");
+        String executeSql = sql.replaceAll(SQL_PARAMETER_REGEX, "?");
         PreparedStatement preparedStatement = this.connection.prepareStatement(executeSql);
         if (this.parameterMap.size() > 0) {
             List<ParameterTranslator> queryParameters = new LinkedList<>();
-            Pattern pattern = Pattern.compile(PARAMETER_REGEX);
+            Pattern pattern = Pattern.compile(SQL_PARAMETER_REGEX);
             Matcher matcher = pattern.matcher(sql);
             while (matcher.find()) {
                 String name = matcher.group().substring(1);
-                queryParameters.add(new ParameterTranslator(name, this.parameterMap.get(name)));
+                queryParameters.add(ParameterTranslator.newInstance(name, this.parameterMap.get(name)));
             }
             fieldTypeStrategy.setPreparedStatement(preparedStatement, queryParameters);
         }

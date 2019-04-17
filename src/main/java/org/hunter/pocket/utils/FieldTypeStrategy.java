@@ -259,15 +259,11 @@ public class FieldTypeStrategy {
         return RESULT_STRATEGY_POOL.get(field.getType().getName()).apply(resultSet, columnName);
     }
 
-    public void setPreparedStatement(PreparedStatement preparedStatement, List<Modern> modernList, List<Restrictions> restrictionsList) {
-        for (int index = 0; index < modernList.size(); index++) {
-            Modern modern = modernList.get(index);
-            PreparedSupplierValue preparedSupplierValue = new PreparedSupplierValue(preparedStatement, index + 1, modern);
-            PREPARED_STRATEGY_POOL.get(modern.getTarget().getClass().getName()).accept(preparedSupplierValue);
-        }
+    public void setPreparedStatement(PreparedStatement preparedStatement, List<ParameterTranslator> parameters, List<Restrictions> restrictionsList) {
+        this.setPreparedStatement(preparedStatement, parameters);
         for (int index = 0; index < restrictionsList.size(); index++) {
             Restrictions restrictions = restrictionsList.get(index);
-            PreparedSupplierValue preparedSupplierValue = new PreparedSupplierValue(preparedStatement, modernList.size() + index + 1, restrictions);
+            PreparedSupplierValue preparedSupplierValue = new PreparedSupplierValue(preparedStatement, parameters.size() + index + 1, restrictions);
             PREPARED_STRATEGY_POOL.get(restrictions.getTarget().getClass().getName()).accept(preparedSupplierValue);
         }
     }

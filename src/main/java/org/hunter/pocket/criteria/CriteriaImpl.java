@@ -52,6 +52,12 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
+    public Criteria setParameter(String key, Object value) {
+        this.parameterMap.put(key, value);
+        return this;
+    }
+
+    @Override
     public Criteria limit(int start, int limit) {
         this.setLimit(start, limit);
         return this;
@@ -63,7 +69,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                 .append(this.tableName)
                 .append(" SET ")
                 .append(this.modernList.stream()
-                        .map(modern -> fieldMapper.get(modern.getSource()).getColumnName() + " = ?")
+                        .map(modern -> modern.parse(fieldMapper, parameters, parameterMap))
                         .collect(Collectors.joining(", ")))
                 .append(this.sqlRestriction);
         PreparedStatement preparedStatement;
@@ -338,7 +344,8 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         } catch (SQLException e) {
             throw new CriteriaException(e.getMessage());
         }
-        fieldTypeStrategy.setPreparedStatement(preparedStatement, this.modernList, this.restrictionsList);
+        fieldTypeStrategy.setPreparedStatement(preparedStatement,this.parameters,
+                this.restrictionsList);
         return preparedStatement;
     }
 }
