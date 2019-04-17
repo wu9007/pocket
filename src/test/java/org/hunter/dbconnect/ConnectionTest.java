@@ -34,7 +34,7 @@ public class ConnectionTest {
     }
 
     @Test
-    public void test5() throws InterruptedException {
+    public void test1() throws InterruptedException {
         PocketExecutor.execute(Executors.newFixedThreadPool(THREAD_NUM), THREAD_NUM, () -> {
             ConnectionManager.getInstance().getConnection(databaseConfigs.getNode().get(0));
             ConnectionManager.getInstance().getConnection(databaseConfigs.getNode().get(1));

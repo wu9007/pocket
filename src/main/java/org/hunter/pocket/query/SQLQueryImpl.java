@@ -1,6 +1,7 @@
 package org.hunter.pocket.query;
 
 import org.hunter.pocket.criteria.ParameterTranslator;
+import org.hunter.pocket.exception.QueryException;
 import org.hunter.pocket.utils.FieldTypeStrategy;
 import org.hunter.pocket.utils.ReflectUtils;
 
@@ -28,6 +29,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
     public SQLQueryImpl(String sql, Connection connection) {
         super(sql, connection);
     }
+
     public SQLQueryImpl(String sql, Connection connection, Class clazz) {
         super(connection, sql, clazz);
     }
@@ -51,8 +53,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
                 return null;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
+            throw new QueryException(e.getMessage());
         }
     }
 
@@ -83,7 +84,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
             }
             return results;
         } catch (SQLException e) {
-            throw new RuntimeException("Your SQL grammar is incorrect.");
+            throw new QueryException(e.getMessage(), e, true, true);
         }
     }
 

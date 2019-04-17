@@ -1,5 +1,6 @@
 package org.hunter.pocket.session;
 
+import org.hunter.pocket.exception.TransactionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,20 +19,28 @@ public class TransactionImpl implements Transaction {
     }
 
     @Override
-    public void begin() throws SQLException {
-        if (this.connection.getAutoCommit()) {
-            this.connection.setAutoCommit(false);
-            this.logger.info("transaction open.");
-        } else {
-            logger.warn("This transaction has already begun. Please do not try again.");
+    public void begin() {
+        try {
+            if (this.connection.getAutoCommit()) {
+                this.connection.setAutoCommit(false);
+                this.logger.info("transaction open.");
+            } else {
+                logger.warn("This transaction has already begun. Please do not try again.");
+            }
+        } catch (SQLException e) {
+            throw new TransactionException(e.getMessage());
         }
     }
 
     @Override
-    public void commit() throws SQLException {
+    public void commit() {
         if (this.connection != null) {
-            this.connection.commit();
-            this.connection.setAutoCommit(true);
+            try {
+                this.connection.commit();
+                this.connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                throw new TransactionException(e.getMessage());
+            }
             this.connection = null;
             this.logger.info("Transaction commit.");
         } else {
@@ -40,10 +49,14 @@ public class TransactionImpl implements Transaction {
     }
 
     @Override
-    public void rollBack() throws SQLException {
+    public void rollBack() {
         if (this.connection != null) {
-            this.connection.rollback();
-            this.connection.setAutoCommit(true);
+            try {
+                this.connection.rollback();
+                this.connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                throw new TransactionException(e.getMessage());
+            }
             this.connection = null;
             this.logger.info("Transaction rollback.");
         } else {

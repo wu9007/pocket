@@ -4,6 +4,7 @@ import org.hunter.pocket.config.DatabaseConfig;
 import org.hunter.pocket.config.DatabaseNodeConfig;
 import org.hunter.pocket.constant.DatasourceDriverTypes;
 import org.hunter.pocket.cache.BaseCacheUtils;
+import org.hunter.pocket.exception.SessionException;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -28,11 +29,11 @@ public class SessionFactory {
                             if (!NODE_POOL.containsKey(sessionName)) {
                                 NODE_POOL.put(sessionName, databaseNodeConfig);
                             } else {
-                                throw new RuntimeException("Session name duplicate.");
+                                throw new SessionException("Session name duplicate.");
                             }
                         });
             } else {
-                throw new RuntimeException("I'm sorry about that I don't support this database now.");
+                throw new SessionException("I'm sorry about that I don't support this database now.");
             }
         });
     }

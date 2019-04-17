@@ -5,6 +5,7 @@ import org.hunter.pocket.connect.ConnectionManager;
 import org.hunter.pocket.constant.SqlOperateTypes;
 import org.hunter.pocket.annotation.OneToMany;
 import org.hunter.pocket.config.DatabaseNodeConfig;
+import org.hunter.pocket.exception.CriteriaException;
 import org.hunter.pocket.model.PocketEntity;
 
 import java.io.Serializable;
@@ -71,8 +72,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             this.after();
             return preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
+            throw new CriteriaException(e.getMessage());
         }
     }
 
@@ -109,8 +109,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             }
             return result;
         } catch (SQLException | IllegalAccessException | InstantiationException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
+            throw new CriteriaException(e.getMessage());
         } finally {
             ConnectionManager.closeIO(preparedStatement, resultSet);
             this.after();
@@ -123,11 +122,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         if (cascade) {
             if (result.size() > 0) {
                 for (Object entity : result) {
-                    try {
-                        this.applyChildren((PocketEntity) entity);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    this.applyChildren((PocketEntity) entity);
                 }
             }
         }
@@ -156,7 +151,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                 return null;
             }
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            throw new CriteriaException(e.getMessage());
         } finally {
             ConnectionManager.closeIO(preparedStatement, resultSet);
             this.after();
@@ -168,12 +163,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     public Object unique(boolean cascade) {
         PocketEntity obj = (PocketEntity) this.unique();
         if (obj != null && cascade) {
-            try {
-                this.applyChildren(obj);
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RuntimeException(e.getMessage());
-            }
+            this.applyChildren(obj);
         }
         this.after();
         return obj;
@@ -197,11 +187,10 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             if (resultSet.next()) {
                 return (long) resultSet.getObject(1);
             } else {
-                throw new RuntimeException("No data found");
+                return 0;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
+            throw new CriteriaException(e.getMessage());
         } finally {
             ConnectionManager.closeIO(preparedStatement, resultSet);
         }
@@ -218,8 +207,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             this.after();
             return preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
+            throw new CriteriaException(e.getMessage());
         } finally {
             ConnectionManager.closeIO(preparedStatement, null);
         }
@@ -244,11 +232,10 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             if (resultSet.next()) {
                 return resultSet.getObject(1);
             } else {
-                throw new RuntimeException("No data found");
+                return null;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
+            throw new CriteriaException(e.getMessage());
         } finally {
             ConnectionManager.closeIO(preparedStatement, resultSet);
         }
@@ -269,8 +256,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                     try {
                         childField.set(entity, this.getChildren(childField, uuid));
                     } catch (Exception e) {
-                        e.printStackTrace();
-                        throw new RuntimeException(e.getMessage());
+                        throw new CriteriaException(e.getMessage());
                     }
                 }
             }
@@ -315,8 +301,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             }
             return collection.size() > 0 ? collection : null;
         } catch (SQLException | IllegalAccessException | InstantiationException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
+            throw new CriteriaException(e.getMessage());
         } finally {
             ConnectionManager.closeIO(preparedStatement, resultSet);
         }
@@ -351,8 +336,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         try {
             preparedStatement = this.connection.prepareStatement(completeSql.toString());
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
+            throw new CriteriaException(e.getMessage());
         }
         fieldTypeStrategy.setPreparedStatement(preparedStatement, this.modernList, this.restrictionsList);
         return preparedStatement;

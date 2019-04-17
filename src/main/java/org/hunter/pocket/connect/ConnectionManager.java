@@ -2,6 +2,8 @@ package org.hunter.pocket.connect;
 
 import org.hunter.pocket.config.DatabaseConfig;
 import org.hunter.pocket.config.DatabaseNodeConfig;
+import org.hunter.pocket.exception.ErrorMessage;
+import org.hunter.pocket.exception.PocketConnectionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ConnectionManager {
     private static final Logger logger = LoggerFactory.getLogger(ConnectionManager.class);
-    private static final ConnectionManager ourInstance = new ConnectionManager();
+    private static final ConnectionManager OUR_INSTANCE = new ConnectionManager();
     private final Map<String, ConnectionPool> connectionPoolMap = new ConcurrentHashMap<>(4);
 
     public synchronized void register(DatabaseConfig databaseConfig) {
@@ -27,7 +29,7 @@ public class ConnectionManager {
             if (success) {
                 this.connectionPoolMap.put(databaseNode.getNodeName(), connectionPool);
             } else {
-                throw new NullPointerException("Configuration error");
+                throw new PocketConnectionException(ErrorMessage.POCKET_NODE_NOTFOUND_EXCEPTION);
             }
         });
     }
@@ -36,7 +38,7 @@ public class ConnectionManager {
     }
 
     public static ConnectionManager getInstance() {
-        return ourInstance;
+        return OUR_INSTANCE;
     }
 
     public Connection getConnection(DatabaseNodeConfig databaseNodeConfig) {
@@ -49,8 +51,7 @@ public class ConnectionManager {
             try {
                 connectionPool.releaseConn(connection);
             } catch (SQLException e) {
-                logger.error("The database link failed to recover");
-                e.printStackTrace();
+                throw new PocketConnectionException(ErrorMessage.POCKET_CONNECTION_RELEASE_EXCEPTION);
             }
         } else {
             logger.error("The database link failed to recover because it could not find the pool named: {}", node);
@@ -117,7 +118,7 @@ public class ConnectionManager {
                 preparedStatement.close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new PocketConnectionException(ErrorMessage.POCKET_IO_RELEASE_EXCEPTION);
         }
     }
 }
