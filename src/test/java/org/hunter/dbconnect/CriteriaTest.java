@@ -194,9 +194,11 @@ public class CriteriaTest {
     @Test
     public void test18() {
         session.createCriteria(Order.class)
-                .add(Modern.setWithPoEl("CONCAT_WS(',', #code, :STR_VALUE)"))
-                .add(Restrictions.equ("code", "C-001"))
+                .add(Modern.setWithPoEl("#code  = CONCAT_WS('', #code, :STR_VALUE)"))
+                .add(Modern.setWithPoEl("#price  = #price + :ADD_PRICE"))
+                .add(Restrictions.equ("uuid", "10"))
                 .setParameter("STR_VALUE", " - A")
+                .setParameter("ADD_PRICE", 100)
                 .update();
     }
 }

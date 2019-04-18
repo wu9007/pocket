@@ -1,13 +1,7 @@
 package org.hunter.pocket.cache;
 
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Component;
-
 import java.io.Serializable;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author wujianchuan 2019/1/17

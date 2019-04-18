@@ -1,6 +1,7 @@
 package org.hunter.pocket.criteria;
 
 import org.hunter.pocket.exception.CriteriaException;
+import org.hunter.pocket.exception.ErrorMessage;
 
 import java.util.List;
 import java.util.Map;
@@ -20,30 +21,29 @@ public class Modern implements SqlBean {
     private String source;
     private Object target;
     private String poEl;
-    private Boolean withPoEl;
+    private final Boolean withPoEl;
 
-    private Modern(String source, Object target, boolean withPoEl) {
+    private Modern(String source, Object target) {
         this.source = source;
         this.target = target;
-        this.withPoEl = withPoEl;
+        this.withPoEl = false;
     }
 
-    public Modern(String poEl, boolean withPoEl) {
-        this.source = source;
+    private Modern(String poEl) {
         this.poEl = poEl;
-        this.withPoEl = withPoEl;
+        this.withPoEl = true;
     }
 
     public static Modern set(String source, Object target) {
-        return new Modern(source, target, false);
+        return new Modern(source, target);
     }
 
 
     public static Modern setWithPoEl(String poEl) {
-        return new Modern(poEl, true);
+        return new Modern(poEl);
     }
 
-    public String getSource() {
+    private String getSource() {
         return source;
     }
 
@@ -60,7 +60,7 @@ public class Modern implements SqlBean {
         return this.poEl;
     }
 
-    public Boolean getWithPoEl() {
+    private Boolean getWithPoEl() {
         return withPoEl;
     }
 
@@ -68,26 +68,27 @@ public class Modern implements SqlBean {
         this.target = target;
     }
 
-    public String parse(Map<String, FieldMapper> fieldMapper, List<ParameterTranslator> parameters, Map<String, Object> parameterMap) {
+    String parse(Map<String, FieldMapper> fieldMapper, List<ParameterTranslator> parameters, Map<String, Object> parameterMap) {
         if (this.getWithPoEl()) {
             String sql = poEl;
             Matcher fieldMatcher = fieldPattern.matcher(this.poEl);
             Matcher valueMatcher = valuePattern.matcher(this.poEl);
-            if (fieldMatcher.find() && valueMatcher.find()) {
-                String fieldEl = fieldMatcher.group();
-                String valueEl = valueMatcher.group();
-                String fieldName = fieldMatcher.group().substring(1);
-                String valueName = valueMatcher.group().substring(1);
-                String columnName = fieldMapper.get(fieldName).getColumnName();
-                sql = columnName + " = " + sql.replace(fieldEl, columnName)
-                        .replace(valueEl, "?");
-                parameters.add(ParameterTranslator.newInstance(valueName, parameterMap.get(valueName)));
-            } else {
-                throw new CriteriaException("can not match.");
+            String fieldName = null;
+            try {
+                while (fieldMatcher.find()) {
+                    fieldName = fieldMatcher.group().substring(1);
+                    sql = sql.replace(fieldMatcher.group(), fieldMapper.get(fieldName).getColumnName());
+                }
+            } catch (NullPointerException e) {
+                throw new CriteriaException(String.format(ErrorMessage.POCKET_ILLEGAL_FIELD_EXCEPTION, fieldName));
+            }
+            while (valueMatcher.find()) {
+                sql = sql.replace(valueMatcher.group(), "?");
+                parameters.add(ParameterTranslator.newInstance(parameterMap.get(valueMatcher.group().substring(1))));
             }
             return sql;
         } else {
-            parameters.add(new ParameterTranslator(this.target));
+            parameters.add(ParameterTranslator.newInstance(this.target));
             return fieldMapper.get(this.getSource()).getColumnName() + " = ?";
         }
     }

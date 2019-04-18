@@ -40,9 +40,8 @@ interface ConnectionPool {
      * 释放链接
      *
      * @param connection 数据库链接对象
-     * @throws SQLException 异常
      */
-    void releaseConn(Connection connection) throws SQLException;
+    void releaseConn(Connection connection);
 
     /**
      * 销毁多有链接

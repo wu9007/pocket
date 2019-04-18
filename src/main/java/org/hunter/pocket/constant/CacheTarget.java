@@ -17,7 +17,7 @@ public enum CacheTarget {
      */
     BUSINESS(LogicCacheUtils.NAME);
 
-    private String cacheUtilsName;
+    private final String cacheUtilsName;
 
     CacheTarget(String cacheUtilsName) {
         this.cacheUtilsName = cacheUtilsName;

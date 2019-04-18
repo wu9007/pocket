@@ -19,6 +19,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.hunter.pocket.exception.ErrorMessage.POCKET_ILLEGAL_FIELD_EXCEPTION;
+
 /**
  * @author wujianchuan 2019/1/10
  */
@@ -321,17 +323,22 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
      */
     private String parseSql(Restrictions restrictions) {
         StringBuilder sql = new StringBuilder();
-        if (restrictions.getLeftRestrictions() == null) {
-            sql.append(fieldMapper.get(restrictions.getSource()).getColumnName())
-                    .append(this.sqlFactory.getSql(this.databaseConfig.getDriverName(), restrictions.getSqlOperate()))
-                    .append("?");
-            this.restrictionsList.add(restrictions);
-        } else {
-            sql.append("(")
-                    .append(this.parseSql(restrictions.getLeftRestrictions()))
-                    .append(this.sqlFactory.getSql(this.databaseConfig.getDriverName(), restrictions.getSqlOperate()))
-                    .append(this.parseSql(restrictions.getRightRestrictions()))
-                    .append(")");
+        try {
+
+            if (restrictions.getLeftRestrictions() == null) {
+                sql.append(fieldMapper.get(restrictions.getSource()).getColumnName())
+                        .append(this.sqlFactory.getSql(this.databaseConfig.getDriverName(), restrictions.getSqlOperate()))
+                        .append("?");
+                this.restrictionsList.add(restrictions);
+            } else {
+                sql.append("(")
+                        .append(this.parseSql(restrictions.getLeftRestrictions()))
+                        .append(this.sqlFactory.getSql(this.databaseConfig.getDriverName(), restrictions.getSqlOperate()))
+                        .append(this.parseSql(restrictions.getRightRestrictions()))
+                        .append(")");
+            }
+        } catch (NullPointerException e) {
+            throw new CriteriaException(String.format(POCKET_ILLEGAL_FIELD_EXCEPTION, restrictions.getSource()));
         }
         return sql.toString();
     }
@@ -344,7 +351,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         } catch (SQLException e) {
             throw new CriteriaException(e.getMessage());
         }
-        fieldTypeStrategy.setPreparedStatement(preparedStatement,this.parameters,
+        fieldTypeStrategy.setPreparedStatement(preparedStatement, this.parameters,
                 this.restrictionsList);
         return preparedStatement;
     }

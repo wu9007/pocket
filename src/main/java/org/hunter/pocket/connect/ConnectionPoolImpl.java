@@ -109,7 +109,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
     }
 
     @Override
-    public void releaseConn(Connection connection) throws SQLException {
+    public void releaseConn(Connection connection) {
         synchronized (RELEASE_LOCK) {
             logger.info("{} release connection node: {}", Thread.currentThread().getName(), this.getDatabaseConfig().getNodeName());
             this.activeConnections.remove(connection);

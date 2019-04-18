@@ -26,8 +26,8 @@ import java.util.function.Consumer;
 public class FieldTypeStrategy {
 
     private class PreparedSupplierValue {
-        private PreparedStatement preparedStatement;
-        private Integer index;
+        private final PreparedStatement preparedStatement;
+        private final Integer index;
         private Restrictions restrictions;
         private Modern modern;
         private ParameterTranslator parameterTranslator;
