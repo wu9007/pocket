@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -48,11 +47,7 @@ public class ConnectionManager {
     public void closeConnection(String node, Connection connection) {
         ConnectionPool connectionPool = this.connectionPoolMap.get(node);
         if (connectionPool != null) {
-            try {
-                connectionPool.releaseConn(connection);
-            } catch (SQLException e) {
-                throw new PocketConnectionException(ErrorMessage.POCKET_CONNECTION_RELEASE_EXCEPTION);
-            }
+            connectionPool.releaseConn(connection);
         } else {
             logger.error("The database link failed to recover because it could not find the pool named: {}", node);
         }

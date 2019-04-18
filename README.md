@@ -156,6 +156,17 @@ criteria.add(Modern.set("price", 500.5D))
   			.add(Modern.set("day", new Date())
         .add(Restrictions.equ("code", "C-001")));
 System.out.println(criteria.update());
+
+// 为保持数据一致性，已支持表达式更新，
+// # 后面跟对应对象中的属性名，
+// : 后对应参数（后面不要忘了调用setParameter）
+session.createCriteria(Order.class)
+        .add(Modern.setWithPoEl("#code  = CONCAT_WS('', #code, :STR_VALUE)")) // 在原数据基础上进行拼接
+        .add(Modern.setWithPoEl("#price  = #price + :ADD_PRICE")) // 在原数据的基础上进行加操作
+        .add(Restrictions.equ("uuid", "10")) //条件过滤
+        .setParameter("STR_VALUE", " - A") // 给 :STR_VALUE 参数赋值
+        .setParameter("ADD_PRICE", 100) // 给 :ADD_PRICE 参数赋值
+        .update(); // 执行更新操作
 ```
 
 <a name="bc860109"></a>
