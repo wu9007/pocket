@@ -45,7 +45,7 @@ public class Order extends BaseEntity {
         return code;
     }
 
-    public void setCode(String code) {
+    private void setCode(String code) {
         this.code = code;
     }
 

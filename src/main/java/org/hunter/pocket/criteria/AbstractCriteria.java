@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -61,7 +60,7 @@ abstract class AbstractCriteria {
         this.showSql();
     }
 
-    public void clear() {
+    void clear() {
         restrictionsList = new LinkedList<>();
         sortedRestrictionsList = new LinkedList<>();
         modernList = new LinkedList<>();

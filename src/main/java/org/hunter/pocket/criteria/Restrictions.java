@@ -69,11 +69,11 @@ public class Restrictions implements SqlBean {
         return new Restrictions(leftRestrictions, SqlOperateTypes.OR, rightRestrictions);
     }
 
-    public String getSource() {
+    private String getSource() {
         return source;
     }
 
-    String getSqlOperate() {
+    private String getSqlOperate() {
         return sqlOperate;
     }
 
@@ -82,11 +82,11 @@ public class Restrictions implements SqlBean {
         return target;
     }
 
-    Restrictions getLeftRestrictions() {
+    private Restrictions getLeftRestrictions() {
         return leftRestrictions;
     }
 
-    Restrictions getRightRestrictions() {
+    private Restrictions getRightRestrictions() {
         return rightRestrictions;
     }
 

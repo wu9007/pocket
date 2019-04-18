@@ -8,7 +8,7 @@ public enum JoinMethod {
      * 关联方式
      */
     LEFT(" LEFT JOIN "), RIGHT(" RIGHT JOIN "), INNER(" INNER JOIN ");
-    private String id;
+    private final String id;
 
     JoinMethod(String id) {
         this.id = id;

@@ -45,7 +45,7 @@ public class CriteriaTest {
     }
 
     @After
-    public void destroy() throws SQLException {
+    public void destroy() {
         this.transaction.commit();
         this.session.close();
     }
@@ -73,7 +73,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test3() throws InterruptedException {
+    public void test3() {
         Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.lt("time", new Date()));
         List orderList = criteria.list(true);

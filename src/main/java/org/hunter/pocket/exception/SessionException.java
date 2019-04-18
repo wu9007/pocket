@@ -4,6 +4,7 @@ package org.hunter.pocket.exception;
  * @author wujianchuan
  */
 public class SessionException extends RuntimeException {
+    private static final long serialVersionUID = 7010927836528837168L;
     private String errorMsg;
 
     private String code;

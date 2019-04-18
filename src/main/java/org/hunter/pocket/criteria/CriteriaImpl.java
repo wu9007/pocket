@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
-    private SqlFactory sqlFactory = SqlFactory.getInstance();
+    private final SqlFactory sqlFactory = SqlFactory.getInstance();
 
     public CriteriaImpl(Class clazz, Connection connection, DatabaseNodeConfig databaseConfig) {
         super(clazz, connection, databaseConfig);

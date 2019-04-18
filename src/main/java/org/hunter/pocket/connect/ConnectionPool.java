@@ -3,7 +3,6 @@ package org.hunter.pocket.connect;
 import org.hunter.pocket.config.DatabaseNodeConfig;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
  * @author wujianchuan 2019/1/15

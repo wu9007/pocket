@@ -28,7 +28,7 @@ public class QueryTest {
     private Transaction transaction;
 
     @Before
-    public void setup() throws SQLException {
+    public void setup() {
         this.session = SessionFactory.getSession("homo");
         this.session.open();
         this.transaction = session.getTransaction();
@@ -36,7 +36,7 @@ public class QueryTest {
     }
 
     @After
-    public void destroy() throws SQLException {
+    public void destroy() {
         this.transaction.commit();
         this.session.close();
     }
