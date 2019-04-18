@@ -32,6 +32,15 @@ public interface Criteria {
     Criteria add(Sort order);
 
     /**
+     * 参数赋值
+     *
+     * @param key   键
+     * @param value 值
+     * @return Criteria
+     */
+    Criteria setParameter(String key, Object value);
+
+    /**
      * 获取分页数据
      *
      * @param start 起始位置

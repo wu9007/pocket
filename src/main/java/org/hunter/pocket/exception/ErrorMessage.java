@@ -10,4 +10,7 @@ public interface ErrorMessage {
     String POCKET_NODE_NOTFOUND_EXCEPTION = "No database configuration node was found.";
     String POCKET_CONNECTION_RELEASE_EXCEPTION = "Database connection release failed.";
     String POCKET_IO_RELEASE_EXCEPTION = "PreparedStatement ResultSet release failed.";
+    String POCKET_ILLEGAL_COLUMN_EXCEPTION = "Illegal column name, please check it in SQL: <<%s>>.";
+    String POCKET_ILLEGAL_FIELD_EXCEPTION = "Illegal field name, please check it in SQL: <<%s>>.";
+    String POCKET_MISS_PARAM_EXCEPTION = "Missing parameters please check call your criteria method: setParameter(__,__).";
 }

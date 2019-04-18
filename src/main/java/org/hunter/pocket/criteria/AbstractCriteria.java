@@ -11,6 +11,8 @@ import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +39,8 @@ abstract class AbstractCriteria {
     final List<Restrictions> restrictionsList = new ArrayList<>();
     final List<Modern> modernList = new ArrayList<>();
     final List<Sort> orderList = new ArrayList<>();
+    final Map<String, Object> parameterMap = new HashMap<>();
+    final List<ParameterTranslator> parameters = new LinkedList<>();
     private Integer start;
     private Integer limit;
     StringBuilder completeSql = new StringBuilder();

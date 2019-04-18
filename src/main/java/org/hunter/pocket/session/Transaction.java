@@ -1,7 +1,5 @@
 package org.hunter.pocket.session;
 
-import java.sql.SQLException;
-
 /**
  * @author wujianchuan 2019/1/1
  */

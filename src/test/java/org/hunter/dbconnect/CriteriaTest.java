@@ -37,7 +37,7 @@ public class CriteriaTest {
     private Transaction transaction;
 
     @Before
-    public void setup(){
+    public void setup() {
         this.session = SessionFactory.getSession("homo");
         this.session.open();
         this.transaction = session.getTransaction();
@@ -189,5 +189,16 @@ public class CriteriaTest {
         this.session.createCriteria(Order.class).add(Restrictions.equ("code", "A-002")).delete();
         System.out.println(this.session.createCriteria(Order.class)
                 .add(Restrictions.equ("code", "A-002")).count());
+    }
+
+    @Test
+    public void test18() {
+        session.createCriteria(Order.class)
+                .add(Modern.setWithPoEl("#code  = CONCAT_WS('', #code, :STR_VALUE)"))
+                .add(Modern.setWithPoEl("#price  = #price + :ADD_PRICE"))
+                .add(Restrictions.equ("uuid", "10"))
+                .setParameter("STR_VALUE", " - A")
+                .setParameter("ADD_PRICE", 100)
+                .update();
     }
 }
