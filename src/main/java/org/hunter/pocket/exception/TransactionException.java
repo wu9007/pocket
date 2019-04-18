@@ -4,6 +4,7 @@ package org.hunter.pocket.exception;
  * @author wujianchuan
  */
 public class TransactionException extends RuntimeException {
+    private static final long serialVersionUID = 3959959252275580404L;
     private String errorMsg;
 
     private String code;

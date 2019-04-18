@@ -2,9 +2,11 @@ package org.hunter.pocket.utils;
 
 import org.hunter.pocket.annotation.Column;
 import org.hunter.pocket.annotation.Entity;
+import org.hunter.pocket.annotation.Join;
 import org.hunter.pocket.annotation.ManyToOne;
 import org.hunter.pocket.annotation.OneToMany;
 import org.hunter.pocket.criteria.FieldMapper;
+import org.hunter.pocket.exception.CriteriaException;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -20,18 +22,21 @@ import java.util.stream.Collectors;
 public class ReflectUtils {
     private static final ReflectUtils OUR_INSTANCE = new ReflectUtils();
     private static final String SERIAL_VERSION_UID = "serialVersionUID";
-    private static final Predicate<Field> FIND_MAPPING_FILTER = field -> !SERIAL_VERSION_UID.equals(field.getName()) && (field.getAnnotation(Column.class) != null || field.getAnnotation(ManyToOne.class) != null);
+    private static final Predicate<Field> FIND_MAPPING_FILTER = field -> !SERIAL_VERSION_UID.equals(field.getName()) && (field.getAnnotation(Column.class) != null || field.getAnnotation(ManyToOne.class) != null || field.getAnnotation(Join.class) != null);
     public static final Predicate<Field> FIND_CHILDREN = field -> !SERIAL_VERSION_UID.equals(field.getName()) && field.getAnnotation(OneToMany.class) != null;
     public static final Predicate<Field> FIND_PARENT = field -> !SERIAL_VERSION_UID.equals(field.getName()) && field.getAnnotation(ManyToOne.class) != null;
 
     private static final Function<Field, FieldMapper> MAP_FIELD_MAPPER = field -> {
         Column column = field.getAnnotation(Column.class);
         ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);
+        Join join = field.getAnnotation(Join.class);
         String columnName;
         if (column != null) {
             columnName = column.name();
+        } else if (manyToOne != null) {
+            columnName = manyToOne.columnName();
         } else {
-            columnName = manyToOne.name();
+            columnName = join.columnName();
         }
         return FieldMapper.newInstance(field.getName(), columnName, field);
     };
@@ -129,7 +134,8 @@ public class ReflectUtils {
                 .map(MAP_FIELD_MAPPER)
                 .collect(Collectors.toMap(FieldMapper::getFieldName, FieldMapper::new));
         Map<String, FieldMapper> superFieldMapper = Arrays
-                .stream(clazz.getSuperclass().getDeclaredFields()).filter(FIND_MAPPING_FILTER)
+                .stream(clazz.getSuperclass().getDeclaredFields())
+                .filter(FIND_MAPPING_FILTER)
                 .map(MAP_FIELD_MAPPER)
                 .collect(Collectors.toMap(FieldMapper::getFieldName, FieldMapper::new));
         superFieldMapper.putAll(fieldMapper);
@@ -170,13 +176,23 @@ public class ReflectUtils {
         StringBuilder sql = new StringBuilder();
         for (int index = 0; index < fields.length; index++) {
             Field field = fields[index];
+            String columnName;
             Column column = field.getAnnotation(Column.class);
             ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);
-            String columnName;
+            Join join = field.getAnnotation(Join.class);
             if (column != null) {
                 columnName = column.name();
             } else if (manyToOne != null) {
-                columnName = manyToOne.name();
+                try {
+                    Class clazz = manyToOne.clazz();
+                    Field upField = clazz.getDeclaredField(manyToOne.upBridgeField());
+                    Column upColumn = upField.getAnnotation(Column.class);
+                    columnName = upColumn.name();
+                } catch (NoSuchFieldException e) {
+                    throw new CriteriaException(e.getMessage());
+                }
+            } else if (join != null) {
+                columnName = join.columnName();
             } else {
                 throw new NullPointerException("找不到注解");
             }

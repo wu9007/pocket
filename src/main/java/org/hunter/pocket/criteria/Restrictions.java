@@ -1,11 +1,20 @@
 package org.hunter.pocket.criteria;
 
+import org.hunter.pocket.config.DatabaseNodeConfig;
 import org.hunter.pocket.constant.SqlOperateTypes;
+import org.hunter.pocket.exception.CriteriaException;
+
+import java.util.List;
+import java.util.Map;
+
+import static org.hunter.pocket.exception.ErrorMessage.POCKET_ILLEGAL_FIELD_EXCEPTION;
 
 /**
  * @author wujianchuan 2019/1/10
  */
 public class Restrictions implements SqlBean {
+    private final SqlFactory sqlFactory = SqlFactory.getInstance();
+
     private String source;
     private final String sqlOperate;
     private Object target;
@@ -60,11 +69,11 @@ public class Restrictions implements SqlBean {
         return new Restrictions(leftRestrictions, SqlOperateTypes.OR, rightRestrictions);
     }
 
-    public String getSource() {
+    private String getSource() {
         return source;
     }
 
-    String getSqlOperate() {
+    private String getSqlOperate() {
         return sqlOperate;
     }
 
@@ -73,11 +82,48 @@ public class Restrictions implements SqlBean {
         return target;
     }
 
-    Restrictions getLeftRestrictions() {
+    private Restrictions getLeftRestrictions() {
         return leftRestrictions;
     }
 
-    Restrictions getRightRestrictions() {
+    private Restrictions getRightRestrictions() {
         return rightRestrictions;
+    }
+
+    void pushTo(List<Restrictions> restrictionsList) {
+        if (this.getLeftRestrictions() != null && this.getRightRestrictions() != null) {
+            this.getLeftRestrictions().pushTo(restrictionsList);
+            this.getRightRestrictions().pushTo(restrictionsList);
+        } else {
+            restrictionsList.add(this);
+        }
+    }
+
+    /**
+     * 解析出SQL
+     *
+     * @return SQL
+     */
+    String parseSql(String tableName, Map<String, FieldMapper> fieldMapper, DatabaseNodeConfig databaseConfig) {
+        StringBuilder sql = new StringBuilder();
+        try {
+
+            if (this.getLeftRestrictions() == null) {
+                sql.append(tableName)
+                        .append(".")
+                        .append(fieldMapper.get(this.getSource()).getColumnName())
+                        .append(this.sqlFactory.getSql(databaseConfig.getDriverName(), this.getSqlOperate()))
+                        .append("?");
+            } else {
+                sql.append("(")
+                        .append(this.getLeftRestrictions().parseSql(tableName, fieldMapper, databaseConfig))
+                        .append(this.sqlFactory.getSql(databaseConfig.getDriverName(), this.getSqlOperate()))
+                        .append(this.getRightRestrictions().parseSql(tableName, fieldMapper, databaseConfig))
+                        .append(")");
+            }
+        } catch (NullPointerException e) {
+            throw new CriteriaException(String.format(POCKET_ILLEGAL_FIELD_EXCEPTION, this.getSource()));
+        }
+        return sql.toString();
     }
 }

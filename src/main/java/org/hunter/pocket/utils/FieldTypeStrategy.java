@@ -1,6 +1,7 @@
 package org.hunter.pocket.utils;
 
 import org.hunter.pocket.annotation.Column;
+import org.hunter.pocket.annotation.Join;
 import org.hunter.pocket.annotation.ManyToOne;
 import org.hunter.pocket.criteria.Modern;
 import org.hunter.pocket.criteria.ParameterTranslator;
@@ -247,11 +248,14 @@ public class FieldTypeStrategy {
     public Object getMappingColumnValue(Field field, ResultSet resultSet) {
         Column column = field.getAnnotation(Column.class);
         ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);
+        Join join = field.getAnnotation(Join.class);
         String columnName;
         if (column != null) {
             columnName = column.name();
         } else if (manyToOne != null) {
-            columnName = manyToOne.name();
+            columnName = manyToOne.columnName();
+        } else if (join != null) {
+            columnName = join.columnName();
         } else {
             throw new NullPointerException("未找到注解");
         }

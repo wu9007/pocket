@@ -5,6 +5,7 @@ package org.hunter.pocket.exception;
  */
 public class PocketConnectionException extends RuntimeException {
 
+    private static final long serialVersionUID = -669986260310668122L;
     private String errorMsg;
 
     private String code;

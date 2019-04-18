@@ -26,7 +26,7 @@ import java.sql.SQLException;
 @SpringBootTest(classes = Application.class)
 public class RedisTest {
 
-    private Logger logger = LoggerFactory.getLogger(RedisTest.class);
+    private final Logger logger = LoggerFactory.getLogger(RedisTest.class);
 
     @Autowired
     RedisTemplate<String, Object> baseRedisTemplate;
@@ -37,11 +37,11 @@ public class RedisTest {
     private BaseCacheUtils cache;
 
     @Before
-    public void setup() throws SQLException {
+    public void setup() {
     }
 
     @After
-    public void destroy() throws SQLException {
+    public void destroy() {
     }
 
     @Test

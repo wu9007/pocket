@@ -5,6 +5,7 @@ package org.hunter.pocket.exception;
  */
 public class QueryException extends RuntimeException {
 
+    private static final long serialVersionUID = 3461708034111021888L;
     private String errorMsg;
 
     private String code;

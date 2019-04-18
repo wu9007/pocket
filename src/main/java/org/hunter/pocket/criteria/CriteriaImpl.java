@@ -1,8 +1,7 @@
 package org.hunter.pocket.criteria;
 
-import org.hunter.pocket.annotation.Entity;
+import org.hunter.pocket.annotation.ManyToOne;
 import org.hunter.pocket.connect.ConnectionManager;
-import org.hunter.pocket.constant.SqlOperateTypes;
 import org.hunter.pocket.annotation.OneToMany;
 import org.hunter.pocket.config.DatabaseNodeConfig;
 import org.hunter.pocket.exception.CriteriaException;
@@ -17,14 +16,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.hunter.pocket.exception.ErrorMessage.POCKET_ILLEGAL_FIELD_EXCEPTION;
 
 /**
  * @author wujianchuan 2019/1/10
  */
 public class CriteriaImpl extends AbstractCriteria implements Criteria {
+
+    private final SqlFactory sqlFactory = SqlFactory.getInstance();
 
     public CriteriaImpl(Class clazz, Connection connection, DatabaseNodeConfig databaseConfig) {
         super(clazz, connection, databaseConfig);
@@ -32,12 +30,8 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public Criteria add(Restrictions restrictions) {
-        if (this.restrictionsList.size() == 0) {
-            this.sqlRestriction.append(" WHERE ");
-        } else {
-            this.sqlRestriction.append(" AND ");
-        }
-        this.sqlRestriction.append(this.parseSql(restrictions));
+        this.restrictionsList.add(restrictions);
+        restrictions.pushTo(this.sortedRestrictionsList);
         return this;
     }
 
@@ -67,34 +61,25 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public int update() {
-        completeSql.append("UPDATE ")
-                .append(this.tableName)
-                .append(" SET ")
-                .append(this.modernList.stream()
-                        .map(modern -> modern.parse(fieldMapper, parameters, parameterMap))
-                        .collect(Collectors.joining(", ")))
-                .append(this.sqlRestriction);
+        completeSql.append(sqlFactory.getSqlBody(tableName, fields, restrictionsList, modernList, null)
+                .buildUpdateSql(fieldMapper, parameters, parameterMap, databaseConfig));
         PreparedStatement preparedStatement;
         try {
             preparedStatement = getPreparedStatement();
-            this.after();
             return preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new CriteriaException(e.getMessage());
+        } finally {
+            this.clear();
         }
     }
 
     @Override
     public List list() {
-        completeSql.append("SELECT ")
-                .append(this.reflectUtils.getColumnNames(this.fields))
-                .append(" FROM ")
-                .append(this.tableName)
-                .append(this.sqlRestriction);
-        if (this.orderList.size() > 0) {
-            completeSql.append(" ORDER BY ")
-                    .append(this.orderList.stream().map(order -> fieldMapper.get(order.getSource()).getColumnName() + " " + order.getSortType()).collect(Collectors.joining(",")));
-        }
+        completeSql.append(sqlFactory
+                .getSqlBody(tableName, fields, restrictionsList, null, orderList)
+                .buildSelectSql(fieldMapper, databaseConfig)
+        );
         if (this.limited()) {
             completeSql.append(" LIMIT ")
                     .append(this.getStart())
@@ -120,7 +105,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             throw new CriteriaException(e.getMessage());
         } finally {
             ConnectionManager.closeIO(preparedStatement, resultSet);
-            this.after();
+            this.clear();
         }
     }
 
@@ -139,11 +124,10 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public Object unique() {
-        completeSql.append("SELECT ")
-                .append(this.reflectUtils.getColumnNames(this.fields))
-                .append(" FROM ")
-                .append(this.tableName)
-                .append(this.sqlRestriction);
+        completeSql.append(sqlFactory
+                .getSqlBody(tableName, fields, restrictionsList, null, orderList)
+                .buildSelectSql(fieldMapper, databaseConfig)
+        );
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         PocketEntity entity;
@@ -162,7 +146,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             throw new CriteriaException(e.getMessage());
         } finally {
             ConnectionManager.closeIO(preparedStatement, resultSet);
-            this.after();
+            this.clear();
         }
         return entity;
     }
@@ -173,25 +157,21 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         if (obj != null && cascade) {
             this.applyChildren(obj);
         }
-        this.after();
+        this.clear();
         return obj;
     }
 
     @Override
     public long count() {
-        completeSql.append("SELECT ")
-                .append(SqlOperateTypes.COUNT)
-                .append("(0)")
-                .append(" FROM ")
-                .append(this.tableName)
-                .append(this.sqlRestriction);
+        completeSql.append(sqlFactory.getSqlBody(tableName, fields, restrictionsList, null, null)
+                .buildCountSql(fieldMapper, databaseConfig)
+        );
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
 
         try {
             preparedStatement = getPreparedStatement();
             resultSet = preparedStatement.executeQuery();
-            this.after();
             if (resultSet.next()) {
                 return (long) resultSet.getObject(1);
             } else {
@@ -201,42 +181,37 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             throw new CriteriaException(e.getMessage());
         } finally {
             ConnectionManager.closeIO(preparedStatement, resultSet);
+            this.clear();
         }
     }
 
     @Override
     public long delete() {
-        completeSql.append("DELETE FROM ")
-                .append(this.tableName)
-                .append(this.sqlRestriction);
+        completeSql.append(sqlFactory.getSqlBody(tableName, fields, restrictionsList, null, null)
+                .buildDeleteSql(fieldMapper, databaseConfig)
+        );
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = getPreparedStatement();
-            this.after();
             return preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new CriteriaException(e.getMessage());
         } finally {
             ConnectionManager.closeIO(preparedStatement, null);
+            this.clear();
         }
     }
 
     @Override
     public Object max(String fieldName) {
-        completeSql.append("SELECT ")
-                .append(SqlOperateTypes.MAX)
-                .append("(")
-                .append(fieldMapper.get(fieldName).getColumnName())
-                .append(") ")
-                .append(" FROM ")
-                .append(this.tableName)
-                .append(this.sqlRestriction);
+        completeSql.append(sqlFactory.getSqlBody(tableName, fields, restrictionsList, null, null)
+                .buildMaxSql(fieldMapper, databaseConfig, fieldName)
+        );
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         try {
             preparedStatement = getPreparedStatement();
             resultSet = preparedStatement.executeQuery();
-            this.after();
             if (resultSet.next()) {
                 return resultSet.getObject(1);
             } else {
@@ -246,6 +221,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             throw new CriteriaException(e.getMessage());
         } finally {
             ConnectionManager.closeIO(preparedStatement, resultSet);
+            this.clear();
         }
     }
 
@@ -262,8 +238,9 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                 childField.setAccessible(true);
                 if (childField.getAnnotation(OneToMany.class) != null) {
                     try {
-                        childField.set(entity, this.getChildren(childField, uuid));
+                        childField.set(entity, this.getChildren(childField, entity));
                     } catch (Exception e) {
+                        e.printStackTrace();
                         throw new CriteriaException(e.getMessage());
                     }
                 }
@@ -271,76 +248,28 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         }
     }
 
-    private Collection getChildren(Field field, Serializable uuid) {
+    private Collection getChildren(Field field, PocketEntity entity) {
         OneToMany oneToMany = field.getAnnotation(OneToMany.class);
         Class clazz = oneToMany.clazz();
-        String columnName = oneToMany.name();
-        Entity entityAnnotation = (Entity) clazz.getAnnotation(Entity.class);
-        Field[] fields = reflectUtils.getMappingFields(clazz);
-        String sql = "SELECT "
-                + reflectUtils.getColumnNames(fields)
-                + " FROM "
-                + entityAnnotation.table()
-                + " WHERE "
-                + columnName
-                + " = ?";
-
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
+        String downBridgeFieldName = oneToMany.bridgeField();
         try {
-            preparedStatement = this.connection.prepareStatement(sql);
-
-            preparedStatement.setObject(1, uuid);
-            resultSet = preparedStatement.executeQuery();
-            List<PocketEntity> collection = new ArrayList<>();
-
-            while (resultSet.next()) {
-                PocketEntity entity = (PocketEntity) clazz.newInstance();
-                for (Field childField : fields) {
-                    if (childField.getAnnotation(OneToMany.class) != null) {
-                        Serializable childUuid = reflectUtils.getUuidValue(entity);
-                        childField.setAccessible(true);
-                        childField.set(entity, this.getChildren(childField, childUuid));
-                    } else {
-                        childField.set(entity, fieldTypeStrategy.getMappingColumnValue(childField, resultSet));
-                    }
-                }
-                collection.add(entity);
+            Field childBridgeField = clazz.getDeclaredField(downBridgeFieldName);
+            ManyToOne manyToOne = childBridgeField.getAnnotation(ManyToOne.class);
+            String upFieldName = manyToOne.upBridgeField();
+            Field upField;
+            try {
+                upField = entity.getClass().getSuperclass().getDeclaredField(upFieldName);
+            } catch (NoSuchFieldException e) {
+                upField = entity.getClass().getDeclaredField(upFieldName);
             }
-            return collection.size() > 0 ? collection : null;
-        } catch (SQLException | IllegalAccessException | InstantiationException e) {
+            upField.setAccessible(true);
+            Object upFieldValue = upField.get(entity);
+            return new CriteriaImpl(clazz, connection, databaseConfig)
+                    .add(Restrictions.equ(downBridgeFieldName, upFieldValue))
+                    .list();
+        } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new CriteriaException(e.getMessage());
-        } finally {
-            ConnectionManager.closeIO(preparedStatement, resultSet);
         }
-    }
-
-    /**
-     * 解析出SQL
-     *
-     * @param restrictions 约束对象
-     * @return SQL
-     */
-    private String parseSql(Restrictions restrictions) {
-        StringBuilder sql = new StringBuilder();
-        try {
-
-            if (restrictions.getLeftRestrictions() == null) {
-                sql.append(fieldMapper.get(restrictions.getSource()).getColumnName())
-                        .append(this.sqlFactory.getSql(this.databaseConfig.getDriverName(), restrictions.getSqlOperate()))
-                        .append("?");
-                this.restrictionsList.add(restrictions);
-            } else {
-                sql.append("(")
-                        .append(this.parseSql(restrictions.getLeftRestrictions()))
-                        .append(this.sqlFactory.getSql(this.databaseConfig.getDriverName(), restrictions.getSqlOperate()))
-                        .append(this.parseSql(restrictions.getRightRestrictions()))
-                        .append(")");
-            }
-        } catch (NullPointerException e) {
-            throw new CriteriaException(String.format(POCKET_ILLEGAL_FIELD_EXCEPTION, restrictions.getSource()));
-        }
-        return sql.toString();
     }
 
     private PreparedStatement getPreparedStatement() {
@@ -352,7 +281,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             throw new CriteriaException(e.getMessage());
         }
         fieldTypeStrategy.setPreparedStatement(preparedStatement, this.parameters,
-                this.restrictionsList);
+                this.sortedRestrictionsList);
         return preparedStatement;
     }
 }

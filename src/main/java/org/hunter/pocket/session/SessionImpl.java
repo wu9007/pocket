@@ -134,7 +134,6 @@ public class SessionImpl extends AbstractSession {
             preparedStatement = this.connection.prepareStatement(sql.toString());
             statementApplyValue(entity, fields, preparedStatement);
             effectRow = preparedStatement.executeUpdate();
-            this.adoptChildren(entity);
         } catch (Exception e) {
             throw new SessionException(e.getMessage(), e, true, true);
         } finally {

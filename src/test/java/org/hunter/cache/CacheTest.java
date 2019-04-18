@@ -4,7 +4,6 @@ import org.hunter.Application;
 import org.hunter.PocketExecutor;
 import org.hunter.demo.model.Order;
 import org.hunter.demo.repository.OrderRepository;
-import org.hunter.pocket.connect.ConnectionManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
