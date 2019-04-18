@@ -26,7 +26,6 @@ abstract class AbstractCriteria {
     private final Logger logger = LoggerFactory.getLogger(AbstractCriteria.class);
     final ReflectUtils reflectUtils = ReflectUtils.getInstance();
     final FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
-    final SqlFactory sqlFactory = SqlFactory.getInstance();
 
     final Class clazz;
     final Connection connection;
@@ -36,15 +35,15 @@ abstract class AbstractCriteria {
     final Field[] fields;
     final Field[] childrenFields;
     final Map<String, FieldMapper> fieldMapper;
-    final List<Restrictions> restrictionsList = new ArrayList<>();
-    final List<Modern> modernList = new ArrayList<>();
-    final List<Sort> orderList = new ArrayList<>();
-    final Map<String, Object> parameterMap = new HashMap<>();
-    final List<ParameterTranslator> parameters = new LinkedList<>();
+    List<Restrictions> restrictionsList = new LinkedList<>();
+    List<Restrictions> sortedRestrictionsList = new LinkedList<>();
+    List<Modern> modernList = new LinkedList<>();
+    List<Sort> orderList = new LinkedList<>();
+    Map<String, Object> parameterMap = new HashMap<>();
+    List<ParameterTranslator> parameters = new LinkedList<>();
     private Integer start;
     private Integer limit;
     StringBuilder completeSql = new StringBuilder();
-    StringBuilder sqlRestriction = new StringBuilder();
 
     AbstractCriteria(Class clazz, Connection connection, DatabaseNodeConfig databaseConfig) {
         this.clazz = clazz;
@@ -62,21 +61,22 @@ abstract class AbstractCriteria {
         this.showSql();
     }
 
-    void after() {
-        this.clear();
+    public void clear() {
+        restrictionsList = new LinkedList<>();
+        sortedRestrictionsList = new LinkedList<>();
+        modernList = new LinkedList<>();
+        orderList = new LinkedList<>();
+        parameterMap = new HashMap<>();
+        parameters = new LinkedList<>();
+        start = null;
+        limit = null;
+        completeSql = new StringBuilder();
     }
 
     private void showSql() {
         if (this.databaseConfig.getShowSql()) {
             this.logger.info("SQL: {}", this.completeSql);
         }
-    }
-
-    private void clear() {
-        this.completeSql = new StringBuilder();
-        this.sqlRestriction = new StringBuilder();
-        this.modernList.clear();
-        this.restrictionsList.clear();
     }
 
     void setLimit(int start, int limit) {

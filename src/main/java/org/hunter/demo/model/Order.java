@@ -1,8 +1,10 @@
 package org.hunter.demo.model;
 
+import org.hunter.pocket.annotation.Join;
 import org.hunter.pocket.annotation.OneToMany;
 import org.hunter.pocket.annotation.Column;
 import org.hunter.pocket.annotation.Entity;
+import org.hunter.pocket.constant.JoinMethod;
 import org.hunter.pocket.model.BaseEntity;
 
 import java.math.BigDecimal;
@@ -26,8 +28,10 @@ public class Order extends BaseEntity {
     private Date time;
     @Column(name = "STATE")
     private Boolean state;
+    @Join(columnName = "TYPE", businessName = "订单支付方式", joinTable = "TBL_ORDER_TYPE", joinMethod = JoinMethod.LEFT, bridgeColumn = "UUID", destinationColumn = "NAME")
+    private String type;
 
-    @OneToMany(clazz = Commodity.class, name = "ORDER_UUID")
+    @OneToMany(clazz = Commodity.class, bridgeField = "order")
     private List<Commodity> commodities;
 
     public static Order newInstance(String code, BigDecimal price) {
@@ -83,5 +87,13 @@ public class Order extends BaseEntity {
 
     public void setState(Boolean state) {
         this.state = state;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

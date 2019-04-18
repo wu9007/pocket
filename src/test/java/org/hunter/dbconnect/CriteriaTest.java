@@ -54,10 +54,10 @@ public class CriteriaTest {
     public void test1() {
         Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.like("code", "%A%"))
-                .add(Restrictions.ne("code", "A-002"))
-                .add(Restrictions.or(Restrictions.gt("price", 13), Restrictions.lt("price", 12.58)));
-        List orderList = criteria.list();
-        System.out.println(orderList.size());
+                .add(Restrictions.or(Restrictions.gt("price", 13), Restrictions.lt("price", 12.58)))
+                .add(Sort.asc("code"));
+        List<Order> orderList = criteria.list();
+        orderList.forEach(order -> System.out.println(order.getPrice()));
     }
 
     @Test
@@ -66,6 +66,7 @@ public class CriteriaTest {
         order.setDay(new Date());
         order.setTime(new Date());
         order.setState(false);
+        order.setType("001");
         this.session.save(order);
         Order newOrder = (Order) this.session.findOne(Order.class, order.getUuid());
         System.out.println(newOrder.getDay());
@@ -200,5 +201,28 @@ public class CriteriaTest {
                 .setParameter("STR_VALUE", " - A")
                 .setParameter("ADD_PRICE", 100)
                 .update();
+    }
+
+    @Test
+    public void test19() {
+        Criteria criteria = this.session.createCriteria(Order.class)
+                .add(Restrictions.equ("state", false));
+        long count = criteria.count();
+        System.out.println(count);
+    }
+
+    @Test
+    public void test20() {
+        Criteria criteria = this.session.createCriteria(Order.class)
+                .add(Restrictions.equ("state", true));
+        long count = criteria.delete();
+        System.out.println(count);
+    }
+
+    @Test
+    public void test21() {
+        Criteria criteria = this.session.createCriteria(Order.class);
+        criteria.add(Restrictions.like("type", "001"));
+        criteria.unique(true);
     }
 }

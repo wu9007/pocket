@@ -13,9 +13,19 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface OneToMany {
+    /**
+     * 关联的类类型
+     *
+     * @return Clazz
+     */
     Class clazz();
 
-    String name();
+    /**
+     * 关联的类型属性
+     *
+     * @return Bridge Field
+     */
+    String bridgeField();
 
     String businessName() default "";
 }

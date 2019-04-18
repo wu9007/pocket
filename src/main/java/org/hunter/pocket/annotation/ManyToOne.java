@@ -13,5 +13,24 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface ManyToOne {
-    String name();
+    /**
+     * 列名
+     *
+     * @return column name
+     */
+    String columnName();
+
+    /**
+     * 关联主类类类型
+     *
+     * @return 主类类类型
+     */
+    Class clazz();
+
+    /**
+     * 主类关联属性名
+     *
+     * @return up bridge field.
+     */
+    String upBridgeField();
 }
