@@ -43,7 +43,7 @@ public class Modern implements SqlBean {
         return new Modern(poEl);
     }
 
-    private String getSource() {
+    public String getSource() {
         return source;
     }
 
