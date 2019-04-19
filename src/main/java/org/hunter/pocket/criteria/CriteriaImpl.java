@@ -82,12 +82,21 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         } catch (SQLException e) {
             throw new CriteriaException(e.getMessage());
         } finally {
-            this.clear();
+            this.cleanAll();
         }
     }
 
     @Override
     public List list() {
+        try {
+            return this.listNotCleanRestrictions();
+        } finally {
+            this.cleanRestrictions();
+        }
+    }
+
+    @Override
+    public List listNotCleanRestrictions() {
         completeSql.append(sqlFactory
                 .getSqlBody(tableName, fields, restrictionsList, null, orderList)
                 .buildSelectSql(fieldMapper, databaseConfig)
@@ -117,7 +126,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             throw new CriteriaException(e.getMessage());
         } finally {
             ConnectionManager.closeIO(preparedStatement, resultSet);
-            this.clear();
+            this.cleanWithoutRestrictions();
         }
     }
 
@@ -158,7 +167,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             throw new CriteriaException(e.getMessage());
         } finally {
             ConnectionManager.closeIO(preparedStatement, resultSet);
-            this.clear();
+            this.cleanAll();
         }
         return entity;
     }
@@ -169,7 +178,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         if (obj != null && cascade) {
             this.applyChildren(obj);
         }
-        this.clear();
+        this.cleanAll();
         return obj;
     }
 
@@ -193,7 +202,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             throw new CriteriaException(e.getMessage());
         } finally {
             ConnectionManager.closeIO(preparedStatement, resultSet);
-            this.clear();
+            this.cleanAll();
         }
     }
 
@@ -210,7 +219,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             throw new CriteriaException(e.getMessage());
         } finally {
             ConnectionManager.closeIO(preparedStatement, null);
-            this.clear();
+            this.cleanAll();
         }
     }
 
@@ -233,7 +242,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             throw new CriteriaException(e.getMessage());
         } finally {
             ConnectionManager.closeIO(preparedStatement, resultSet);
-            this.clear();
+            this.cleanAll();
         }
     }
 
