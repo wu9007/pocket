@@ -1,5 +1,6 @@
 package org.hunter.pocket.session;
 
+import org.hunter.pocket.annotation.Entity;
 import org.hunter.pocket.config.DatabaseNodeConfig;
 import org.hunter.pocket.model.PocketEntity;
 import org.hunter.pocket.cache.BaseCacheUtils;
@@ -53,5 +54,18 @@ abstract class AbstractSession implements Session {
             field.setAccessible(true);
             preparedStatement.setObject(valueIndex + 1, field.get(entity));
         }
+    }
+
+    String buildSaveSql(Entity entityAnnotation, Field[] fields) {
+        StringBuilder sql = new StringBuilder("INSERT INTO ")
+                .append(entityAnnotation.table())
+                .append("(")
+                .append(reflectUtils.getColumnNames(fields))
+                .append(") ");
+        StringBuilder valuesSql = new StringBuilder("VALUES(")
+                .append(reflectUtils.getColumnPlaceholder(fields))
+                .append(") ");
+        sql.append(valuesSql);
+        return sql.toString();
     }
 }

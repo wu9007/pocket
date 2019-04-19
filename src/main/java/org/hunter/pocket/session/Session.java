@@ -79,6 +79,14 @@ public interface Session {
     int save(PocketEntity entity);
 
     /**
+     * 保存(跳过为空的属性)
+     *
+     * @param entity 实体对象
+     * @return 影响行数
+     */
+    int saveVariable(PocketEntity entity);
+
+    /**
      * 更新实体
      *
      * @param entity 实体对象
