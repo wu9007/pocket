@@ -89,8 +89,16 @@ public class Order extends BaseEntity {
     private String code;
     @Column(name = "PRICE")
     private BigDecimal price;
+    @Column(name = "DAY")
+    private Date day;
+    @Column(name = "TIME")
+    private Date time;
+    @Column(name = "STATE")
+    private Boolean state;
+    @Join(columnName = "TYPE", businessName = "订单支付方式", joinTable = "TBL_ORDER_TYPE", joinMethod = JoinMethod.LEFT, bridgeColumn = "UUID", destinationColumn = "NAME")
+    private String type;
 
-    @OneToMany(clazz = Commodity.class, name = "ORDER_UUID")
+    @OneToMany(clazz = Commodity.class, bridgeField = "order")
     private List<Commodity> commodities;
 
    // 这里省略 getter setter
@@ -109,8 +117,10 @@ public class Commodity extends BaseEntity {
     private String name;
     @Column(name = "PRICE")
     private BigDecimal price;
+    @Join(columnName = "TYPE", businessName = "订单支付方式", joinTable = "TBL_ORDER_TYPE", joinMethod = JoinMethod.LEFT, bridgeColumn = "UUID", destinationColumn = "NAME")
+    private String type;
 
-    @ManyToOne(name = "ORDER_UUID")
+    @ManyToOne(columnName = "ORDER_UUID", clazz = Order.class, upBridgeField = "uuid")
     private Long order;
 
     // getter setter

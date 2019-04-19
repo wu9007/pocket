@@ -185,7 +185,12 @@ public class ReflectUtils {
             } else if (manyToOne != null) {
                 try {
                     Class clazz = manyToOne.clazz();
-                    Field upField = clazz.getDeclaredField(manyToOne.upBridgeField());
+                    Field upField;
+                    try {
+                        upField = clazz.getSuperclass().getDeclaredField(manyToOne.upBridgeField());
+                    } catch (NoSuchFieldException e) {
+                        upField = clazz.getDeclaredField(manyToOne.upBridgeField());
+                    }
                     Column upColumn = upField.getAnnotation(Column.class);
                     columnName = upColumn.name();
                 } catch (NoSuchFieldException e) {
