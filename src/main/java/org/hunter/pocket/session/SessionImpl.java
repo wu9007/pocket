@@ -1,5 +1,7 @@
 package org.hunter.pocket.session;
 
+import org.hunter.pocket.annotation.Join;
+import org.hunter.pocket.annotation.ManyToOne;
 import org.hunter.pocket.connect.ConnectionManager;
 import org.hunter.pocket.annotation.Column;
 import org.hunter.pocket.annotation.Entity;
@@ -151,11 +153,27 @@ public class SessionImpl extends AbstractSession {
             Field[] fields = reflectUtils.dirtyFieldFilter(entity, older);
             if (fields.length > 0) {
                 StringBuilder sql = new StringBuilder("UPDATE ").append(reflectUtils.getEntityAnnotation(clazz).table()).append(" SET ");
+                Column column;
+                Join join;
+                ManyToOne manyToOne;
+                String columnName;
                 for (int index = 0; index < fields.length; index++) {
-                    if (index < fields.length - 1) {
-                        sql.append(fields[index].getAnnotation(Column.class).name()).append(" = ?, ");
+                    column = fields[index].getAnnotation(Column.class);
+                    join = fields[index].getAnnotation(Join.class);
+                    manyToOne = fields[index].getAnnotation(ManyToOne.class);
+                    if (column != null) {
+                        columnName = column.name();
+                    } else if (join != null) {
+                        columnName = join.columnName();
+                    } else if (manyToOne != null) {
+                        columnName = manyToOne.columnName();
                     } else {
-                        sql.append(fields[index].getAnnotation(Column.class).name()).append(" = ? ");
+                        throw new SessionException("未找到注解。");
+                    }
+                    if (index < fields.length - 1) {
+                        sql.append(columnName).append(" = ?, ");
+                    } else {
+                        sql.append(columnName).append(" = ? ");
                     }
                 }
                 sql.append(" WHERE UUID = ?");
