@@ -45,12 +45,11 @@ public class SessionTest {
     public void test1() {
         Order order = new Order();
         order.setType("001");
-        order.setState(true);
         order.setTime(new Date());
         order.setPrice(new BigDecimal("99.56789"));
         order.setDay(new Date());
+        order.setSort(1);
+        this.session.saveVariable(order);
         this.session.save(order);
-        order.setState(false);
-        this.session.update(order);
     }
 }

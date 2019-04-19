@@ -28,6 +28,8 @@ public class Order extends BaseEntity {
     private Date time;
     @Column(name = "STATE")
     private Boolean state;
+    @Column(name = "SORT")
+    private int sort;
     @Join(columnName = "TYPE", businessName = "订单支付方式", joinTable = "TBL_ORDER_TYPE", joinMethod = JoinMethod.LEFT, bridgeColumn = "UUID", destinationColumn = "NAME")
     private String type;
 
@@ -83,6 +85,14 @@ public class Order extends BaseEntity {
 
     public Boolean getState() {
         return state;
+    }
+
+    public int getSort() {
+        return sort;
+    }
+
+    public void setSort(int sort) {
+        this.sort = sort;
     }
 
     public void setState(Boolean state) {

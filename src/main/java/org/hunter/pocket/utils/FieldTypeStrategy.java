@@ -75,6 +75,47 @@ public class FieldTypeStrategy {
     private static final Map<String, Consumer<PreparedSupplierValue>> PREPARED_STRATEGY_POOL = new ConcurrentHashMap<>(20);
 
     static {
+        RESULT_STRATEGY_POOL.put((int.class.getName()), (resultSet, columnName) -> {
+            try {
+                return resultSet.getInt(columnName);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
+        RESULT_STRATEGY_POOL.put((float.class.getName()), (resultSet, columnName) -> {
+            try {
+                return resultSet.getFloat(columnName);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
+        RESULT_STRATEGY_POOL.put((double.class.getName()), (resultSet, columnName) -> {
+            try {
+                return resultSet.getDouble(columnName);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
+        RESULT_STRATEGY_POOL.put((long.class.getName()), (resultSet, columnName) -> {
+            try {
+                return resultSet.getLong(columnName);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
+        RESULT_STRATEGY_POOL.put((boolean.class.getName()), (resultSet, columnName) -> {
+            try {
+                return resultSet.getBoolean(columnName);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
+
         RESULT_STRATEGY_POOL.put(String.class.getName(), (resultSet, columnName) -> {
             try {
                 return resultSet.getString(columnName);
@@ -137,6 +178,52 @@ public class FieldTypeStrategy {
             } catch (SQLException e) {
                 e.printStackTrace();
                 return null;
+            }
+        });
+// ====================================================================================================//
+        PREPARED_STRATEGY_POOL.put(int.class.getName(), (value) -> {
+            PreparedStatement preparedStatement = value.getPreparedStatement();
+            SqlBean sqlBean = value.getSqlBean();
+            try {
+                preparedStatement.setInt(value.getIndex(), (Integer) sqlBean.getTarget());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+        PREPARED_STRATEGY_POOL.put(float.class.getName(), (value) -> {
+            PreparedStatement preparedStatement = value.getPreparedStatement();
+            SqlBean sqlBean = value.getSqlBean();
+            try {
+                preparedStatement.setFloat(value.getIndex(), (Float) sqlBean.getTarget());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+        PREPARED_STRATEGY_POOL.put(double.class.getName(), (value) -> {
+            PreparedStatement preparedStatement = value.getPreparedStatement();
+            SqlBean sqlBean = value.getSqlBean();
+            try {
+                preparedStatement.setDouble(value.getIndex(), (Double) sqlBean.getTarget());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+        PREPARED_STRATEGY_POOL.put(long.class.getName(), (value) -> {
+            PreparedStatement preparedStatement = value.getPreparedStatement();
+            SqlBean sqlBean = value.getSqlBean();
+            try {
+                preparedStatement.setLong(value.getIndex(), (Long) sqlBean.getTarget());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+        PREPARED_STRATEGY_POOL.put(boolean.class.getName(), (value) -> {
+            PreparedStatement preparedStatement = value.getPreparedStatement();
+            SqlBean sqlBean = value.getSqlBean();
+            try {
+                preparedStatement.setBoolean(value.getIndex(), (Boolean) sqlBean.getTarget());
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         });
 

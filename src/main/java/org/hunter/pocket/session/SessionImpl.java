@@ -115,17 +115,9 @@ public class SessionImpl extends AbstractSession {
         Entity entityAnnotation = reflectUtils.getEntityAnnotation(clazz);
 
         Field[] fields = reflectUtils.getMappingFields(clazz);
-        StringBuilder sql = new StringBuilder("INSERT INTO ")
-                .append(entityAnnotation.table())
-                .append("(")
-                .append(reflectUtils.getColumnNames(fields))
-                .append(") ");
-        StringBuilder valuesSql = new StringBuilder("VALUES(")
-                .append(reflectUtils.getColumnPlaceholder(fields))
-                .append(") ");
-        sql.append(valuesSql);
+        String sql = this.buildSaveSql(entityAnnotation, fields);
 
-        this.showSql(sql.toString());
+        this.showSql(sql);
         int effectRow;
         PreparedStatement preparedStatement = null;
         try {
@@ -133,7 +125,33 @@ public class SessionImpl extends AbstractSession {
                     .getUuidGenerator(entityAnnotation.uuidGenerator())
                     .getUuid(entity.getClass(), this);
             reflectUtils.setUuidValue(entity, uuid);
-            preparedStatement = this.connection.prepareStatement(sql.toString());
+            preparedStatement = this.connection.prepareStatement(sql);
+            statementApplyValue(entity, fields, preparedStatement);
+            effectRow = preparedStatement.executeUpdate();
+        } catch (Exception e) {
+            throw new SessionException(e.getMessage(), e, true, true);
+        } finally {
+            ConnectionManager.closeIO(preparedStatement, null);
+        }
+        return effectRow;
+    }
+
+    @Override
+    public int saveVariable(PocketEntity entity) {
+        Class clazz = entity.getClass();
+        Entity entityAnnotation = reflectUtils.getEntityAnnotation(clazz);
+        int effectRow;
+        PreparedStatement preparedStatement = null;
+        try {
+            Serializable uuid = UuidGeneratorFactory.getInstance()
+                    .getUuidGenerator(entityAnnotation.uuidGenerator())
+                    .getUuid(entity.getClass(), this);
+            reflectUtils.setUuidValue(entity, uuid);
+            Field[] fields = reflectUtils.getValueNotNullFields(entity);
+
+            String sql = this.buildSaveSql(entityAnnotation, fields);
+            this.showSql(sql);
+            preparedStatement = this.connection.prepareStatement(sql);
             statementApplyValue(entity, fields, preparedStatement);
             effectRow = preparedStatement.executeUpdate();
         } catch (Exception e) {

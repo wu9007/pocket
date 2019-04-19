@@ -7,10 +7,13 @@ import org.hunter.pocket.annotation.ManyToOne;
 import org.hunter.pocket.annotation.OneToMany;
 import org.hunter.pocket.criteria.FieldMapper;
 import org.hunter.pocket.exception.CriteriaException;
+import org.hunter.pocket.model.PocketEntity;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -195,6 +198,30 @@ public class ReflectUtils {
             }
         }
         return sql.toString();
+    }
+
+    /**
+     * 拼接列名
+     *
+     * @param entity 实体
+     * @return 以逗号隔开的列名
+     */
+    public Field[] getValueNotNullFields(PocketEntity entity) {
+        Field[] fields = this.getMappingFields(entity.getClass());
+        List<Field> valueNotNullFields = new LinkedList<>();
+        int count = 0;
+        for (Field field : fields) {
+            field.setAccessible(true);
+            try {
+                if (field.get(entity) != null) {
+                    valueNotNullFields.add(field);
+                    count++;
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return valueNotNullFields.toArray(new Field[count]);
     }
 
     /**
