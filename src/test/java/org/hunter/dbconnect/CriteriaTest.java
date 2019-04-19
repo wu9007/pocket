@@ -224,4 +224,13 @@ public class CriteriaTest {
         criteria.add(Restrictions.like("type", "001"));
         criteria.unique(true);
     }
+
+    @Test
+    public void test22() {
+        Criteria criteria = this.session.createCriteria(Order.class);
+        criteria.add(Restrictions.like("state", false)).limit(0,5);
+        List<Order> orders = criteria.listNotCleanRestrictions();
+        System.out.println(orders.size());
+        System.out.println(criteria.count());
+    }
 }

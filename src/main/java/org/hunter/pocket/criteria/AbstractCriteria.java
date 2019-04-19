@@ -60,9 +60,12 @@ abstract class AbstractCriteria {
         this.showSql();
     }
 
-    void clear() {
-        restrictionsList = new LinkedList<>();
-        sortedRestrictionsList = new LinkedList<>();
+    void cleanAll() {
+        this.cleanWithoutRestrictions();
+        this.cleanRestrictions();
+    }
+
+    void cleanWithoutRestrictions() {
         modernList = new LinkedList<>();
         orderList = new LinkedList<>();
         parameterMap = new HashMap<>();
@@ -70,6 +73,11 @@ abstract class AbstractCriteria {
         start = null;
         limit = null;
         completeSql = new StringBuilder();
+    }
+
+    void cleanRestrictions() {
+        sortedRestrictionsList = new LinkedList<>();
+        this.restrictionsList = new LinkedList<>();
     }
 
     private void showSql() {

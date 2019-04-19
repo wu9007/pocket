@@ -57,6 +57,13 @@ public interface Criteria {
     List list();
 
     /**
+     * 获取所有数据,持有条件集合可重复利用
+     *
+     * @return 对象集合
+     */
+    List listNotCleanRestrictions();
+
+    /**
      * 获取所有数据
      *
      * @param cascade 是否级联查询
