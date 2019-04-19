@@ -268,7 +268,7 @@ public class FieldTypeStrategy {
         for (int index = 0; index < restrictionsList.size(); index++) {
             Restrictions restrictions = restrictionsList.get(index);
             PreparedSupplierValue preparedSupplierValue = new PreparedSupplierValue(preparedStatement, parameters.size() + index + 1, restrictions);
-            PREPARED_STRATEGY_POOL.get(restrictions.getTarget().getClass().getName()).accept(preparedSupplierValue);
+            this.apply(preparedStatement, preparedSupplierValue);
         }
     }
 
@@ -276,7 +276,20 @@ public class FieldTypeStrategy {
         for (int index = 0; index < parameterTranslatorList.size(); index++) {
             ParameterTranslator parameterTranslator = parameterTranslatorList.get(index);
             PreparedSupplierValue preparedSupplierValue = new PreparedSupplierValue(preparedStatement, index + 1, parameterTranslator);
-            PREPARED_STRATEGY_POOL.get(parameterTranslator.getTarget().getClass().getName()).accept(preparedSupplierValue);
+            this.apply(preparedStatement, preparedSupplierValue);
+        }
+    }
+
+    private void apply(PreparedStatement preparedStatement, PreparedSupplierValue preparedSupplierValue) {
+        SqlBean sqlBean = preparedSupplierValue.getSqlBean();
+        if (sqlBean.getTarget() != null) {
+            PREPARED_STRATEGY_POOL.get(sqlBean.getTarget().getClass().getName()).accept(preparedSupplierValue);
+        } else {
+            try {
+                preparedStatement.setObject(preparedSupplierValue.getIndex(), sqlBean.getTarget());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

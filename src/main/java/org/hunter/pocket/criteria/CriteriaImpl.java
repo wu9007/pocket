@@ -30,6 +30,11 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public Criteria add(Restrictions restrictions) {
+        String source = restrictions.getSource();
+        boolean sourceEmpty = source == null || source.trim().length() == 0;
+        if (sourceEmpty && restrictions.getSqlOperate() == null) {
+            throw new CriteriaException("No field name found in your Restrictions.");
+        }
         this.restrictionsList.add(restrictions);
         restrictions.pushTo(this.sortedRestrictionsList);
         return this;
@@ -37,6 +42,13 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public Criteria add(Modern modern) {
+        String source = modern.getSource();
+        String poEl = modern.getPoEl();
+        boolean sourceEmpty = source == null || source.trim().length() == 0;
+        boolean poElEmpty = poEl == null || poEl.trim().length() == 0;
+        if (sourceEmpty && poElEmpty) {
+            throw new CriteriaException("No field name found in your Modern.");
+        }
         this.modernList.add(modern);
         return this;
     }
