@@ -183,19 +183,7 @@ public class ReflectUtils {
             if (column != null) {
                 columnName = column.name();
             } else if (manyToOne != null) {
-                try {
-                    Class clazz = manyToOne.clazz();
-                    Field upField;
-                    try {
-                        upField = clazz.getSuperclass().getDeclaredField(manyToOne.upBridgeField());
-                    } catch (NoSuchFieldException e) {
-                        upField = clazz.getDeclaredField(manyToOne.upBridgeField());
-                    }
-                    Column upColumn = upField.getAnnotation(Column.class);
-                    columnName = upColumn.name();
-                } catch (NoSuchFieldException e) {
-                    throw new CriteriaException(e.getMessage());
-                }
+                columnName = manyToOne.columnName();
             } else if (join != null) {
                 columnName = join.columnName();
             } else {
