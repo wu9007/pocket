@@ -37,6 +37,13 @@ public @interface Join {
     String joinTable();
 
     /**
+     * 关联表别名
+     *
+     * @return join table surname
+     */
+    String joinTableSurname() default "";
+
+    /**
      * 关联方式
      *
      * @return Join Method
