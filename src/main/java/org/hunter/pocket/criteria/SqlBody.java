@@ -139,18 +139,23 @@ public class SqlBody {
 
     private String parseJoinSql() {
         return this.tableJoins.stream()
-                .map(join -> new StringBuilder(join
-                        .joinMethod().getId())
-                        .append(" ")
-                        .append(join.joinTable())
-                        .append(CommonSql.ON)
-                        .append(this.tableName)
-                        .append(".")
-                        .append(join.columnName())
-                        .append(" = ")
-                        .append(join.joinTable())
-                        .append(".")
-                        .append(join.bridgeColumn()))
+                .map(join -> {
+                    String joinTableSurname = join.joinTableSurname().trim();
+                    return new StringBuilder(join
+                            .joinMethod().getId())
+                            .append(" ")
+                            .append(join.joinTable())
+                            .append(" ")
+                            .append(joinTableSurname)
+                            .append(CommonSql.ON)
+                            .append(this.tableName)
+                            .append(".")
+                            .append(join.columnName())
+                            .append(" = ")
+                            .append(joinTableSurname.length() > 0 ? joinTableSurname : join.joinTable())
+                            .append(".")
+                            .append(join.bridgeColumn());
+                })
                 .collect(Collectors.joining());
     }
 

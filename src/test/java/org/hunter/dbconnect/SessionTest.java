@@ -2,7 +2,6 @@ package org.hunter.dbconnect;
 
 import org.hunter.Application;
 import org.hunter.demo.model.Order;
-import org.hunter.pocket.query.SQLQuery;
 import org.hunter.pocket.session.Session;
 import org.hunter.pocket.session.SessionFactory;
 import org.hunter.pocket.session.Transaction;
@@ -15,7 +14,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author wujianchuan 2019/1/15
