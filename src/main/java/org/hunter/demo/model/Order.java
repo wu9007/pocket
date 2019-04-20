@@ -30,10 +30,10 @@ public class Order extends BaseEntity {
     private Boolean state;
     @Column(name = "SORT")
     private int sort;
-    @Join(columnName = "TYPE", businessName = "订单支付方式", joinTable = "TBL_ORDER_TYPE", joinTableSurname = "T1", joinMethod = JoinMethod.LEFT, bridgeColumn = "UUID", destinationColumn = "NAME")
+    @Column(name = "TYPE")
     private String type;
-    @Join(columnName = "TYPE_COPY", businessName = "订单支付方式", joinTable = "TBL_ORDER_TYPE", joinTableSurname = "T2", joinMethod = JoinMethod.LEFT, bridgeColumn = "UUID", destinationColumn = "NAME")
-    private String typeCopy;
+    @Join(columnName = "TYPE", columnSurname = "TYPE_NAME", businessName = "订单支付方式", joinTable = "TBL_ORDER_TYPE", joinTableSurname = "T2", joinMethod = JoinMethod.LEFT, bridgeColumn = "UUID", destinationColumn = "NAME")
+    private String typeName;
 
     @OneToMany(clazz = Commodity.class, bridgeField = "order")
     private List<Commodity> commodities;
@@ -109,11 +109,11 @@ public class Order extends BaseEntity {
         this.type = type;
     }
 
-    public String getTypeCopy() {
-        return typeCopy;
+    public String getTypeName() {
+        return typeName;
     }
 
-    public void setTypeCopy(String typeCopy) {
-        this.typeCopy = typeCopy;
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
     }
 }

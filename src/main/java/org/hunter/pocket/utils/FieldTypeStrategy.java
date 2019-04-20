@@ -342,7 +342,8 @@ public class FieldTypeStrategy {
         } else if (manyToOne != null) {
             columnName = manyToOne.columnName();
         } else if (join != null) {
-            columnName = join.columnName();
+            String columnSurname = join.columnSurname().trim();
+            columnName = columnSurname.length() > 0 ? columnSurname : join.columnName();
         } else {
             throw new NullPointerException("未找到注解");
         }

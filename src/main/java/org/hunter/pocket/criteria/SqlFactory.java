@@ -69,7 +69,8 @@ public class SqlFactory {
             } else if (join != null) {
                 String joinTableSurname = join.joinTableSurname().trim();
                 String tableName = joinTableSurname.length() > 0 ? joinTableSurname : join.joinTable();
-                columnNames.add(tableName + "." + join.destinationColumn() + CommonSql.AS + join.columnName());
+                String columnSurname = join.columnSurname().trim();
+                columnNames.add(tableName + "." + join.destinationColumn() + CommonSql.AS + (columnSurname.length() > 0 ? columnSurname : join.columnName()));
                 tableJoins.add(join);
             } else {
                 throw new NullPointerException("找不到注解");

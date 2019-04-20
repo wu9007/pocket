@@ -25,6 +25,7 @@ import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 /**
  * @author wujianchuan 2019/1/1
@@ -114,7 +115,11 @@ public class SessionImpl extends AbstractSession {
         Class clazz = entity.getClass();
         Entity entityAnnotation = reflectUtils.getEntityAnnotation(clazz);
 
-        Field[] fields = reflectUtils.getMappingFields(clazz);
+        Field[] fields = Arrays.stream(reflectUtils.getMappingFields(clazz)).filter((field) -> {
+            Join join = field.getAnnotation(Join.class);
+            return join == null || join.columnSurname().trim().length() == 0;
+        }).toArray(Field[]::new);
+
         String sql = this.buildSaveSql(entityAnnotation, fields);
 
         this.showSql(sql);
@@ -147,7 +152,11 @@ public class SessionImpl extends AbstractSession {
                     .getUuidGenerator(entityAnnotation.uuidGenerator())
                     .getUuid(entity.getClass(), this);
             reflectUtils.setUuidValue(entity, uuid);
-            Field[] fields = reflectUtils.getValueNotNullFields(entity);
+            // TODO: 重构 --- 程序启动时将所有的属性和数据库字段映射存储到内存中
+            Field[] fields = Arrays.stream(reflectUtils.getValueNotNullFields(entity)).filter((field) -> {
+                Join join = field.getAnnotation(Join.class);
+                return join == null || join.columnSurname().trim().length() == 0;
+            }).toArray(Field[]::new);
 
             String sql = this.buildSaveSql(entityAnnotation, fields);
             this.showSql(sql);

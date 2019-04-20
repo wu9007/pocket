@@ -175,10 +175,9 @@ public class ReflectUtils {
      * @param fields 属性
      * @return 以逗号隔开的列名
      */
-    public String getColumnNames(Field[] fields) {
-        StringBuilder sql = new StringBuilder();
-        for (int index = 0; index < fields.length; index++) {
-            Field field = fields[index];
+    public List getColumnNames(Field[] fields) {
+        List<String> columnNames = new LinkedList<>();
+        for (Field field : fields) {
             String columnName;
             Column column = field.getAnnotation(Column.class);
             ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);
@@ -192,12 +191,9 @@ public class ReflectUtils {
             } else {
                 throw new NullPointerException("找不到注解");
             }
-            sql.append(columnName);
-            if (index < fields.length - 1) {
-                sql.append(", ");
-            }
+            columnNames.add(columnName);
         }
-        return sql.toString();
+        return columnNames;
     }
 
     /**
@@ -230,6 +226,7 @@ public class ReflectUtils {
      * @param fields 属性
      * @return 以逗号隔开的列名
      */
+    @Deprecated
     public String getColumnPlaceholder(Field[] fields) {
         StringBuilder sql = new StringBuilder();
         for (int index = 0; index < fields.length; index++) {
