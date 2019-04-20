@@ -228,7 +228,7 @@ public class CriteriaTest {
     @Test
     public void test22() {
         Criteria criteria = this.session.createCriteria(Order.class);
-        criteria.add(Restrictions.like("state", false)).limit(0,5);
+        criteria.add(Restrictions.equ("type", "001")).limit(0,5);
         List<Order> orders = criteria.listNotCleanRestrictions();
         System.out.println(orders.size());
         System.out.println(criteria.count());

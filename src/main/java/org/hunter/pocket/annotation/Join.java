@@ -23,6 +23,13 @@ public @interface Join {
     String columnName();
 
     /**
+     * 数据库字段别名，查询时使用，不用于保存操作
+     *
+     * @return column sur name
+     */
+    String columnSurname() default "";
+
+    /**
      * 业务名称
      *
      * @return Business Name

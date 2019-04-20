@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * @author wujianchuan 2019/1/9
@@ -57,13 +59,15 @@ abstract class AbstractSession implements Session {
     }
 
     String buildSaveSql(Entity entityAnnotation, Field[] fields) {
+        List<String> columns = reflectUtils.getColumnNames(fields);
         StringBuilder sql = new StringBuilder("INSERT INTO ")
                 .append(entityAnnotation.table())
                 .append("(")
-                .append(reflectUtils.getColumnNames(fields))
+                .append(String.join(", ", columns))
                 .append(") ");
+        columns.replaceAll(column -> "?");
         StringBuilder valuesSql = new StringBuilder("VALUES(")
-                .append(reflectUtils.getColumnPlaceholder(fields))
+                .append(String.join(", ", columns))
                 .append(") ");
         sql.append(valuesSql);
         return sql.toString();
