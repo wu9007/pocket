@@ -49,7 +49,7 @@ public class Order extends BaseEntity {
         return code;
     }
 
-    private void setCode(String code) {
+    public void setCode(String code) {
         this.code = code;
     }
 

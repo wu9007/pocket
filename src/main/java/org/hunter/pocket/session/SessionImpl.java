@@ -1,15 +1,14 @@
 package org.hunter.pocket.session;
 
-import org.hunter.pocket.annotation.Join;
-import org.hunter.pocket.annotation.ManyToOne;
 import org.hunter.pocket.connect.ConnectionManager;
-import org.hunter.pocket.annotation.Column;
 import org.hunter.pocket.annotation.Entity;
 import org.hunter.pocket.config.DatabaseNodeConfig;
+import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.criteria.Criteria;
 import org.hunter.pocket.criteria.CriteriaImpl;
 import org.hunter.pocket.criteria.Restrictions;
 import org.hunter.pocket.exception.SessionException;
+import org.hunter.pocket.model.MapperFactory;
 import org.hunter.pocket.model.PocketEntity;
 import org.hunter.pocket.query.ProcessQuery;
 import org.hunter.pocket.query.ProcessQueryImpl;
@@ -25,7 +24,8 @@ import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author wujianchuan 2019/1/1
@@ -111,30 +111,21 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public int save(PocketEntity entity) {
+    public int save(PocketEntity entity) throws SQLException {
         Class clazz = entity.getClass();
-        Entity entityAnnotation = reflectUtils.getEntityAnnotation(clazz);
-
-        Field[] fields = Arrays.stream(reflectUtils.getMappingFields(clazz)).filter((field) -> {
-            Join join = field.getAnnotation(Join.class);
-            return join == null || join.columnSurname().trim().length() == 0;
-        }).toArray(Field[]::new);
-
-        String sql = this.buildSaveSql(entityAnnotation, fields);
+        String sql = this.buildSaveSqlNullable(entity);
 
         this.showSql(sql);
         int effectRow;
         PreparedStatement preparedStatement = null;
         try {
             Serializable uuid = UuidGeneratorFactory.getInstance()
-                    .getUuidGenerator(entityAnnotation.uuidGenerator())
+                    .getUuidGenerator(MapperFactory.getUuidGenerator(clazz.getName()))
                     .getUuid(entity.getClass(), this);
             reflectUtils.setUuidValue(entity, uuid);
             preparedStatement = this.connection.prepareStatement(sql);
-            statementApplyValue(entity, fields, preparedStatement);
+            this.statementApplyNullable(entity, preparedStatement);
             effectRow = preparedStatement.executeUpdate();
-        } catch (Exception e) {
-            throw new SessionException(e.getMessage(), e, true, true);
         } finally {
             ConnectionManager.closeIO(preparedStatement, null);
         }
@@ -142,28 +133,20 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public int saveVariable(PocketEntity entity) {
+    public int saveVariable(PocketEntity entity) throws SQLException {
         Class clazz = entity.getClass();
-        Entity entityAnnotation = reflectUtils.getEntityAnnotation(clazz);
         int effectRow;
         PreparedStatement preparedStatement = null;
         try {
             Serializable uuid = UuidGeneratorFactory.getInstance()
-                    .getUuidGenerator(entityAnnotation.uuidGenerator())
+                    .getUuidGenerator(MapperFactory.getUuidGenerator(clazz.getName()))
                     .getUuid(entity.getClass(), this);
             reflectUtils.setUuidValue(entity, uuid);
-            Field[] fields = Arrays.stream(reflectUtils.getValueNotNullFields(entity)).filter((field) -> {
-                Join join = field.getAnnotation(Join.class);
-                return join == null || join.columnSurname().trim().length() == 0;
-            }).toArray(Field[]::new);
-
-            String sql = this.buildSaveSql(entityAnnotation, fields);
+            String sql = this.buildSaveSqlNotNull(entity);
             this.showSql(sql);
             preparedStatement = this.connection.prepareStatement(sql);
-            statementApplyValue(entity, fields, preparedStatement);
+            this.statementApplyNotNull(entity, preparedStatement);
             effectRow = preparedStatement.executeUpdate();
-        } catch (Exception e) {
-            throw new SessionException(e.getMessage(), e, true, true);
         } finally {
             ConnectionManager.closeIO(preparedStatement, null);
         }
@@ -171,47 +154,31 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public int update(PocketEntity entity) {
+    public int update(PocketEntity entity) throws SQLException {
         Class clazz = entity.getClass();
         Object older = this.findOne(clazz, reflectUtils.getUuidValue(entity));
         int effectRow = 0;
         if (older != null) {
             Field[] fields = reflectUtils.dirtyFieldFilter(entity, older);
             if (fields.length > 0) {
-                StringBuilder sql = new StringBuilder("UPDATE ").append(reflectUtils.getEntityAnnotation(clazz).table()).append(" SET ");
-                Column column;
-                Join join;
-                ManyToOne manyToOne;
-                String columnName;
-                for (int index = 0; index < fields.length; index++) {
-                    column = fields[index].getAnnotation(Column.class);
-                    join = fields[index].getAnnotation(Join.class);
-                    manyToOne = fields[index].getAnnotation(ManyToOne.class);
-                    if (column != null) {
-                        columnName = column.name();
-                    } else if (join != null) {
-                        columnName = join.columnName();
-                    } else if (manyToOne != null) {
-                        columnName = manyToOne.columnName();
-                    } else {
-                        throw new SessionException("未找到注解。");
-                    }
-                    if (index < fields.length - 1) {
-                        sql.append(columnName).append(" = ?, ");
-                    } else {
-                        sql.append(columnName).append(" = ? ");
-                    }
+                StringBuilder sql = new StringBuilder(CommonSql.UPDATE)
+                        .append(MapperFactory.getTableName(clazz.getName()))
+                        .append(CommonSql.SET);
+
+                List<String> setValues = new LinkedList<>();
+                for (Field field : fields) {
+                    setValues.add(MapperFactory.getRepositoryColumnName(clazz.getName(), field.getName()) + CommonSql.EQUAL_TO + CommonSql.PLACEHOLDER);
                 }
-                sql.append(" WHERE UUID = ?");
+                sql.append(String.join(CommonSql.COMMA, setValues))
+                        .append(CommonSql.WHERE)
+                        .append("UUID").append(CommonSql.EQUAL_TO).append(CommonSql.PLACEHOLDER);
                 this.showSql(sql.toString());
                 PreparedStatement preparedStatement = null;
                 try {
                     preparedStatement = this.connection.prepareStatement(sql.toString());
-                    statementApplyValue(entity, fields, preparedStatement);
+                    this.statementApply(fields, entity, preparedStatement);
                     preparedStatement.setObject(fields.length + 1, reflectUtils.getUuidValue(entity));
                     effectRow = preparedStatement.executeUpdate();
-                } catch (Exception e) {
-                    throw new SessionException(e.getMessage(), e, true, true);
                 } finally {
                     ConnectionManager.closeIO(preparedStatement, null);
                 }
@@ -222,21 +189,25 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public int delete(PocketEntity entity) {
+    public int delete(PocketEntity entity) throws SQLException {
         Class clazz = entity.getClass();
         Serializable uuid = reflectUtils.getUuidValue(entity);
         Object garbage = this.findOne(clazz, uuid);
         int effectRow = 0;
         if (garbage != null) {
-            String sql = "DELETE FROM " + reflectUtils.getEntityAnnotation(clazz).table() + " WHERE UUID = ?";
+            String sql = CommonSql.DELETE +
+                    CommonSql.FROM +
+                    MapperFactory.getTableName(clazz.getName()) +
+                    CommonSql.WHERE +
+                    "UUID" +
+                    CommonSql.EQUAL_TO +
+                    CommonSql.PLACEHOLDER;
             this.showSql(sql);
             PreparedStatement preparedStatement = null;
             try {
                 preparedStatement = this.connection.prepareStatement(sql);
                 preparedStatement.setObject(1, uuid);
                 effectRow = preparedStatement.executeUpdate();
-            } catch (SQLException e) {
-                throw new SessionException(e.getMessage(), e, true, true);
             } finally {
                 ConnectionManager.closeIO(preparedStatement, null);
             }
@@ -287,9 +258,14 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public long getMaxUuid(Integer serverId, Class clazz) throws Exception {
+    public long getMaxUuid(Integer serverId, Class clazz) throws SQLException {
         Entity annotation = (Entity) clazz.getAnnotation(Entity.class);
-        PreparedStatement preparedStatement = this.connection.prepareStatement("SELECT MAX(CONVERT(UUID,SIGNED)) FROM " + annotation.table() + " WHERE UUID REGEXP '^" + serverId + annotation.tableId() + "'");
+        String sql = CommonSql.SELECT
+                + "MAX(CONVERT(UUID,SIGNED))"
+                + CommonSql.FROM + annotation.table()
+                + CommonSql.WHERE
+                + "UUID REGEXP '^" + serverId + annotation.tableId() + "'";
+        PreparedStatement preparedStatement = this.connection.prepareStatement(sql);
         ResultSet resultSet = preparedStatement.executeQuery();
         long uuid;
         if (resultSet.next()) {

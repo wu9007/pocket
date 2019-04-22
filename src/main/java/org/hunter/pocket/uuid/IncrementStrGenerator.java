@@ -5,6 +5,7 @@ import org.hunter.pocket.utils.ReflectUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
+import java.sql.SQLException;
 
 /**
  * @author wujianchuan 2019/1/2
@@ -26,7 +27,7 @@ public class IncrementStrGenerator extends AbstractUuidGenerator {
     }
 
     @Override
-    public synchronized Serializable getUuid(Class clazz, Session session) throws Exception {
+    public synchronized Serializable getUuid(Class clazz, Session session) throws SQLException {
         int tableId = ReflectUtils.getInstance().getEntityAnnotation(clazz).tableId();
         String mapKey = this.serverId + "_" + tableId;
         String leaderNum = "" + serverId + tableId;

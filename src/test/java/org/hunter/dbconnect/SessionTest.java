@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.Date;
 
 /**
@@ -40,14 +41,36 @@ public class SessionTest {
     }
 
     @Test
-    public void test1() {
+    public void test1() throws SQLException {
         Order order = new Order();
+        order.setCode("F-00x");
         order.setType("001");
         order.setTime(new Date());
         order.setPrice(new BigDecimal("99.56789"));
         order.setDay(new Date());
-        order.setSort(1);
         this.session.saveVariable(order);
         this.session.save(order);
+    }
+
+    @Test
+    public void test2() throws SQLException {
+        Order order = (Order) session.findOne(Order.class, 10110180);
+        order.setState(null);
+        order.setPrice(new BigDecimal("100.96"));
+        order.setDay(new Date());
+        order.setType("002");
+        session.update(order);
+    }
+
+    @Test
+    public void test3() throws SQLException {
+        Order order = (Order) session.findOne(Order.class, 10110180);
+        session.delete(order);
+    }
+
+    @Test
+    public void test4() throws Exception {
+        long uuid = session.getMaxUuid(101, Order.class);
+        System.out.println(uuid);
     }
 }

@@ -5,6 +5,7 @@ import org.hunter.pocket.constant.AnnotationType;
 import org.springframework.context.ApplicationContext;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,12 +23,24 @@ public class MapperFactory {
         return ENTITY_MAPPER_POOL.get(classFullName).getTableName();
     }
 
+    public static String getUuidGenerator(String classFullName) {
+        return ENTITY_MAPPER_POOL.get(classFullName).getUuidGenerator();
+    }
+
     public static AnnotationType getAnnotationType(String classFullName, String fieldName) {
         return ENTITY_MAPPER_POOL.get(classFullName).getFieldMapper().get(fieldName).getAnnotationType();
     }
 
     public static Annotation getAnnotation(String classFullName, String fieldName) {
         return ENTITY_MAPPER_POOL.get(classFullName).getFieldMapper().get(fieldName).getAnnotation();
+    }
+
+    public static Field[] getRepositoryFields(String className) {
+        return ENTITY_MAPPER_POOL.get(className).getRepositoryFields();
+    }
+
+    public static List<String> getRepositoryColumnNames(String className) {
+        return (List<String>) ENTITY_MAPPER_POOL.get(className).getRepositoryColumnNames();
     }
 
     public static String getRepositoryColumnName(String className, String fieldName) {

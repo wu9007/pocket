@@ -1,5 +1,6 @@
 package org.hunter.pocket.query;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -11,15 +12,17 @@ public interface SQLQuery {
      * 单条查询
      *
      * @return 查询结果
+     * @throws SQLException 语句异常
      */
-    Object unique();
+    Object unique() throws SQLException;
 
     /**
      * 查询所有数据
      *
      * @return list
+     * @throws SQLException 语句异常
      */
-    List list();
+    List list() throws SQLException;
 
     /**
      * 分页
