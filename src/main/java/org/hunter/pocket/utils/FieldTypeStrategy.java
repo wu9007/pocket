@@ -150,7 +150,12 @@ public class FieldTypeStrategy {
         });
         RESULT_STRATEGY_POOL.put(Boolean.class.getName(), (resultSet, columnName) -> {
             try {
-                return resultSet.getBoolean(columnName);
+                Object object = resultSet.getObject(columnName);
+                if (object == null) {
+                    return null;
+                } else {
+                    return (int) object != 0;
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
                 return null;

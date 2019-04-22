@@ -6,6 +6,7 @@ import org.hunter.pocket.query.ProcessQuery;
 import org.hunter.pocket.query.SQLQuery;
 
 import java.io.Serializable;
+import java.sql.SQLException;
 
 /**
  * @author wujianchuan 2018/12/31
@@ -75,32 +76,36 @@ public interface Session {
      *
      * @param entity 实体对象
      * @return 影响行数
+     * @throws SQLException 语句异常
      */
-    int save(PocketEntity entity);
+    int save(PocketEntity entity) throws SQLException;
 
     /**
      * 保存(跳过为空的属性)
      *
      * @param entity 实体对象
      * @return 影响行数
+     * @throws SQLException 语句异常
      */
-    int saveVariable(PocketEntity entity);
+    int saveVariable(PocketEntity entity) throws SQLException;
 
     /**
      * 更新实体
      *
      * @param entity 实体对象
      * @return 影响行数
+     * @throws SQLException 语句异常
      */
-    int update(PocketEntity entity);
+    int update(PocketEntity entity) throws SQLException;
 
     /**
      * 删除实体
      *
      * @param entity 实体对象
      * @return 影响行数
+     * @throws SQLException 语句异常
      */
-    int delete(PocketEntity entity);
+    int delete(PocketEntity entity) throws SQLException;
 
     /**
      * 查询对象
@@ -126,9 +131,9 @@ public interface Session {
      * @param serverId 服务名
      * @param clazz    实体类型
      * @return 最大值
-     * @throws Exception 语句异常
+     * @throws SQLException 语句异常
      */
-    long getMaxUuid(Integer serverId, Class clazz) throws Exception;
+    long getMaxUuid(Integer serverId, Class clazz) throws SQLException;
 
     /**
      * 删除该数据的缓存

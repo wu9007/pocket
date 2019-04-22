@@ -12,6 +12,7 @@ import org.hunter.pocket.model.PocketEntity;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -161,6 +162,9 @@ public class ReflectUtils {
                         field.setAccessible(true);
                         Object modernValue = field.get(modern);
                         Object olderValue = field.get(older);
+                        if (olderValue instanceof Number) {
+                            return ((Comparable) modernValue).compareTo((Comparable) olderValue) != 0;
+                        }
                         return modernValue == null && olderValue != null || olderValue == null && modernValue != null || modernValue != null && !modernValue.equals(olderValue);
                     } catch (IllegalAccessException e) {
                         e.printStackTrace();

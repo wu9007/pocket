@@ -4,11 +4,13 @@ package org.hunter.pocket.constant;
  * @author wujianchuan
  */
 public interface CommonSql {
+    String INSERT_INTO = "INSERT INTO ";
     String SELECT = "SELECT ";
     String UPDATE = "UPDATE ";
     String DELETE = "DELETE ";
     String AS = " AS ";
     String SET = " SET ";
+    String VALUES = " VALUES";
     String FROM = " FROM ";
     String WHERE = " WHERE ";
     String AND = " AND ";

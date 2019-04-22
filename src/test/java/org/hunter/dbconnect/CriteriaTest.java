@@ -20,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -60,7 +61,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test2() {
+    public void test2() throws SQLException {
         Order order = Order.newInstance("C-001", new BigDecimal("50.25"));
         order.setDay(new Date());
         order.setTime(new Date());
@@ -80,7 +81,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test4() {
+    public void test4() throws SQLException {
         Order order = Order.newInstance("C-001", new BigDecimal("50.25"));
         order.setDay(new Date());
         order.setTime(new Date());
@@ -144,7 +145,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test11() {
+    public void test11() throws SQLException {
         this.session.findDirect(Order.class, 11L);
         Order order = (Order) this.session.findOne(Order.class, 11L);
         if (order != null) {
