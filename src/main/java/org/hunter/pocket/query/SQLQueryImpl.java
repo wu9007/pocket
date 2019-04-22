@@ -2,7 +2,6 @@ package org.hunter.pocket.query;
 
 import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.criteria.ParameterTranslator;
-import org.hunter.pocket.exception.QueryException;
 import org.hunter.pocket.utils.FieldTypeStrategy;
 import org.hunter.pocket.utils.ReflectUtils;
 
@@ -38,30 +37,26 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
     }
 
     @Override
-    public Object unique() {
-        try {
-            ResultSet resultSet = execute(sql);
-            if (resultSet.next()) {
-                List<String> columnNames = this.getColumnNames();
-                if (clazz != null) {
-                    try {
-                        return getEntity(resultSet, columnNames);
-                    } catch (InstantiationException | IllegalAccessException e) {
-                        throw new IllegalAccessError();
-                    }
-                } else {
-                    return getObjects(resultSet, columnNames.size());
+    public Object unique() throws SQLException {
+        ResultSet resultSet = execute(sql);
+        if (resultSet.next()) {
+            List<String> columnNames = this.getColumnNames();
+            if (clazz != null) {
+                try {
+                    return getEntity(resultSet, columnNames);
+                } catch (InstantiationException | IllegalAccessException e) {
+                    throw new IllegalAccessError();
                 }
             } else {
-                return null;
+                return getObjects(resultSet, columnNames.size());
             }
-        } catch (SQLException e) {
-            throw new QueryException(e.getMessage());
+        } else {
+            return null;
         }
     }
 
     @Override
-    public List list() {
+    public List list() throws SQLException {
         StringBuilder querySQL = new StringBuilder(this.sql);
         if (this.limited()) {
             querySQL.append(" LIMIT ")
@@ -69,26 +64,22 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
                     .append(CommonSql.COMMA)
                     .append(this.getLimit());
         }
-        try {
-            ResultSet resultSet = execute(querySQL.toString());
-            List<Object> results = new ArrayList<>();
-            while (resultSet.next()) {
-                List<String> columnNames = this.getColumnNames();
-                if (clazz != null) {
-                    try {
-                        Object result = getEntity(resultSet, columnNames);
-                        results.add(result);
-                    } catch (InstantiationException | IllegalAccessException e) {
-                        throw new IllegalAccessError();
-                    }
-                } else {
-                    results.add(getObjects(resultSet, columnNames.size()));
+        ResultSet resultSet = execute(querySQL.toString());
+        List<Object> results = new ArrayList<>();
+        while (resultSet.next()) {
+            List<String> columnNames = this.getColumnNames();
+            if (clazz != null) {
+                try {
+                    Object result = getEntity(resultSet, columnNames);
+                    results.add(result);
+                } catch (InstantiationException | IllegalAccessException e) {
+                    throw new IllegalAccessError();
                 }
+            } else {
+                results.add(getObjects(resultSet, columnNames.size()));
             }
-            return results;
-        } catch (SQLException e) {
-            throw new QueryException(e.getMessage(), e, true, true);
         }
+        return results;
     }
 
     @Override
