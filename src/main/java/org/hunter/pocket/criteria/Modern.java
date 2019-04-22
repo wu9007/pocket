@@ -1,7 +1,9 @@
 package org.hunter.pocket.criteria;
 
+import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.exception.CriteriaException;
 import org.hunter.pocket.exception.ErrorMessage;
+import org.hunter.pocket.model.MapperFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -47,10 +49,6 @@ public class Modern implements SqlBean {
         return source;
     }
 
-    private void setSource(String source) {
-        this.source = source;
-    }
-
     @Override
     public Object getTarget() {
         return target;
@@ -64,11 +62,7 @@ public class Modern implements SqlBean {
         return withPoEl;
     }
 
-    private void setTarget(Object target) {
-        this.target = target;
-    }
-
-    String parse(Map<String, FieldMapper> fieldMapper, List<ParameterTranslator> parameters, Map<String, Object> parameterMap) {
+    String parse(Class clazz, List<ParameterTranslator> parameters, Map<String, Object> parameterMap) {
         if (this.getWithPoEl()) {
             String sql = poEl;
             Matcher fieldMatcher = fieldPattern.matcher(this.poEl);
@@ -77,19 +71,19 @@ public class Modern implements SqlBean {
             try {
                 while (fieldMatcher.find()) {
                     fieldName = fieldMatcher.group().substring(1);
-                    sql = sql.replace(fieldMatcher.group(), fieldMapper.get(fieldName).getColumnName());
+                    sql = sql.replace(fieldMatcher.group(), MapperFactory.getRepositoryColumnName(clazz.getName(), fieldName));
                 }
             } catch (NullPointerException e) {
                 throw new CriteriaException(String.format(ErrorMessage.POCKET_ILLEGAL_FIELD_EXCEPTION, fieldName));
             }
             while (valueMatcher.find()) {
-                sql = sql.replace(valueMatcher.group(), "?");
+                sql = sql.replace(valueMatcher.group(), CommonSql.PLACEHOLDER);
                 parameters.add(ParameterTranslator.newInstance(parameterMap.get(valueMatcher.group().substring(1))));
             }
             return sql;
         } else {
             parameters.add(ParameterTranslator.newInstance(this.target));
-            return fieldMapper.get(this.getSource()).getColumnName() + " = ?";
+            return MapperFactory.getRepositoryColumnName(clazz.getName(), this.getSource()) + CommonSql.EQUAL_TO + CommonSql.PLACEHOLDER;
         }
     }
 }

@@ -152,7 +152,6 @@ public class SessionImpl extends AbstractSession {
                     .getUuidGenerator(entityAnnotation.uuidGenerator())
                     .getUuid(entity.getClass(), this);
             reflectUtils.setUuidValue(entity, uuid);
-            // TODO: 重构 --- 程序启动时将所有的属性和数据库字段映射存储到内存中
             Field[] fields = Arrays.stream(reflectUtils.getValueNotNullFields(entity)).filter((field) -> {
                 Join join = field.getAnnotation(Join.class);
                 return join == null || join.columnSurname().trim().length() == 0;

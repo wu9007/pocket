@@ -27,7 +27,7 @@ public @interface Join {
      *
      * @return column sur name
      */
-    String columnSurname() default "";
+    String columnSurname();
 
     /**
      * 业务名称
@@ -48,7 +48,7 @@ public @interface Join {
      *
      * @return join table surname
      */
-    String joinTableSurname() default "";
+    String joinTableSurname();
 
     /**
      * 关联方式

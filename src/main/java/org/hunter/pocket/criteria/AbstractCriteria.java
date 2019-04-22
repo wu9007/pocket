@@ -1,6 +1,5 @@
 package org.hunter.pocket.criteria;
 
-import org.hunter.pocket.annotation.Entity;
 import org.hunter.pocket.config.DatabaseNodeConfig;
 import org.hunter.pocket.utils.FieldTypeStrategy;
 import org.hunter.pocket.utils.ReflectUtils;
@@ -29,7 +28,6 @@ abstract class AbstractCriteria {
     final Class clazz;
     final Connection connection;
     final DatabaseNodeConfig databaseConfig;
-    final String tableName;
 
     final Field[] fields;
     final Field[] childrenFields;
@@ -53,7 +51,6 @@ abstract class AbstractCriteria {
                 .filter(FIND_CHILDREN)
                 .toArray(Field[]::new);
         this.fieldMapper = reflectUtils.getFieldMapperMap(clazz);
-        this.tableName = ((Entity) this.clazz.getAnnotation(Entity.class)).table();
     }
 
     void before() {

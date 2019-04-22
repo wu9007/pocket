@@ -14,4 +14,12 @@ public interface CommonSql {
     String AND = " AND ";
     String ON = " ON ";
     String ORDER_BY = " ORDER BY ";
+
+    String EQUAL_TO = " = ";
+    String DOT = ".";
+    String PLACEHOLDER = "?";
+    String LEFT_BRACKET = "(";
+    String RIGHT_BRACKET = ")";
+    String COMMA = ",";
+    String BLANK_SPACE = " ";
 }

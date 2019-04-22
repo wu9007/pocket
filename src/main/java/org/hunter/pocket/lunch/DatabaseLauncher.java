@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  * @author wujianchuan 2019/1/12
  */
 @Component
-@Order(value = 0)
+@Order(value = -100)
 public class DatabaseLauncher implements CommandLineRunner {
     private final
     DatabaseConfig databaseConfig;

@@ -4,6 +4,7 @@ import org.hunter.pocket.annotation.ManyToOne;
 import org.hunter.pocket.connect.ConnectionManager;
 import org.hunter.pocket.annotation.OneToMany;
 import org.hunter.pocket.config.DatabaseNodeConfig;
+import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.exception.CriteriaException;
 import org.hunter.pocket.model.PocketEntity;
 
@@ -73,8 +74,8 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public int update() {
-        completeSql.append(sqlFactory.getSqlBody(tableName, fields, restrictionsList, modernList, null)
-                .buildUpdateSql(fieldMapper, parameters, parameterMap, databaseConfig));
+        completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList)
+                .buildUpdateSql(parameters, parameterMap, databaseConfig));
         PreparedStatement preparedStatement;
         try {
             preparedStatement = getPreparedStatement();
@@ -97,14 +98,13 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public List listNotCleanRestrictions() {
-        completeSql.append(sqlFactory
-                .getSqlBody(tableName, fields, restrictionsList, null, orderList)
-                .buildSelectSql(fieldMapper, databaseConfig)
+        completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList)
+                .buildSelectSql(databaseConfig)
         );
         if (this.limited()) {
             completeSql.append(" LIMIT ")
                     .append(this.getStart())
-                    .append(", ")
+                    .append(CommonSql.COMMA)
                     .append(this.getLimit());
         }
         PreparedStatement preparedStatement = null;
@@ -145,9 +145,8 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public Object unique() {
-        completeSql.append(sqlFactory
-                .getSqlBody(tableName, fields, restrictionsList, null, orderList)
-                .buildSelectSql(fieldMapper, databaseConfig)
+        completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList)
+                .buildSelectSql(databaseConfig)
         );
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -184,8 +183,8 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public long count() {
-        completeSql.append(sqlFactory.getSqlBody(tableName, fields, restrictionsList, null, null)
-                .buildCountSql(fieldMapper, databaseConfig)
+        completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList)
+                .buildCountSql(databaseConfig)
         );
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -208,8 +207,8 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public long delete() {
-        completeSql.append(sqlFactory.getSqlBody(tableName, fields, restrictionsList, null, null)
-                .buildDeleteSql(fieldMapper, databaseConfig)
+        completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList)
+                .buildDeleteSql(databaseConfig)
         );
         PreparedStatement preparedStatement = null;
         try {
@@ -225,8 +224,8 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public Object max(String fieldName) {
-        completeSql.append(sqlFactory.getSqlBody(tableName, fields, restrictionsList, null, null)
-                .buildMaxSql(fieldMapper, databaseConfig, fieldName)
+        completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList)
+                .buildMaxSql(databaseConfig, fieldName)
         );
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;

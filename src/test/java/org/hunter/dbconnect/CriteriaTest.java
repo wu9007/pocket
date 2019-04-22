@@ -124,7 +124,7 @@ public class CriteriaTest {
     public void test9() {
         Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.equ("code", "C-001"));
-        System.out.println(criteria.max("price"));
+        System.out.println(criteria.max("typeName"));
 
         long count = criteria.add(Restrictions.like("code", "%001%"))
                 .count();
@@ -228,7 +228,11 @@ public class CriteriaTest {
     @Test
     public void test22() {
         Criteria criteria = this.session.createCriteria(Order.class);
-        criteria.add(Restrictions.equ("type", "001")).limit(0,5);
+        criteria.add(Restrictions.equ("typeName", "手机支付"))
+                .add(Restrictions.equ("type", "001"))
+                .add(Sort.asc("typeName"))
+                .add(Sort.asc("type"))
+                .limit(0, 5);
         List<Order> orders = criteria.listNotCleanRestrictions();
         System.out.println(orders.size());
         System.out.println(criteria.count());

@@ -1,5 +1,6 @@
 package org.hunter.pocket.query;
 
+import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.criteria.ParameterTranslator;
 import org.hunter.pocket.exception.QueryException;
 import org.hunter.pocket.utils.FieldTypeStrategy;
@@ -65,7 +66,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
         if (this.limited()) {
             querySQL.append(" LIMIT ")
                     .append(this.getStart())
-                    .append(", ")
+                    .append(CommonSql.COMMA)
                     .append(this.getLimit());
         }
         try {
@@ -103,7 +104,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
     }
 
     private ResultSet execute(String sql) throws SQLException {
-        String executeSql = sql.replaceAll(SQL_PARAMETER_REGEX, "?");
+        String executeSql = sql.replaceAll(SQL_PARAMETER_REGEX, CommonSql.PLACEHOLDER);
         PreparedStatement preparedStatement = this.connection.prepareStatement(executeSql);
         if (this.parameterMap.size() > 0) {
             List<ParameterTranslator> queryParameters = new LinkedList<>();
@@ -130,7 +131,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
         String str = this.sql.replaceAll("\\s*", "");
         String[] columnStrArray = str
                 .substring(str.toUpperCase().indexOf("SELECT") + 7, str.toUpperCase().indexOf("FROM"))
-                .split(",");
+                .split(CommonSql.COMMA);
         return Arrays
                 .stream(columnStrArray)
                 .map(columnStr -> columnStr.substring(columnStr.toUpperCase().indexOf("AS") + 2))
