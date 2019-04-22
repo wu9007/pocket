@@ -23,11 +23,11 @@ public class Sort {
         return new Sort(source, SqlOperateTypes.DESC);
     }
 
-    public String getSource() {
+    String getSource() {
         return source;
     }
 
-    public String getSortType() {
+    String getSortType() {
         return sortType;
     }
 }

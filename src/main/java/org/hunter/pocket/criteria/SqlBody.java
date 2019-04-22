@@ -2,8 +2,10 @@ package org.hunter.pocket.criteria;
 
 import org.hunter.pocket.annotation.Join;
 import org.hunter.pocket.config.DatabaseNodeConfig;
+import org.hunter.pocket.constant.AnnotationType;
 import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.constant.SqlOperateTypes;
+import org.hunter.pocket.model.MapperFactory;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -15,164 +17,120 @@ import java.util.stream.Collectors;
  */
 public class SqlBody {
 
-    private String tableName;
-    private List<String> columnNames;
+    private Class clazz;
     private List<Modern> modernList;
-    private List<Join> tableJoins;
     private List<Restrictions> restrictionsList;
     private List<Sort> orderList;
 
-    private SqlBody(String tableName, List<String> columnNames, List<Join> tableJoins, List<Restrictions> restrictionsList, List<Modern> modernList, List<Sort> orderList) {
-        this.tableName = tableName;
-        this.columnNames = columnNames;
-        this.tableJoins = tableJoins;
+    private SqlBody(Class clazz, List<Restrictions> restrictionsList, List<Modern> modernList, List<Sort> orderList) {
+        this.clazz = clazz;
         this.restrictionsList = restrictionsList;
         this.modernList = modernList;
         this.orderList = orderList;
     }
 
-    public static SqlBody newInstance(String tableName, List<String> columnNames, List<Join> tableJoins, List<Restrictions> restrictions, List<Modern> modernList, List<Sort> orderList) {
-        return new SqlBody(tableName, columnNames, tableJoins, restrictions, modernList, orderList);
+    private SqlBody(List<Restrictions> restrictionsList, List<Modern> modernList, List<Sort> orderList) {
+        this.restrictionsList = restrictionsList;
+        this.modernList = modernList;
+        this.orderList = orderList;
     }
 
-    String buildSelectSql(Map<String, FieldMapper> fieldMapper, DatabaseNodeConfig databaseConfig) {
+    public static SqlBody newInstance(Class clazz, List<Restrictions> restrictions, List<Modern> modernList, List<Sort> orderList) {
+        return new SqlBody(clazz, restrictions, modernList, orderList);
+    }
+
+    public static SqlBody newInstance(List<Restrictions> restrictions, List<Modern> modernList, List<Sort> orderList) {
+        return new SqlBody(restrictions, modernList, orderList);
+    }
+
+    String buildSelectSql(DatabaseNodeConfig databaseConfig) {
         return CommonSql.SELECT +
                 this.parseColumnSql() +
                 CommonSql.FROM +
-                this.tableName +
+                MapperFactory.getTableName(clazz.getName()) +
                 this.parseJoinSql() +
-                this.parseRestrictionsSql(fieldMapper, databaseConfig) +
-                this.parseOrderSql(fieldMapper);
+                this.parseRestrictionsSql(databaseConfig) +
+                this.parseOrderSql();
     }
 
-    String buildUpdateSql(Map<String, FieldMapper> fieldMapper, List<ParameterTranslator> parameters, Map<String, Object> parameterMap, DatabaseNodeConfig databaseConfig) {
+    String buildUpdateSql(List<ParameterTranslator> parameters, Map<String, Object> parameterMap, DatabaseNodeConfig databaseConfig) {
         return CommonSql.UPDATE +
-                this.tableName +
+                MapperFactory.getTableName(clazz.getName()) +
                 CommonSql.SET +
-                this.parserModernSql(fieldMapper, parameters, parameterMap) +
-                this.parseRestrictionsSql(fieldMapper, databaseConfig);
+                this.parserModernSql(parameters, parameterMap) +
+                this.parseRestrictionsSql(databaseConfig);
 
     }
 
-    String buildCountSql(Map<String, FieldMapper> fieldMapper, DatabaseNodeConfig databaseConfig) {
+    String buildCountSql(DatabaseNodeConfig databaseConfig) {
         return CommonSql.SELECT +
                 SqlOperateTypes.COUNT +
                 "(0)" +
                 CommonSql.FROM +
-                this.tableName +
-                this.parseRestrictionsSql(fieldMapper, databaseConfig);
+                MapperFactory.getTableName(clazz.getName()) +
+                this.parseJoinSql() +
+                this.parseRestrictionsSql(databaseConfig);
     }
 
-    String buildDeleteSql(Map<String, FieldMapper> fieldMapper, DatabaseNodeConfig databaseConfig) {
+    String buildDeleteSql(DatabaseNodeConfig databaseConfig) {
         return CommonSql.DELETE +
                 CommonSql.FROM +
-                this.tableName +
-                this.parseRestrictionsSql(fieldMapper, databaseConfig);
+                MapperFactory.getTableName(clazz.getName()) +
+                this.parseRestrictionsSql(databaseConfig);
     }
 
-    String buildMaxSql(Map<String, FieldMapper> fieldMapper, DatabaseNodeConfig databaseConfig, String fieldName) {
+    String buildMaxSql(DatabaseNodeConfig databaseConfig, String fieldName) {
+        String columnName;
+        if (AnnotationType.JOIN.equals(MapperFactory.getAnnotationType(clazz.getName(), fieldName))) {
+            Join join = (Join) MapperFactory.getAnnotation(clazz.getName(), fieldName);
+            columnName = join.joinTableSurname() + CommonSql.DOT + join.destinationColumn();
+        } else {
+            columnName = MapperFactory.getTableName(this.clazz.getName()) + CommonSql.DOT + MapperFactory.getRepositoryColumnName(this.clazz.getName(), fieldName);
+        }
         return CommonSql.SELECT +
                 SqlOperateTypes.MAX +
-                "(" + fieldMapper.get(fieldName).getColumnName() + ")" +
+                CommonSql.LEFT_BRACKET + columnName + CommonSql.RIGHT_BRACKET +
                 CommonSql.FROM +
-                this.tableName +
-                this.parseRestrictionsSql(fieldMapper, databaseConfig);
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
-    public List<String> getColumnNames() {
-        return columnNames;
-    }
-
-    public void setColumnNames(List<String> columnNames) {
-        this.columnNames = columnNames;
-    }
-
-    public List<Modern> getModernList() {
-        return modernList;
-    }
-
-    public void setModernList(List<Modern> modernList) {
-        this.modernList = modernList;
-    }
-
-    public List<Join> getTableJoins() {
-        return tableJoins;
-    }
-
-    public void setTableJoins(List<Join> tableJoins) {
-        this.tableJoins = tableJoins;
-    }
-
-    public List<Restrictions> getRestrictionsList() {
-        return restrictionsList;
-    }
-
-    public void setRestrictionsList(List<Restrictions> restrictionsList) {
-        this.restrictionsList = restrictionsList;
-    }
-
-    public List<Sort> getOrderList() {
-        return orderList;
-    }
-
-    public void setOrderList(List<Sort> orderList) {
-        this.orderList = orderList;
+                MapperFactory.getTableName(clazz.getName()) +
+                this.parseJoinSql() +
+                this.parseRestrictionsSql(databaseConfig);
     }
 
     private String parseColumnSql() {
-        return String.join(",", this.columnNames);
+        return String.join(CommonSql.COMMA, MapperFactory.getViewColumnMapper(this.clazz.getName()).values());
     }
 
-    private String parserModernSql(Map<String, FieldMapper> fieldMapper, List<ParameterTranslator> parameters, Map<String, Object> parameterMap) {
+    private String parserModernSql(List<ParameterTranslator> parameters, Map<String, Object> parameterMap) {
         return this.modernList.stream()
-                .map(modern -> modern.parse(fieldMapper, parameters, parameterMap))
-                .collect(Collectors.joining(", "));
+                .map(modern -> modern.parse(this.clazz, parameters, parameterMap))
+                .collect(Collectors.joining(CommonSql.COMMA));
     }
 
     private String parseJoinSql() {
-        return this.tableJoins.stream()
-                .map(join -> {
-                    String joinTableSurname = join.joinTableSurname().trim();
-                    return new StringBuilder(join
-                            .joinMethod().getId())
-                            .append(" ")
-                            .append(join.joinTable())
-                            .append(" ")
-                            .append(joinTableSurname)
-                            .append(CommonSql.ON)
-                            .append(this.tableName)
-                            .append(".")
-                            .append(join.columnName())
-                            .append(" = ")
-                            .append(joinTableSurname.length() > 0 ? joinTableSurname : join.joinTable())
-                            .append(".")
-                            .append(join.bridgeColumn());
-                })
-                .collect(Collectors.joining());
+        return String.join(CommonSql.BLANK_SPACE, MapperFactory.getJoinSqlList(this.clazz.getName()));
     }
 
-    private String parseRestrictionsSql(Map<String, FieldMapper> fieldMapper, DatabaseNodeConfig databaseConfig) {
+    private String parseRestrictionsSql(DatabaseNodeConfig databaseConfig) {
         List<String> restrictionSqlList = new LinkedList<>();
         for (Restrictions restrictions : this.restrictionsList) {
-            restrictionSqlList.add(restrictions.parseSql(this.tableName, fieldMapper, databaseConfig));
+            restrictionSqlList.add(restrictions.parseSql(this.clazz, databaseConfig));
         }
         return restrictionSqlList.size() > 0 ? CommonSql.WHERE + String.join(CommonSql.AND, restrictionSqlList) : "";
     }
 
-    private String parseOrderSql(Map<String, FieldMapper> fieldMapper) {
+    private String parseOrderSql() {
         if (this.orderList != null && this.orderList.size() > 0) {
             return CommonSql.ORDER_BY +
                     this.orderList.stream()
-                            .map(order -> fieldMapper.get(order.getSource()).getColumnName() + " " + order.getSortType())
-                            .collect(Collectors.joining(","));
+                            .map(order -> {
+                                if (AnnotationType.JOIN.equals(MapperFactory.getAnnotationType(clazz.getName(), order.getSource()))) {
+                                    Join join = (Join) MapperFactory.getAnnotation(this.clazz.getName(), order.getSource());
+                                    return join.columnSurname() + CommonSql.BLANK_SPACE + order.getSortType();
+                                } else {
+                                    return MapperFactory.getRepositoryColumnName(this.clazz.getName(), order.getSource()) + CommonSql.BLANK_SPACE + order.getSortType();
+                                }
+                            })
+                            .collect(Collectors.joining(CommonSql.COMMA));
         } else {
             return "";
         }

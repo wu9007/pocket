@@ -35,16 +35,8 @@ public class ParameterTranslator implements SqlBean {
         return source;
     }
 
-    private void setSource(String source) {
-        this.source = source;
-    }
-
     @Override
     public Object getTarget() {
         return target;
-    }
-
-    private void setTarget(Object target) {
-        this.target = target;
     }
 }

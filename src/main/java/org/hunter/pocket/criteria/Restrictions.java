@@ -1,11 +1,14 @@
 package org.hunter.pocket.criteria;
 
+import org.hunter.pocket.annotation.Join;
 import org.hunter.pocket.config.DatabaseNodeConfig;
+import org.hunter.pocket.constant.AnnotationType;
+import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.constant.SqlOperateTypes;
 import org.hunter.pocket.exception.CriteriaException;
+import org.hunter.pocket.model.MapperFactory;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.hunter.pocket.exception.ErrorMessage.POCKET_ILLEGAL_FIELD_EXCEPTION;
 
@@ -46,11 +49,11 @@ public class Restrictions implements SqlBean {
     }
 
     public static Restrictions lt(String source, Object target) {
-        return new Restrictions(source, SqlOperateTypes.LTE, target);
+        return new Restrictions(source, SqlOperateTypes.LT, target);
     }
 
     public static Restrictions gte(String source, Object target) {
-        return new Restrictions(source, SqlOperateTypes.GT, target);
+        return new Restrictions(source, SqlOperateTypes.GTE, target);
     }
 
     public static Restrictions lte(String source, Object target) {
@@ -69,11 +72,11 @@ public class Restrictions implements SqlBean {
         return new Restrictions(leftRestrictions, SqlOperateTypes.OR, rightRestrictions);
     }
 
-    public String getSource() {
+    String getSource() {
         return source;
     }
 
-    public String getSqlOperate() {
+    String getSqlOperate() {
         return sqlOperate;
     }
 
@@ -104,22 +107,31 @@ public class Restrictions implements SqlBean {
      *
      * @return SQL
      */
-    String parseSql(String tableName, Map<String, FieldMapper> fieldMapper, DatabaseNodeConfig databaseConfig) {
+    String parseSql(Class clazz, DatabaseNodeConfig databaseConfig) {
         StringBuilder sql = new StringBuilder();
         try {
 
             if (this.getLeftRestrictions() == null) {
-                sql.append(tableName)
-                        .append(".")
-                        .append(fieldMapper.get(this.getSource()).getColumnName())
-                        .append(this.sqlFactory.getSql(databaseConfig.getDriverName(), this.getSqlOperate()))
-                        .append("?");
+                if (AnnotationType.JOIN.equals(MapperFactory.getAnnotationType(clazz.getName(), this.getSource()))) {
+                    Join join = (Join) MapperFactory.getAnnotation(clazz.getName(), this.getSource());
+                    sql.append(join.joinTableSurname())
+                            .append(CommonSql.DOT)
+                            .append(join.destinationColumn())
+                            .append(this.sqlFactory.getSql(databaseConfig.getDriverName(), this.getSqlOperate()))
+                            .append(CommonSql.PLACEHOLDER);
+                } else {
+                    sql.append(MapperFactory.getTableName(clazz.getName()))
+                            .append(CommonSql.DOT)
+                            .append(MapperFactory.getRepositoryColumnName(clazz.getName(), this.getSource()))
+                            .append(this.sqlFactory.getSql(databaseConfig.getDriverName(), this.getSqlOperate()))
+                            .append(CommonSql.PLACEHOLDER);
+                }
             } else {
-                sql.append("(")
-                        .append(this.getLeftRestrictions().parseSql(tableName, fieldMapper, databaseConfig))
+                sql.append(CommonSql.LEFT_BRACKET)
+                        .append(this.getLeftRestrictions().parseSql(clazz, databaseConfig))
                         .append(this.sqlFactory.getSql(databaseConfig.getDriverName(), this.getSqlOperate()))
-                        .append(this.getRightRestrictions().parseSql(tableName, fieldMapper, databaseConfig))
-                        .append(")");
+                        .append(this.getRightRestrictions().parseSql(clazz, databaseConfig))
+                        .append(CommonSql.RIGHT_BRACKET);
             }
         } catch (NullPointerException e) {
             throw new CriteriaException(String.format(POCKET_ILLEGAL_FIELD_EXCEPTION, this.getSource()));

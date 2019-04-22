@@ -2,6 +2,7 @@ package org.hunter.pocket.session;
 
 import org.hunter.pocket.config.DatabaseConfig;
 import org.hunter.pocket.config.DatabaseNodeConfig;
+import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.constant.DatasourceDriverTypes;
 import org.hunter.pocket.cache.BaseCacheUtils;
 import org.hunter.pocket.exception.SessionException;
@@ -24,7 +25,7 @@ public class SessionFactory {
         SessionFactory.baseCacheUtils = cacheUtils;
         databaseConfig.getNode().forEach(databaseNodeConfig -> {
             if (DatasourceDriverTypes.MYSQL_DRIVER.equals(databaseNodeConfig.getDriverName()) || DatasourceDriverTypes.ORACLE_DRIVER.equals(databaseNodeConfig.getDriverName())) {
-                Arrays.stream(databaseNodeConfig.getSession().split(","))
+                Arrays.stream(databaseNodeConfig.getSession().split(CommonSql.COMMA))
                         .forEach(sessionName -> {
                             if (!NODE_POOL.containsKey(sessionName)) {
                                 NODE_POOL.put(sessionName, databaseNodeConfig);

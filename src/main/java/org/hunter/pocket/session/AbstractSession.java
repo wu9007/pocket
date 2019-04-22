@@ -2,6 +2,7 @@ package org.hunter.pocket.session;
 
 import org.hunter.pocket.annotation.Entity;
 import org.hunter.pocket.config.DatabaseNodeConfig;
+import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.model.PocketEntity;
 import org.hunter.pocket.cache.BaseCacheUtils;
 import org.hunter.pocket.utils.ReflectUtils;
@@ -12,7 +13,6 @@ import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.List;
-import java.util.stream.IntStream;
 
 /**
  * @author wujianchuan 2019/1/9
@@ -63,11 +63,11 @@ abstract class AbstractSession implements Session {
         StringBuilder sql = new StringBuilder("INSERT INTO ")
                 .append(entityAnnotation.table())
                 .append("(")
-                .append(String.join(", ", columns))
+                .append(String.join(CommonSql.COMMA, columns))
                 .append(") ");
-        columns.replaceAll(column -> "?");
+        columns.replaceAll(column -> CommonSql.PLACEHOLDER);
         StringBuilder valuesSql = new StringBuilder("VALUES(")
-                .append(String.join(", ", columns))
+                .append(String.join(CommonSql.COMMA, columns))
                 .append(") ");
         sql.append(valuesSql);
         return sql.toString();

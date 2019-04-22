@@ -5,6 +5,7 @@ import org.hunter.pocket.annotation.Entity;
 import org.hunter.pocket.annotation.Join;
 import org.hunter.pocket.annotation.ManyToOne;
 import org.hunter.pocket.annotation.OneToMany;
+import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.criteria.FieldMapper;
 import org.hunter.pocket.exception.CriteriaException;
 import org.hunter.pocket.model.PocketEntity;
@@ -110,7 +111,7 @@ public class ReflectUtils {
     public Field[] getMappingFields(Class clazz) {
         Field[] superFields = Arrays.stream(clazz.getSuperclass().getDeclaredFields()).filter(FIND_MAPPING_FILTER).toArray(Field[]::new);
         Field[] fields = Arrays.stream(clazz.getDeclaredFields()).filter(FIND_MAPPING_FILTER).toArray(Field[]::new);
-        return (Field[]) this.combinedField(superFields, fields);
+        return (Field[]) CommonUtils.combinedArray(superFields, fields);
     }
 
     /**
@@ -122,7 +123,7 @@ public class ReflectUtils {
     public Field[] getFields(Class clazz) {
         Field[] superFields = Arrays.stream(clazz.getSuperclass().getDeclaredFields()).filter(field -> !SERIAL_VERSION_UID.equals(field.getName())).toArray(Field[]::new);
         Field[] fields = Arrays.stream(clazz.getDeclaredFields()).filter(field -> !SERIAL_VERSION_UID.equals(field.getName())).toArray(Field[]::new);
-        return (Field[]) this.combinedField(superFields, fields);
+        return (Field[]) CommonUtils.combinedArray(superFields, fields);
     }
 
     /**
@@ -230,26 +231,11 @@ public class ReflectUtils {
     public String getColumnPlaceholder(Field[] fields) {
         StringBuilder sql = new StringBuilder();
         for (int index = 0; index < fields.length; index++) {
-            sql.append("?");
+            sql.append(CommonSql.PLACEHOLDER);
             if (index < fields.length - 1) {
-                sql.append(", ");
+                sql.append(CommonSql.COMMA);
             }
         }
         return sql.toString();
-    }
-
-    /**
-     * 数组合并
-     *
-     * @param head 头数组
-     * @param tail 尾数组
-     * @return 合并后的数组
-     */
-    private Object[] combinedField(Object[] head, Object[] tail) {
-        int headLength = head.length;
-        int tailLength = tail.length;
-        head = Arrays.copyOf(head, headLength + tailLength);
-        System.arraycopy(tail, 0, head, headLength, tailLength);
-        return head;
     }
 }

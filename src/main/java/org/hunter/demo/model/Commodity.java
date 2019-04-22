@@ -19,7 +19,7 @@ public class Commodity extends BaseEntity {
     private String name;
     @Column(name = "PRICE")
     private BigDecimal price;
-    @Join(columnName = "TYPE", businessName = "订单支付方式", joinTable = "TBL_ORDER_TYPE", joinMethod = JoinMethod.LEFT, bridgeColumn = "UUID", destinationColumn = "NAME")
+    @Join(columnName = "TYPE", columnSurname = "TYPE_NAME", businessName = "订单支付方式", joinTable = "TBL_ORDER_TYPE", joinTableSurname = "T1", joinMethod = JoinMethod.LEFT, bridgeColumn = "UUID", destinationColumn = "NAME")
     private String type;
 
     @ManyToOne(columnName = "ORDER_UUID", clazz = Order.class, upBridgeField = "uuid")
