@@ -153,7 +153,7 @@ public class FieldTypeStrategy {
                 if (object == null) {
                     return null;
                 } else {
-                    return (int) object != 0;
+                    return (long) object != 0;
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
