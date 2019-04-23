@@ -6,6 +6,7 @@ import org.hunter.pocket.annotation.OneToMany;
 import org.hunter.pocket.config.DatabaseNodeConfig;
 import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.exception.CriteriaException;
+import org.hunter.pocket.model.MapperFactory;
 import org.hunter.pocket.model.PocketEntity;
 
 import java.io.Serializable;
@@ -22,8 +23,6 @@ import java.util.List;
  * @author wujianchuan 2019/1/10
  */
 public class CriteriaImpl extends AbstractCriteria implements Criteria {
-
-    private final SqlFactory sqlFactory = SqlFactory.getInstance();
 
     public CriteriaImpl(Class clazz, Connection connection, DatabaseNodeConfig databaseConfig) {
         super(clazz, connection, databaseConfig);
@@ -116,8 +115,8 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
             while (resultSet.next()) {
                 PocketEntity entity = (PocketEntity) clazz.newInstance();
-                for (Field field : this.fields) {
-                    field.set(entity, this.fieldTypeStrategy.getMappingColumnValue(field, resultSet));
+                for (Field field : MapperFactory.getViewFields(clazz.getName())) {
+                    field.set(entity, this.fieldTypeStrategy.getMappingColumnValue(clazz, field, resultSet));
                 }
                 result.add(entity);
             }
@@ -156,8 +155,8 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 entity = (PocketEntity) clazz.newInstance();
-                for (Field field : this.fields) {
-                    field.set(entity, this.fieldTypeStrategy.getMappingColumnValue(field, resultSet));
+                for (Field field : MapperFactory.getViewFields(clazz.getName())) {
+                    field.set(entity, this.fieldTypeStrategy.getMappingColumnValue(clazz, field, resultSet));
                 }
             } else {
                 return null;

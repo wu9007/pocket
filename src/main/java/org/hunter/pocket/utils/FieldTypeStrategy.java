@@ -1,12 +1,10 @@
 package org.hunter.pocket.utils;
 
-import org.hunter.pocket.annotation.Column;
-import org.hunter.pocket.annotation.Join;
-import org.hunter.pocket.annotation.ManyToOne;
 import org.hunter.pocket.criteria.Modern;
 import org.hunter.pocket.criteria.ParameterTranslator;
 import org.hunter.pocket.criteria.Restrictions;
 import org.hunter.pocket.criteria.SqlBean;
+import org.hunter.pocket.model.MapperFactory;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -39,6 +37,7 @@ public class FieldTypeStrategy {
             this.restrictions = restrictions;
         }
 
+        @Deprecated
         PreparedSupplierValue(PreparedStatement preparedStatement, Integer index, Modern modern) {
             this.preparedStatement = preparedStatement;
             this.index = index;
@@ -337,23 +336,9 @@ public class FieldTypeStrategy {
         return RESULT_STRATEGY_POOL.get(field.getType().getName()).apply(resultSet, field.getName());
     }
 
-    public Object getMappingColumnValue(Field field, ResultSet resultSet) {
-        Column column = field.getAnnotation(Column.class);
-        ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);
-        Join join = field.getAnnotation(Join.class);
-        String columnName;
-        if (column != null) {
-            columnName = column.name();
-        } else if (manyToOne != null) {
-            columnName = manyToOne.columnName();
-        } else if (join != null) {
-            String columnSurname = join.columnSurname().trim();
-            columnName = columnSurname.length() > 0 ? columnSurname : join.columnName();
-        } else {
-            throw new NullPointerException("未找到注解");
-        }
+    public Object getMappingColumnValue(Class clazz, Field field, ResultSet resultSet) {
         field.setAccessible(true);
-        return RESULT_STRATEGY_POOL.get(field.getType().getName()).apply(resultSet, columnName);
+        return RESULT_STRATEGY_POOL.get(field.getType().getName()).apply(resultSet, MapperFactory.getViewColumnName(clazz.getName(), field.getName()));
     }
 
     public void setPreparedStatement(PreparedStatement preparedStatement, List<ParameterTranslator> parameters, List<Restrictions> restrictionsList) {

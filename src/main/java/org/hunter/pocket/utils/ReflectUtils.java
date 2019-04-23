@@ -7,12 +7,11 @@ import org.hunter.pocket.annotation.ManyToOne;
 import org.hunter.pocket.annotation.OneToMany;
 import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.criteria.FieldMapper;
-import org.hunter.pocket.exception.CriteriaException;
+import org.hunter.pocket.model.MapperFactory;
 import org.hunter.pocket.model.PocketEntity;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,7 +28,6 @@ public class ReflectUtils {
     private static final String SERIAL_VERSION_UID = "serialVersionUID";
     private static final Predicate<Field> FIND_MAPPING_FILTER = field -> !SERIAL_VERSION_UID.equals(field.getName()) && (field.getAnnotation(Column.class) != null || field.getAnnotation(ManyToOne.class) != null || field.getAnnotation(Join.class) != null);
     public static final Predicate<Field> FIND_CHILDREN = field -> !SERIAL_VERSION_UID.equals(field.getName()) && field.getAnnotation(OneToMany.class) != null;
-    public static final Predicate<Field> FIND_PARENT = field -> !SERIAL_VERSION_UID.equals(field.getName()) && field.getAnnotation(ManyToOne.class) != null;
 
     private static final Function<Field, FieldMapper> MAP_FIELD_MAPPER = field -> {
         Column column = field.getAnnotation(Column.class);
@@ -59,6 +57,7 @@ public class ReflectUtils {
      * @param clazz 类类型
      * @return 表名
      */
+    @Deprecated
     public Entity getEntityAnnotation(Class clazz) {
         return (Entity) clazz.getAnnotation(Entity.class);
     }
@@ -109,7 +108,8 @@ public class ReflectUtils {
      * @param clazz 实体类
      * @return 需持久化的属性
      */
-    public Field[] getMappingFields(Class clazz) {
+    @Deprecated
+    private Field[] getMappingFields(Class clazz) {
         Field[] superFields = Arrays.stream(clazz.getSuperclass().getDeclaredFields()).filter(FIND_MAPPING_FILTER).toArray(Field[]::new);
         Field[] fields = Arrays.stream(clazz.getDeclaredFields()).filter(FIND_MAPPING_FILTER).toArray(Field[]::new);
         return (Field[]) CommonUtils.combinedArray(superFields, fields);
@@ -133,6 +133,7 @@ public class ReflectUtils {
      * @param clazz 类类型
      * @return 映射数组
      */
+    @Deprecated
     public Map<String, FieldMapper> getFieldMapperMap(Class clazz) {
         Map<String, FieldMapper> fieldMapper = Arrays.stream(clazz.getDeclaredFields())
                 .filter(FIND_MAPPING_FILTER)
@@ -155,7 +156,7 @@ public class ReflectUtils {
      * @return 需要更新的属性
      */
     public Field[] dirtyFieldFilter(Object modern, Object older) {
-        Field[] fields = this.getMappingFields(modern.getClass());
+        Field[] fields = MapperFactory.getRepositoryFields(modern.getClass().getName());
         return Arrays.stream(fields)
                 .filter(field -> {
                     try {
@@ -163,7 +164,7 @@ public class ReflectUtils {
                         Object modernValue = field.get(modern);
                         Object olderValue = field.get(older);
                         if (olderValue instanceof Number) {
-                            return ((Comparable) modernValue).compareTo((Comparable) olderValue) != 0;
+                            return ((Comparable) modernValue).compareTo(olderValue) != 0;
                         }
                         return modernValue == null && olderValue != null || olderValue == null && modernValue != null || modernValue != null && !modernValue.equals(olderValue);
                     } catch (IllegalAccessException e) {
@@ -180,6 +181,7 @@ public class ReflectUtils {
      * @param fields 属性
      * @return 以逗号隔开的列名
      */
+    @Deprecated
     public List getColumnNames(Field[] fields) {
         List<String> columnNames = new LinkedList<>();
         for (Field field : fields) {
@@ -207,6 +209,7 @@ public class ReflectUtils {
      * @param entity 实体
      * @return 以逗号隔开的列名
      */
+    @Deprecated
     public Field[] getValueNotNullFields(PocketEntity entity) {
         Field[] fields = this.getMappingFields(entity.getClass());
         List<Field> valueNotNullFields = new LinkedList<>();

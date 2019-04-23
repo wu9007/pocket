@@ -50,26 +50,20 @@ public class SessionTest {
         order.setDay(new Date());
         this.session.saveVariable(order);
         this.session.save(order);
-    }
-
-    @Test
-    public void test2() throws SQLException {
-        Order order = (Order) session.findOne(Order.class, 10110180);
-        order.setState(null);
-        order.setPrice(new BigDecimal("100.96"));
-        order.setDay(new Date());
-        order.setType("002");
-        session.update(order);
-    }
-
-    @Test
-    public void test3() throws SQLException {
-        Order order = (Order) session.findOne(Order.class, 10110180);
         session.delete(order);
     }
 
     @Test
-    public void test4() throws Exception {
+    public void test2() throws SQLException {
+        Order order = (Order) session.findOne(Order.class, 10110194);
+        order.setState(null);
+        order.setPrice(new BigDecimal("120.96"));
+        order.setType("001");
+        session.update(order);
+    }
+
+    @Test
+    public void test3() throws Exception {
         long uuid = session.getMaxUuid(101, Order.class);
         System.out.println(uuid);
     }

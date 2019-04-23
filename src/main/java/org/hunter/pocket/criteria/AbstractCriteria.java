@@ -29,9 +29,7 @@ abstract class AbstractCriteria {
     final Connection connection;
     final DatabaseNodeConfig databaseConfig;
 
-    final Field[] fields;
     final Field[] childrenFields;
-    final Map<String, FieldMapper> fieldMapper;
     List<Restrictions> restrictionsList = new LinkedList<>();
     List<Restrictions> sortedRestrictionsList = new LinkedList<>();
     List<Modern> modernList = new LinkedList<>();
@@ -46,11 +44,9 @@ abstract class AbstractCriteria {
         this.clazz = clazz;
         this.connection = connection;
         this.databaseConfig = databaseConfig;
-        this.fields = reflectUtils.getMappingFields(clazz);
         this.childrenFields = Arrays.stream(clazz.getDeclaredFields())
                 .filter(FIND_CHILDREN)
                 .toArray(Field[]::new);
-        this.fieldMapper = reflectUtils.getFieldMapperMap(clazz);
     }
 
     void before() {
@@ -65,7 +61,7 @@ abstract class AbstractCriteria {
     void cleanWithoutRestrictions() {
         modernList = new LinkedList<>();
         orderList = new LinkedList<>();
-        parameterMap = new HashMap<>();
+        parameterMap = new HashMap<>(16);
         parameters = new LinkedList<>();
         start = null;
         limit = null;
