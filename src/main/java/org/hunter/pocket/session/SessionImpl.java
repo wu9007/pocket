@@ -182,8 +182,8 @@ public class SessionImpl extends AbstractSession {
                 } finally {
                     ConnectionManager.closeIO(preparedStatement, null);
                 }
+                this.removeCache(entity);
             }
-            this.removeCache(entity);
         }
         return effectRow;
     }

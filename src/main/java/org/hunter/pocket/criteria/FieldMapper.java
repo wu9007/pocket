@@ -6,8 +6,8 @@ import java.lang.reflect.Field;
  * @author wujianchuan 2019/1/14
  */
 public class FieldMapper {
-    private String fieldName;
-    private String columnName;
+    private final String fieldName;
+    private final String columnName;
     private Field field;
 
     private FieldMapper(String fieldName, String columnName, Field field) {
@@ -30,7 +30,7 @@ public class FieldMapper {
         return fieldName;
     }
 
-    String getColumnName() {
+    private String getColumnName() {
         return columnName;
     }
 

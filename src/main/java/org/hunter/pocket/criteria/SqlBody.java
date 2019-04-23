@@ -18,9 +18,9 @@ import java.util.stream.Collectors;
 public class SqlBody {
 
     private Class clazz;
-    private List<Modern> modernList;
-    private List<Restrictions> restrictionsList;
-    private List<Sort> orderList;
+    private final List<Modern> modernList;
+    private final List<Restrictions> restrictionsList;
+    private final List<Sort> orderList;
 
     private SqlBody(Class clazz, List<Restrictions> restrictionsList, List<Modern> modernList, List<Sort> orderList) {
         this.clazz = clazz;
@@ -97,7 +97,7 @@ public class SqlBody {
     }
 
     private String parseColumnSql() {
-        return String.join(CommonSql.COMMA, MapperFactory.getViewColumnMapper(this.clazz.getName()).values());
+        return String.join(CommonSql.COMMA, MapperFactory.getViewColumnMapperWithAs(this.clazz.getName()).values());
     }
 
     private String parserModernSql(List<ParameterTranslator> parameters, Map<String, Object> parameterMap) {

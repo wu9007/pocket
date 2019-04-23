@@ -8,10 +8,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class UuidGeneratorFactory {
     private static final Map<String, UuidGenerator> GENERATOR_POOL = new ConcurrentHashMap<>(6);
-    private static final UuidGeneratorFactory ourInstance = new UuidGeneratorFactory();
+    private static final UuidGeneratorFactory OUR_INSTANCE = new UuidGeneratorFactory();
 
     public static UuidGeneratorFactory getInstance() {
-        return ourInstance;
+        return OUR_INSTANCE;
     }
 
     private UuidGeneratorFactory() {

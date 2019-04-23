@@ -8,7 +8,7 @@ import org.hunter.pocket.exception.QueryException;
  */
 public class ParameterTranslator implements SqlBean {
     private String source;
-    private Object target;
+    private final Object target;
 
     private ParameterTranslator(String source, Object target) {
         this.source = source;
