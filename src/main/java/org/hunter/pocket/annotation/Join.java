@@ -37,6 +37,13 @@ public @interface Join {
     String businessName() default "";
 
     /**
+     * 关键业务
+     *
+     * @return flag business
+     */
+    boolean flagBusiness() default false;
+
+    /**
      * 关联的数据库表
      *
      * @return Join Table

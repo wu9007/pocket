@@ -37,8 +37,9 @@ class EntityMapper {
     private Map<String, String> viewColumnMapperWithTableAs;
     private Map<String, String> viewColumnMapper;
 
-    private Field[] businessFields;
-    private Map<String, BusinessMapper> businessMapperMap;
+    private Field[] commonBusinessFields;
+    private Field[] keyBusinessFields;
+    private Map<String, String> businessMapper;
     private List<String> joinSqlList;
 
     int getTableId() {
@@ -85,18 +86,22 @@ class EntityMapper {
         return joinSqlList;
     }
 
-    public Field[] getBusinessFields() {
-        return businessFields;
+    Field[] getCommonBusinessFields() {
+        return commonBusinessFields;
     }
 
-    public Map<String, BusinessMapper> getBusinessMapperMap() {
-        return businessMapperMap;
+    Field[] getKeyBusinessFields() {
+        return keyBusinessFields;
+    }
+
+    Map<String, String> getBusinessMapper() {
+        return businessMapper;
     }
 
     private EntityMapper(int tableId, String tableName, String uuidGenerator, Map<String, AnnotationMapper> fieldMapper,
                          Field[] repositoryFields, List<String> repositoryColumnNames, Map<String, String> repositoryColumnMapper,
                          Field[] viewFields, Map<String, String> viewColumnMapperWithTableAs, Map<String, String> viewColumnMapper,
-                         Field[] businessFields, Map<String, BusinessMapper> businessMapperMap, List<String> joinSqlList) {
+                         Field[] commonBusinessFields, Field[] keyBusinessFields, Map<String, String> businessMapper, List<String> joinSqlList) {
         this.tableId = tableId;
         this.tableName = tableName;
         this.uuidGenerator = uuidGenerator;
@@ -107,8 +112,9 @@ class EntityMapper {
         this.viewFields = viewFields;
         this.viewColumnMapperWithTableAs = viewColumnMapperWithTableAs;
         this.viewColumnMapper = viewColumnMapper;
-        this.businessFields = businessFields;
-        this.businessMapperMap = businessMapperMap;
+        this.commonBusinessFields = commonBusinessFields;
+        this.keyBusinessFields = keyBusinessFields;
+        this.businessMapper = businessMapper;
         this.joinSqlList = joinSqlList;
     }
 
@@ -139,8 +145,9 @@ class EntityMapper {
         List<Field> viewFields = new LinkedList<>();
         Map<String, String> viewColumnMapperWithTableAs = new LinkedHashMap<>(16);
         Map<String, String> viewColumnMapper = new LinkedHashMap<>(16);
-        List<Field> businessFields = new LinkedList<>();
-        Map<String, BusinessMapper> businessMapperMap = new LinkedHashMap<>(16);
+        List<Field> commonBusinessFields = new LinkedList<>();
+        List<Field> keyBusinessFields = new LinkedList<>();
+        Map<String, String> businessMapper = new LinkedHashMap<>(16);
         List<String> joinSqlList = new LinkedList<>();
 
         for (Field field : withAnnotationFields) {
@@ -158,10 +165,7 @@ class EntityMapper {
                 viewFields.add(field);
                 viewColumnMapperWithTableAs.put(filedName, tableName + CommonSql.DOT + column.name());
                 viewColumnMapper.put(filedName, column.name());
-                if (column.businessName().trim().length() > 0) {
-                    businessFields.add(field);
-                    businessMapperMap.put(filedName, new BusinessMapper(column.businessName(), column.flag()));
-                }
+                pushBusiness(commonBusinessFields, keyBusinessFields, businessMapper, field, filedName, column.businessName(), column.flagBusiness());
             } else if (join != null) {
                 String bridgeColumnSurname = join.columnSurname().trim();
                 String joinTableSurname = join.joinTableSurname().trim();
@@ -181,16 +185,10 @@ class EntityMapper {
                         + tableName + CommonSql.DOT + join.columnName()
                         + CommonSql.EQUAL_TO
                         + joinTableSurname + CommonSql.DOT + bridgeColumnName);
-                if (join.businessName().trim().length() > 0) {
-                    businessFields.add(field);
-                    businessMapperMap.put(filedName, new BusinessMapper(join.businessName(), false));
-                }
+                pushBusiness(commonBusinessFields, keyBusinessFields, businessMapper, field, filedName, join.businessName(), join.flagBusiness());
             } else if (oneToMany != null) {
                 fieldMapper.put(filedName, new AnnotationMapper(AnnotationType.ONE_TO_MANY, oneToMany));
-                if (oneToMany.businessName().trim().length() > 0) {
-                    businessFields.add(field);
-                    businessMapperMap.put(filedName, new BusinessMapper(oneToMany.businessName(), false));
-                }
+                pushBusiness(commonBusinessFields, keyBusinessFields, businessMapper, field, filedName, oneToMany.businessName(), oneToMany.flagBusiness());
             } else if (manyToOne != null) {
                 fieldMapper.put(filedName, new AnnotationMapper(AnnotationType.MANY_TO_ONE, manyToOne));
                 repositoryFields.add(field);
@@ -204,7 +202,18 @@ class EntityMapper {
         return new EntityMapper(tableId, tableName, uuidGenerator, fieldMapper,
                 repositoryFields.toArray(new Field[0]), repositoryColumnNames, repositoryColumnMapper,
                 viewFields.toArray(new Field[0]), viewColumnMapperWithTableAs, viewColumnMapper,
-                businessFields.toArray(new Field[0]), businessMapperMap, joinSqlList);
+                commonBusinessFields.toArray(new Field[0]), keyBusinessFields.toArray(new Field[0]), businessMapper, joinSqlList);
+    }
+
+    private static void pushBusiness(List<Field> commonBusinessFields, List<Field> keyBusinessFields, Map<String, String> businessMapper, Field field, String filedName, String businessName, boolean flagBusiness) {
+        if (businessName.trim().length() > 0) {
+            if (flagBusiness) {
+                keyBusinessFields.add(field);
+            } else {
+                commonBusinessFields.add(field);
+            }
+            businessMapper.put(filedName, businessName);
+        }
     }
 
     static class AnnotationMapper {
@@ -222,24 +231,6 @@ class EntityMapper {
 
         public Annotation getAnnotation() {
             return annotation;
-        }
-    }
-
-    static class BusinessMapper {
-        private final String businessName;
-        private final Boolean flag;
-
-        BusinessMapper(String businessName, Boolean flag) {
-            this.businessName = businessName;
-            this.flag = flag;
-        }
-
-        public String getBusinessName() {
-            return businessName;
-        }
-
-        public Boolean getFlag() {
-            return flag;
         }
     }
 }

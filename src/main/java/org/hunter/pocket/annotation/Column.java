@@ -17,5 +17,10 @@ public @interface Column {
 
     String businessName() default "";
 
-    boolean flag() default false;
+    /**
+     * 关键业务
+     *
+     * @return flag business
+     */
+    boolean flagBusiness() default false;
 }

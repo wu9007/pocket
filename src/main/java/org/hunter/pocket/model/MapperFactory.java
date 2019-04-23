@@ -144,13 +144,23 @@ public class MapperFactory {
     }
 
     /**
-     * 获取所有业务相关属性
+     * 获取普通业务相关属性
      *
      * @param className class name
      * @return fields
      */
-    public static Field[] getBusinessFields(String className) {
-        return ENTITY_MAPPER_POOL.get(className).getBusinessFields();
+    public static Field[] getCommonBusinessFields(String className) {
+        return ENTITY_MAPPER_POOL.get(className).getCommonBusinessFields();
+    }
+
+    /**
+     * 获取关键业务相关属性
+     *
+     * @param className class name
+     * @return fields
+     */
+    public static Field[] getKeyBusinessFields(String className) {
+        return ENTITY_MAPPER_POOL.get(className).getKeyBusinessFields();
     }
 
     /**
@@ -161,18 +171,7 @@ public class MapperFactory {
      * @return business name
      */
     public static String getBusinessName(String className, String fieldName) {
-        return ENTITY_MAPPER_POOL.get(className).getBusinessMapperMap().get(fieldName).getBusinessName();
-    }
-
-    /**
-     * 该属性是否关键业务相关的
-     *
-     * @param className class name
-     * @param fieldName field name
-     * @return business flag
-     */
-    public static boolean getBusinessFlag(String className, String fieldName) {
-        return ENTITY_MAPPER_POOL.get(className).getBusinessMapperMap().get(fieldName).getFlag();
+        return ENTITY_MAPPER_POOL.get(className).getBusinessMapper().get(fieldName);
     }
 
     /**

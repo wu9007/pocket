@@ -28,4 +28,11 @@ public @interface OneToMany {
     String bridgeField();
 
     String businessName() default "";
+
+    /**
+     * 关键业务
+     *
+     * @return flag business
+     */
+    boolean flagBusiness() default false;
 }
