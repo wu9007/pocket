@@ -1,5 +1,6 @@
 package org.hunter.pocket.query;
 
+import com.mysql.cj.jdbc.result.ResultSetImpl;
 import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.criteria.ParameterTranslator;
 import org.hunter.pocket.utils.FieldTypeStrategy;
@@ -43,12 +44,12 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
             List<String> columnNames = this.getColumnNames();
             if (clazz != null) {
                 try {
-                    return getEntity(resultSet, columnNames);
+                    return getEntity(resultSet);
                 } catch (InstantiationException | IllegalAccessException e) {
                     throw new IllegalAccessError();
                 }
             } else {
-                return getObjects(resultSet, columnNames.size());
+                return getObjects(resultSet);
             }
         } else {
             return null;
@@ -67,16 +68,15 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
         ResultSet resultSet = execute(querySQL.toString());
         List<Object> results = new ArrayList<>();
         while (resultSet.next()) {
-            List<String> columnNames = this.getColumnNames();
             if (clazz != null) {
                 try {
-                    Object result = getEntity(resultSet, columnNames);
+                    Object result = getEntity(resultSet);
                     results.add(result);
                 } catch (InstantiationException | IllegalAccessException e) {
                     throw new IllegalAccessError();
                 }
             } else {
-                results.add(getObjects(resultSet, columnNames.size()));
+                results.add(getObjects(resultSet));
             }
         }
         return results;
@@ -110,29 +110,37 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
         return preparedStatement.executeQuery();
     }
 
-    private Object[] getObjects(ResultSet resultSet, int columnCount) throws SQLException {
-        Object[] result = new Object[columnCount];
-        for (int index = 1; index <= columnCount; index++) {
-            result[index - 1] = resultSet.getObject(index);
+    private Object[] getObjects(ResultSet resultSet) throws SQLException {
+        int columnSize = ((ResultSetImpl) resultSet).getColumnDefinition().getFields().length;
+        List<Object> result = new LinkedList<>();
+        for (int index = 1; index <= columnSize; index++) {
+            result.add(resultSet.getObject(index++));
         }
-        return result;
+        return result.toArray();
     }
 
     private List<String> getColumnNames() {
         String str = this.sql.replaceAll("\\s*", "");
         String[] columnStrArray = str
-                .substring(str.toUpperCase().indexOf("SELECT") + 7, str.toUpperCase().indexOf("FROM"))
+                .substring(str.toUpperCase().indexOf("SELECT") + 6, str.toUpperCase().indexOf("FROM"))
                 .split(CommonSql.COMMA);
         return Arrays
                 .stream(columnStrArray)
-                .map(columnStr -> columnStr.substring(columnStr.toUpperCase().indexOf("AS") + 2))
+                .map(columnStr -> {
+                    int asIndex = columnStr.toUpperCase().indexOf("AS");
+                    if (asIndex > 0) {
+                        return columnStr.substring(asIndex + 2);
+                    } else {
+                        return columnStr;
+                    }
+                })
                 .collect(Collectors.toList());
     }
 
-    private Object getEntity(ResultSet resultSet, List<String> columnNames) throws InstantiationException, IllegalAccessException {
+    private Object getEntity(ResultSet resultSet) throws InstantiationException, IllegalAccessException {
         Object result = clazz.newInstance();
         List<Field> fields = Arrays.stream(reflectUtils.getFields(clazz))
-                .filter(field -> columnNames.contains(field.getName()))
+                .filter(field -> this.sql.contains(field.getName()))
                 .collect(Collectors.toList());
         for (Field field : fields) {
             field.set(result, fieldTypeStrategy.getColumnValue(field, resultSet));
