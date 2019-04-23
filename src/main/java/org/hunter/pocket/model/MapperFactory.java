@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class MapperFactory {
 
-    private static final AtomicBoolean completed = new AtomicBoolean(false);
+    private static final AtomicBoolean COMPLETED = new AtomicBoolean(false);
     private static final Map<String, EntityMapper> ENTITY_MAPPER_POOL = new ConcurrentHashMap<>();
 
     /**
@@ -144,19 +144,51 @@ public class MapperFactory {
     }
 
     /**
+     * 获取所有业务相关属性
+     *
+     * @param className class name
+     * @return fields
+     */
+    public static Field[] getBusinessFields(String className) {
+        return ENTITY_MAPPER_POOL.get(className).getBusinessFields();
+    }
+
+    /**
+     * 获取属性的业务名称
+     *
+     * @param className class name
+     * @param fieldName field name
+     * @return business name
+     */
+    public static String getBusinessName(String className, String fieldName) {
+        return ENTITY_MAPPER_POOL.get(className).getBusinessMapperMap().get(fieldName).getBusinessName();
+    }
+
+    /**
+     * 该属性是否关键业务相关的
+     *
+     * @param className class name
+     * @param fieldName field name
+     * @return business flag
+     */
+    public static boolean getBusinessFlag(String className, String fieldName) {
+        return ENTITY_MAPPER_POOL.get(className).getBusinessMapperMap().get(fieldName).getFlag();
+    }
+
+    /**
      * 初始化
      *
      * @param context application context
      */
     public static void init(ApplicationContext context) {
-        if (!completed.get()) {
+        if (!COMPLETED.get()) {
             Map<String, Object> beans = context.getBeansWithAnnotation(Entity.class);
             beans.forEach((name, bean) -> {
                 Class clazz = bean.getClass();
                 ENTITY_MAPPER_POOL.put(clazz.getName(), EntityMapper.newInstance(clazz));
             });
 
-            completed.compareAndSet(false, true);
+            COMPLETED.compareAndSet(false, true);
         }
     }
 }
