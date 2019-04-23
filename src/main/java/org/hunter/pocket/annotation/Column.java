@@ -16,4 +16,6 @@ public @interface Column {
     String name();
 
     String businessName() default "";
+
+    boolean flag() default false;
 }

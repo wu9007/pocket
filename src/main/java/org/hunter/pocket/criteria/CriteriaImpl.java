@@ -73,8 +73,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public int update() {
-        completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList)
-                .buildUpdateSql(parameters, parameterMap, databaseConfig));
+        completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildUpdateSql(parameters, parameterMap, databaseConfig));
         PreparedStatement preparedStatement;
         try {
             preparedStatement = getPreparedStatement();
@@ -97,11 +96,9 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public List listNotCleanRestrictions() {
-        completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList)
-                .buildSelectSql(databaseConfig)
-        );
+        completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildSelectSql(databaseConfig));
         if (this.limited()) {
-            completeSql.append(" LIMIT ")
+            completeSql.append(CommonSql.LIMIT)
                     .append(this.getStart())
                     .append(CommonSql.COMMA)
                     .append(this.getLimit());
@@ -144,9 +141,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public Object unique() {
-        completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList)
-                .buildSelectSql(databaseConfig)
-        );
+        completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildSelectSql(databaseConfig));
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         PocketEntity entity;
@@ -182,9 +177,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public long count() {
-        completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList)
-                .buildCountSql(databaseConfig)
-        );
+        completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildCountSql(databaseConfig));
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
 
@@ -206,9 +199,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public long delete() {
-        completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList)
-                .buildDeleteSql(databaseConfig)
-        );
+        completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildDeleteSql(databaseConfig));
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = getPreparedStatement();
@@ -223,9 +214,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public Object max(String fieldName) {
-        completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList)
-                .buildMaxSql(databaseConfig, fieldName)
-        );
+        completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildMaxSql(databaseConfig, fieldName));
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         try {
