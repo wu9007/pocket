@@ -144,13 +144,13 @@ public class MapperFactory {
     }
 
     /**
-     * 获取普通业务相关属性
+     * 获取所有业务相关属性
      *
      * @param className class name
      * @return fields
      */
-    public static Field[] getCommonBusinessFields(String className) {
-        return ENTITY_MAPPER_POOL.get(className).getCommonBusinessFields();
+    public static Field[] getBusinessFields(String className) {
+        return ENTITY_MAPPER_POOL.get(className).getBusinessFields();
     }
 
     /**
