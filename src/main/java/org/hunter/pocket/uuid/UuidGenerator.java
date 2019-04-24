@@ -36,5 +36,5 @@ public interface UuidGenerator {
      * @param session 缓存管理类
      * @return 数据标识
      */
-    Serializable getUuid(Class clazz, Session session) throws SQLException;
+    String getUuid(Class clazz, Session session) throws SQLException;
 }

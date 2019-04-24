@@ -123,20 +123,25 @@ public class SessionImpl extends AbstractSession {
             if (fields.length > 0) {
                 for (Field field : fields) {
                     field.setAccessible(true);
-                    List details = (List) field.get(entity);
+                    List<BaseEntity> details = (List<BaseEntity>) field.get(entity);
                     String mainFieldName = field.getName();
                     String detailListEntityName = MapperFactory.getDetailClassName(mainClassName, mainFieldName);
-                    for (Object detail : details) {
-                        //TODO 放到循环外，有的order_uuid没有附上值
-                        String upBridgeFiledName = MapperFactory.getManyToOneUpField(detailListEntityName, mainClassName);
-                        Field upBridgeField = MapperFactory.getField(mainClassName, upBridgeFiledName);
-                        Object upBridgeFieldValue = upBridgeField.get(entity);
-                        String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, mainFieldName);
-                        Field downBridgeField = MapperFactory.getField(detailListEntityName, downBridgeFieldName);
-                        downBridgeField.setAccessible(true);
-                        downBridgeField.set(detail, upBridgeFieldValue);
-                        effectRow += this.save((BaseEntity) detail, true);
-                    }
+                    String upBridgeFiledName = MapperFactory.getManyToOneUpField(detailListEntityName, mainClassName);
+                    Field upBridgeField = MapperFactory.getField(mainClassName, upBridgeFiledName);
+                    Object upBridgeFieldValue = upBridgeField.get(entity);
+                    String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, mainFieldName);
+                    Field downBridgeField = MapperFactory.getField(detailListEntityName, downBridgeFieldName);
+                    downBridgeField.setAccessible(true);
+                    details.parallelStream().forEach(detail->{
+                        try {
+                            downBridgeField.set(detail, upBridgeFieldValue);
+                            this.save(detail, true);
+                        } catch (IllegalAccessException | SQLException e) {
+                            e.printStackTrace();
+                            throw new RuntimeException(e.getMessage());
+                        }
+                    });
+                    effectRow+=details.size();
                 }
             }
         }

@@ -27,7 +27,7 @@ public class IncrementStrGenerator extends AbstractUuidGenerator {
     }
 
     @Override
-    public synchronized Serializable getUuid(Class clazz, Session session) throws SQLException {
+    public synchronized String getUuid(Class clazz, Session session) throws SQLException {
         int tableId = MapperFactory.getTableId(clazz.getName());
         String mapKey = this.serverId + "_" + tableId;
         String leaderNum = "" + serverId + tableId;

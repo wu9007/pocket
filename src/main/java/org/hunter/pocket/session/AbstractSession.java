@@ -5,14 +5,12 @@ import org.hunter.pocket.connect.ConnectionManager;
 import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.model.BaseEntity;
 import org.hunter.pocket.model.MapperFactory;
-import org.hunter.pocket.model.PocketEntity;
 import org.hunter.pocket.cache.BaseCacheUtils;
 import org.hunter.pocket.utils.ReflectUtils;
 import org.hunter.pocket.uuid.UuidGeneratorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -27,6 +25,7 @@ import java.util.stream.Stream;
  * @author wujianchuan 2019/1/9
  */
 abstract class AbstractSession implements Session {
+    private  static final String SET_UUID_LOCK = "setUUidLock";
 
     private final Logger logger = LoggerFactory.getLogger(AbstractSession.class);
 
@@ -73,17 +72,19 @@ abstract class AbstractSession implements Session {
         int effectRow;
         PreparedStatement preparedStatement = null;
         try {
-            Serializable uuid = UuidGeneratorFactory.getInstance()
+            String uuid = UuidGeneratorFactory.getInstance()
                     .getUuidGenerator(MapperFactory.getUuidGenerator(clazz.getName()))
                     .getUuid(entity.getClass(), this);
-            reflectUtils.setUuidValue(entity, uuid);
-            String sql = notNull ? this.buildSaveSqlNotNull(entity) : this.buildSaveSqlNullable(entity);
-            this.showSql(sql);
-            preparedStatement = this.connection.prepareStatement(sql);
-            if (notNull) {
-                this.statementApplyNotNull(entity, preparedStatement);
-            } else {
-                this.statementApplyNullable(entity, preparedStatement);
+            synchronized (SET_UUID_LOCK) {
+                entity.setUuid(uuid);
+                String sql = notNull ? this.buildSaveSqlNotNull(entity) : this.buildSaveSqlNullable(entity);
+                this.showSql(sql);
+                preparedStatement = this.connection.prepareStatement(sql);
+                if (notNull) {
+                    this.statementApplyNotNull(entity, preparedStatement);
+                } else {
+                    this.statementApplyNullable(entity, preparedStatement);
+                }
             }
             effectRow = preparedStatement.executeUpdate();
         } finally {
@@ -99,7 +100,7 @@ abstract class AbstractSession implements Session {
      * @param entity            entity
      * @param preparedStatement prepared statement
      */
-    void statementApply(Field[] fields, PocketEntity entity, PreparedStatement preparedStatement) {
+    void statementApply(Field[] fields, BaseEntity entity, PreparedStatement preparedStatement) {
         for (int valueIndex = 0; valueIndex < fields.length; valueIndex++) {
             Field field = fields[valueIndex];
             field.setAccessible(true);
@@ -117,7 +118,7 @@ abstract class AbstractSession implements Session {
      * @param entity entity
      * @return sql
      */
-    private String buildSaveSqlNullable(PocketEntity entity) {
+    private String buildSaveSqlNullable(BaseEntity entity) {
         return this.buildSaveSql(entity, false);
     }
 
@@ -127,7 +128,7 @@ abstract class AbstractSession implements Session {
      * @param entity entity
      * @return sql
      */
-    private String buildSaveSqlNotNull(PocketEntity entity) {
+    private String buildSaveSqlNotNull(BaseEntity entity) {
         return this.buildSaveSql(entity, true);
     }
 
@@ -137,7 +138,7 @@ abstract class AbstractSession implements Session {
      * @param entity            entity
      * @param preparedStatement prepared statement
      */
-    private void statementApplyNullable(PocketEntity entity, PreparedStatement preparedStatement) {
+    private void statementApplyNullable(BaseEntity entity, PreparedStatement preparedStatement) {
         this.statementApply(entity, preparedStatement, false);
     }
 
@@ -147,7 +148,7 @@ abstract class AbstractSession implements Session {
      * @param entity            entity
      * @param preparedStatement prepared statement
      */
-    private void statementApplyNotNull(PocketEntity entity, PreparedStatement preparedStatement) {
+    private void statementApplyNotNull(BaseEntity entity, PreparedStatement preparedStatement) {
         this.statementApply(entity, preparedStatement, true);
     }
 
@@ -158,7 +159,7 @@ abstract class AbstractSession implements Session {
      * @param notNull 为空的属性是否纳入保存范围
      * @return sql
      */
-    private String buildSaveSql(PocketEntity entity, boolean notNull) {
+    private String buildSaveSql(BaseEntity entity, boolean notNull) {
         Class clazz = entity.getClass();
         List<String> columns;
         if (notNull) {
@@ -187,7 +188,7 @@ abstract class AbstractSession implements Session {
      * @param preparedStatement prepared statement
      * @param notNull           为空的属性是否纳入保存范围
      */
-    private void statementApply(PocketEntity entity, PreparedStatement preparedStatement, boolean notNull) {
+    private void statementApply(BaseEntity entity, PreparedStatement preparedStatement, boolean notNull) {
         Class clazz = entity.getClass();
         Field[] fields;
         if (notNull) {
@@ -199,7 +200,7 @@ abstract class AbstractSession implements Session {
         this.statementApply(fields, entity, preparedStatement);
     }
 
-    private Stream<Field> validFieldStream(PocketEntity entity) {
+    private Stream<Field> validFieldStream(BaseEntity entity) {
         return Arrays.stream(MapperFactory.getRepositoryFields(entity.getClass().getName()))
                 .filter(field -> {
                     field.setAccessible(true);

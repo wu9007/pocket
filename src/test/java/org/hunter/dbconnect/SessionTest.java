@@ -38,7 +38,7 @@ public class SessionTest {
         commodity.setType("001");
         commodity.setPrice(new BigDecimal("11.2"));
 
-        IntStream.range(1, 2000).forEach((index) -> commodities.add(commodity));
+        IntStream.range(1, 5000).forEach((index) -> commodities.add(commodity));
         this.session = SessionFactory.getSession("homo");
         this.session.open();
         this.transaction = session.getTransaction();
@@ -96,13 +96,14 @@ public class SessionTest {
         order.setPrice(new BigDecimal("120.96"));
         order.setType("001");
         order.setCommodities(commodities);
+        System.out.println(session.save(order));
         commodities.forEach(commodity1 -> {
             try {
+                commodity1.setOrder(order.getUuid());
                 session.save(commodity1);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         });
-        System.out.println(session.save(order));
     }
 }
