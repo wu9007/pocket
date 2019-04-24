@@ -1,6 +1,7 @@
 package org.hunter.pocket.model;
 
 import org.hunter.pocket.annotation.Entity;
+import org.hunter.pocket.annotation.OneToMany;
 import org.hunter.pocket.constant.AnnotationType;
 import org.springframework.context.ApplicationContext;
 
@@ -22,53 +23,64 @@ public class MapperFactory {
     /**
      * 获取表ID
      *
-     * @param classFullName class name
+     * @param className class name
      * @return table id
      */
-    public static int getTableId(String classFullName) {
-        return ENTITY_MAPPER_POOL.get(classFullName).getTableId();
+    public static int getTableId(String className) {
+        return ENTITY_MAPPER_POOL.get(className).getTableId();
     }
 
     /**
      * 获取表名
      *
-     * @param classFullName class name
+     * @param className class name
      * @return table name
      */
-    public static String getTableName(String classFullName) {
-        return ENTITY_MAPPER_POOL.get(classFullName).getTableName();
+    public static String getTableName(String className) {
+        return ENTITY_MAPPER_POOL.get(className).getTableName();
     }
 
     /**
      * 获取主键生成策略
      *
-     * @param classFullName class name
+     * @param className class name
      * @return uuid generator
      */
-    public static String getUuidGenerator(String classFullName) {
-        return ENTITY_MAPPER_POOL.get(classFullName).getUuidGenerator();
+    public static String getUuidGenerator(String className) {
+        return ENTITY_MAPPER_POOL.get(className).getUuidGenerator();
     }
 
     /**
      * 获取属性上的注解类型
      *
-     * @param classFullName class name
-     * @param fieldName     field name
+     * @param className class name
+     * @param fieldName field name
      * @return annotation type
      */
-    public static AnnotationType getAnnotationType(String classFullName, String fieldName) {
-        return ENTITY_MAPPER_POOL.get(classFullName).getFieldMapper().get(fieldName).getAnnotationType();
+    public static AnnotationType getAnnotationType(String className, String fieldName) {
+        return ENTITY_MAPPER_POOL.get(className).getFieldMapper().get(fieldName).getAnnotationType();
     }
 
     /**
      * 获取属性上的注解
      *
-     * @param classFullName class name
-     * @param fieldName     field name
+     * @param className class name
+     * @param fieldName field name
      * @return annotation
      */
-    public static Annotation getAnnotation(String classFullName, String fieldName) {
-        return ENTITY_MAPPER_POOL.get(classFullName).getFieldMapper().get(fieldName).getAnnotation();
+    public static Annotation getAnnotation(String className, String fieldName) {
+        return ENTITY_MAPPER_POOL.get(className).getFieldMapper().get(fieldName).getAnnotation();
+    }
+
+    /**
+     * 获取属性
+     *
+     * @param className class name
+     * @param fieldName field name
+     * @return field
+     */
+    public static Field getField(String className, String fieldName) {
+        return ENTITY_MAPPER_POOL.get(className).getFieldMapper().get(fieldName).getField();
     }
 
     /**
@@ -105,11 +117,11 @@ public class MapperFactory {
     /**
      * 获取外连接关联语句列表
      *
-     * @param classFullName class name
+     * @param className class name
      * @return join sql list
      */
-    public static List<String> getJoinSqlList(String classFullName) {
-        return ENTITY_MAPPER_POOL.get(classFullName).getJoinSqlList();
+    public static List<String> getJoinSqlList(String className) {
+        return ENTITY_MAPPER_POOL.get(className).getJoinSqlList();
     }
 
     /**
@@ -125,11 +137,11 @@ public class MapperFactory {
     /**
      * 获取查询时用到的所有 属性-列名 映射 带有table name 和 as
      *
-     * @param classFullName class name
+     * @param className class name
      * @return field name-column name mapper
      */
-    public static Map<String, String> getViewColumnMapperWithAs(String classFullName) {
-        return ENTITY_MAPPER_POOL.get(classFullName).getViewColumnMapperWithTableAs();
+    public static Map<String, String> getViewColumnMapperWithAs(String className) {
+        return ENTITY_MAPPER_POOL.get(className).getViewColumnMapperWithTableAs();
     }
 
     /**
@@ -172,6 +184,49 @@ public class MapperFactory {
      */
     public static String getBusinessName(String className, String fieldName) {
         return ENTITY_MAPPER_POOL.get(className).getBusinessMapper().get(fieldName);
+    }
+
+    /**
+     * 获取一对多的属性
+     *
+     * @param className class name
+     * @return one to many fields
+     */
+    public static Field[] getOneToMayFields(String className) {
+        return ENTITY_MAPPER_POOL.get(className).getOneToManyFields();
+    }
+
+    /**
+     * 获取子类类型
+     *
+     * @param className main class name
+     * @param fieldName main class field name
+     * @return children class name
+     */
+    public static String getDetailClassName(String className, String fieldName) {
+        return ENTITY_MAPPER_POOL.get(className).getOnToManyClassNameMapper().get(fieldName);
+    }
+
+    /**
+     * 获取对应子类的关联属性的名称
+     *
+     * @param className main class name
+     * @param fieldName main class field name
+     * @return children field name
+     */
+    public static String getOneToMayDownFieldName(String className, String fieldName) {
+        return ENTITY_MAPPER_POOL.get(className).getOneToManyDownMapper().get(fieldName);
+    }
+
+    /**
+     * 获取主表的关联属性
+     *
+     * @param ownClassName own class name
+     * @param upClassName  up class name
+     * @return field name
+     */
+    public static String getManyToOneUpField(String ownClassName, String upClassName) {
+        return ENTITY_MAPPER_POOL.get(ownClassName).getManyToOneUpMapper().get(upClassName);
     }
 
     /**

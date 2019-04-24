@@ -18,6 +18,7 @@ public class StreamPredicates {
                     &&
                     ((field.getAnnotation(Column.class) != null
                             || field.getAnnotation(ManyToOne.class) != null
+                            || field.getAnnotation(OneToMany.class) != null
                             || field.getAnnotation(Join.class) != null
                     ));
     public static final Predicate<Field> CHILDREN_MAPPING_PREDICATE =

@@ -9,13 +9,12 @@ import org.hunter.pocket.criteria.CriteriaImpl;
 import org.hunter.pocket.criteria.Restrictions;
 import org.hunter.pocket.exception.SessionException;
 import org.hunter.pocket.model.MapperFactory;
-import org.hunter.pocket.model.PocketEntity;
+import org.hunter.pocket.model.BaseEntity;
 import org.hunter.pocket.query.ProcessQuery;
 import org.hunter.pocket.query.ProcessQueryImpl;
 import org.hunter.pocket.query.SQLQuery;
 import org.hunter.pocket.query.SQLQueryImpl;
 import org.hunter.pocket.cache.BaseCacheUtils;
-import org.hunter.pocket.uuid.UuidGeneratorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,50 +110,51 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public int save(PocketEntity entity) throws SQLException {
-        Class clazz = entity.getClass();
-        String sql = this.buildSaveSqlNullable(entity);
+    public int save(BaseEntity entity) throws SQLException {
+        return super.saveEntity(entity, false);
+    }
 
-        this.showSql(sql);
-        int effectRow;
-        PreparedStatement preparedStatement = null;
-        try {
-            Serializable uuid = UuidGeneratorFactory.getInstance()
-                    .getUuidGenerator(MapperFactory.getUuidGenerator(clazz.getName()))
-                    .getUuid(entity.getClass(), this);
-            reflectUtils.setUuidValue(entity, uuid);
-            preparedStatement = this.connection.prepareStatement(sql);
-            this.statementApplyNullable(entity, preparedStatement);
-            effectRow = preparedStatement.executeUpdate();
-        } finally {
-            ConnectionManager.closeIO(preparedStatement, null);
+    @Override
+    public int save(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException {
+        int effectRow = this.save(entity);
+        if (cascade) {
+            String mainClassName = entity.getClass().getName();
+            Field[] fields = MapperFactory.getOneToMayFields(mainClassName);
+            if (fields.length > 0) {
+                for (Field field : fields) {
+                    field.setAccessible(true);
+                    List<BaseEntity> details = (List<BaseEntity>) field.get(entity);
+                    String mainFieldName = field.getName();
+                    String detailListEntityName = MapperFactory.getDetailClassName(mainClassName, mainFieldName);
+                    String upBridgeFiledName = MapperFactory.getManyToOneUpField(detailListEntityName, mainClassName);
+                    Field upBridgeField = MapperFactory.getField(mainClassName, upBridgeFiledName);
+                    Object upBridgeFieldValue = upBridgeField.get(entity);
+                    String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, mainFieldName);
+                    Field downBridgeField = MapperFactory.getField(detailListEntityName, downBridgeFieldName);
+                    downBridgeField.setAccessible(true);
+                    details.parallelStream().forEach(detail->{
+                        try {
+                            downBridgeField.set(detail, upBridgeFieldValue);
+                            this.save(detail, true);
+                        } catch (IllegalAccessException | SQLException e) {
+                            e.printStackTrace();
+                            throw new RuntimeException(e.getMessage());
+                        }
+                    });
+                    effectRow+=details.size();
+                }
+            }
         }
         return effectRow;
     }
 
     @Override
-    public int saveVariable(PocketEntity entity) throws SQLException {
-        Class clazz = entity.getClass();
-        int effectRow;
-        PreparedStatement preparedStatement = null;
-        try {
-            Serializable uuid = UuidGeneratorFactory.getInstance()
-                    .getUuidGenerator(MapperFactory.getUuidGenerator(clazz.getName()))
-                    .getUuid(entity.getClass(), this);
-            reflectUtils.setUuidValue(entity, uuid);
-            String sql = this.buildSaveSqlNotNull(entity);
-            this.showSql(sql);
-            preparedStatement = this.connection.prepareStatement(sql);
-            this.statementApplyNotNull(entity, preparedStatement);
-            effectRow = preparedStatement.executeUpdate();
-        } finally {
-            ConnectionManager.closeIO(preparedStatement, null);
-        }
-        return effectRow;
+    public int saveNotNull(BaseEntity entity) throws SQLException {
+        return super.saveEntity(entity, true);
     }
 
     @Override
-    public int update(PocketEntity entity) throws SQLException {
+    public int update(BaseEntity entity) throws SQLException {
         Class clazz = entity.getClass();
         Object older = this.findOne(clazz, reflectUtils.getUuidValue(entity));
         int effectRow = 0;
@@ -189,7 +189,7 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public int delete(PocketEntity entity) throws SQLException {
+    public int delete(BaseEntity entity) throws SQLException {
         Class clazz = entity.getClass();
         Serializable uuid = reflectUtils.getUuidValue(entity);
         Object garbage = this.findOne(clazz, uuid);
@@ -229,7 +229,7 @@ public class SessionImpl extends AbstractSession {
             lock = this.baseCacheUtils.getMapLock().putIfAbsent(cacheKey, cacheKey) == null;
             if (lock) {
                 result = this.findDirect(clazz, uuid);
-                this.baseCacheUtils.set(cacheKey, result, 360L);
+                this.baseCacheUtils.set(cacheKey, result, 3600 * 24 * 7L);
                 synchronized (CACHE_UNLOCK) {
                     CACHE_UNLOCK.notifyAll();
                 }
@@ -279,7 +279,7 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public void removeCache(PocketEntity entity) {
+    public void removeCache(BaseEntity entity) {
         String cacheKey = this.baseCacheUtils.generateKey(this.sessionName, entity.getClass(), reflectUtils.getUuidValue(entity));
         this.baseCacheUtils.delete(cacheKey);
     }
