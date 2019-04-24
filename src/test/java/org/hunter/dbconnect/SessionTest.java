@@ -38,7 +38,7 @@ public class SessionTest {
         commodity.setType("001");
         commodity.setPrice(new BigDecimal("11.2"));
 
-        IntStream.range(1, 5000).forEach((index) -> commodities.add(commodity));
+        IntStream.range(1, 10).forEach((index) -> commodities.add(commodity));
         this.session = SessionFactory.getSession("homo");
         this.session.open();
         this.transaction = session.getTransaction();
