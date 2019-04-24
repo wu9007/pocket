@@ -1,7 +1,7 @@
 package org.hunter.pocket.session;
 
 import org.hunter.pocket.criteria.Criteria;
-import org.hunter.pocket.model.PocketEntity;
+import org.hunter.pocket.model.BaseEntity;
 import org.hunter.pocket.query.ProcessQuery;
 import org.hunter.pocket.query.SQLQuery;
 
@@ -72,22 +72,32 @@ public interface Session {
     <T> ProcessQuery<T> createProcessQuery(String processSQL);
 
     /**
-     * 保存
+     * 保存(NULL同样进行保存)
      *
      * @param entity 实体对象
      * @return 影响行数
      * @throws SQLException 语句异常
      */
-    int save(PocketEntity entity) throws SQLException;
+    int save(BaseEntity entity) throws SQLException;
 
     /**
-     * 保存(跳过为空的属性)
+     * 保存(NULL同样进行保存)
+     *
+     * @param entity  entity
+     * @param cascade 是否进行级联保存操作
+     * @return 影响行数（主+从）
+     * @throws SQLException 语句异常
+     */
+    int save(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
+
+    /**
+     * 保存(NULL不纳入保存范围)
      *
      * @param entity 实体对象
      * @return 影响行数
      * @throws SQLException 语句异常
      */
-    int saveVariable(PocketEntity entity) throws SQLException;
+    int saveNotNull(BaseEntity entity) throws SQLException;
 
     /**
      * 更新实体
@@ -96,7 +106,7 @@ public interface Session {
      * @return 影响行数
      * @throws SQLException 语句异常
      */
-    int update(PocketEntity entity) throws SQLException;
+    int update(BaseEntity entity) throws SQLException;
 
     /**
      * 删除实体
@@ -105,7 +115,7 @@ public interface Session {
      * @return 影响行数
      * @throws SQLException 语句异常
      */
-    int delete(PocketEntity entity) throws SQLException;
+    int delete(BaseEntity entity) throws SQLException;
 
     /**
      * 查询对象
@@ -140,5 +150,5 @@ public interface Session {
      *
      * @param entity 实体对象
      */
-    void removeCache(PocketEntity entity);
+    void removeCache(BaseEntity entity);
 }
