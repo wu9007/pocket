@@ -42,7 +42,7 @@ class EntityMapper {
     private Map<String, String> businessMapper;
 
     private Field[] oneToManyFields;
-    private Map<String, String> onToManyClassNameMapper;
+    private Map<String, Class> onToManyClassMapper;
     /**
      * key->主类属性名，value->子类属性名
      */
@@ -109,8 +109,8 @@ class EntityMapper {
         return oneToManyFields;
     }
 
-    Map<String, String> getOnToManyClassNameMapper() {
-        return onToManyClassNameMapper;
+    public Map<String, Class> getOnToManyClassMapper() {
+        return onToManyClassMapper;
     }
 
     Map<String, String> getOneToManyDownMapper() {
@@ -129,7 +129,7 @@ class EntityMapper {
                          Field[] repositoryFields, List<String> repositoryColumnNames, Map<String, String> repositoryColumnMapper,
                          Field[] viewFields, Map<String, String> viewColumnMapperWithTableAs, Map<String, String> viewColumnMapper,
                          Field[] businessFields, Field[] keyBusinessFields, Map<String, String> businessMapper,
-                         Field[] oneToManyFields, Map<String, String> onToManyClassNameMapper, Map<String, String> oneToManyDownMapper,
+                         Field[] oneToManyFields, Map<String, Class> onToManyClassMapper, Map<String, String> oneToManyDownMapper,
                          Map<String, String> manyToOneUpMapper, List<String> joinSqlList) {
         this.tableId = tableId;
         this.tableName = tableName;
@@ -145,7 +145,7 @@ class EntityMapper {
         this.keyBusinessFields = keyBusinessFields;
         this.businessMapper = businessMapper;
         this.oneToManyFields = oneToManyFields;
-        this.onToManyClassNameMapper = onToManyClassNameMapper;
+        this.onToManyClassMapper = onToManyClassMapper;
         this.oneToManyDownMapper = oneToManyDownMapper;
         this.manyToOneUpMapper = manyToOneUpMapper;
         this.joinSqlList = joinSqlList;
@@ -182,7 +182,7 @@ class EntityMapper {
         List<Field> keyBusinessFields = new LinkedList<>();
         Map<String, String> businessMapper = new LinkedHashMap<>(16);
         List<Field> oneToManyField = new LinkedList<>();
-        Map<String, String> onToManyClassNameMapper = new LinkedHashMap<>(16);
+        Map<String, Class> onToManyClassMapper = new LinkedHashMap<>(16);
         Map<String, String> oneToManyDownMapper = new LinkedHashMap<>(16);
         Map<String, String> manyToOneUpMapper = new LinkedHashMap<>(16);
         List<String> joinSqlList = new LinkedList<>();
@@ -227,7 +227,7 @@ class EntityMapper {
                 fieldMapper.put(filedName, new FieldData(field, AnnotationType.ONE_TO_MANY, oneToMany));
                 pushBusiness(businessFields, keyBusinessFields, businessMapper, field, filedName, oneToMany.businessName(), oneToMany.flagBusiness());
                 oneToManyField.add(field);
-                onToManyClassNameMapper.put(filedName, oneToMany.clazz().getName());
+                onToManyClassMapper.put(filedName, oneToMany.clazz());
                 oneToManyDownMapper.put(filedName, oneToMany.bridgeField());
             } else if (manyToOne != null) {
                 fieldMapper.put(filedName, new FieldData(field, AnnotationType.MANY_TO_ONE, manyToOne));
@@ -244,7 +244,7 @@ class EntityMapper {
                 repositoryFields.toArray(new Field[0]), repositoryColumnNames, repositoryColumnMapper,
                 viewFields.toArray(new Field[0]), viewColumnMapperWithTableAs, viewColumnMapper,
                 businessFields.toArray(new Field[0]), keyBusinessFields.toArray(new Field[0]), businessMapper,
-                oneToManyField.toArray(new Field[0]), onToManyClassNameMapper, oneToManyDownMapper,
+                oneToManyField.toArray(new Field[0]), onToManyClassMapper, oneToManyDownMapper,
                 manyToOneUpMapper, joinSqlList);
     }
 

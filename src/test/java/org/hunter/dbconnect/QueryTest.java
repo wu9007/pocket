@@ -44,7 +44,7 @@ public class QueryTest {
     @Test
     public void test1() throws SQLException {
         SQLQuery query = this.session.createSQLQuery("select uuid as uuid,code as code,price as price from tbl_order where uuid = :uuid", Order.class);
-        Order order = (Order) query.setParameter("uuid", "1011010").unique();
+        Order order = (Order) query.setParameter("uuid", "10110110").unique();
         System.out.println(order.getCode());
     }
 

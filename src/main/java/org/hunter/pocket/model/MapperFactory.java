@@ -201,10 +201,10 @@ public class MapperFactory {
      *
      * @param className main class name
      * @param fieldName main class field name
-     * @return children class name
+     * @return children class
      */
-    public static String getDetailClassName(String className, String fieldName) {
-        return ENTITY_MAPPER_POOL.get(className).getOnToManyClassNameMapper().get(fieldName);
+    public static Class getDetailClass(String className, String fieldName) {
+        return ENTITY_MAPPER_POOL.get(className).getOnToManyClassMapper().get(fieldName);
     }
 
     /**

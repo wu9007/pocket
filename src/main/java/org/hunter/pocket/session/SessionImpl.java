@@ -8,6 +8,7 @@ import org.hunter.pocket.criteria.Criteria;
 import org.hunter.pocket.criteria.CriteriaImpl;
 import org.hunter.pocket.criteria.Restrictions;
 import org.hunter.pocket.exception.SessionException;
+import org.hunter.pocket.model.DetailInductiveBox;
 import org.hunter.pocket.model.MapperFactory;
 import org.hunter.pocket.model.BaseEntity;
 import org.hunter.pocket.query.ProcessQuery;
@@ -25,13 +26,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author wujianchuan 2019/1/1
  */
 public class SessionImpl extends AbstractSession {
     private final Logger logger = LoggerFactory.getLogger(SessionImpl.class);
+    private static final String IDENTIFICATION = "UUID";
     private static final String CACHE_LOCK = "CACHE_INTO_MONITOR";
     private static final String CACHE_UNLOCK = "CACHE_ESC_MONITOR";
     private static final String OPEN_LOCK = "OPEN_MONITOR";
@@ -126,7 +127,7 @@ public class SessionImpl extends AbstractSession {
                     field.setAccessible(true);
                     List details = (List) field.get(entity);
                     String mainFieldName = field.getName();
-                    String detailListEntityName = MapperFactory.getDetailClassName(mainClassName, mainFieldName);
+                    String detailListEntityName = MapperFactory.getDetailClass(mainClassName, mainFieldName).getName();
                     String upBridgeFiledName = MapperFactory.getManyToOneUpField(detailListEntityName, mainClassName);
                     Field upBridgeField = MapperFactory.getField(mainClassName, upBridgeFiledName);
                     Object upBridgeFieldValue = upBridgeField.get(entity);
@@ -167,7 +168,7 @@ public class SessionImpl extends AbstractSession {
                 }
                 sql.append(String.join(CommonSql.COMMA, setValues))
                         .append(CommonSql.WHERE)
-                        .append("UUID").append(CommonSql.EQUAL_TO).append(CommonSql.PLACEHOLDER);
+                        .append(IDENTIFICATION).append(CommonSql.EQUAL_TO).append(CommonSql.PLACEHOLDER);
                 this.showSql(sql.toString());
                 PreparedStatement preparedStatement = null;
                 try {
@@ -186,6 +187,7 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public int update(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException {
+        int effectRow = 0;
         Class clazz = entity.getClass();
         Object older = this.findOne(clazz, entity.getUuid());
         if (cascade) {
@@ -194,30 +196,55 @@ public class SessionImpl extends AbstractSession {
             if (fields.length > 0) {
                 for (Field field : fields) {
                     field.setAccessible(true);
-                    List<BaseEntity> newDetails = (List<BaseEntity>) field.get(entity);
-                    List<BaseEntity> olderDetails = (List<BaseEntity>) field.get(older);
-                    List<BaseEntity> saveList = newDetails.parallelStream().filter(detail -> detail.getUuid() == null).collect(Collectors.toList());
-                    List<String> olderDetailUuidList = olderDetails.stream().map(BaseEntity::getUuid).collect(Collectors.toList());
-                    List<BaseEntity> deleteList = newDetails.parallelStream().filter(detail -> !olderDetailUuidList.contains(detail.getUuid())).collect(Collectors.toList());
+                    DetailInductiveBox detailBox = DetailInductiveBox.newInstance(field.get(entity), field.get(older));
+                    for (BaseEntity detail : detailBox.getNewborn()) {
+                        this.save(detail, true);
+                    }
+                    for (BaseEntity detail : detailBox.getMoribund()) {
+                        this.delete(detail);
+                    }
+                    for (BaseEntity detail : detailBox.getUpdate()) {
+                        this.update(detail, true);
+                    }
+                    effectRow += detailBox.getCount();
                 }
             }
         }
-        int effectRow = this.update(entity);
+        effectRow += this.update(entity);
         return effectRow;
     }
 
     @Override
-    public int delete(BaseEntity entity) throws SQLException {
+    public int delete(BaseEntity entity) throws SQLException, IllegalAccessException {
         Class clazz = entity.getClass();
-        Serializable uuid = reflectUtils.getUuidValue(entity);
+        String mainClassName = clazz.getName();
+        Serializable uuid = entity.getUuid();
+
         Object garbage = this.findOne(clazz, uuid);
         int effectRow = 0;
         if (garbage != null) {
+            // delete detail list data
+            Field[] fields = MapperFactory.getOneToMayFields(mainClassName);
+            if (fields.length > 0) {
+                for (Field field : fields) {
+                    String mainFieldName = field.getName();
+                    Class childrenClass = MapperFactory.getDetailClass(mainClassName, mainFieldName);
+                    String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, mainFieldName);
+                    String upBridgeFieldName = MapperFactory.getManyToOneUpField(childrenClass.getName(), mainClassName);
+                    Field upBridgeField = MapperFactory.getField(mainClassName, upBridgeFieldName);
+                    upBridgeField.setAccessible(true);
+                    effectRow += this.createCriteria(childrenClass)
+                            .add(Restrictions.equ(downBridgeFieldName, upBridgeField.get(entity)))
+                            .delete();
+                }
+            }
+
+            // delete main data
             String sql = CommonSql.DELETE +
                     CommonSql.FROM +
                     MapperFactory.getTableName(clazz.getName()) +
                     CommonSql.WHERE +
-                    "UUID" +
+                    IDENTIFICATION +
                     CommonSql.EQUAL_TO +
                     CommonSql.PLACEHOLDER;
             this.showSql(sql);
@@ -225,7 +252,7 @@ public class SessionImpl extends AbstractSession {
             try {
                 preparedStatement = this.connection.prepareStatement(sql);
                 preparedStatement.setObject(1, uuid);
-                effectRow = preparedStatement.executeUpdate();
+                effectRow += preparedStatement.executeUpdate();
             } finally {
                 ConnectionManager.closeIO(preparedStatement, null);
             }
@@ -248,7 +275,7 @@ public class SessionImpl extends AbstractSession {
             lock = this.baseCacheUtils.getMapLock().putIfAbsent(cacheKey, cacheKey) == null;
             if (lock) {
                 result = this.findDirect(clazz, uuid);
-                this.baseCacheUtils.set(cacheKey, result, 3600 * 24 * 7L);
+                this.baseCacheUtils.set(cacheKey, result, 10L);
                 synchronized (CACHE_UNLOCK) {
                     CACHE_UNLOCK.notifyAll();
                 }
