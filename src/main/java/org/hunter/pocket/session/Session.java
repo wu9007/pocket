@@ -126,7 +126,7 @@ public interface Session {
      * @return 影响行数
      * @throws SQLException 语句异常
      */
-    int delete(BaseEntity entity) throws SQLException;
+    int delete(BaseEntity entity) throws SQLException, IllegalAccessException;
 
     /**
      * 查询对象

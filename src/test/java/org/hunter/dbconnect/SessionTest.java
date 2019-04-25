@@ -35,12 +35,13 @@ public class SessionTest {
 
     @Before
     public void setup() {
-        Commodity commodity = new Commodity();
-        commodity.setName("c1");
-        commodity.setType("001");
-        commodity.setPrice(new BigDecimal("11.2"));
-
-        IntStream.range(1, 10).forEach((index) -> commodities.add(commodity));
+        IntStream.range(1, 10).forEach((index) -> {
+            Commodity commodity = new Commodity();
+            commodity.setName("c1");
+            commodity.setType("001");
+            commodity.setPrice(new BigDecimal("11.2"));
+            commodities.add(commodity);
+        });
         this.session = SessionFactory.getSession("homo");
         this.session.open();
         this.transaction = session.getTransaction();
@@ -54,7 +55,7 @@ public class SessionTest {
     }
 
     @Test
-    public void test1() throws SQLException {
+    public void test1() throws SQLException, IllegalAccessException {
         Order order = new Order();
         order.setCode("F-00x");
         order.setType("001");
@@ -110,7 +111,7 @@ public class SessionTest {
     }
 
     @Test
-    public void test6() throws Exception {
+    public void test6() {
         Order order = new Order();
         order.setState(null);
         order.setPrice(new BigDecimal("120.96"));
@@ -136,5 +137,30 @@ public class SessionTest {
                 e.printStackTrace();
             }
         });
+    }
+
+    @Test
+    public void test7() throws SQLException, IllegalAccessException {
+        Order order = new Order();
+        order.setState(null);
+        order.setPrice(new BigDecimal("120.96"));
+        order.setType("001");
+        order.setCommodities(commodities);
+
+        session.save(order, true);
+
+        order = (Order) session.findOne(Order.class, order.getUuid());
+        List<Commodity> details = order.getCommodities();
+        details.remove(0);
+        details.get(0).setType("00000");
+
+        Commodity commodity = new Commodity();
+        commodity.setName("C001");
+        commodity.setType("002");
+        commodity.setPrice(new BigDecimal("868"));
+
+        details.add(commodity);
+        session.update(order, true);
+        System.out.println(session.delete(order));
     }
 }
