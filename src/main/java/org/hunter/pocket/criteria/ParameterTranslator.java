@@ -24,11 +24,7 @@ public class ParameterTranslator implements SqlBean {
     }
 
     public static ParameterTranslator newInstance(Object target) {
-        if (target != null) {
-            return new ParameterTranslator(target);
-        } else {
-            throw new QueryException(ErrorMessage.POCKET_MISS_PARAM_EXCEPTION);
-        }
+        return new ParameterTranslator(target);
     }
 
     public String getSource() {
