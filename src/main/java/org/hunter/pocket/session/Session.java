@@ -108,6 +108,17 @@ public interface Session {
      */
     int update(BaseEntity entity) throws SQLException;
 
+
+    /**
+     * 更新实体
+     *
+     * @param entity  实体对象
+     * @param cascade 是否进行级联更新操作
+     * @return 影响行数
+     * @throws SQLException 语句异常
+     */
+    int update(BaseEntity entity, boolean cascade) throws SQLException;
+
     /**
      * 删除实体
      *
