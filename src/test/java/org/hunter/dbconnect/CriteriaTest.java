@@ -238,4 +238,11 @@ public class CriteriaTest {
         System.out.println(orders.size());
         System.out.println(criteria.count());
     }
+
+    @Test
+    public void test23() {
+        Criteria criteria = this.session.createCriteria(Order.class);
+        criteria.add(Modern.set("type", null))
+                .update();
+    }
 }
