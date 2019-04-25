@@ -197,8 +197,20 @@ public class SessionImpl extends AbstractSession {
                 for (Field field : fields) {
                     field.setAccessible(true);
                     DetailInductiveBox detailBox = DetailInductiveBox.newInstance(field.get(entity), field.get(older));
-                    for (BaseEntity detail : detailBox.getNewborn()) {
-                        this.save(detail, true);
+                    List<BaseEntity> newbornDetails = detailBox.getNewborn();
+                    if (newbornDetails.size() > 0) {
+                        Class childrenClass = MapperFactory.getDetailClass(mainClassName, field.getName());
+                        String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, field.getName());
+                        Field downBridgeField = MapperFactory.getField(childrenClass.getName(), downBridgeFieldName);
+                        String upBridgeFieldName = MapperFactory.getManyToOneUpField(childrenClass.getName(), mainClassName);
+                        Field upBridgeField = MapperFactory.getField(mainClassName, upBridgeFieldName);
+                        upBridgeField.setAccessible(true);
+                        Object upV = upBridgeField.get(entity);
+                        downBridgeField.setAccessible(true);
+                        for (BaseEntity detail : newbornDetails) {
+                            downBridgeField.set(detail, upV);
+                            this.save(detail, true);
+                        }
                     }
                     for (BaseEntity detail : detailBox.getMoribund()) {
                         this.delete(detail);
