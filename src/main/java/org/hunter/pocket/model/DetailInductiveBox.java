@@ -16,11 +16,11 @@ public class DetailInductiveBox {
         this.newborn = newDetails.parallelStream()
                 .filter(detail -> detail.getUuid() == null)
                 .collect(Collectors.toList());
-        List<String> olderDetailUuidList = olderDetails.stream()
+        List<String> newDetailUuidList = newDetails.stream()
                 .map(BaseEntity::getUuid)
                 .collect(Collectors.toList());
-        this.moribund = newDetails.parallelStream()
-                .filter(detail -> !olderDetailUuidList.contains(detail.getUuid()))
+        this.moribund = olderDetails.parallelStream()
+                .filter(detail -> !newDetailUuidList.contains(detail.getUuid()))
                 .collect(Collectors.toList());
         this.update = newDetails.parallelStream()
                 .filter(detail -> {
