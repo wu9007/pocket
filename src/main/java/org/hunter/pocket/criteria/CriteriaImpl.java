@@ -7,7 +7,7 @@ import org.hunter.pocket.config.DatabaseNodeConfig;
 import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.exception.CriteriaException;
 import org.hunter.pocket.model.MapperFactory;
-import org.hunter.pocket.model.PocketEntity;
+import org.hunter.pocket.model.BaseEntity;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -109,10 +109,10 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         try {
             preparedStatement = getPreparedStatement();
             resultSet = preparedStatement.executeQuery();
-            List<PocketEntity> result = new ArrayList<>();
+            List<BaseEntity> result = new ArrayList<>();
 
             while (resultSet.next()) {
-                PocketEntity entity = (PocketEntity) clazz.newInstance();
+                BaseEntity entity = (BaseEntity) clazz.newInstance();
                 for (Field field : MapperFactory.getViewFields(clazz.getName())) {
                     field.set(entity, this.fieldTypeStrategy.getMappingColumnValue(clazz, field, resultSet));
                 }
@@ -133,7 +133,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         if (cascade) {
             if (result.size() > 0) {
                 for (Object entity : result) {
-                    this.applyChildren((PocketEntity) entity);
+                    this.applyChildren((BaseEntity) entity);
                 }
             }
         }
@@ -145,12 +145,12 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildSelectSql(databaseConfig));
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
-        PocketEntity entity;
+        BaseEntity entity;
         try {
             preparedStatement = getPreparedStatement();
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                entity = (PocketEntity) clazz.newInstance();
+                entity = (BaseEntity) clazz.newInstance();
                 for (Field field : MapperFactory.getViewFields(clazz.getName())) {
                     field.set(entity, this.fieldTypeStrategy.getMappingColumnValue(clazz, field, resultSet));
                 }
@@ -168,7 +168,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public Object unique(boolean cascade) {
-        PocketEntity obj = (PocketEntity) this.unique();
+        BaseEntity obj = (BaseEntity) this.unique();
         if (obj != null && cascade) {
             this.applyChildren(obj);
         }
@@ -239,7 +239,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
      *
      * @param entity 实体
      */
-    private void applyChildren(PocketEntity entity) {
+    private void applyChildren(BaseEntity entity) {
         Serializable uuid = reflectUtils.getUuidValue(entity);
 
         if (uuid != null && childrenFields.length > 0) {
@@ -257,7 +257,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         }
     }
 
-    private Collection getChildren(Field field, PocketEntity entity) {
+    private Collection getChildren(Field field, BaseEntity entity) {
         OneToMany oneToMany = field.getAnnotation(OneToMany.class);
         Class clazz = oneToMany.clazz();
         String downBridgeFieldName = oneToMany.bridgeField();
