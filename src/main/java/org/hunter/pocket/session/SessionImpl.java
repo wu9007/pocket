@@ -184,6 +184,12 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
+    public int update(BaseEntity entity, boolean cascade) throws SQLException {
+        // 假的🌚
+        return this.update(entity);
+    }
+
+    @Override
     public int delete(BaseEntity entity) throws SQLException {
         Class clazz = entity.getClass();
         Serializable uuid = reflectUtils.getUuidValue(entity);
