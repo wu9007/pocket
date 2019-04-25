@@ -242,7 +242,7 @@ public class CriteriaTest {
     @Test
     public void test23() {
         Criteria criteria = this.session.createCriteria(Order.class);
-        criteria.add(Modern.set("type", null))
+        criteria.add(Modern.set("type", "001"))
                 .update();
     }
 }

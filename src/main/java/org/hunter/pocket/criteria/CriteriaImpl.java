@@ -44,12 +44,13 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     public Criteria add(Modern modern) {
         String source = modern.getSource();
         String poEl = modern.getPoEl();
-        boolean sourceEmpty = source == null || source.trim().length() == 0;
-        boolean poElEmpty = poEl == null || poEl.trim().length() == 0;
-        if (sourceEmpty && poElEmpty) {
+        boolean sourceValuable = source != null && source.trim().length() > 0 && MapperFactory.getRepositoryColumnName(this.clazz.getName(), source) != null;
+        boolean poElValuable = poEl != null && poEl.trim().length() > 0;
+        if (sourceValuable || poElValuable) {
+            this.modernList.add(modern);
+        } else {
             throw new CriteriaException("No field name found in your Modern.");
         }
-        this.modernList.add(modern);
         return this;
     }
 

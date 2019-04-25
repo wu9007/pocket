@@ -1,6 +1,7 @@
 package org.hunter.dbconnect;
 
 import org.hunter.Application;
+import org.hunter.PocketExecutor;
 import org.hunter.demo.model.Commodity;
 import org.hunter.demo.model.Order;
 import org.hunter.pocket.session.Session;
@@ -18,6 +19,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
 /**
@@ -38,7 +40,7 @@ public class SessionTest {
         commodity.setType("001");
         commodity.setPrice(new BigDecimal("11.2"));
 
-        IntStream.range(1, 1000).forEach((index) -> commodities.add(commodity));
+        IntStream.range(1, 10).forEach((index) -> commodities.add(commodity));
         this.session = SessionFactory.getSession("homo");
         this.session.open();
         this.transaction = session.getTransaction();
@@ -102,6 +104,35 @@ public class SessionTest {
                 commodity1.setOrder(order.getUuid());
                 session.save(commodity1);
             } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    @Test
+    public void test6() throws Exception {
+        Order order = new Order();
+        order.setState(null);
+        order.setPrice(new BigDecimal("120.96"));
+        order.setType("001");
+        order.setCommodities(commodities);
+
+        Commodity commodity = new Commodity();
+        commodity.setName("c1");
+        commodity.setType("001");
+        commodity.setPrice(new BigDecimal("11.2"));
+
+        IntStream.range(1, 10).parallel().forEach((i) -> {
+            try {
+                PocketExecutor.execute(Executors.newFixedThreadPool(10), 10, () -> {
+                    try {
+                        session.save(order, true);
+                        session.save(commodity, true);
+                    } catch (SQLException | IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                });
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         });

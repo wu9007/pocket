@@ -123,7 +123,7 @@ public class SessionImpl extends AbstractSession {
             if (fields.length > 0) {
                 for (Field field : fields) {
                     field.setAccessible(true);
-                    List<BaseEntity> details = (List<BaseEntity>) field.get(entity);
+                    List details = (List) field.get(entity);
                     String mainFieldName = field.getName();
                     String detailListEntityName = MapperFactory.getDetailClassName(mainClassName, mainFieldName);
                     String upBridgeFiledName = MapperFactory.getManyToOneUpField(detailListEntityName, mainClassName);
@@ -132,16 +132,11 @@ public class SessionImpl extends AbstractSession {
                     String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, mainFieldName);
                     Field downBridgeField = MapperFactory.getField(detailListEntityName, downBridgeFieldName);
                     downBridgeField.setAccessible(true);
-                    details.parallelStream().forEach(detail->{
-                        try {
-                            downBridgeField.set(detail, upBridgeFieldValue);
-                            this.save(detail, true);
-                        } catch (IllegalAccessException | SQLException e) {
-                            e.printStackTrace();
-                            throw new RuntimeException(e.getMessage());
-                        }
-                    });
-                    effectRow+=details.size();
+                    for (Object detail : details) {
+                        downBridgeField.set(detail, upBridgeFieldValue);
+                        this.save((BaseEntity) detail, true);
+                    }
+                    effectRow += details.size();
                 }
             }
         }
@@ -156,7 +151,7 @@ public class SessionImpl extends AbstractSession {
     @Override
     public int update(BaseEntity entity) throws SQLException {
         Class clazz = entity.getClass();
-        Object older = this.findOne(clazz, reflectUtils.getUuidValue(entity));
+        Object older = this.findOne(clazz, entity.getUuid());
         int effectRow = 0;
         if (older != null) {
             Field[] fields = reflectUtils.dirtyFieldFilter(entity, older);
