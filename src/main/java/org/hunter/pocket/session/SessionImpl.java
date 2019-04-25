@@ -213,6 +213,7 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public Object findOne(Class clazz, Serializable uuid) {
+        //TODO 使用cache替代redis
         String cacheKey = this.baseCacheUtils.generateKey(this.sessionName, clazz, uuid);
         Object result = this.baseCacheUtils.getObj(cacheKey);
         if (result != null) {
