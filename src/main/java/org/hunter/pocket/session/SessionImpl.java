@@ -25,6 +25,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author wujianchuan 2019/1/1
@@ -151,7 +152,7 @@ public class SessionImpl extends AbstractSession {
     @Override
     public int update(BaseEntity entity) throws SQLException {
         Class clazz = entity.getClass();
-        Object older = this.findOne(clazz, entity.getUuid());
+        BaseEntity older = (BaseEntity) this.findOne(clazz, entity.getUuid());
         int effectRow = 0;
         if (older != null) {
             Field[] fields = reflectUtils.dirtyFieldFilter(entity, older);
@@ -184,9 +185,25 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public int update(BaseEntity entity, boolean cascade) throws SQLException {
-        // 假的🌚
-        return this.update(entity);
+    public int update(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException {
+        Class clazz = entity.getClass();
+        Object older = this.findOne(clazz, entity.getUuid());
+        if (cascade) {
+            String mainClassName = entity.getClass().getName();
+            Field[] fields = MapperFactory.getOneToMayFields(mainClassName);
+            if (fields.length > 0) {
+                for (Field field : fields) {
+                    field.setAccessible(true);
+                    List<BaseEntity> newDetails = (List<BaseEntity>) field.get(entity);
+                    List<BaseEntity> olderDetails = (List<BaseEntity>) field.get(older);
+                    List<BaseEntity> saveList = newDetails.parallelStream().filter(detail -> detail.getUuid() == null).collect(Collectors.toList());
+                    List<String> olderDetailUuidList = olderDetails.stream().map(BaseEntity::getUuid).collect(Collectors.toList());
+                    List<BaseEntity> deleteList = newDetails.parallelStream().filter(detail -> !olderDetailUuidList.contains(detail.getUuid())).collect(Collectors.toList());
+                }
+            }
+        }
+        int effectRow = this.update(entity);
+        return effectRow;
     }
 
     @Override

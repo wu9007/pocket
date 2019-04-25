@@ -117,7 +117,7 @@ public interface Session {
      * @return 影响行数
      * @throws SQLException 语句异常
      */
-    int update(BaseEntity entity, boolean cascade) throws SQLException;
+    int update(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
 
     /**
      * 删除实体
