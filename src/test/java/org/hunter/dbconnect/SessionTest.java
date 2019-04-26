@@ -62,19 +62,25 @@ public class SessionTest {
         order.setTime(new Date());
         order.setPrice(new BigDecimal("99.56789"));
         order.setDay(new Date());
-        this.session.saveNotNull(order);
-        this.session.save(order);
-        session.delete(order);
+        this.session.shallowSave(order);
+        Order repositoryOrder = (Order) this.session.findDirect(Order.class, order.getUuid());
+        System.out.println(repositoryOrder.getState());
+        System.out.println(repositoryOrder.getSort());
+        session.delete(repositoryOrder);
     }
 
     @Test
-    public void test2() throws SQLException {
-        Order order = (Order) session.findOne(Order.class, "1011010");
-        order.setCode("C-001");
-        order.setState(null);
-        order.setPrice(new BigDecimal("120.96"));
+    public void test2() throws SQLException, IllegalAccessException {
+        Order order = new Order();
+        order.setCode("F-00x");
         order.setType("001");
+        order.setTime(new Date());
+        order.setPrice(new BigDecimal("99.56789"));
+        order.setDay(new Date());
+        this.session.save(order);
+        order.setType("002");
         session.update(order);
+        session.delete(order);
     }
 
     @Test
