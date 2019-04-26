@@ -1,5 +1,6 @@
 package org.hunter.pocket.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,20 +17,25 @@ public class DetailInductiveBox {
         this.newborn = newDetails.parallelStream()
                 .filter(detail -> detail.getUuid() == null)
                 .collect(Collectors.toList());
-        List<String> newDetailUuidList = newDetails.stream()
-                .map(BaseEntity::getUuid)
-                .collect(Collectors.toList());
-        this.moribund = olderDetails.parallelStream()
-                .filter(detail -> !newDetailUuidList.contains(detail.getUuid()))
-                .collect(Collectors.toList());
-        this.update = newDetails.parallelStream()
-                .filter(detail -> {
-                    boolean notNewborn = !this.newborn.contains(detail);
-                    boolean notMoribund = !this.moribund.contains(detail);
-                    boolean notEqual = !olderDetails.contains(detail);
-                    return notNewborn && notMoribund && notEqual;
-                })
-                .collect(Collectors.toList());
+        if (olderDetails != null) {
+            List<String> newDetailUuidList = newDetails.stream()
+                    .map(BaseEntity::getUuid)
+                    .collect(Collectors.toList());
+            this.moribund = olderDetails.parallelStream()
+                    .filter(detail -> !newDetailUuidList.contains(detail.getUuid()))
+                    .collect(Collectors.toList());
+            this.update = newDetails.parallelStream()
+                    .filter(detail -> {
+                        boolean notNewborn = !this.newborn.contains(detail);
+                        boolean notMoribund = !this.moribund.contains(detail);
+                        boolean notEqual = !olderDetails.contains(detail);
+                        return notNewborn && notMoribund && notEqual;
+                    })
+                    .collect(Collectors.toList());
+        } else {
+            this.moribund = new ArrayList<>();
+            this.update = new ArrayList<>();
+        }
         this.count = this.newborn.size() + this.moribund.size() + this.update.size();
     }
 
