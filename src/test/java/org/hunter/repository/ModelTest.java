@@ -9,6 +9,9 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.math.BigDecimal;
+import java.util.Date;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 public class ModelTest {
@@ -23,11 +26,20 @@ public class ModelTest {
     @Test
     public void test1() {
         Order order = new Order();
-        order.setUuid(null);
+        order.setUuid("001");
         order.setCode("002");
+        order.setPrice(new BigDecimal("11.2"));
+        order.setDay(new Date(new Date().getTime() - 10000));
+        order.setState(false);
+        order.setSort(2);
+
         Order order1 = new Order();
-        order1.setUuid(null);
+        order1.setUuid("001");
         order1.setCode("002");
+        order1.setPrice(new BigDecimal("11.2"));
+        order1.setDay(order.getDay());
+        order1.setState(false);
+        order1.setSort(1);
         System.out.println(order.equals(order1));
     }
 }

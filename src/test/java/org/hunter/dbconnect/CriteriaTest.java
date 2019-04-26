@@ -95,7 +95,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test5() {
+    public void test5() throws SQLException {
         Order order = (Order) this.session.findDirect(Order.class, 11L);
         if (order != null) {
             System.out.println(order.getPrice());
@@ -103,7 +103,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test6() {
+    public void test6() throws SQLException {
         Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.equ("uuid", 11L));
         Order order = (Order) criteria.unique(true);
@@ -113,7 +113,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test8() {
+    public void test8() throws SQLException {
         Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Modern.set("price", 500.5D))
                 .add(Restrictions.equ("code", "C-001"))
@@ -122,7 +122,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test9() {
+    public void test9() throws SQLException {
         Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.equ("code", "C-001"));
         System.out.println(criteria.max("typeName"));
@@ -158,7 +158,7 @@ public class CriteriaTest {
     DatabaseConfig databaseConfig;
 
     @Test
-    public void test14() {
+    public void test14() throws SQLException {
         Criteria criteria = session.createCriteria(Order.class);
         criteria.add(Restrictions.equ("uuid", 1011011L));
         criteria.delete();
@@ -184,7 +184,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test17() {
+    public void test17() throws SQLException {
         System.out.println(this.session.createCriteria(Order.class)
                 .add(Restrictions.equ("code", "A-002")).count());
         this.session.createCriteria(Order.class).add(Restrictions.equ("code", "A-002")).delete();
@@ -193,7 +193,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test18() {
+    public void test18() throws SQLException {
         session.createCriteria(Order.class)
                 .add(Modern.setWithPoEl("#code  = CONCAT_WS('', #code, :STR_VALUE)"))
                 .add(Modern.setWithPoEl("#price  = #price + :ADD_PRICE"))
@@ -204,7 +204,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test19() {
+    public void test19() throws SQLException {
         Criteria criteria = this.session.createCriteria(Order.class)
                 .add(Restrictions.equ("state", false));
         long count = criteria.count();
@@ -212,7 +212,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test20() {
+    public void test20() throws SQLException {
         Criteria criteria = this.session.createCriteria(Order.class)
                 .add(Restrictions.equ("state", true));
         long count = criteria.delete();
@@ -220,14 +220,15 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test21() {
+    public void test21() throws SQLException {
         Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.like("type", "001"));
-        criteria.unique(true);
+        Order order = (Order) criteria.unique(true);
+        System.out.println(order.getCode());
     }
 
     @Test
-    public void test22() {
+    public void test22() throws SQLException {
         Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.equ("typeName", "手机支付"))
                 .add(Restrictions.equ("type", "001"))
@@ -240,7 +241,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test23() {
+    public void test23() throws SQLException {
         Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Modern.set("type", "001"))
                 .update();
