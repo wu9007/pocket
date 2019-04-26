@@ -25,7 +25,7 @@ import java.util.stream.Stream;
  * @author wujianchuan 2019/1/9
  */
 abstract class AbstractSession implements Session {
-    private  static final String SET_UUID_LOCK = "setUUidLock";
+    private static final String SET_UUID_LOCK = "setUUidLock";
 
     private final Logger logger = LoggerFactory.getLogger(AbstractSession.class);
 
@@ -61,12 +61,12 @@ abstract class AbstractSession implements Session {
     /**
      * 保存数据
      *
-     * @param entity  entity
-     * @param notNull 保存时属性值是否不可为空（true：NULL 不进行保存  false:NULL 同样进行保存）
+     * @param entity   entity
+     * @param nullAble 保存时属性值是否不可为空（false：NULL 不进行保存  true:NULL 同样进行保存）
      * @return effect row number
      * @throws SQLException sql exception
      */
-    int saveEntity(BaseEntity entity, boolean notNull) throws SQLException {
+    int saveEntity(BaseEntity entity, boolean nullAble) throws SQLException {
         Class clazz = entity.getClass();
 
         int effectRow;
@@ -77,18 +77,52 @@ abstract class AbstractSession implements Session {
                     .getUuid(entity.getClass(), this);
             synchronized (SET_UUID_LOCK) {
                 entity.setUuid(uuid);
-                String sql = notNull ? this.buildSaveSqlNotNull(entity) : this.buildSaveSqlNullable(entity);
+                String sql = nullAble ? this.buildSaveSqlNullable(entity) : this.buildSaveSqlNotNull(entity);
                 this.showSql(sql);
                 preparedStatement = this.connection.prepareStatement(sql);
-                if (notNull) {
-                    this.statementApplyNotNull(entity, preparedStatement);
-                } else {
+                if (nullAble) {
                     this.statementApplyNullable(entity, preparedStatement);
+                } else {
+                    this.statementApplyNotNull(entity, preparedStatement);
                 }
             }
             effectRow = preparedStatement.executeUpdate();
         } finally {
             ConnectionManager.closeIO(preparedStatement, null);
+        }
+        return effectRow;
+    }
+
+    /**
+     * 级联保存明细
+     *
+     * @param entity   entity
+     * @param nullAble 保存时属性值是否不可为空（false：NULL 不进行保存  true:NULL 同样进行保存）
+     * @return effect row
+     * @throws IllegalAccessException e
+     * @throws SQLException           e
+     */
+    int saveDetails(BaseEntity entity, boolean nullAble) throws IllegalAccessException, SQLException {
+        int effectRow = 0;
+        String mainClassName = entity.getClass().getName();
+        Field[] fields = MapperFactory.getOneToMayFields(mainClassName);
+        if (fields.length > 0) {
+            for (Field field : fields) {
+                field.setAccessible(true);
+                List details = (List) field.get(entity);
+                String mainFieldName = field.getName();
+                Class childClass = MapperFactory.getDetailClass(mainClassName, mainFieldName);
+                String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, mainFieldName);
+                Field downBridgeField = MapperFactory.getField(childClass.getName(), downBridgeFieldName);
+                Object upBridgeFieldValue = MapperFactory.getUpBridgeFieldValue(entity, mainClassName, childClass);
+                downBridgeField.setAccessible(true);
+                for (Object detail : details) {
+                    downBridgeField.set(detail, upBridgeFieldValue);
+                    this.saveEntity((BaseEntity) detail, nullAble);
+                    this.saveDetails((BaseEntity) detail, nullAble);
+                }
+                effectRow += details.size();
+            }
         }
         return effectRow;
     }

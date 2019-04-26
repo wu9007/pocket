@@ -165,12 +165,20 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test15() throws InterruptedException {
+    public void test15() throws InterruptedException, SQLException, IllegalAccessException {
         ExecutorService executor = Executors.newFixedThreadPool(500);
+        Order order = new Order();
+        order.setCode("F-00x");
+        order.setType("001");
+        order.setTime(new Date());
+        order.setPrice(new BigDecimal("99.56789"));
+        order.setDay(new Date());
+        this.session.save(order);
         PocketExecutor.execute(executor, 500, () -> {
-            Order order = (Order) session.findOne(Order.class, "1011010");
-            System.out.println(order.getCode() + "=======================");
+            Order repositoryOrder = (Order) session.findOne(Order.class, order.getUuid());
+            System.out.println(repositoryOrder.getCode() + "=======================");
         });
+        this.session.delete(order);
         executor.shutdown();
     }
 

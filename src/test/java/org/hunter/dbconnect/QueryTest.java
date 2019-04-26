@@ -13,6 +13,7 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
@@ -42,10 +43,18 @@ public class QueryTest {
     }
 
     @Test
-    public void test1() throws SQLException {
+    public void test1() throws SQLException, IllegalAccessException {
+        Order order = new Order();
+        order.setCode("F-00x");
+        order.setType("001");
+        order.setTime(new Date());
+        order.setPrice(new BigDecimal("99.56789"));
+        order.setDay(new Date());
+        this.session.save(order);
         SQLQuery query = this.session.createSQLQuery("select uuid as uuid,code as code,price as price from tbl_order where uuid = :uuid", Order.class);
-        Order order = (Order) query.setParameter("uuid", "1011010").unique();
-        System.out.println(order.getPrice());
+        Order repositoryOrder = (Order) query.setParameter("uuid", order.getUuid()).unique();
+        System.out.println(repositoryOrder.getPrice());
+        this.session.delete(repositoryOrder);
     }
 
     @Test

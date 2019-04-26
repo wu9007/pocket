@@ -47,13 +47,23 @@ public interface OperateDictionary {
     int save(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
 
     /**
-     * 保存(NULL不纳入保存范围)
+     * 保存(NULL不纳入保存范围保留数据库默认值)
      *
      * @param entity 实体对象
      * @return 影响行数
      * @throws SQLException 语句异常
      */
-    int saveNotNull(BaseEntity entity) throws SQLException;
+    int shallowSave(BaseEntity entity) throws SQLException;
+
+    /**
+     * 保存(NULL不纳入保存范围保留数据库默认值)
+     *
+     * @param entity  实体对象
+     * @param cascade 是否进行级联保存操作
+     * @return 影响行数
+     * @throws SQLException 语句异常
+     */
+    int shallowSave(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
 
     /**
      * 更新实体

@@ -113,39 +113,30 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public int save(BaseEntity entity) throws SQLException {
-        return super.saveEntity(entity, false);
+        return super.saveEntity(entity, true);
     }
 
     @Override
     public int save(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException {
         int effectRow = this.save(entity);
         if (cascade) {
-            String mainClassName = entity.getClass().getName();
-            Field[] fields = MapperFactory.getOneToMayFields(mainClassName);
-            if (fields.length > 0) {
-                for (Field field : fields) {
-                    field.setAccessible(true);
-                    List details = (List) field.get(entity);
-                    String mainFieldName = field.getName();
-                    Class childClass = MapperFactory.getDetailClass(mainClassName, mainFieldName);
-                    String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, mainFieldName);
-                    Field downBridgeField = MapperFactory.getField(childClass.getName(), downBridgeFieldName);
-                    Object upBridgeFieldValue = MapperFactory.getUpBridgeFieldValue(entity, mainClassName, childClass);
-                    downBridgeField.setAccessible(true);
-                    for (Object detail : details) {
-                        downBridgeField.set(detail, upBridgeFieldValue);
-                        this.save((BaseEntity) detail, true);
-                    }
-                    effectRow += details.size();
-                }
-            }
+            effectRow += super.saveDetails(entity, true);
         }
         return effectRow;
     }
 
     @Override
-    public int saveNotNull(BaseEntity entity) throws SQLException {
-        return super.saveEntity(entity, true);
+    public int shallowSave(BaseEntity entity) throws SQLException {
+        return super.saveEntity(entity, false);
+    }
+
+    @Override
+    public int shallowSave(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException {
+        int effectRow = this.shallowSave(entity);
+        if (cascade) {
+            effectRow += super.saveDetails(entity, false);
+        }
+        return effectRow;
     }
 
     @Override
