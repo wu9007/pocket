@@ -69,7 +69,8 @@ public class SessionTest {
 
     @Test
     public void test2() throws SQLException {
-        Order order = (Order) session.findOne(Order.class, 10110194);
+        Order order = (Order) session.findOne(Order.class, "1011010");
+        order.setCode("C-001");
         order.setState(null);
         order.setPrice(new BigDecimal("120.96"));
         order.setType("001");
@@ -85,9 +86,11 @@ public class SessionTest {
     @Test
     public void test4() throws Exception {
         Order order = new Order();
-        order.setState(null);
-        order.setPrice(new BigDecimal("120.96"));
+        order.setCode("C-001");
         order.setType("001");
+        order.setTime(new Date());
+        order.setPrice(new BigDecimal("99.56789"));
+        order.setDay(new Date());
         order.setCommodities(commodities);
         System.out.println(session.save(order, true));
     }
@@ -95,9 +98,12 @@ public class SessionTest {
     @Test
     public void test5() throws Exception {
         Order order = new Order();
+        order.setCode("C-001");
         order.setState(null);
-        order.setPrice(new BigDecimal("120.96"));
         order.setType("001");
+        order.setTime(new Date());
+        order.setPrice(new BigDecimal("99.56789"));
+        order.setDay(new Date());
         order.setCommodities(commodities);
         System.out.println(session.save(order));
         commodities.parallelStream().forEach(commodity1 -> {
@@ -113,9 +119,12 @@ public class SessionTest {
     @Test
     public void test6() {
         Order order = new Order();
+        order.setCode("C-001");
         order.setState(null);
-        order.setPrice(new BigDecimal("120.96"));
         order.setType("001");
+        order.setTime(new Date());
+        order.setPrice(new BigDecimal("99.56789"));
+        order.setDay(new Date());
         order.setCommodities(commodities);
 
         Commodity commodity = new Commodity();
@@ -142,9 +151,12 @@ public class SessionTest {
     @Test
     public void test7() throws SQLException, IllegalAccessException {
         Order order = new Order();
+        order.setCode("C-001");
         order.setState(null);
-        order.setPrice(new BigDecimal("120.96"));
         order.setType("001");
+        order.setTime(new Date());
+        order.setPrice(new BigDecimal("99.56789"));
+        order.setDay(new Date());
         order.setCommodities(commodities);
 
         session.save(order, true);

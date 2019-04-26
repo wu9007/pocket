@@ -3,6 +3,7 @@ package org.hunter.pocket.query;
 import com.mysql.cj.jdbc.result.ResultSetImpl;
 import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.criteria.ParameterTranslator;
+import org.hunter.pocket.model.MapperFactory;
 import org.hunter.pocket.utils.FieldTypeStrategy;
 import org.hunter.pocket.utils.ReflectUtils;
 
@@ -139,7 +140,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
 
     private Object getEntity(ResultSet resultSet) throws InstantiationException, IllegalAccessException {
         Object result = clazz.newInstance();
-        List<Field> fields = Arrays.stream(reflectUtils.getFields(clazz))
+        List<Field> fields = Arrays.stream(MapperFactory.getRepositoryFields(clazz.getName()))
                 .filter(field -> this.sql.contains(field.getName()))
                 .collect(Collectors.toList());
         for (Field field : fields) {

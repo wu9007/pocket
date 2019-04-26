@@ -52,8 +52,14 @@ public abstract class BaseEntity implements Serializable {
                             return false;
                         }
                     } else {
-                        if (!ownV.equals(otherV)) {
-                            return false;
+                        if (ownV instanceof Number) {
+                            if (((Comparable) ownV).compareTo(otherV) != 0) {
+                                return false;
+                            }
+                        } else {
+                            if (!ownV.equals(otherV)) {
+                                return false;
+                            }
                         }
                     }
                 }

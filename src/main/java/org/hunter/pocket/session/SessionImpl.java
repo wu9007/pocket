@@ -127,12 +127,10 @@ public class SessionImpl extends AbstractSession {
                     field.setAccessible(true);
                     List details = (List) field.get(entity);
                     String mainFieldName = field.getName();
-                    String detailListEntityName = MapperFactory.getDetailClass(mainClassName, mainFieldName).getName();
-                    String upBridgeFiledName = MapperFactory.getManyToOneUpField(detailListEntityName, mainClassName);
-                    Field upBridgeField = MapperFactory.getField(mainClassName, upBridgeFiledName);
-                    Object upBridgeFieldValue = upBridgeField.get(entity);
+                    Class childClass = MapperFactory.getDetailClass(mainClassName, mainFieldName);
                     String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, mainFieldName);
-                    Field downBridgeField = MapperFactory.getField(detailListEntityName, downBridgeFieldName);
+                    Field downBridgeField = MapperFactory.getField(childClass.getName(), downBridgeFieldName);
+                    Object upBridgeFieldValue = MapperFactory.getUpBridgeFieldValue(entity, mainClassName, childClass);
                     downBridgeField.setAccessible(true);
                     for (Object detail : details) {
                         downBridgeField.set(detail, upBridgeFieldValue);
@@ -174,7 +172,7 @@ public class SessionImpl extends AbstractSession {
                 try {
                     preparedStatement = this.connection.prepareStatement(sql.toString());
                     this.statementApply(fields, entity, preparedStatement);
-                    preparedStatement.setObject(fields.length + 1, reflectUtils.getUuidValue(entity));
+                    preparedStatement.setObject(fields.length + 1, entity.getUuid());
                     effectRow = preparedStatement.executeUpdate();
                 } finally {
                     ConnectionManager.closeIO(preparedStatement, null);
@@ -202,13 +200,10 @@ public class SessionImpl extends AbstractSession {
                         Class childrenClass = MapperFactory.getDetailClass(mainClassName, field.getName());
                         String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, field.getName());
                         Field downBridgeField = MapperFactory.getField(childrenClass.getName(), downBridgeFieldName);
-                        String upBridgeFieldName = MapperFactory.getManyToOneUpField(childrenClass.getName(), mainClassName);
-                        Field upBridgeField = MapperFactory.getField(mainClassName, upBridgeFieldName);
-                        upBridgeField.setAccessible(true);
-                        Object upV = upBridgeField.get(entity);
+                        Object upBridgeFieldValue = MapperFactory.getUpBridgeFieldValue(entity, mainClassName, childrenClass);
                         downBridgeField.setAccessible(true);
                         for (BaseEntity detail : newbornDetails) {
-                            downBridgeField.set(detail, upV);
+                            downBridgeField.set(detail, upBridgeFieldValue);
                             this.save(detail, true);
                         }
                     }
@@ -242,11 +237,9 @@ public class SessionImpl extends AbstractSession {
                     String mainFieldName = field.getName();
                     Class childrenClass = MapperFactory.getDetailClass(mainClassName, mainFieldName);
                     String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, mainFieldName);
-                    String upBridgeFieldName = MapperFactory.getManyToOneUpField(childrenClass.getName(), mainClassName);
-                    Field upBridgeField = MapperFactory.getField(mainClassName, upBridgeFieldName);
-                    upBridgeField.setAccessible(true);
+                    Object upBridgeFieldValue = MapperFactory.getUpBridgeFieldValue(entity, mainClassName, childrenClass);
                     effectRow += this.createCriteria(childrenClass)
-                            .add(Restrictions.equ(downBridgeFieldName, upBridgeField.get(entity)))
+                            .add(Restrictions.equ(downBridgeFieldName, upBridgeFieldValue))
                             .delete();
                 }
             }
@@ -297,7 +290,7 @@ public class SessionImpl extends AbstractSession {
                     result = this.findOne(clazz, uuid);
                 }
             }
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | SQLException e) {
             Thread.currentThread().interrupt();
             throw new SessionException(e.getMessage(), e, true, true);
         } finally {
@@ -309,7 +302,7 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public Object findDirect(Class clazz, Serializable uuid) {
+    public Object findDirect(Class clazz, Serializable uuid) throws SQLException {
         Criteria criteria = this.createCriteria(clazz);
         criteria.add(Restrictions.equ("uuid", uuid));
         return criteria.unique(true);
@@ -338,7 +331,7 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public void removeCache(BaseEntity entity) {
-        String cacheKey = this.baseCacheUtils.generateKey(this.sessionName, entity.getClass(), reflectUtils.getUuidValue(entity));
+        String cacheKey = this.baseCacheUtils.generateKey(this.sessionName, entity.getClass(), entity.getUuid());
         this.baseCacheUtils.delete(cacheKey);
     }
 }

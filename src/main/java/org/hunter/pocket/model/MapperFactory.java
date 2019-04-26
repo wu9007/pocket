@@ -1,7 +1,6 @@
 package org.hunter.pocket.model;
 
 import org.hunter.pocket.annotation.Entity;
-import org.hunter.pocket.annotation.OneToMany;
 import org.hunter.pocket.constant.AnnotationType;
 import org.springframework.context.ApplicationContext;
 
@@ -227,6 +226,22 @@ public class MapperFactory {
      */
     public static String getManyToOneUpField(String ownClassName, String upClassName) {
         return ENTITY_MAPPER_POOL.get(ownClassName).getManyToOneUpMapper().get(upClassName);
+    }
+
+    /**
+     * 获取字表关联的主表字段值
+     *
+     * @param entity        main data
+     * @param mainClassName main class name
+     * @param childClass    child class name
+     * @return main field name
+     * @throws IllegalAccessException e
+     */
+    public static Object getUpBridgeFieldValue(BaseEntity entity, String mainClassName, Class childClass) throws IllegalAccessException {
+        String upBridgeFiledName = MapperFactory.getManyToOneUpField(childClass.getName(), mainClassName);
+        Field upBridgeField = MapperFactory.getField(mainClassName, upBridgeFiledName);
+        upBridgeField.setAccessible(true);
+        return upBridgeField.get(entity);
     }
 
     /**

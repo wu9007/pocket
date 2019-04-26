@@ -44,8 +44,8 @@ public class QueryTest {
     @Test
     public void test1() throws SQLException {
         SQLQuery query = this.session.createSQLQuery("select uuid as uuid,code as code,price as price from tbl_order where uuid = :uuid", Order.class);
-        Order order = (Order) query.setParameter("uuid", "10110110").unique();
-        System.out.println(order.getCode());
+        Order order = (Order) query.setParameter("uuid", "1011010").unique();
+        System.out.println(order.getPrice());
     }
 
     @Test
@@ -59,7 +59,7 @@ public class QueryTest {
     public void test3() throws SQLException {
         SQLQuery query = this.session.createSQLQuery("select uuid,code,price from tbl_order", Order.class);
         List<Order> orders = query.limit(0, 5).list();
-        orders.forEach(order -> System.out.println(order.getCode()));
+        orders.forEach(order -> System.out.println(order.getPrice()));
     }
 
     @Test
