@@ -125,11 +125,12 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public List list(boolean cascade) {
-        List result = this.list();
-        if (cascade) {
-            if (result.size() > 0) {
-                for (Object entity : result) {
-                    this.applyChildren((BaseEntity) entity);
+        List<BaseEntity> result = this.list();
+        if (result.size() > 0 && cascade) {
+            Field[] fields = MapperFactory.getOneToMayFields(this.clazz.getName());
+            if (fields.length > 0) {
+                for (BaseEntity entity : result) {
+                    this.applyChildren(entity, fields);
                 }
             }
         }
@@ -168,12 +169,15 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public Object unique(boolean cascade) throws SQLException {
-        BaseEntity obj = (BaseEntity) this.unique();
-        if (obj != null && cascade) {
-            this.applyChildren(obj);
+        BaseEntity entity = (BaseEntity) this.unique();
+        if (entity != null && cascade) {
+            Field[] fields = MapperFactory.getOneToMayFields(this.clazz.getName());
+            if (fields.length > 0) {
+                this.applyChildren(entity, fields);
+            }
         }
         this.cleanAll();
-        return obj;
+        return entity;
     }
 
     @Override
@@ -233,34 +237,31 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
      *
      * @param entity 实体
      */
-    private void applyChildren(BaseEntity entity) {
-        String uuid = entity.getUuid();
-        Field[] fields = MapperFactory.getOneToMayFields(entity.getClass().getName());
-        if (uuid != null && fields.length > 0) {
+    private void applyChildren(BaseEntity entity, Field[] fields) {
+        if (fields.length > 0) {
             for (Field field : fields) {
                 field.setAccessible(true);
                 try {
-                    field.set(entity, this.getChildren(field, entity));
+                    String mainClassName = entity.getClass().getName();
+                    String mainFieldName = field.getName();
+                    Class childClass = MapperFactory.getDetailClass(mainClassName, mainFieldName);
+                    String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, mainFieldName);
+                    Object upFieldValue = MapperFactory.getUpBridgeFieldValue(entity, mainClassName, childClass);
+                    Criteria criteria = new CriteriaImpl(childClass, connection, databaseConfig)
+                            .add(Restrictions.equ(downBridgeFieldName, upFieldValue));
+                    List<BaseEntity> details = criteria.list();
+                    field.set(entity, details);
+                    Field[] detailFields = MapperFactory.getOneToMayFields(childClass.getName());
+                    if (detailFields.length > 0) {
+                        for (BaseEntity detail : details) {
+                            this.applyChildren(detail, detailFields);
+                        }
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     throw new CriteriaException(e.getMessage());
                 }
             }
-        }
-    }
-
-    private Collection getChildren(Field field, BaseEntity entity) {
-        String mainClassName = entity.getClass().getName();
-        String mainFieldName = field.getName();
-        Class childClass = MapperFactory.getDetailClass(mainClassName, mainFieldName);
-        String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, mainFieldName);
-        try {
-            Object upFieldValue = MapperFactory.getUpBridgeFieldValue(entity, mainClassName, childClass);
-            return new CriteriaImpl(childClass, connection, databaseConfig)
-                    .add(Restrictions.equ(downBridgeFieldName, upFieldValue))
-                    .list();
-        } catch (IllegalAccessException e) {
-            throw new CriteriaException(e.getMessage());
         }
     }
 
