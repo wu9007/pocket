@@ -1,6 +1,5 @@
 package org.hunter.pocket.session;
 
-import org.hunter.pocket.model.BaseEntity;
 import org.hunter.pocket.session.actions.BuildDictionary;
 import org.hunter.pocket.session.actions.BuildTransaction;
 import org.hunter.pocket.session.actions.OperateDictionary;
@@ -10,11 +9,5 @@ import org.hunter.pocket.session.actions.OperateDictionary;
  */
 
 public interface Session extends BuildDictionary, OperateDictionary, BuildTransaction {
-
-    /**
-     * 删除该数据的缓存
-     *
-     * @param entity 实体对象
-     */
-    void removeCache(BaseEntity entity);
+    //TODO 缓存实现方式  待定
 }
