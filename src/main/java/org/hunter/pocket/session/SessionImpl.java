@@ -233,13 +233,13 @@ public class SessionImpl extends AbstractSession {
             Field[] fields = MapperFactory.getOneToMayFields(mainClassName);
             if (fields.length > 0) {
                 for (Field field : fields) {
-                    String mainFieldName = field.getName();
-                    Class childrenClass = MapperFactory.getDetailClass(mainClassName, mainFieldName);
-                    String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, mainFieldName);
-                    Object upBridgeFieldValue = MapperFactory.getUpBridgeFieldValue(entity, mainClassName, childrenClass);
-                    effectRow += this.createCriteria(childrenClass)
-                            .add(Restrictions.equ(downBridgeFieldName, upBridgeFieldValue))
-                            .delete();
+                    field.setAccessible(true);
+                    List<BaseEntity> details = (List<BaseEntity>) field.get(entity);
+                    if (details != null) {
+                        for (BaseEntity detail : details) {
+                            effectRow += this.delete(detail);
+                        }
+                    }
                 }
             }
 
