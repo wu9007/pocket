@@ -167,7 +167,7 @@ public class SessionTest {
 
         session.save(order, true);
 
-        order = (Order) session.findOne(Order.class, order.getUuid());
+        order = (Order) session.findDirect(Order.class, order.getUuid());
         List<Commodity> details = order.getCommodities();
         details.remove(0);
         details.get(0).setType("00000");

@@ -175,7 +175,12 @@ public class CriteriaTest {
         order.setDay(new Date());
         this.session.save(order);
         PocketExecutor.execute(executor, 500, () -> {
-            Order repositoryOrder = (Order) session.findOne(Order.class, order.getUuid());
+            Order repositoryOrder = null;
+            try {
+                repositoryOrder = (Order) session.findOne(Order.class, order.getUuid());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
             System.out.println(repositoryOrder.getCode() + "=======================");
         });
         this.session.delete(order);

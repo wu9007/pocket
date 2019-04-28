@@ -7,7 +7,6 @@ import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.criteria.Criteria;
 import org.hunter.pocket.criteria.CriteriaImpl;
 import org.hunter.pocket.criteria.Restrictions;
-import org.hunter.pocket.exception.SessionException;
 import org.hunter.pocket.model.DetailInductiveBox;
 import org.hunter.pocket.model.MapperFactory;
 import org.hunter.pocket.model.BaseEntity;
@@ -33,8 +32,6 @@ import java.util.List;
 public class SessionImpl extends AbstractSession {
     private final Logger logger = LoggerFactory.getLogger(SessionImpl.class);
     private static final String IDENTIFICATION = "UUID";
-    private static final String CACHE_LOCK = "CACHE_INTO_MONITOR";
-    private static final String CACHE_UNLOCK = "CACHE_ESC_MONITOR";
     private static final String OPEN_LOCK = "OPEN_MONITOR";
     private static final String CLOSE_LOCK = "CLOSE_MONITOR";
     private static final String TRANSACTION_LOCK = "TRANSACTION_MONITOR";
@@ -112,6 +109,18 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
+    public Object findOne(Class clazz, Serializable uuid) throws SQLException {
+        return this.findDirect(clazz, uuid);
+    }
+
+    @Override
+    public Object findDirect(Class clazz, Serializable uuid) throws SQLException {
+        Criteria criteria = this.createCriteria(clazz);
+        criteria.add(Restrictions.equ("uuid", uuid));
+        return criteria.unique(true);
+    }
+
+    @Override
     public int save(BaseEntity entity) throws SQLException {
         return super.saveEntity(entity, true);
     }
@@ -168,7 +177,6 @@ public class SessionImpl extends AbstractSession {
                 } finally {
                     ConnectionManager.closeIO(preparedStatement, null);
                 }
-                this.removeCache(entity);
             }
         }
         return effectRow;
@@ -252,51 +260,8 @@ public class SessionImpl extends AbstractSession {
             } finally {
                 ConnectionManager.closeIO(preparedStatement, null);
             }
-            this.removeCache(entity);
         }
         return effectRow;
-    }
-
-    @Override
-    public Object findOne(Class clazz, Serializable uuid) {
-        //TODO 使用cache替代redis
-        String cacheKey = this.baseCacheUtils.generateKey(this.sessionName, clazz, uuid);
-        Object result = this.baseCacheUtils.getObj(cacheKey);
-        if (result != null) {
-            return result;
-        }
-
-        boolean lock = false;
-        try {
-            lock = this.baseCacheUtils.getMapLock().putIfAbsent(cacheKey, cacheKey) == null;
-            if (lock) {
-                result = this.findDirect(clazz, uuid);
-                this.baseCacheUtils.set(cacheKey, result, 10L);
-                synchronized (CACHE_UNLOCK) {
-                    CACHE_UNLOCK.notifyAll();
-                }
-            } else {
-                synchronized (CACHE_LOCK) {
-                    CACHE_LOCK.wait(10);
-                    result = this.findOne(clazz, uuid);
-                }
-            }
-        } catch (InterruptedException | SQLException e) {
-            Thread.currentThread().interrupt();
-            throw new SessionException(e.getMessage(), e, true, true);
-        } finally {
-            if (lock) {
-                this.baseCacheUtils.getMapLock().remove(cacheKey);
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public Object findDirect(Class clazz, Serializable uuid) throws SQLException {
-        Criteria criteria = this.createCriteria(clazz);
-        criteria.add(Restrictions.equ("uuid", uuid));
-        return criteria.unique(true);
     }
 
     @Override
@@ -318,11 +283,5 @@ public class SessionImpl extends AbstractSession {
         resultSet.close();
         preparedStatement.close();
         return uuid;
-    }
-
-    @Override
-    public void removeCache(BaseEntity entity) {
-        String cacheKey = this.baseCacheUtils.generateKey(this.sessionName, entity.getClass(), entity.getUuid());
-        this.baseCacheUtils.delete(cacheKey);
     }
 }

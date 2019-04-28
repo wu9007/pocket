@@ -27,6 +27,25 @@ public interface OperateDictionary {
      */
     void close();
 
+
+    /**
+     * 查询对象
+     *
+     * @param clazz 类类型
+     * @param uuid  数据标识
+     * @return 实体对象
+     */
+    Object findOne(Class clazz, Serializable uuid) throws SQLException;
+
+    /**
+     * 强制通过数据库查询数据
+     *
+     * @param clazz 类类型
+     * @param uuid  数据标识
+     * @return 实体对象
+     */
+    Object findDirect(Class clazz, Serializable uuid) throws SQLException;
+
     /**
      * 保存(NULL同样进行保存)
      *
@@ -93,24 +112,6 @@ public interface OperateDictionary {
      * @throws SQLException 语句异常
      */
     int delete(BaseEntity entity) throws SQLException, IllegalAccessException;
-
-    /**
-     * 查询对象
-     *
-     * @param clazz 类类型
-     * @param uuid  数据标识
-     * @return 实体对象
-     */
-    Object findOne(Class clazz, Serializable uuid);
-
-    /**
-     * 强制通过数据库查询数据
-     *
-     * @param clazz 类类型
-     * @param uuid  数据标识
-     * @return 实体对象
-     */
-    Object findDirect(Class clazz, Serializable uuid) throws SQLException;
 
     /**
      * 获取最大数据标识
