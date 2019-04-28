@@ -236,8 +236,8 @@ public class CriteriaTest {
     public void test21() throws SQLException {
         Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.like("type", "001"));
-        Order order = (Order) criteria.unique(true);
-        System.out.println(order.getCode());
+        List<Order> orders = criteria.list(true);
+        System.out.println(orders.size());
     }
 
     @Test
