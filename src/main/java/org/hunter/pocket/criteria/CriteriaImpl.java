@@ -154,7 +154,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                     e.printStackTrace();
                 }
             } else {
-                return null;
+                throw new CriteriaException("Data is not unique, and multiple data are returned.");
             }
         } finally {
             ConnectionManager.closeIO(preparedStatement, resultSet);
