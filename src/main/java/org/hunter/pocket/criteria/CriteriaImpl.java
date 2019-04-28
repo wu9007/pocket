@@ -1,5 +1,6 @@
 package org.hunter.pocket.criteria;
 
+import com.mysql.cj.jdbc.result.ResultSetImpl;
 import org.hunter.pocket.connect.ConnectionManager;
 import org.hunter.pocket.config.DatabaseNodeConfig;
 import org.hunter.pocket.constant.CommonSql;
@@ -144,6 +145,10 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         try {
             preparedStatement = getPreparedStatement();
             resultSet = preparedStatement.executeQuery();
+            int resultRowCount = ((ResultSetImpl) resultSet).getRows().size();
+            if (resultRowCount > 1) {
+                throw new CriteriaException("Data is not unique, and multiple data are returned.");
+            }
             if (resultSet.next()) {
                 try {
                     entity = (BaseEntity) clazz.newInstance();
@@ -153,8 +158,6 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                 } catch (InstantiationException | IllegalAccessException e) {
                     e.printStackTrace();
                 }
-            } else {
-                throw new CriteriaException("Data is not unique, and multiple data are returned.");
             }
         } finally {
             ConnectionManager.closeIO(preparedStatement, resultSet);
