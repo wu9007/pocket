@@ -116,12 +116,14 @@ abstract class AbstractSession implements Session {
                 Field downBridgeField = MapperFactory.getField(childClass.getName(), downBridgeFieldName);
                 Object upBridgeFieldValue = MapperFactory.getUpBridgeFieldValue(entity, mainClassName, childClass);
                 downBridgeField.setAccessible(true);
-                for (Object detail : details) {
-                    downBridgeField.set(detail, upBridgeFieldValue);
-                    this.saveEntity((BaseEntity) detail, nullAble);
-                    this.saveDetails((BaseEntity) detail, nullAble);
+                if (details != null) {
+                    for (Object detail : details) {
+                        downBridgeField.set(detail, upBridgeFieldValue);
+                        this.saveEntity((BaseEntity) detail, nullAble);
+                        this.saveDetails((BaseEntity) detail, nullAble);
+                    }
+                    effectRow += details.size();
                 }
-                effectRow += details.size();
             }
         }
         return effectRow;
