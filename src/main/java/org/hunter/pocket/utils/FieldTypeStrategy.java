@@ -12,6 +12,8 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -147,6 +149,14 @@ public class FieldTypeStrategy {
                 return null;
             }
         });
+        RESULT_STRATEGY_POOL.put(LocalDate.class.getName(), (resultSet, columnName) -> {
+            try {
+                return resultSet.getDate(columnName);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
         RESULT_STRATEGY_POOL.put(Boolean.class.getName(), (resultSet, columnName) -> {
             try {
                 Object object = resultSet.getObject(columnName);
@@ -254,6 +264,26 @@ public class FieldTypeStrategy {
             SqlBean sqlBean = value.getSqlBean();
             try {
                 preparedStatement.setLong(value.getIndex(), (Long) sqlBean.getTarget());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+        PREPARED_STRATEGY_POOL.put(Date.class.getName(), (value) -> {
+            PreparedStatement preparedStatement = value.getPreparedStatement();
+            SqlBean sqlBean = value.getSqlBean();
+            try {
+                Date date = (Date) sqlBean.getTarget();
+                preparedStatement.setTimestamp(value.getIndex(), new java.sql.Timestamp(date.getTime()));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+        PREPARED_STRATEGY_POOL.put(LocalDate.class.getName(), (value) -> {
+            PreparedStatement preparedStatement = value.getPreparedStatement();
+            SqlBean sqlBean = value.getSqlBean();
+            try {
+                LocalDate date = (LocalDate) sqlBean.getTarget();
+                preparedStatement.setDate(value.getIndex(), java.sql.Date.valueOf(date));
             } catch (SQLException e) {
                 e.printStackTrace();
             }
