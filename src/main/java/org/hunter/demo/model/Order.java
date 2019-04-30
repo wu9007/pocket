@@ -8,6 +8,8 @@ import org.hunter.pocket.constant.JoinMethod;
 import org.hunter.pocket.model.BaseEntity;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -23,9 +25,9 @@ public class Order extends BaseEntity {
     @Column(name = "PRICE")
     private BigDecimal price;
     @Column(name = "DAY")
-    private Date day;
+    private LocalDate day;
     @Column(name = "TIME")
-    private Date time;
+    private LocalDateTime time;
     @Column(name = "STATE")
     private Boolean state;
     @Column(name = "SORT")
@@ -69,19 +71,19 @@ public class Order extends BaseEntity {
         this.commodities = commodities;
     }
 
-    public Date getDay() {
+    public LocalDate getDay() {
         return day;
     }
 
-    public void setDay(Date day) {
+    public void setDay(LocalDate day) {
         this.day = day;
     }
 
-    public Date getTime() {
+    public LocalDateTime getTime() {
         return time;
     }
 
-    public void setTime(Date time) {
+    public void setTime(LocalDateTime time) {
         this.time = time;
     }
 

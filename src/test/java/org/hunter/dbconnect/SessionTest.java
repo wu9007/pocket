@@ -16,6 +16,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -59,9 +61,9 @@ public class SessionTest {
         Order order = new Order();
         order.setCode("F-00x");
         order.setType("001");
-        order.setTime(new Date());
+        order.setTime(LocalDateTime.now());
         order.setPrice(new BigDecimal("99.56789"));
-        order.setDay(new Date());
+        order.setDay(LocalDate.now());
         this.session.shallowSave(order);
         Order repositoryOrder = (Order) this.session.findDirect(Order.class, order.getUuid());
         System.out.println(repositoryOrder.getState());
@@ -74,9 +76,9 @@ public class SessionTest {
         Order order = new Order();
         order.setCode("F-00x");
         order.setType("001");
-        order.setTime(new Date());
+        order.setTime(LocalDateTime.now());
         order.setPrice(new BigDecimal("99.56789"));
-        order.setDay(new Date());
+        order.setDay(LocalDate.now());
         this.session.save(order);
         order.setType("002");
         session.update(order);
@@ -94,9 +96,9 @@ public class SessionTest {
         Order order = new Order();
         order.setCode("C-001");
         order.setType("001");
-        order.setTime(new Date());
+        order.setTime(LocalDateTime.now());
         order.setPrice(new BigDecimal("99.56789"));
-        order.setDay(new Date());
+        order.setDay(LocalDate.now());
         order.setCommodities(commodities);
         System.out.println(session.save(order, true));
     }
@@ -107,9 +109,9 @@ public class SessionTest {
         order.setCode("C-001");
         order.setState(null);
         order.setType("001");
-        order.setTime(new Date());
+        order.setTime(LocalDateTime.now());
         order.setPrice(new BigDecimal("99.56789"));
-        order.setDay(new Date());
+        order.setDay(LocalDate.now());
         order.setCommodities(commodities);
         System.out.println(session.save(order));
         commodities.parallelStream().forEach(commodity1 -> {
@@ -128,9 +130,9 @@ public class SessionTest {
         order.setCode("C-001");
         order.setState(null);
         order.setType("001");
-        order.setTime(new Date());
+        order.setTime(LocalDateTime.now());
         order.setPrice(new BigDecimal("99.56789"));
-        order.setDay(new Date());
+        order.setDay(LocalDate.now());
         order.setCommodities(commodities);
 
         Commodity commodity = new Commodity();
@@ -160,9 +162,9 @@ public class SessionTest {
         order.setCode("C-001");
         order.setState(null);
         order.setType("001");
-        order.setTime(new Date());
+        order.setTime(LocalDateTime.now());
         order.setPrice(new BigDecimal("99.56789"));
-        order.setDay(new Date());
+        order.setDay(LocalDate.now());
         order.setCommodities(commodities);
 
         session.save(order, true);

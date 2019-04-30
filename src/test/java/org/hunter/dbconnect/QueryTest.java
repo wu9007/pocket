@@ -15,6 +15,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -47,9 +49,9 @@ public class QueryTest {
         Order order = new Order();
         order.setCode("F-00x");
         order.setType("001");
-        order.setTime(new Date());
+        order.setTime(LocalDateTime.now());
         order.setPrice(new BigDecimal("99.56789"));
-        order.setDay(new Date());
+        order.setDay(LocalDate.now());
         this.session.save(order);
         SQLQuery query = this.session.createSQLQuery("select uuid as uuid,code as code,price as price from tbl_order where uuid = :uuid", Order.class);
         Order repositoryOrder = (Order) query.setParameter("uuid", order.getUuid()).unique();

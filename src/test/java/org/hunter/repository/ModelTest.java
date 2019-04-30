@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 
 @RunWith(SpringRunner.class)
@@ -29,7 +30,7 @@ public class ModelTest {
         order.setUuid("001");
         order.setCode("002");
         order.setPrice(new BigDecimal("11.2"));
-        order.setDay(new Date(new Date().getTime() - 10000));
+        order.setDay(LocalDate.now());
         order.setState(false);
         order.setSort(2);
 
