@@ -21,6 +21,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -63,8 +65,8 @@ public class CriteriaTest {
     @Test
     public void test2() throws SQLException {
         Order order = Order.newInstance("C-001", new BigDecimal("50.25"));
-        order.setDay(new Date());
-        order.setTime(new Date());
+        order.setDay(LocalDate.now());
+        order.setTime(LocalDateTime.now());
         order.setState(false);
         order.setType("001");
         this.session.save(order);
@@ -83,8 +85,8 @@ public class CriteriaTest {
     @Test
     public void test4() throws SQLException {
         Order order = Order.newInstance("C-001", new BigDecimal("50.25"));
-        order.setDay(new Date());
-        order.setTime(new Date());
+        order.setDay(LocalDate.now());
+        order.setTime(LocalDateTime.now());
         this.session.save(order);
         Order newOrder = (Order) this.session.findOne(Order.class, order.getUuid());
         newOrder.setPrice(newOrder.getPrice().multiply(new BigDecimal("1.5")));
@@ -170,9 +172,9 @@ public class CriteriaTest {
         Order order = new Order();
         order.setCode("F-00x");
         order.setType("001");
-        order.setTime(new Date());
+        order.setTime(LocalDateTime.now());
         order.setPrice(new BigDecimal("99.56789"));
-        order.setDay(new Date());
+        order.setDay(LocalDate.now());
         this.session.save(order);
         PocketExecutor.execute(executor, 500, () -> {
             Order repositoryOrder = null;

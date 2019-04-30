@@ -151,7 +151,15 @@ public class FieldTypeStrategy {
         });
         RESULT_STRATEGY_POOL.put(LocalDate.class.getName(), (resultSet, columnName) -> {
             try {
-                return resultSet.getDate(columnName);
+                return resultSet.getDate(columnName).toLocalDate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
+        RESULT_STRATEGY_POOL.put(LocalDateTime.class.getName(), (resultSet, columnName) -> {
+            try {
+                return resultSet.getTimestamp(columnName).toLocalDateTime();
             } catch (SQLException e) {
                 e.printStackTrace();
                 return null;
@@ -288,12 +296,12 @@ public class FieldTypeStrategy {
                 e.printStackTrace();
             }
         });
-        PREPARED_STRATEGY_POOL.put(Date.class.getName(), (value) -> {
+        PREPARED_STRATEGY_POOL.put(LocalDateTime.class.getName(), (value) -> {
             PreparedStatement preparedStatement = value.getPreparedStatement();
             SqlBean sqlBean = value.getSqlBean();
             try {
-                Date date = (Date) sqlBean.getTarget();
-                preparedStatement.setTimestamp(value.getIndex(), new java.sql.Timestamp(date.getTime()));
+                LocalDateTime dateTime = (LocalDateTime) sqlBean.getTarget();
+                preparedStatement.setTimestamp(value.getIndex(), java.sql.Timestamp.valueOf(dateTime));
             } catch (SQLException e) {
                 e.printStackTrace();
             }
