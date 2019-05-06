@@ -50,7 +50,7 @@ public interface OperateDictionary {
      *
      * @return 影响行数
      */
-    long delete() throws SQLException;
+    int delete() throws SQLException;
 
     /**
      * 获取一条数据

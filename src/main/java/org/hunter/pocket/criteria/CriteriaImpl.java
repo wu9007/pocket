@@ -210,7 +210,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
-    public long delete() throws SQLException {
+    public int delete() throws SQLException {
         completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildDeleteSql(databaseConfig));
         PreparedStatement preparedStatement = null;
         try {
