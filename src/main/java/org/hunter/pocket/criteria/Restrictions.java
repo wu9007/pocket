@@ -60,6 +60,14 @@ public class Restrictions implements SqlBean {
         return new Restrictions(source, SqlOperateTypes.LTE, target);
     }
 
+    public static Restrictions isNull(String source) {
+        return new Restrictions(source, SqlOperateTypes.IS_NULL, null);
+    }
+
+    public static Restrictions isNotNull(String source) {
+        return new Restrictions(source, SqlOperateTypes.IS_NOT_NULL, null);
+    }
+
     public static Restrictions like(String source, Object target) {
         return new Restrictions(source, SqlOperateTypes.LIKE, target);
     }
@@ -85,7 +93,7 @@ public class Restrictions implements SqlBean {
         return target;
     }
 
-    private Restrictions getLeftRestrictions() {
+    Restrictions getLeftRestrictions() {
         return leftRestrictions;
     }
 
@@ -117,14 +125,15 @@ public class Restrictions implements SqlBean {
                     sql.append(join.joinTableSurname())
                             .append(CommonSql.DOT)
                             .append(join.destinationColumn())
-                            .append(this.sqlFactory.getSql(databaseConfig.getDriverName(), this.getSqlOperate()))
-                            .append(CommonSql.PLACEHOLDER);
+                            .append(this.sqlFactory.getSql(databaseConfig.getDriverName(), this.getSqlOperate()));
                 } else {
                     sql.append(MapperFactory.getTableName(clazz.getName()))
                             .append(CommonSql.DOT)
                             .append(MapperFactory.getRepositoryColumnName(clazz.getName(), this.getSource()))
-                            .append(this.sqlFactory.getSql(databaseConfig.getDriverName(), this.getSqlOperate()))
-                            .append(CommonSql.PLACEHOLDER);
+                            .append(this.sqlFactory.getSql(databaseConfig.getDriverName(), this.getSqlOperate()));
+                }
+                if (this.getTarget() != null) {
+                    sql.append(CommonSql.PLACEHOLDER);
                 }
             } else {
                 sql.append(CommonSql.LEFT_BRACKET)
