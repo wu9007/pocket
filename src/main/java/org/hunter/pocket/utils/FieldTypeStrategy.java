@@ -171,7 +171,7 @@ public class FieldTypeStrategy {
                 if (object == null) {
                     return null;
                 } else {
-                    return (int) object != 0;
+                    return Integer.parseInt(String.valueOf(object)) != 0;
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
