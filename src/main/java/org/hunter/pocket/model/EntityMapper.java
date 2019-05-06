@@ -219,7 +219,7 @@ class EntityMapper {
                 joinSqlList.add(join.joinMethod().getId()
                         + joinTableName + CommonSql.AS + joinTableSurname
                         + CommonSql.ON
-                        + tableName + CommonSql.DOT + join.columnName()
+                        + (join.columnName().contains(CommonSql.DOT) ? join.columnName() : tableName + CommonSql.DOT + join.columnName())
                         + CommonSql.EQUAL_TO
                         + joinTableSurname + CommonSql.DOT + bridgeColumnName);
                 pushBusiness(businessFields, keyBusinessFields, businessMapper, field, filedName, join.businessName(), join.flagBusiness());
