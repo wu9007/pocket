@@ -25,6 +25,7 @@ public class SqlFactory {
         mysqlSqlOperateTypes.put(SqlOperateTypes.IS_NULL, " IS NULL ");
         mysqlSqlOperateTypes.put(SqlOperateTypes.IS_NOT_NULL, " IS NOT NULL ");
         mysqlSqlOperateTypes.put(SqlOperateTypes.IN, " IN ");
+        mysqlSqlOperateTypes.put(SqlOperateTypes.NOT_IN, " NOT IN ");
         mysqlSqlOperateTypes.put(SqlOperateTypes.OR, " OR ");
         SQL_POOL.put(DatasourceDriverTypes.MYSQL_DRIVER, mysqlSqlOperateTypes);
     }

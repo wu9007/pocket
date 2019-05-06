@@ -277,8 +277,8 @@ public class CriteriaTest {
     public void test25() throws SQLException {
         Criteria criteria = this.session.createCriteria(Order.class);
         List<String> types = Arrays.asList("002", "003", "004");
-        List<Order> orders = criteria.add(Restrictions.in("type", types))
+        List<Order> orders = criteria.add(Restrictions.notIn("type", types))
                 .list();
-        System.out.println(orders);
+        System.out.println(orders.size());
     }
 }

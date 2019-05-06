@@ -85,6 +85,10 @@ public class Restrictions implements SqlBean {
         return new Restrictions(source, SqlOperateTypes.IN, target);
     }
 
+    public static Restrictions notIn(String source, List target) {
+        return new Restrictions(source, SqlOperateTypes.NOT_IN, target);
+    }
+
     public static Restrictions and(Restrictions leftRestrictions, Restrictions rightRestrictions) {
         return new Restrictions(leftRestrictions, SqlOperateTypes.AND, rightRestrictions);
     }
@@ -145,7 +149,7 @@ public class Restrictions implements SqlBean {
                             .append(this.sqlFactory.getSql(databaseConfig.getDriverName(), this.getSqlOperate()));
                 }
                 if (this.getTarget() != null) {
-                    if (SqlOperateTypes.IN.equals(this.getSqlOperate())) {
+                    if (SqlOperateTypes.IN.equals(this.getSqlOperate()) || SqlOperateTypes.NOT_IN.equals(this.getSqlOperate())) {
                         List targets = (List) this.getTarget();
                         sql.append((targets).stream().map(item -> CommonSql.PLACEHOLDER).collect(Collectors.joining(",", "(", ")")));
                     } else {

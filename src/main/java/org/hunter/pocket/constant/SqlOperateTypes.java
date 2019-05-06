@@ -14,6 +14,7 @@ public interface SqlOperateTypes {
     String IS_NULL = "isNull";
     String IS_NOT_NULL = "isNotNull";
     String IN = "in";
+    String NOT_IN = "notIn";
     String AND = "and";
     String OR = "or";
     String MAX = "max";
