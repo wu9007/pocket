@@ -9,6 +9,7 @@ import org.hunter.pocket.exception.CriteriaException;
 import org.hunter.pocket.model.MapperFactory;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hunter.pocket.exception.ErrorMessage.POCKET_ILLEGAL_FIELD_EXCEPTION;
 
@@ -19,7 +20,7 @@ public class Restrictions implements SqlBean {
     private final SqlFactory sqlFactory = SqlFactory.getInstance();
 
     private String source;
-    private final String sqlOperate;
+    private String sqlOperate;
     private Object target;
     private Restrictions leftRestrictions;
     private Restrictions rightRestrictions;
@@ -34,6 +35,14 @@ public class Restrictions implements SqlBean {
         this.leftRestrictions = leftRestrictions;
         this.sqlOperate = sqlOperate;
         this.rightRestrictions = rightRestrictions;
+    }
+
+    private Restrictions(Object target) {
+        this.target = target;
+    }
+
+    static Restrictions newParamInstance(Object target) {
+        return new Restrictions(target);
     }
 
     public static Restrictions equ(String source, Object target) {
@@ -60,6 +69,10 @@ public class Restrictions implements SqlBean {
         return new Restrictions(source, SqlOperateTypes.LTE, target);
     }
 
+    public static Restrictions like(String source, Object target) {
+        return new Restrictions(source, SqlOperateTypes.LIKE, target);
+    }
+
     public static Restrictions isNull(String source) {
         return new Restrictions(source, SqlOperateTypes.IS_NULL, null);
     }
@@ -68,8 +81,8 @@ public class Restrictions implements SqlBean {
         return new Restrictions(source, SqlOperateTypes.IS_NOT_NULL, null);
     }
 
-    public static Restrictions like(String source, Object target) {
-        return new Restrictions(source, SqlOperateTypes.LIKE, target);
+    public static Restrictions in(String source, List target) {
+        return new Restrictions(source, SqlOperateTypes.IN, target);
     }
 
     public static Restrictions and(Restrictions leftRestrictions, Restrictions rightRestrictions) {
@@ -118,7 +131,6 @@ public class Restrictions implements SqlBean {
     String parseSql(Class clazz, DatabaseNodeConfig databaseConfig) {
         StringBuilder sql = new StringBuilder();
         try {
-
             if (this.getLeftRestrictions() == null) {
                 if (AnnotationType.JOIN.equals(MapperFactory.getAnnotationType(clazz.getName(), this.getSource()))) {
                     Join join = (Join) MapperFactory.getAnnotation(clazz.getName(), this.getSource());
@@ -133,7 +145,12 @@ public class Restrictions implements SqlBean {
                             .append(this.sqlFactory.getSql(databaseConfig.getDriverName(), this.getSqlOperate()));
                 }
                 if (this.getTarget() != null) {
-                    sql.append(CommonSql.PLACEHOLDER);
+                    if (SqlOperateTypes.IN.equals(this.getSqlOperate())) {
+                        List targets = (List) this.getTarget();
+                        sql.append((targets).stream().map(item -> CommonSql.PLACEHOLDER).collect(Collectors.joining(",", "(", ")")));
+                    } else {
+                        sql.append(CommonSql.PLACEHOLDER);
+                    }
                 }
             } else {
                 sql.append(CommonSql.LEFT_BRACKET)

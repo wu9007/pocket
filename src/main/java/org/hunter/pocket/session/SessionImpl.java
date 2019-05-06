@@ -14,7 +14,6 @@ import org.hunter.pocket.query.ProcessQuery;
 import org.hunter.pocket.query.ProcessQueryImpl;
 import org.hunter.pocket.query.SQLQuery;
 import org.hunter.pocket.query.SQLQueryImpl;
-import org.hunter.pocket.cache.BaseCacheUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,8 +35,8 @@ public class SessionImpl extends AbstractSession {
     private static final String CLOSE_LOCK = "CLOSE_MONITOR";
     private static final String TRANSACTION_LOCK = "TRANSACTION_MONITOR";
 
-    SessionImpl(DatabaseNodeConfig databaseNodeConfig, String sessionName, BaseCacheUtils baseCacheUtils) {
-        super(databaseNodeConfig, sessionName, baseCacheUtils);
+    SessionImpl(DatabaseNodeConfig databaseNodeConfig, String sessionName) {
+        super(databaseNodeConfig, sessionName);
     }
 
     @Override

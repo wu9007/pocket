@@ -5,7 +5,6 @@ import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.criteria.ParameterTranslator;
 import org.hunter.pocket.model.MapperFactory;
 import org.hunter.pocket.utils.FieldTypeStrategy;
-import org.hunter.pocket.utils.ReflectUtils;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -28,7 +27,6 @@ import static org.hunter.pocket.constant.RegexString.SQL_PARAMETER_REGEX;
 public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
 
     private final FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
-    private final ReflectUtils reflectUtils = ReflectUtils.getInstance();
 
     public SQLQueryImpl(String sql, Connection connection) {
         super(sql, connection);
@@ -42,7 +40,6 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
     public Object unique() throws SQLException {
         ResultSet resultSet = execute(sql);
         if (resultSet.next()) {
-            List<String> columnNames = this.getColumnNames();
             if (clazz != null) {
                 try {
                     return getEntity(resultSet);
@@ -118,24 +115,6 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
             result.add(resultSet.getObject(index++));
         }
         return result.toArray();
-    }
-
-    private List<String> getColumnNames() {
-        String str = this.sql.replaceAll("\\s*", "");
-        String[] columnStrArray = str
-                .substring(str.toUpperCase().indexOf("SELECT") + 6, str.toUpperCase().indexOf("FROM"))
-                .split(CommonSql.COMMA);
-        return Arrays
-                .stream(columnStrArray)
-                .map(columnStr -> {
-                    int asIndex = columnStr.toUpperCase().indexOf("AS");
-                    if (asIndex > 0) {
-                        return columnStr.substring(asIndex + 2);
-                    } else {
-                        return columnStr;
-                    }
-                })
-                .collect(Collectors.toList());
     }
 
     private Object getEntity(ResultSet resultSet) throws InstantiationException, IllegalAccessException {

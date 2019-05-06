@@ -23,6 +23,8 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -266,7 +268,16 @@ public class CriteriaTest {
     public void test24() throws SQLException {
         Criteria criteria = this.session.createCriteria(Order.class);
         List<Order> orders = criteria.add(Restrictions.isNull("state"))
-                .add(Restrictions.equ("code","C-001"))
+                .add(Restrictions.equ("code", "C-001"))
+                .list();
+        System.out.println(orders);
+    }
+
+    @Test
+    public void test25() throws SQLException {
+        Criteria criteria = this.session.createCriteria(Order.class);
+        List<String> types = Arrays.asList("002", "003", "004");
+        List<Order> orders = criteria.add(Restrictions.in("type", types))
                 .list();
         System.out.println(orders);
     }

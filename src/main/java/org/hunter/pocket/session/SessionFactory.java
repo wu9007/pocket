@@ -4,7 +4,6 @@ import org.hunter.pocket.config.DatabaseConfig;
 import org.hunter.pocket.config.DatabaseNodeConfig;
 import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.constant.DatasourceDriverTypes;
-import org.hunter.pocket.cache.BaseCacheUtils;
 import org.hunter.pocket.exception.SessionException;
 
 import java.util.Arrays;
@@ -16,13 +15,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class SessionFactory {
     private static final Map<String, DatabaseNodeConfig> NODE_POOL = new ConcurrentHashMap<>(5);
-    private static BaseCacheUtils baseCacheUtils;
 
     private SessionFactory() {
     }
 
-    public static void register(DatabaseConfig databaseConfig, BaseCacheUtils cacheUtils) {
-        SessionFactory.baseCacheUtils = cacheUtils;
+    public static void register(DatabaseConfig databaseConfig) {
         databaseConfig.getNode().forEach(databaseNodeConfig -> {
             if (DatasourceDriverTypes.MYSQL_DRIVER.equals(databaseNodeConfig.getDriverName()) || DatasourceDriverTypes.ORACLE_DRIVER.equals(databaseNodeConfig.getDriverName())) {
                 Arrays.stream(databaseNodeConfig.getSession().split(CommonSql.COMMA))
@@ -46,6 +43,6 @@ public class SessionFactory {
      * @return session
      */
     public static Session getSession(String sessionName) {
-        return new SessionImpl(NODE_POOL.get(sessionName), sessionName, SessionFactory.baseCacheUtils);
+        return new SessionImpl(NODE_POOL.get(sessionName), sessionName);
     }
 }

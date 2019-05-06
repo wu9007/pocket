@@ -5,7 +5,6 @@ import org.hunter.pocket.connect.ConnectionManager;
 import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.model.BaseEntity;
 import org.hunter.pocket.model.MapperFactory;
-import org.hunter.pocket.cache.BaseCacheUtils;
 import org.hunter.pocket.utils.ReflectUtils;
 import org.hunter.pocket.uuid.UuidGeneratorFactory;
 import org.slf4j.Logger;
@@ -33,14 +32,12 @@ abstract class AbstractSession implements Session {
     final String sessionName;
     volatile Connection connection;
     Transaction transaction;
-    final BaseCacheUtils baseCacheUtils;
     final ReflectUtils reflectUtils = ReflectUtils.getInstance();
     private volatile Boolean closed = true;
 
-    AbstractSession(DatabaseNodeConfig databaseNodeConfig, String sessionName, BaseCacheUtils baseCacheUtils) {
+    AbstractSession(DatabaseNodeConfig databaseNodeConfig, String sessionName) {
         this.databaseNodeConfig = databaseNodeConfig;
         this.sessionName = sessionName;
-        this.baseCacheUtils = baseCacheUtils;
     }
 
     @Override
