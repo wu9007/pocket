@@ -261,4 +261,13 @@ public class CriteriaTest {
         criteria.add(Modern.set("type", "001"))
                 .update();
     }
+
+    @Test
+    public void test24() throws SQLException {
+        Criteria criteria = this.session.createCriteria(Order.class);
+        List<Order> orders = criteria.add(Restrictions.isNull("state"))
+                .add(Restrictions.equ("code","C-001"))
+                .list();
+        System.out.println(orders);
+    }
 }

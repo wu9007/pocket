@@ -22,6 +22,8 @@ public class SqlFactory {
         mysqlSqlOperateTypes.put(SqlOperateTypes.LT, " < ");
         mysqlSqlOperateTypes.put(SqlOperateTypes.GTE, " >= ");
         mysqlSqlOperateTypes.put(SqlOperateTypes.LTE, " <= ");
+        mysqlSqlOperateTypes.put(SqlOperateTypes.IS_NULL, " IS NULL ");
+        mysqlSqlOperateTypes.put(SqlOperateTypes.IS_NOT_NULL, " IS NOT NULL ");
         mysqlSqlOperateTypes.put(SqlOperateTypes.OR, " OR ");
         SQL_POOL.put(DatasourceDriverTypes.MYSQL_DRIVER, mysqlSqlOperateTypes);
     }

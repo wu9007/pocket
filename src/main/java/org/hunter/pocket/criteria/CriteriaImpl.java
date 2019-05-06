@@ -33,7 +33,9 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             throw new CriteriaException("No field name found in your Restrictions.");
         }
         this.restrictionsList.add(restrictions);
-        restrictions.pushTo(this.sortedRestrictionsList);
+        if (restrictions.getTarget() != null || restrictions.getLeftRestrictions() != null) {
+            restrictions.pushTo(this.sortedRestrictionsList);
+        }
         return this;
     }
 

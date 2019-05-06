@@ -11,6 +11,8 @@ public interface SqlOperateTypes {
     String LT = "lessThan";
     String GTE = "greaterThanOrEqual";
     String LTE = "lessThanOrEqual";
+    String IS_NULL = "isNull";
+    String IS_NOT_NULL = "isNotNull";
     String AND = "and";
     String OR = "or";
     String MAX = "max";
