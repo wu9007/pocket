@@ -39,10 +39,6 @@ abstract class AbstractCriteria {
         this.databaseConfig = databaseConfig;
     }
 
-    void before() {
-        this.showSql();
-    }
-
     void cleanAll() {
         this.cleanWithoutRestrictions();
         this.cleanRestrictions();
@@ -63,7 +59,7 @@ abstract class AbstractCriteria {
         this.restrictionsList = new LinkedList<>();
     }
 
-    private void showSql() {
+    void showSql() {
         if (this.databaseConfig.getShowSql()) {
             this.logger.info("SQL: {}", this.completeSql);
         }
