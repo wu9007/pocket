@@ -26,7 +26,7 @@ public class DetailInductiveBox {
     private int count;
 
     private DetailInductiveBox(List<BaseEntity> details, List<BaseEntity> olderDetails) {
-        if (details.size() > 0) {
+        if (details != null && details.size() > 0) {
             this.newborn = details.parallelStream()
                     .filter(detail -> detail.getUuid() == null)
                     .collect(Collectors.toList());
@@ -34,7 +34,7 @@ public class DetailInductiveBox {
             this.newborn = new ArrayList<>();
         }
         if (olderDetails != null) {
-            if (details.size() > 0) {
+            if (details != null && details.size() > 0) {
                 List<String> newDetailUuidList = details.stream()
                         .map(BaseEntity::getUuid)
                         .collect(Collectors.toList());
