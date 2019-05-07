@@ -69,9 +69,9 @@ abstract class AbstractSession implements Session {
         int effectRow;
         PreparedStatement preparedStatement = null;
         try {
-            String uuid = UuidGeneratorFactory.getInstance()
+            String uuid = entity.getUuid() == null ? UuidGeneratorFactory.getInstance()
                     .getUuidGenerator(MapperFactory.getUuidGenerator(clazz.getName()))
-                    .getUuid(entity.getClass(), this);
+                    .getUuid(entity.getClass(), this) : entity.getUuid();
             synchronized (SET_UUID_LOCK) {
                 entity.setUuid(uuid);
                 String sql = nullAble ? this.buildSaveSqlNullable(entity) : this.buildSaveSqlNotNull(entity);
