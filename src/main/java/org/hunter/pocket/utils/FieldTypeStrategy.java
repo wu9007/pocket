@@ -205,6 +205,22 @@ public class FieldTypeStrategy {
                 return null;
             }
         });
+        RESULT_STRATEGY_POOL.put(Byte[].class.getName(), (resultSet, columnName) -> {
+            try {
+                return resultSet.getBytes(columnName);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
+        RESULT_STRATEGY_POOL.put(byte[].class.getName(), (resultSet, columnName) -> {
+            try {
+                return resultSet.getBytes(columnName);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
 // ====================================================================================================//
         PREPARED_STRATEGY_POOL.put(int.class.getName(), (value) -> {
             PreparedStatement preparedStatement = value.getPreparedStatement();
@@ -359,6 +375,24 @@ public class FieldTypeStrategy {
             SqlBean sqlBean = value.getSqlBean();
             try {
                 preparedStatement.setObject(value.getIndex(), sqlBean.getTarget());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+        PREPARED_STRATEGY_POOL.put(Byte[].class.getName(), (value) -> {
+            PreparedStatement preparedStatement = value.getPreparedStatement();
+            SqlBean sqlBean = value.getSqlBean();
+            try {
+                preparedStatement.setObject(value.getIndex(), sqlBean.getTarget());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+        PREPARED_STRATEGY_POOL.put(byte[].class.getName(), (value) -> {
+            PreparedStatement preparedStatement = value.getPreparedStatement();
+            SqlBean sqlBean = value.getSqlBean();
+            try {
+                preparedStatement.setBytes(value.getIndex(), (byte[]) sqlBean.getTarget());
             } catch (SQLException e) {
                 e.printStackTrace();
             }

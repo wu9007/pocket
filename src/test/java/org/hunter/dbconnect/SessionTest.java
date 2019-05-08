@@ -79,10 +79,15 @@ public class SessionTest {
         order.setTime(LocalDateTime.now());
         order.setPrice(new BigDecimal("99.56789"));
         order.setDay(LocalDate.now());
+        byte[] photo = {'a', 'b', 'c'};
+        order.setPhoto(photo);
         this.session.save(order);
-        order.setType("002");
-        session.update(order);
-        session.delete(order);
+        Order older = (Order) session.findOne(Order.class, order.getUuid());
+        older.setType("002");
+        byte[] bytes = {'a', 'b'};
+        older.setPhoto(bytes);
+        session.update(older);
+        session.delete(older);
     }
 
     @Test
