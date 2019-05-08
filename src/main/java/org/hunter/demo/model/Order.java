@@ -36,6 +36,8 @@ public class Order extends BaseEntity {
     private String type;
     @Join(columnName = "TYPE", columnSurname = "TYPE_NAME", businessName = "订单支付方式", joinTable = "TBL_ORDER_TYPE", joinTableSurname = "T2", joinMethod = JoinMethod.LEFT, bridgeColumn = "UUID", destinationColumn = "NAME")
     private String typeName;
+    @Column(name = "PHOTO")
+    private byte[] photo;
 
     @OneToMany(clazz = Commodity.class, bridgeField = "order")
     private List<Commodity> commodities;
@@ -117,5 +119,13 @@ public class Order extends BaseEntity {
 
     public void setTypeName(String typeName) {
         this.typeName = typeName;
+    }
+
+    public byte[] getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(byte[] photo) {
+        this.photo = photo;
     }
 }

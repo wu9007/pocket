@@ -33,10 +33,16 @@ public class ReflectUtils {
                         field.setAccessible(true);
                         Object modernValue = field.get(modern);
                         Object olderValue = field.get(older);
+                        if (modernValue == null && olderValue == null) {
+                            return false;
+                        }
+                        if (modernValue == null) {
+                            return true;
+                        }
                         if (olderValue instanceof Number) {
                             return ((Comparable) modernValue).compareTo(olderValue) != 0;
                         }
-                        return modernValue == null && olderValue != null || olderValue == null && modernValue != null || modernValue != null && !modernValue.equals(olderValue);
+                        return !modernValue.equals(olderValue);
                     } catch (IllegalAccessException e) {
                         e.printStackTrace();
                         return false;
