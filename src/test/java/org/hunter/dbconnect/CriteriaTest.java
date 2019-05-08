@@ -259,7 +259,7 @@ public class CriteriaTest {
     @Test
     public void test23() throws SQLException {
         Criteria criteria = this.session.createCriteria(Order.class);
-        criteria.add(Modern.set("type", "001"))
+        criteria.add(Modern.set("type", "002"))
                 .update();
     }
 
@@ -275,8 +275,9 @@ public class CriteriaTest {
     @Test
     public void test25() throws SQLException {
         Criteria criteria = this.session.createCriteria(Order.class);
-        List<String> types = Arrays.asList("002", "003", "004");
-        List<Order> orders = criteria.add(Restrictions.notIn("type", types))
+        List<String> types1 = Arrays.asList("001", "002", "004");
+        List<String> types2 = Arrays.asList("001", "003", "004");
+        List<Order> orders = criteria.add(Restrictions.or(Restrictions.in("type", types1),Restrictions.in("type", types2)))
                 .list();
         System.out.println(orders.size());
     }
