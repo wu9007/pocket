@@ -118,12 +118,19 @@ public class Restrictions implements SqlBean {
         return rightRestrictions;
     }
 
-    void pushTo(List<Restrictions> restrictionsList) {
+    void pushTo(List<Restrictions> sortedRestrictionsList) {
         if (this.getLeftRestrictions() != null && this.getRightRestrictions() != null) {
-            this.getLeftRestrictions().pushTo(restrictionsList);
-            this.getRightRestrictions().pushTo(restrictionsList);
+            this.getLeftRestrictions().pushTo(sortedRestrictionsList);
+            this.getRightRestrictions().pushTo(sortedRestrictionsList);
         } else {
-            restrictionsList.add(this);
+            if (this.getTarget() instanceof List) {
+                List targets = ((List) this.getTarget());
+                for (Object item : targets) {
+                    Restrictions.newParamInstance(item).pushTo(sortedRestrictionsList);
+                }
+            } else {
+                sortedRestrictionsList.add(this);
+            }
         }
     }
 
