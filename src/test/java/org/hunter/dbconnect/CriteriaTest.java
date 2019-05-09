@@ -65,11 +65,11 @@ public class CriteriaTest {
 
     @Test
     public void test2() throws SQLException {
-        Order order = Order.newInstance("C-001", new BigDecimal("50.25"));
+        Order order = Order.newInstance("C-006", new BigDecimal("50.25"));
         order.setDay(LocalDate.now());
         order.setTime(LocalDateTime.now());
         order.setState(false);
-        order.setType("001");
+        order.setType("002");
         this.session.save(order);
         Order newOrder = (Order) this.session.findOne(Order.class, order.getUuid());
         System.out.println(newOrder.getDay());

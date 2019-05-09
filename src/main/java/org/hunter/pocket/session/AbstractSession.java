@@ -41,6 +41,21 @@ abstract class AbstractSession implements Session {
     }
 
     @Override
+    public DatabaseNodeConfig getDatabaseNodeConfig() {
+        return databaseNodeConfig;
+    }
+
+    @Override
+    public Connection getConnection() {
+        return connection;
+    }
+
+    @Override
+    public String getSessionName() {
+        return this.sessionName;
+    }
+
+    @Override
     public boolean getClosed() {
         return this.closed;
     }
