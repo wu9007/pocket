@@ -87,10 +87,8 @@ public class QueryTest {
     @Test
     public void test5() throws SQLException {
         List<String> types = Arrays.asList("006", "007", "008", "009");
-        SQLQuery query = this.session.createSQLQuery("select uuid, code from tbl_order where CODE = :ORDER_CODE AND DAY < :DAY AND TYPE IN(:TYPE)")
+        SQLQuery query = this.session.createSQLQuery("select uuid, code from tbl_order where TYPE IN(:TYPE)")
                 .mapperColumn("label", "value")
-                .setParameter("ORDER_CODE", "C-001")
-                .setParameter("DAY", new Date())
                 .setParameter("TYPE", types);
         List orders = query.list();
         System.out.println(orders.size());
