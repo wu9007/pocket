@@ -41,4 +41,12 @@ public interface SQLQuery {
      * @return SQLQuery
      */
     SQLQuery setParameter(String key, Object value);
+
+    /**
+     * 添加列名映射
+     *
+     * @param columnNames column name array
+     * @return sql query
+     */
+    SQLQuery mapperColumn(String... columnNames);
 }

@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author wujianchuan 2019/1/15
@@ -75,10 +76,11 @@ public class QueryTest {
 
     @Test
     public void test4() throws SQLException {
-        SQLQuery query = this.session.createSQLQuery("select uuid as uuid,code as code,price as price, day as day,time as time from tbl_order where CODE = :ORDER_CODE AND DAY < :DAY");
+        SQLQuery query = this.session.createSQLQuery("select uuid as uuid,code as code,price as price, day as day,time as time from tbl_order where CODE = :ORDER_CODE AND DAY < :DAY")
+                .mapperColumn("uuid", "code", "price", "day", "time");
         query.setParameter("ORDER_CODE", "C-001")
                 .setParameter("DAY", new Date());
-        List<Object[]> orders = query.list();
+        List orders = query.list();
         System.out.println(orders.size());
     }
 }
