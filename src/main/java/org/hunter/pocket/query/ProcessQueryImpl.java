@@ -1,5 +1,6 @@
 package org.hunter.pocket.query;
 
+import org.hunter.pocket.config.DatabaseNodeConfig;
 import org.hunter.pocket.exception.QueryException;
 
 import java.sql.CallableStatement;
@@ -17,8 +18,8 @@ public class ProcessQueryImpl<T> extends AbstractSQLQuery implements ProcessQuer
 
     private String[] parameters;
 
-    public ProcessQueryImpl(String processSQL, Connection connection) {
-        super(processSQL, connection);
+    public ProcessQueryImpl(String processSQL, Connection connection, DatabaseNodeConfig databaseNodeConfig) {
+        super(processSQL, connection, databaseNodeConfig);
     }
 
     @Override

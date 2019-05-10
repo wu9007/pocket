@@ -89,17 +89,17 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public SQLQuery createSQLQuery(String sql) {
-        return new SQLQueryImpl(sql, this.connection);
+        return new SQLQueryImpl(sql, this.connection, this.databaseNodeConfig);
     }
 
     @Override
     public SQLQuery createSQLQuery(String sql, Class clazz) {
-        return new SQLQueryImpl(sql, connection, clazz);
+        return new SQLQueryImpl(sql, connection, this.databaseNodeConfig, clazz);
     }
 
     @Override
     public <T> ProcessQuery<T> createProcessQuery(String processSQL) {
-        return new ProcessQueryImpl<>(processSQL, this.connection);
+        return new ProcessQueryImpl<>(processSQL, this.connection, this.databaseNodeConfig);
     }
 
     @Override

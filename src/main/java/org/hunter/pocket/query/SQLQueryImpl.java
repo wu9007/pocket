@@ -1,6 +1,7 @@
 package org.hunter.pocket.query;
 
 import com.mysql.cj.jdbc.result.ResultSetImpl;
+import org.hunter.pocket.config.DatabaseNodeConfig;
 import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.criteria.ParameterTranslator;
 import org.hunter.pocket.model.MapperFactory;
@@ -30,16 +31,17 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
 
     private final FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
 
-    public SQLQueryImpl(String sql, Connection connection) {
-        super(sql, connection);
+    public SQLQueryImpl(String sql, Connection connection, DatabaseNodeConfig databaseNodeConfig) {
+        super(sql, connection, databaseNodeConfig);
     }
 
-    public SQLQueryImpl(String sql, Connection connection, Class clazz) {
-        super(connection, sql, clazz);
+    public SQLQueryImpl(String sql, Connection connection, DatabaseNodeConfig databaseNodeConfig, Class clazz) {
+        super(connection, sql, databaseNodeConfig, clazz);
     }
 
     @Override
     public Object unique() throws SQLException {
+        super.showSql();
         ResultSet resultSet = execute(sql);
         if (resultSet.next()) {
             if (clazz != null) {
@@ -65,6 +67,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
                     .append(CommonSql.COMMA)
                     .append(this.getLimit());
         }
+        super.showSql();
         ResultSet resultSet = execute(querySQL.toString());
         List<Object> results = new ArrayList<>();
         while (resultSet.next()) {
@@ -101,17 +104,29 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
     }
 
     private ResultSet execute(String sql) throws SQLException {
-        String executeSql = sql.replaceAll(SQL_PARAMETER_REGEX, CommonSql.PLACEHOLDER);
-        PreparedStatement preparedStatement = this.connection.prepareStatement(executeSql);
+        PreparedStatement preparedStatement;
+        String executeSql = sql;
         if (this.parameterMap.size() > 0) {
             List<ParameterTranslator> queryParameters = new LinkedList<>();
             Pattern pattern = Pattern.compile(SQL_PARAMETER_REGEX);
             Matcher matcher = pattern.matcher(sql);
             while (matcher.find()) {
-                String name = matcher.group().substring(1);
-                queryParameters.add(ParameterTranslator.newInstance(name, this.parameterMap.get(name)));
+                String regexString = matcher.group();
+                String name = regexString.substring(1);
+                Object parameter = this.parameterMap.get(name);
+                if (parameter instanceof List) {
+                    List<Object> parameters = (List<Object>) parameter;
+                    executeSql = executeSql.replaceAll(regexString, parameters.stream().map(item -> CommonSql.PLACEHOLDER).collect(Collectors.joining(",")));
+                    parameters.forEach(item -> queryParameters.add(ParameterTranslator.newInstance(item)));
+                } else {
+                    executeSql = executeSql.replaceAll(regexString, CommonSql.PLACEHOLDER);
+                    queryParameters.add(ParameterTranslator.newInstance(parameter));
+                }
             }
+            preparedStatement = this.connection.prepareStatement(executeSql);
             fieldTypeStrategy.setPreparedStatement(preparedStatement, queryParameters);
+        } else {
+            preparedStatement = this.connection.prepareStatement(executeSql);
         }
         return preparedStatement.executeQuery();
     }
