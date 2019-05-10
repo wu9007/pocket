@@ -13,8 +13,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -92,6 +94,12 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
         return this;
     }
 
+    @Override
+    public SQLQuery mapperColumn(String... columnNames) {
+        this.columnNameList.addAll(Arrays.asList(columnNames));
+        return this;
+    }
+
     private ResultSet execute(String sql) throws SQLException {
         String executeSql = sql.replaceAll(SQL_PARAMETER_REGEX, CommonSql.PLACEHOLDER);
         PreparedStatement preparedStatement = this.connection.prepareStatement(executeSql);
@@ -108,13 +116,18 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
         return preparedStatement.executeQuery();
     }
 
-    private Object[] getObjects(ResultSet resultSet) throws SQLException {
+    private Map<String, Object> getObjects(ResultSet resultSet) throws SQLException {
+        int columnNameSize = this.columnNameList.size();
         int columnSize = ((ResultSetImpl) resultSet).getColumnDefinition().getFields().length;
-        List<Object> result = new LinkedList<>();
-        for (int index = 1; index <= columnSize; index++) {
-            result.add(resultSet.getObject(index++));
+        if (columnNameSize != columnSize) {
+            throw new SQLException("Column mapping failed");
+        } else {
+            Map<String, Object> result = new LinkedHashMap<>();
+            for (int nameIndex = 0, columnIndex = 1; nameIndex < columnNameSize; nameIndex++, columnIndex++) {
+                result.put(this.columnNameList.get(nameIndex), resultSet.getObject(columnIndex));
+            }
+            return result;
         }
-        return result.toArray();
     }
 
     private Object getEntity(ResultSet resultSet) throws InstantiationException, IllegalAccessException {

@@ -2,6 +2,8 @@ package org.hunter.pocket.query;
 
 import java.sql.Connection;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -14,6 +16,7 @@ abstract class AbstractSQLQuery {
     private Integer limit;
     Class clazz;
     final Map<String, Object> parameterMap = new HashMap<>();
+    final List<String> columnNameList = new LinkedList<>();
 
     AbstractSQLQuery(String sql, Connection connection) {
         this.sql = sql;
