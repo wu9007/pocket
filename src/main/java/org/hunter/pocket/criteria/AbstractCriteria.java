@@ -61,7 +61,7 @@ abstract class AbstractCriteria {
 
     void showSql() {
         if (this.databaseConfig.getShowSql()) {
-            this.logger.info("SQL: {}", this.completeSql);
+            this.logger.info("Pocket: {}", this.completeSql);
         }
     }
 

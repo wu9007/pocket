@@ -17,9 +17,9 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author wujianchuan 2019/1/15
@@ -76,10 +76,22 @@ public class QueryTest {
 
     @Test
     public void test4() throws SQLException {
-        SQLQuery query = this.session.createSQLQuery("select uuid as uuid,code as code,price as price, day as day,time as time from tbl_order where CODE = :ORDER_CODE AND DAY < :DAY")
-                .mapperColumn("uuid", "code", "price", "day", "time");
-        query.setParameter("ORDER_CODE", "C-001")
+        SQLQuery query = this.session.createSQLQuery("select uuid, code from tbl_order where CODE = :ORDER_CODE AND DAY < :DAY")
+                .mapperColumn("label", "value")
+                .setParameter("ORDER_CODE", "C-001")
                 .setParameter("DAY", new Date());
+        List orders = query.list();
+        System.out.println(orders.size());
+    }
+
+    @Test
+    public void test5() throws SQLException {
+        List<String> types = Arrays.asList("006", "007", "008", "009");
+        SQLQuery query = this.session.createSQLQuery("select uuid, code from tbl_order where CODE = :ORDER_CODE AND DAY < :DAY AND TYPE IN(:TYPE)")
+                .mapperColumn("label", "value")
+                .setParameter("ORDER_CODE", "C-001")
+                .setParameter("DAY", new Date())
+                .setParameter("TYPE", types);
         List orders = query.list();
         System.out.println(orders.size());
     }

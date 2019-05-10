@@ -1,5 +1,10 @@
 package org.hunter.pocket.query;
 
+import org.hunter.pocket.config.DatabaseNodeConfig;
+import org.hunter.pocket.constant.CommonSql;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -10,7 +15,9 @@ import java.util.Map;
  * @author wujianchuan 2019/1/3
  */
 abstract class AbstractSQLQuery {
+    private final Logger logger = LoggerFactory.getLogger(AbstractSQLQuery.class);
     final Connection connection;
+    private final DatabaseNodeConfig databaseNodeConfig;
     final String sql;
     private Integer start;
     private Integer limit;
@@ -18,14 +25,16 @@ abstract class AbstractSQLQuery {
     final Map<String, Object> parameterMap = new HashMap<>();
     final List<String> columnNameList = new LinkedList<>();
 
-    AbstractSQLQuery(String sql, Connection connection) {
+    AbstractSQLQuery(String sql, Connection connection, DatabaseNodeConfig databaseNodeConfig) {
         this.sql = sql;
         this.connection = connection;
+        this.databaseNodeConfig = databaseNodeConfig;
     }
 
-    AbstractSQLQuery(Connection connection, String sql, Class clazz) {
-        this.connection = connection;
+    AbstractSQLQuery(Connection connection, String sql, DatabaseNodeConfig databaseNodeConfig, Class clazz) {
         this.sql = sql;
+        this.connection = connection;
+        this.databaseNodeConfig = databaseNodeConfig;
         this.clazz = clazz;
     }
 
@@ -44,5 +53,16 @@ abstract class AbstractSQLQuery {
 
     Integer getLimit() {
         return limit;
+    }
+
+    void showSql() {
+        if (this.databaseNodeConfig.getShowSql()) {
+            this.logger.info("Pocket: {}", this.limited() ?
+                    new StringBuilder(this.sql).append(" LIMIT ")
+                            .append(this.getStart())
+                            .append(CommonSql.COMMA)
+                            .append(this.getLimit())
+                    : this.sql);
+        }
     }
 }
