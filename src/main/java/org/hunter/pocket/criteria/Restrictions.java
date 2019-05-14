@@ -41,7 +41,7 @@ public class Restrictions implements SqlBean {
         this.target = target;
     }
 
-    static Restrictions newParamInstance(Object target) {
+    private static Restrictions newParamInstance(Object target) {
         return new Restrictions(target);
     }
 
@@ -110,7 +110,7 @@ public class Restrictions implements SqlBean {
         return target;
     }
 
-    Restrictions getLeftRestrictions() {
+    private Restrictions getLeftRestrictions() {
         return leftRestrictions;
     }
 
@@ -123,13 +123,15 @@ public class Restrictions implements SqlBean {
             this.getLeftRestrictions().pushTo(sortedRestrictionsList);
             this.getRightRestrictions().pushTo(sortedRestrictionsList);
         } else {
-            if (this.getTarget() instanceof List) {
-                List targets = ((List) this.getTarget());
-                for (Object item : targets) {
-                    Restrictions.newParamInstance(item).pushTo(sortedRestrictionsList);
+            if (!SqlOperateTypes.IS_NULL.equals(this.getSqlOperate()) && !SqlOperateTypes.IS_NOT_NULL.equals(this.getSqlOperate())) {
+                if (this.getTarget() instanceof List) {
+                    List targets = ((List) this.getTarget());
+                    for (Object item : targets) {
+                        Restrictions.newParamInstance(item).pushTo(sortedRestrictionsList);
+                    }
+                } else {
+                    sortedRestrictionsList.add(this);
                 }
-            } else {
-                sortedRestrictionsList.add(this);
             }
         }
     }
