@@ -266,8 +266,8 @@ public class CriteriaTest {
     @Test
     public void test24() throws SQLException {
         Criteria criteria = this.session.createCriteria(Order.class);
-        List<Order> orders = criteria.add(Restrictions.isNull("state"))
-                .add(Restrictions.equ("code", "C-001"))
+        List<Order> orders = criteria
+                .add(Restrictions.or(Restrictions.isNull("state"), Restrictions.equ("code", "C-001")))
                 .list();
         System.out.println(orders);
     }
@@ -277,7 +277,7 @@ public class CriteriaTest {
         Criteria criteria = this.session.createCriteria(Order.class);
         List<String> types1 = Arrays.asList("001", "002", "004");
         List<String> types2 = Arrays.asList("001", "003", "004");
-        List<Order> orders = criteria.add(Restrictions.or(Restrictions.in("type", types1),Restrictions.in("type", types2)))
+        List<Order> orders = criteria.add(Restrictions.or(Restrictions.in("type", types1), Restrictions.in("type", types2)))
                 .list();
         System.out.println(orders.size());
     }
