@@ -19,6 +19,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static org.hunter.pocket.constant.StreamPredicates.CHILDREN_MAPPING_PREDICATE;
+
 /**
  * @author wujianchuan
  */
@@ -166,7 +168,7 @@ class EntityMapper {
         Field[] superWithAnnotationFields = Arrays.stream(clazz.getSuperclass().getDeclaredFields()).filter(StreamPredicates.COLUMN_MAPPING_PREDICATE).toArray(Field[]::new);
         Field[] ownWithAnnotationFields = Arrays.stream(clazz.getDeclaredFields()).filter(StreamPredicates.COLUMN_MAPPING_PREDICATE).toArray(Field[]::new);
         Field[] withAnnotationFields = (Field[]) CommonUtils.combinedArray(superWithAnnotationFields, ownWithAnnotationFields);
-        Field[] noAnnotationFields = Arrays.stream(clazz.getDeclaredFields()).filter(field -> !Arrays.asList(withAnnotationFields).contains(field)).toArray(Field[]::new);
+        Field[] noAnnotationFields = Arrays.stream(clazz.getDeclaredFields()).filter(field -> !Arrays.asList(withAnnotationFields).contains(field)).filter(CHILDREN_MAPPING_PREDICATE).toArray(Field[]::new);
 
         return buildMapper(tableName, tableId, uuidGenerator, withAnnotationFields, noAnnotationFields);
     }
