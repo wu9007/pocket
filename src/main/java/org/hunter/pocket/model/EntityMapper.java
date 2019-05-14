@@ -109,7 +109,7 @@ class EntityMapper {
         return oneToManyFields;
     }
 
-    public Map<String, Class> getOnToManyClassMapper() {
+    Map<String, Class> getOnToManyClassMapper() {
         return onToManyClassMapper;
     }
 
@@ -166,16 +166,16 @@ class EntityMapper {
         Field[] superWithAnnotationFields = Arrays.stream(clazz.getSuperclass().getDeclaredFields()).filter(StreamPredicates.COLUMN_MAPPING_PREDICATE).toArray(Field[]::new);
         Field[] ownWithAnnotationFields = Arrays.stream(clazz.getDeclaredFields()).filter(StreamPredicates.COLUMN_MAPPING_PREDICATE).toArray(Field[]::new);
         Field[] withAnnotationFields = (Field[]) CommonUtils.combinedArray(superWithAnnotationFields, ownWithAnnotationFields);
+        Field[] noAnnotationFields = Arrays.stream(clazz.getDeclaredFields()).filter(field -> !Arrays.asList(withAnnotationFields).contains(field)).toArray(Field[]::new);
 
-        return buildMapper(tableName, tableId, uuidGenerator, withAnnotationFields);
+        return buildMapper(tableName, tableId, uuidGenerator, withAnnotationFields, noAnnotationFields);
     }
 
-    private static EntityMapper buildMapper(String tableName, int tableId, String uuidGenerator, Field[] withAnnotationFields) {
+    private static EntityMapper buildMapper(String tableName, int tableId, String uuidGenerator, Field[] withAnnotationFields, Field[] noAnnotationFields) {
         Map<String, FieldData> fieldMapper = new LinkedHashMap<>(16);
         List<Field> repositoryFields = new LinkedList<>();
         List<String> repositoryColumnNames = new LinkedList<>();
         Map<String, String> repositoryColumnMapper = new LinkedHashMap<>(16);
-        List<Field> viewFields = new LinkedList<>();
         Map<String, String> viewColumnMapperWithTableAs = new LinkedHashMap<>(16);
         Map<String, String> viewColumnMapper = new LinkedHashMap<>(16);
         List<Field> businessFields = new LinkedList<>();
@@ -187,6 +187,7 @@ class EntityMapper {
         Map<String, String> manyToOneUpMapper = new LinkedHashMap<>(16);
         List<String> joinSqlList = new LinkedList<>();
 
+        List<Field> viewFields = new LinkedList<>(Arrays.asList(noAnnotationFields));
         for (Field field : withAnnotationFields) {
             String filedName = field.getName();
             Column column = field.getAnnotation(Column.class);
