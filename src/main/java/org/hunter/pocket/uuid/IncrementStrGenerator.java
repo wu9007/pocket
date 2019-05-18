@@ -4,7 +4,6 @@ import org.hunter.pocket.model.MapperFactory;
 import org.hunter.pocket.session.Session;
 import org.springframework.stereotype.Component;
 
-import java.io.Serializable;
 import java.sql.SQLException;
 
 /**

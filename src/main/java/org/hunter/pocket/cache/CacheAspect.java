@@ -53,7 +53,7 @@ public class CacheAspect {
                 context.setVariable(argsName[index], argsValue[index]);
             }
         } else {
-            throw new RuntimeException("can not found any arg.");
+            throw new IllegalArgumentException("can not found any arg.");
         }
         Object cacheKeyValue = cacheKeyExpression.getValue(context);
 
@@ -94,7 +94,7 @@ public class CacheAspect {
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new RuntimeException(e.getMessage());
+                throw new InterruptedException(e.getMessage());
             } finally {
                 if (lock) {
                     cacheUtils.getMapLock().remove(key);

@@ -2,7 +2,6 @@ package org.hunter.pocket.uuid;
 
 import org.hunter.pocket.session.Session;
 
-import java.io.Serializable;
 import java.sql.SQLException;
 
 /**

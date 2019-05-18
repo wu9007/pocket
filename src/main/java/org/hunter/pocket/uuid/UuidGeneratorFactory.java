@@ -24,7 +24,7 @@ public class UuidGeneratorFactory {
     public void registerGenerator(UuidGenerator uuidGenerator) {
         synchronized (this) {
             if (GENERATOR_POOL.containsKey(uuidGenerator.getGeneratorId())) {
-                throw new RuntimeException("This logo already exists. Please use another one.");
+                throw new IllegalArgumentException("This logo already exists. Please use another one.");
             } else {
                 GENERATOR_POOL.put(uuidGenerator.getGeneratorId(), uuidGenerator);
             }
