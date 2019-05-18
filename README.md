@@ -13,7 +13,7 @@ allprojects {
 }
 ```
 **Step 2.** Add the dependency
-```
+```groovy
 dependencies {
 	implementation 'com.github.leyan95:pocket:+'
 }

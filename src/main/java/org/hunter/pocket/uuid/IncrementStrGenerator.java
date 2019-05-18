@@ -12,6 +12,7 @@ import java.sql.SQLException;
 @Component
 public class IncrementStrGenerator extends AbstractUuidGenerator {
     private final static UuidGenerator INSTANCE = new IncrementStrGenerator();
+    private final static String UNDERLINE_DIVIDER = "_";
 
     public static UuidGenerator getInstance() {
         return INSTANCE;
@@ -28,7 +29,7 @@ public class IncrementStrGenerator extends AbstractUuidGenerator {
     @Override
     public synchronized String getUuid(Class clazz, Session session) throws SQLException {
         int tableId = MapperFactory.getTableId(clazz.getName());
-        String mapKey = this.serverId + "_" + tableId;
+        String mapKey = this.serverId + UNDERLINE_DIVIDER + tableId;
         String leaderNum = "" + serverId + tableId;
         Long tailNumber = POOL.get(mapKey);
         if (tailNumber != null) {
