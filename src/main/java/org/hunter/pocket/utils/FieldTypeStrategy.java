@@ -26,6 +26,9 @@ import java.util.function.Consumer;
  * @author wujianchuan 2019/1/3
  */
 public class FieldTypeStrategy {
+    private static final FieldTypeStrategy STRATEGY = new FieldTypeStrategy();
+    private static final Map<String, BiFunction<ResultSet, String, Object>> RESULT_STRATEGY_POOL = new ConcurrentHashMap<>(20);
+    private static final Map<String, Consumer<PreparedSupplierValue>> PREPARED_STRATEGY_POOL = new ConcurrentHashMap<>(20);
 
     private class PreparedSupplierValue {
         private final PreparedStatement preparedStatement;
@@ -33,6 +36,7 @@ public class FieldTypeStrategy {
         private Restrictions restrictions;
         private Modern modern;
         private ParameterTranslator parameterTranslator;
+
 
         PreparedSupplierValue(PreparedStatement preparedStatement, Integer index, Restrictions restrictions) {
             this.preparedStatement = preparedStatement;
@@ -70,11 +74,8 @@ public class FieldTypeStrategy {
                 return this.parameterTranslator;
             }
         }
-    }
 
-    private static final FieldTypeStrategy STRATEGY = new FieldTypeStrategy();
-    private static final Map<String, BiFunction<ResultSet, String, Object>> RESULT_STRATEGY_POOL = new ConcurrentHashMap<>(20);
-    private static final Map<String, Consumer<PreparedSupplierValue>> PREPARED_STRATEGY_POOL = new ConcurrentHashMap<>(20);
+    }
 
     static {
         RESULT_STRATEGY_POOL.put((int.class.getName()), (resultSet, columnName) -> {
@@ -300,7 +301,7 @@ public class FieldTypeStrategy {
             SqlBean sqlBean = value.getSqlBean();
             try {
                 Date date = (Date) sqlBean.getTarget();
-                preparedStatement.setTimestamp(value.getIndex(), new java.sql.Timestamp(date.getTime()));
+                preparedStatement.setTimestamp(value.getIndex(), new Timestamp(date.getTime()));
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -320,7 +321,7 @@ public class FieldTypeStrategy {
             SqlBean sqlBean = value.getSqlBean();
             try {
                 LocalDateTime dateTime = (LocalDateTime) sqlBean.getTarget();
-                preparedStatement.setTimestamp(value.getIndex(), java.sql.Timestamp.valueOf(dateTime));
+                preparedStatement.setTimestamp(value.getIndex(), Timestamp.valueOf(dateTime));
             } catch (SQLException e) {
                 e.printStackTrace();
             }
