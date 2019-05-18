@@ -153,7 +153,8 @@ public class FieldTypeStrategy {
         });
         RESULT_STRATEGY_POOL.put(LocalDate.class.getName(), (resultSet, columnName) -> {
             try {
-                return resultSet.getDate(columnName).toLocalDate();
+                java.sql.Date date = resultSet.getDate(columnName);
+                return date != null ? date.toLocalDate() : null;
             } catch (SQLException e) {
                 e.printStackTrace();
                 return null;
@@ -161,7 +162,8 @@ public class FieldTypeStrategy {
         });
         RESULT_STRATEGY_POOL.put(LocalDateTime.class.getName(), (resultSet, columnName) -> {
             try {
-                return resultSet.getTimestamp(columnName).toLocalDateTime();
+                Timestamp timestamp = resultSet.getTimestamp(columnName);
+                return timestamp != null ? timestamp.toLocalDateTime() : null;
             } catch (SQLException e) {
                 e.printStackTrace();
                 return null;
