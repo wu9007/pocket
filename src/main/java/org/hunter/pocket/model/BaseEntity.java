@@ -16,9 +16,6 @@ public abstract class BaseEntity implements Serializable {
     @Column(name = "UUID")
     private String uuid;
 
-    public BaseEntity() {
-    }
-
     public String getUuid() {
         return uuid;
     }
