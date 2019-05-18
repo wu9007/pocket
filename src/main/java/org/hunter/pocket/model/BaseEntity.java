@@ -67,7 +67,7 @@ public abstract class BaseEntity implements Serializable {
                 return true;
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
-                throw new RuntimeException(e.getMessage());
+                throw new IllegalArgumentException(e.getMessage());
             }
         }
     }

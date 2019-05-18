@@ -58,7 +58,7 @@ public class DatabaseLauncher implements CommandLineRunner {
         if (this.entityList != null) {
             for (Entity entityAnnotation : entityList.stream().map(entity -> entity.getClass().getAnnotation(Entity.class)).collect(Collectors.toList())) {
                 if (counter.containsKey(entityAnnotation.tableId())) {
-                    throw new RuntimeException("Table ID - " + entityAnnotation.tableId() + " repeated.");
+                    throw new IllegalArgumentException("Table ID - " + entityAnnotation.tableId() + " repeated.");
                 } else {
                     counter.put(entityAnnotation.tableId(), true);
                 }
