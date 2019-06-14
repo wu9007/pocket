@@ -24,6 +24,8 @@ public class ConnectionPoolImpl implements ConnectionPool {
     private static final String RELEASE_LOCK = "RELEASE_MONITOR";
     private static final String DESTROY_LOCK = "DESTROY_MONITOR";
 
+    private static ThreadLocal<Integer> retryTimes = new ThreadLocal<>();
+
     private final AtomicBoolean activated = new AtomicBoolean(false);
     private final AtomicInteger activatedCount = new AtomicInteger(0);
 
@@ -83,13 +85,20 @@ public class ConnectionPoolImpl implements ConnectionPool {
                     logger.warn("the waiting thread is interrupted!");
                     e.printStackTrace();
                 }
-                if (this.databaseConfig.getTimeout() != 0 && System.currentTimeMillis() - startTime > this.databaseConfig.getTimeout()) {
+                if (retryTimes.get() == null) {
+                    retryTimes.set(1);
+                } else {
+                    retryTimes.set(retryTimes.get() + 1);
+                }
+                logger.info(String.format("======================第 %s 次重新尝试获取连接======================", retryTimes.get()));
+                if (retryTimes.get() > this.databaseConfig.getRetry()) {
                     logger.warn("thread waiting for connection was time out!");
                     return null;
                 }
                 connection = this.getConnection();
             }
-            logger.debug("获取连接：======================活动连接个数: " + this.activatedCount + "  ===========================游离连接个数: " + this.freeConnections.size() + "  ================================================");
+            retryTimes.remove();
+            logger.info("获取连接：======================活动连接个数: " + this.activatedCount + "  ===========================游离连接个数: " + this.freeConnections.size() + "  ================================================");
             return connection;
         }
     }

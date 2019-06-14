@@ -11,6 +11,7 @@ pocket:
         poolMiniSize: 10
         poolMaxSize: 60
         timeout: 1000
+        retry: 5
         session: homo,user
       - url: jdbc:mysql://127.0.0.1:3306/home?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8
         nodeName: mysql-01-02
@@ -21,6 +22,7 @@ pocket:
         poolMiniSize: 10
         poolMaxSize: 60
         timeout: 1000
+        retry: 5
         session: order,commodity
   cache:
     logic:

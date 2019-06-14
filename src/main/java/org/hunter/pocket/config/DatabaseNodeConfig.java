@@ -16,6 +16,7 @@ public class DatabaseNodeConfig {
     private Integer poolMiniSize;
     private Integer poolMaxSize;
     private Long timeout;
+    private Integer retry;
 
     private String session;
 
@@ -89,6 +90,14 @@ public class DatabaseNodeConfig {
 
     public void setTimeout(Long timeout) {
         this.timeout = timeout;
+    }
+
+    public Integer getRetry() {
+        return retry;
+    }
+
+    public void setRetry(Integer retry) {
+        this.retry = retry;
     }
 
     public String getSession() {

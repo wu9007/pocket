@@ -77,6 +77,9 @@ public class ConnectionManager {
                                 if (config.getTimeout() == null) {
                                     config.setTimeout(2000L);
                                 }
+                                if (config.getRetry() == null) {
+                                    config.setRetry(5);
+                                }
                             } else {
                                 logger.error("Please configure the session correctly");
                                 return false;
