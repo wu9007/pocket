@@ -84,6 +84,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
                         this.activeConnections.add(connection);
                         currentConnection.set(connection);
                     } else {
+                        this.connectionCount.decrementAndGet();
                         connection = this.getConnection();
                     }
                 } else {
