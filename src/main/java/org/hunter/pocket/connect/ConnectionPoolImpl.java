@@ -114,7 +114,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
             }
             retryTimes.remove();
             logger.info("Get the connection: Count of active connections: {}; Count of free connections: {}; All connections in the pool: {}.",
-                    this.activeConnections.size(), this.freeConnections.size(), this.connectionCount);
+                    this.getActiveNum(), this.freeConnections.size(), this.connectionCount);
             return connection;
         }
     }
@@ -145,7 +145,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
                 this.freeConnections.add(this.newConnection());
             }
             logger.info("Release connection: Number of active connections: {}; Number of free connections: {}; All connections in the pool: {}.",
-                    this.activeConnections.size(), this.freeConnections.size(), this.connectionCount);
+                    this.getActiveNum(), this.freeConnections.size(), this.connectionCount);
             RELEASE_LOCK.notifyAll();
 
         }
