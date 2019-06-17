@@ -98,7 +98,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
                 connection = this.getConnection();
             }
             retryTimes.remove();
-            logger.info("Get the connection：====================== Number of active connections: {}  =========================== Number of free connections: {}================================",
+            logger.info("Get the connection:====================== Number of active connections: {}  =========================== Number of free connections: {}================================",
                     this.activatedCount, this.freeConnections.size());
             return connection;
         }
@@ -130,7 +130,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
                 this.freeConnections.add(this.newConnection());
             }
             RELEASE_LOCK.notifyAll();
-            logger.debug("Release connection：====================== Number of active connections: {} =========================== Number of free connections: {} " +
+            logger.debug("Release connection:====================== Number of active connections: {} =========================== Number of free connections: {} " +
                             "==============================",
                     this.activatedCount, this.freeConnections.size());
 
