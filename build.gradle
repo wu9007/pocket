@@ -6,7 +6,7 @@ apply plugin: 'build-dashboard'
 apply plugin: 'maven-publish'
 
 group = 'org.hunter'
-version = '0.6.8-PRE'
+version = '0.6.9-PRE'
 sourceCompatibility = 1.8
 
 compileJava {

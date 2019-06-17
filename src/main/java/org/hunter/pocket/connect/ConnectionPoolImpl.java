@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ConnectionPoolImpl implements ConnectionPool {
     private final Logger logger = LoggerFactory.getLogger(ConnectionPoolImpl.class);
+
     private static final String CONNECT_LOCK = "CONNECT_MONITOR";
     private static final String RELEASE_LOCK = "RELEASE_MONITOR";
     private static final String DESTROY_LOCK = "DESTROY_MONITOR";
@@ -27,12 +28,27 @@ public class ConnectionPoolImpl implements ConnectionPool {
     private static ThreadLocal<Integer> retryTimes = new ThreadLocal<>();
 
     private final AtomicBoolean activated = new AtomicBoolean(false);
-    private final AtomicInteger activatedCount = new AtomicInteger(0);
+    /**
+     * 池中连接数
+     */
+    private final AtomicInteger connectionCount = new AtomicInteger(0);
 
+    /**
+     * 数据库配置
+     */
     private final DatabaseNodeConfig databaseConfig;
     private final DatabaseManager databaseManager;
+    /**
+     * 未被持有的连接
+     */
     private final LinkedList<Connection> freeConnections = new LinkedList<>();
+    /**
+     * 已被持有的连接
+     */
     private final LinkedList<Connection> activeConnections = new LinkedList<>();
+    /**
+     * 当前返回的的连接
+     */
     private final ThreadLocal<Connection> currentConnection = new ThreadLocal<>();
 
     private ConnectionPoolImpl(DatabaseNodeConfig databaseConfig) {
@@ -52,7 +68,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
         for (int index = 0; index < initSize; index++) {
             Connection connection = this.newConnection();
             this.freeConnections.add(connection);
-            this.activatedCount.addAndGet(1);
+            this.connectionCount.addAndGet(1);
         }
         this.activated.compareAndSet(false, true);
     }
@@ -61,7 +77,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
     public Connection getConnection() {
         synchronized (CONNECT_LOCK) {
             Connection connection;
-            if (activatedCount.get() < this.databaseConfig.getPoolMaxSize()) {
+            if (connectionCount.get() < this.databaseConfig.getPoolMaxSize()) {
                 if (this.freeConnections.size() > 0) {
                     connection = this.freeConnections.pollFirst();
                     if (this.databaseManager.isValidConnection(connection)) {
@@ -74,10 +90,9 @@ public class ConnectionPoolImpl implements ConnectionPool {
                     connection = this.newConnection();
                     this.activeConnections.add(connection);
                     currentConnection.set(connection);
-                    this.activatedCount.incrementAndGet();
+                    this.connectionCount.incrementAndGet();
                 }
             } else {
-                long startTime = System.currentTimeMillis();
                 try {
                     CONNECT_LOCK.wait(this.databaseConfig.getTimeout());
                 } catch (InterruptedException e) {
@@ -98,8 +113,8 @@ public class ConnectionPoolImpl implements ConnectionPool {
                 connection = this.getConnection();
             }
             retryTimes.remove();
-            logger.info("Get the connection:====================== Number of active connections: {}  =========================== Number of free connections: {}================================",
-                    this.activatedCount, this.freeConnections.size());
+            logger.info("Get the connection: Count of active connections: {}; Count of free connections: {}; All connections in the pool: {}.",
+                    this.activeConnections.size(), this.freeConnections.size(), this.connectionCount);
             return connection;
         }
     }
@@ -129,10 +144,9 @@ public class ConnectionPoolImpl implements ConnectionPool {
             } else {
                 this.freeConnections.add(this.newConnection());
             }
+            logger.info("Release connection: Number of active connections: {}; Number of free connections: {}; All connections in the pool: {}.",
+                    this.activeConnections.size(), this.freeConnections.size(), this.connectionCount);
             RELEASE_LOCK.notifyAll();
-            logger.debug("Release connection:====================== Number of active connections: {} =========================== Number of free connections: {} " +
-                            "==============================",
-                    this.activatedCount, this.freeConnections.size());
 
         }
     }
