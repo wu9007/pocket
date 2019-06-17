@@ -90,7 +90,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
                 } else {
                     retryTimes.set(retryTimes.get() + 1);
                 }
-                logger.info(String.format("======================第 %s 次重新尝试获取连接======================", retryTimes.get()));
+                logger.info("====================== The {} attempt to get a connection. ======================", retryTimes.get());
                 if (retryTimes.get() > this.databaseConfig.getRetry()) {
                     logger.warn("thread waiting for connection was time out!");
                     return null;
@@ -98,7 +98,8 @@ public class ConnectionPoolImpl implements ConnectionPool {
                 connection = this.getConnection();
             }
             retryTimes.remove();
-            logger.info("获取连接：======================活动连接个数: " + this.activatedCount + "  ===========================游离连接个数: " + this.freeConnections.size() + "  ================================================");
+            logger.info("Get the connection：====================== Number of active connections: {}  =========================== Number of free connections: {}================================",
+                    this.activatedCount, this.freeConnections.size());
             return connection;
         }
     }
@@ -129,7 +130,9 @@ public class ConnectionPoolImpl implements ConnectionPool {
                 this.freeConnections.add(this.newConnection());
             }
             RELEASE_LOCK.notifyAll();
-            logger.debug("释放链接：======================活动连接个数: " + this.activatedCount + "  ===========================游离连接个数: " + this.freeConnections.size() + "  ================================================");
+            logger.debug("Release connection：====================== Number of active connections: {} =========================== Number of free connections: {} " +
+                            "==============================",
+                    this.activatedCount, this.freeConnections.size());
 
         }
     }
