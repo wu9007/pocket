@@ -109,7 +109,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
                 logger.info("====================== The {} attempt to get a connection. ======================", retryTimes.get());
                 if (retryTimes.get() > this.databaseConfig.getRetry()) {
                     logger.warn("thread waiting for connection was time out!");
-                    return null;
+                    throw new ArrayIndexOutOfBoundsException("Sorry. The number of connections in the pool reaches the maximum number.");
                 }
                 connection = this.getConnection();
             }
