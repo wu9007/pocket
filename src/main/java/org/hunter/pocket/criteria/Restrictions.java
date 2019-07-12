@@ -82,10 +82,12 @@ public class Restrictions implements SqlBean {
     }
 
     public static Restrictions in(String source, List target) {
+        assert (target != null && target.size() > 0);
         return new Restrictions(source, SqlOperateTypes.IN, target);
     }
 
     public static Restrictions notIn(String source, List target) {
+        assert (target != null && target.size() > 0);
         return new Restrictions(source, SqlOperateTypes.NOT_IN, target);
     }
 
