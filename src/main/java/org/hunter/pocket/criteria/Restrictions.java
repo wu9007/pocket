@@ -7,6 +7,7 @@ import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.constant.SqlOperateTypes;
 import org.hunter.pocket.exception.CriteriaException;
 import org.hunter.pocket.model.MapperFactory;
+import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -82,12 +83,16 @@ public class Restrictions implements SqlBean {
     }
 
     public static Restrictions in(String source, List target) {
-        assert (target != null && target.size() > 0);
+        if (target == null || target.size() == 0) {
+            throw new CriteriaException("The set pointed by in function in SQL statement cannot be empty.");
+        }
         return new Restrictions(source, SqlOperateTypes.IN, target);
     }
 
     public static Restrictions notIn(String source, List target) {
-        assert (target != null && target.size() > 0);
+        if (target == null || target.size() == 0) {
+            throw new CriteriaException("The set pointed by notIn function in SQL statement cannot be empty.");
+        }
         return new Restrictions(source, SqlOperateTypes.NOT_IN, target);
     }
 
