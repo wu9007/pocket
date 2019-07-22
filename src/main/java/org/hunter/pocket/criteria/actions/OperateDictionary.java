@@ -9,7 +9,7 @@ import java.util.List;
 public interface OperateDictionary {
 
     /**
-     * 获取所有数据
+     * 获取所有数据 不进行级联查询
      *
      * @return 对象集合
      */
