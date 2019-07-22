@@ -107,7 +107,7 @@ public class ConnectionManager {
         return true;
     }
 
-    public static void closeIO(PreparedStatement preparedStatement, ResultSet rs) {
+    public static void closeIo(PreparedStatement preparedStatement, ResultSet rs) {
         try {
             if (rs != null) {
                 rs.close();

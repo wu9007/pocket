@@ -117,7 +117,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         } catch (IllegalAccessException | InstantiationException | SQLException e) {
             throw new CriteriaException(e.getMessage());
         } finally {
-            ConnectionManager.closeIO(preparedStatement, resultSet);
+            ConnectionManager.closeIo(preparedStatement, resultSet);
             this.cleanWithoutRestrictions();
         }
     }
@@ -160,7 +160,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                 }
             }
         } finally {
-            ConnectionManager.closeIO(preparedStatement, resultSet);
+            ConnectionManager.closeIo(preparedStatement, resultSet);
             this.cleanAll();
         }
         return entity;
@@ -194,7 +194,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                 return 0;
             }
         } finally {
-            ConnectionManager.closeIO(preparedStatement, resultSet);
+            ConnectionManager.closeIo(preparedStatement, resultSet);
             this.cleanAll();
         }
     }
@@ -207,7 +207,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             preparedStatement = getPreparedStatement();
             return preparedStatement.executeUpdate();
         } finally {
-            ConnectionManager.closeIO(preparedStatement, null);
+            ConnectionManager.closeIo(preparedStatement, null);
             this.cleanAll();
         }
     }
@@ -226,7 +226,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                 return null;
             }
         } finally {
-            ConnectionManager.closeIO(preparedStatement, resultSet);
+            ConnectionManager.closeIo(preparedStatement, resultSet);
             this.cleanAll();
         }
     }

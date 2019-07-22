@@ -174,7 +174,7 @@ public class SessionImpl extends AbstractSession {
                     preparedStatement.setObject(fields.length + 1, entity.getUuid());
                     effectRow = preparedStatement.executeUpdate();
                 } finally {
-                    ConnectionManager.closeIO(preparedStatement, null);
+                    ConnectionManager.closeIo(preparedStatement, null);
                 }
             }
         }
@@ -257,7 +257,7 @@ public class SessionImpl extends AbstractSession {
                 preparedStatement.setObject(1, uuid);
                 effectRow += preparedStatement.executeUpdate();
             } finally {
-                ConnectionManager.closeIO(preparedStatement, null);
+                ConnectionManager.closeIo(preparedStatement, null);
             }
         }
         return effectRow;

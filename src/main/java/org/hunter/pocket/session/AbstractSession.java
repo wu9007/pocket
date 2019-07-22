@@ -100,7 +100,7 @@ abstract class AbstractSession implements Session {
             }
             effectRow = preparedStatement.executeUpdate();
         } finally {
-            ConnectionManager.closeIO(preparedStatement, null);
+            ConnectionManager.closeIo(preparedStatement, null);
         }
         return effectRow;
     }

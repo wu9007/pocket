@@ -7,7 +7,6 @@ import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.constant.SqlOperateTypes;
 import org.hunter.pocket.exception.CriteriaException;
 import org.hunter.pocket.model.MapperFactory;
-import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.stream.Collectors;
