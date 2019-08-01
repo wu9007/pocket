@@ -137,6 +137,11 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
+    public Object top() {
+        return this.top(false);
+    }
+
+    @Override
     public Object top(boolean cascade) {
         List listResult = this.list(cascade);
         return listResult != null && listResult.size() > 0 ? listResult.get(0) : null;

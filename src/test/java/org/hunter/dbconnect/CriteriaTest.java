@@ -184,7 +184,6 @@ public class CriteriaTest {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-            System.out.println(repositoryOrder.getCode() + "=======================");
         });
         this.session.delete(order);
         executor.shutdown();
@@ -266,19 +265,29 @@ public class CriteriaTest {
     @Test
     public void test24() throws SQLException {
         Criteria criteria = this.session.createCriteria(Order.class);
-        List<Order> orders = criteria
-                .add(Restrictions.or(Restrictions.isNull("state"), Restrictions.equ("code", "C-001")))
-                .list();
+        criteria.add(Restrictions.or(Restrictions.isNull("state"), Restrictions.equ("code", "C-001")));
+        List<Order> orders = criteria.list();
         System.out.println(orders);
     }
 
     @Test
-    public void test25() throws SQLException {
+    public void test25() {
         Criteria criteria = this.session.createCriteria(Order.class);
         List<String> types1 = Arrays.asList("001", "002", "004");
         List<String> types2 = Arrays.asList("001", "003", "004");
-        List<Order> orders = criteria.add(Restrictions.or(Restrictions.in("type", types1), Restrictions.in("type", types2)))
-                .list();
+        criteria.add(Restrictions.or(Restrictions.in("type", types1), Restrictions.in("type", types2)));
+        List<Order> orders = criteria.list();
         System.out.println(orders.size());
+    }
+
+    @Test
+    public void test26() {
+        Criteria criteria = this.session.createCriteria(Order.class);
+        List<String> types1 = Arrays.asList("001", "002", "004");
+        List<String> types2 = Arrays.asList("001", "003", "004");
+        criteria.add(Restrictions.or(Restrictions.in("type", types1), Restrictions.in("type", types2)))
+                .add(Sort.asc("sort"));
+        Order order = (Order) criteria.top(false);
+        System.out.println(order);
     }
 }

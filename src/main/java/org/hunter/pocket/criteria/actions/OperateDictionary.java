@@ -9,7 +9,7 @@ import java.util.List;
 public interface OperateDictionary {
 
     /**
-     * 获取所有数据 不进行级联查询
+     * 获取所有数据 (默认不进行级联查询)
      *
      * @return 对象集合
      */
@@ -29,6 +29,13 @@ public interface OperateDictionary {
      * @return 对象集合
      */
     List list(boolean cascade);
+
+    /**
+     * 获取第一条数据 (默认不进行级联查询)
+     *
+     * @return obj
+     */
+    Object top();
 
     /**
      * 获取第一条数据
