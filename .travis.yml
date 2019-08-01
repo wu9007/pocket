@@ -1,6 +1,9 @@
 language: java
 jdk:
   - oraclejdk8
+  - oraclejdk11
+  - openjdk10
+  - openjdk11
 
 install: echo "skip './gradlew assemble' step"
 
