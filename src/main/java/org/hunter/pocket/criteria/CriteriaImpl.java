@@ -137,6 +137,12 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
+    public Object top(boolean cascade) {
+        List listResult = this.list(cascade);
+        return listResult != null && listResult.size() > 0 ? listResult.get(0) : null;
+    }
+
+    @Override
     public Object unique() throws SQLException {
         completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildSelectSql(databaseConfig));
         PreparedStatement preparedStatement = null;

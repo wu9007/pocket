@@ -31,6 +31,14 @@ public interface OperateDictionary {
     List list(boolean cascade);
 
     /**
+     * 获取第一条数据
+     *
+     * @param cascade 是否级联
+     * @return obj
+     */
+    Object top(boolean cascade);
+
+    /**
      * 获取最大值
      *
      * @param field 类型的属性
