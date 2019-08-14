@@ -414,7 +414,11 @@ public class FieldTypeStrategy {
 
     public Object getMappingColumnValue(Class clazz, Field field, ResultSet resultSet) {
         field.setAccessible(true);
-        return RESULT_STRATEGY_POOL.get(field.getType().getName()).apply(resultSet, MapperFactory.getViewColumnName(clazz.getName(), field.getName()));
+        BiFunction<ResultSet, String, Object> strategy = RESULT_STRATEGY_POOL.get(field.getType().getName());
+        if (strategy == null) {
+            throw new IllegalArgumentException(String.format("No strategy for parsing this field type: <<%s>> was found, Please submit issue here: https://github.com/leyan95/pocket/issues", field.getType()));
+        }
+        return strategy.apply(resultSet, MapperFactory.getViewColumnName(clazz.getName(), field.getName()));
     }
 
     public void setPreparedStatement(PreparedStatement preparedStatement, List<ParameterTranslator> parameters, List<Restrictions> restrictionsList) {
