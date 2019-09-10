@@ -26,7 +26,21 @@ public abstract class BaseEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        return uuid != null ? uuid.hashCode() : 0;
+        int hashCode = 0;
+        Field[] fields = MapperFactory.getRepositoryFields(this.getClass().getName());
+        try {
+            for (Field field : fields) {
+                field.setAccessible(true);
+                Object value = field.get(this);
+                if (value != null) {
+                    hashCode = 31 * hashCode + value.hashCode();
+                }
+            }
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException(e.getMessage());
+        }
+        return hashCode;
     }
 
     @Override
@@ -43,19 +57,19 @@ public abstract class BaseEntity implements Serializable {
             try {
                 for (Field field : fields) {
                     field.setAccessible(true);
-                    Object otherV = field.get(other);
-                    Object ownV = field.get(this);
-                    if (ownV == null) {
-                        if (otherV != null) {
+                    Object otherValue = field.get(other);
+                    Object ownValue = field.get(this);
+                    if (ownValue == null) {
+                        if (otherValue != null) {
                             return false;
                         }
                     } else {
-                        if (ownV instanceof Number) {
-                            if (((Comparable) ownV).compareTo(otherV) != 0) {
+                        if (ownValue instanceof Number) {
+                            if (((Comparable) ownValue).compareTo(otherValue) != 0) {
                                 return false;
                             }
                         } else {
-                            if (!ownV.equals(otherV)) {
+                            if (!ownValue.equals(otherValue)) {
                                 return false;
                             }
                         }
