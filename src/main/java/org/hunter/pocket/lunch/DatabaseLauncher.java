@@ -2,7 +2,6 @@ package org.hunter.pocket.lunch;
 
 import org.hunter.pocket.annotation.Entity;
 import org.hunter.pocket.config.DatabaseConfig;
-import org.hunter.pocket.config.ServerConfig;
 import org.hunter.pocket.connect.ConnectionManager;
 import org.hunter.pocket.model.BaseEntity;
 import org.hunter.pocket.session.SessionFactory;
@@ -29,18 +28,14 @@ public class DatabaseLauncher implements CommandLineRunner {
     DatabaseConfig databaseConfig;
 
     private final
-    ServerConfig serverConfig;
-
-    private final
     List<UuidGenerator> uuidGeneratorList;
 
     private final
     List<BaseEntity> entityList;
 
     @Autowired
-    public DatabaseLauncher(DatabaseConfig databaseConfig, ServerConfig serverConfig, List<UuidGenerator> uuidGeneratorList, @Nullable List<BaseEntity> entityList) {
+    public DatabaseLauncher(DatabaseConfig databaseConfig, List<UuidGenerator> uuidGeneratorList, @Nullable List<BaseEntity> entityList) {
         this.databaseConfig = databaseConfig;
-        this.serverConfig = serverConfig;
         this.uuidGeneratorList = uuidGeneratorList;
         this.entityList = entityList;
     }
@@ -77,7 +72,7 @@ public class DatabaseLauncher implements CommandLineRunner {
 
     private void initUuidGenerator() {
         UuidGeneratorFactory uuidGeneratorFactory = UuidGeneratorFactory.getInstance();
-        Integer serverId = serverConfig.getServerId();
+        Integer serverId = databaseConfig.getServerId();
         this.uuidGeneratorList.forEach(uuidGenerator -> {
             uuidGenerator.setServerId(serverId);
             uuidGenerator.setGeneratorId();

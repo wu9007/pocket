@@ -9,8 +9,13 @@
   "properties": [
     {
       "name": "pocket.serverId",
-      "type": "server id",
+      "type": "java.lang.String",
       "description": "server id."
+    },
+    {
+      "name": "pocket.cacheSize",
+      "type": "java.lang.Integer",
+      "description": "cache size."
     },
     {
       "name": "pocket.datasource.node",

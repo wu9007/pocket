@@ -1,7 +1,6 @@
 package org.hunter.demo.repository;
 
 import org.hunter.demo.model.Order;
-import org.hunter.pocket.annotation.Cache;
 import org.hunter.pocket.criteria.Criteria;
 import org.hunter.pocket.criteria.Restrictions;
 import org.hunter.pocket.session.Session;
@@ -16,7 +15,6 @@ import java.util.List;
 @Repository
 public class OrderRepositoryImpl implements OrderRepository {
     @Override
-    @Cache(key = "'order code - ' + #code")
     public List<Order> loadByCode(String code) {
         Session session = SessionFactory.getSession("order");
         session.open();
