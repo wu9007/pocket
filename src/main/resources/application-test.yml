@@ -1,7 +1,6 @@
 pocket:
-  serverId: 101
-  cacheSize: 2000
   datasource:
+    serverId: 101
     node:
       - url: jdbc:mysql://127.0.0.1:3306/home?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8
         nodeName: mysql-01
@@ -13,6 +12,7 @@ pocket:
         poolMaxSize: 60
         timeout: 1000
         retry: 5
+        cacheSize: 1000
         session: homo,user
       - url: jdbc:mysql://127.0.0.1:3306/home?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8
         nodeName: mysql-01-02
@@ -24,12 +24,8 @@ pocket:
         poolMaxSize: 60
         timeout: 1000
         retry: 5
+        cacheSize: 1000
         session: order,commodity
-  cache:
-    logic:
-      hostName: 127.0.0.1
-    base:
-      hostName: 127.0.0.1
 
 server:
   port: 8081

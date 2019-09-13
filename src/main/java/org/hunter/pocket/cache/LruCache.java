@@ -4,7 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
 
 /**
  * @author wujianchuan
@@ -55,6 +57,9 @@ public class LruCache<K, V> implements Cache<K, V> {
         if (node == null) {
             return null;
         }
+        if (this.head == null || this.tail == null) {
+            return null;
+        }
         if (this.head.k.equals(node.k)) {
             return node.v;
         }
@@ -100,6 +105,14 @@ public class LruCache<K, V> implements Cache<K, V> {
             this.hashMap.remove(key);
             logger.info("Element Count: {}", this.elementCount.decrementAndGet());
         }
+    }
+
+    @Override
+    public void clear() {
+        this.head = null;
+        this.tail = null;
+        this.hashMap.clear();
+        this.elementCount.set(0);
     }
 
     private class Node {

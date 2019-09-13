@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class SessionFactory {
     private static final Map<String, DatabaseNodeConfig> NODE_POOL = new ConcurrentHashMap<>(5);
+    private static final Map<String, CacheHolder> CACHE_POOL = new ConcurrentHashMap<>(5);
 
     private SessionFactory() {
     }
@@ -26,6 +27,11 @@ public class SessionFactory {
                         .forEach(sessionName -> {
                             if (!NODE_POOL.containsKey(sessionName)) {
                                 NODE_POOL.put(sessionName, databaseNodeConfig);
+                                Integer cacheSize = databaseNodeConfig.getCacheSize();
+                                if (cacheSize == null) {
+                                    cacheSize = 100;
+                                }
+                                CACHE_POOL.put(sessionName, new CacheHolder(cacheSize));
                             } else {
                                 throw new SessionException("Session name duplicate.");
                             }
@@ -44,5 +50,15 @@ public class SessionFactory {
      */
     public static Session getSession(String sessionName) {
         return new SessionImpl(NODE_POOL.get(sessionName), sessionName);
+    }
+
+    /**
+     * 获取session对应的缓存空间
+     *
+     * @param sessionName session name
+     * @return cache
+     */
+    public static CacheHolder getCache(String sessionName) {
+        return CACHE_POOL.get(sessionName);
     }
 }

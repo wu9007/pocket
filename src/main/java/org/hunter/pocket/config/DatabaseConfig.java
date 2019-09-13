@@ -13,7 +13,7 @@ import java.util.List;
 public class DatabaseConfig {
 
     private Integer serverId;
-    private Integer cacheSize;
+
     private List<DatabaseNodeConfig> node;
 
     public Integer getServerId() {
@@ -22,14 +22,6 @@ public class DatabaseConfig {
 
     public void setServerId(Integer serverId) {
         this.serverId = serverId;
-    }
-
-    public Integer getCacheSize() {
-        return cacheSize;
-    }
-
-    public void setCacheSize(Integer cacheSize) {
-        this.cacheSize = cacheSize;
     }
 
     public List<DatabaseNodeConfig> getNode() {

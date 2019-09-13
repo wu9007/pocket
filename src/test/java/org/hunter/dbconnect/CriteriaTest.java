@@ -110,9 +110,6 @@ public class CriteriaTest {
         Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.equ("uuid", 11L));
         Order order = (Order) criteria.unique(true);
-        if (order != null) {
-            System.out.println(order.getCommodities().size());
-        }
     }
 
     @Test
@@ -178,9 +175,10 @@ public class CriteriaTest {
         order.setDay(LocalDate.now());
         this.session.save(order);
         PocketExecutor.execute(executor, 500, () -> {
-            Order repositoryOrder = null;
+            Order repositoryOrder;
             try {
                 repositoryOrder = (Order) session.findOne(Order.class, order.getUuid());
+                System.out.println(repositoryOrder.getCode());
             } catch (SQLException e) {
                 e.printStackTrace();
             }

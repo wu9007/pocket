@@ -2,14 +2,13 @@ package org.hunter.pocket.criteria;
 
 import com.mysql.cj.jdbc.result.ResultSetImpl;
 import org.hunter.pocket.connect.ConnectionManager;
-import org.hunter.pocket.config.DatabaseNodeConfig;
 import org.hunter.pocket.constant.CommonSql;
 import org.hunter.pocket.exception.CriteriaException;
 import org.hunter.pocket.model.MapperFactory;
 import org.hunter.pocket.model.BaseEntity;
+import org.hunter.pocket.session.Session;
 
 import java.lang.reflect.Field;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,8 +20,8 @@ import java.util.List;
  */
 public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
-    public CriteriaImpl(Class clazz, Connection connection, DatabaseNodeConfig databaseConfig) {
-        super(clazz, connection, databaseConfig);
+    public CriteriaImpl(Class clazz, Session session) {
+        super(clazz, session);
     }
 
     @Override
@@ -77,6 +76,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             preparedStatement = getPreparedStatement();
             return preparedStatement.executeUpdate();
         } finally {
+            super.getSession().getCacheHolder().clear();
             this.cleanAll();
         }
     }
@@ -219,6 +219,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             return preparedStatement.executeUpdate();
         } finally {
             ConnectionManager.closeIo(preparedStatement, null);
+            super.getSession().getCacheHolder().clear();
             this.cleanAll();
         }
     }
@@ -257,7 +258,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                     Class childClass = MapperFactory.getDetailClass(mainClassName, mainFieldName);
                     String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, mainFieldName);
                     Object upFieldValue = MapperFactory.getUpBridgeFieldValue(entity, mainClassName, childClass);
-                    Criteria criteria = new CriteriaImpl(childClass, connection, databaseConfig)
+                    Criteria criteria = new CriteriaImpl(childClass, super.getSession())
                             .add(Restrictions.equ(downBridgeFieldName, upFieldValue));
                     List<BaseEntity> details = criteria.list();
                     field.set(entity, details);

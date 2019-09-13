@@ -27,6 +27,7 @@ abstract class AbstractSession implements Session {
     private static final String SET_UUID_LOCK = "setUUidLock";
 
     private final Logger logger = LoggerFactory.getLogger(AbstractSession.class);
+    final CacheHolder cache;
 
     final DatabaseNodeConfig databaseNodeConfig;
     final String sessionName;
@@ -38,6 +39,7 @@ abstract class AbstractSession implements Session {
     AbstractSession(DatabaseNodeConfig databaseNodeConfig, String sessionName) {
         this.databaseNodeConfig = databaseNodeConfig;
         this.sessionName = sessionName;
+        cache = SessionFactory.getCache(sessionName);
     }
 
     @Override

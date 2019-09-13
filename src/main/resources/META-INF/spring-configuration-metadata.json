@@ -8,49 +8,19 @@
   ],
   "properties": [
     {
-      "name": "pocket.serverId",
+      "name": "pocket.datasource.serverId",
       "type": "java.lang.String",
       "description": "server id."
     },
     {
-      "name": "pocket.cacheSize",
-      "type": "java.lang.Integer",
-      "description": "cache size."
-    },
-    {
       "name": "pocket.datasource.node",
       "type": "java.util.List<org.hunter.pocket.config.DatabaseNodeConfig>",
-      "description": "java.util.List<org.homo.dbconnect.config.DatabaseNode>."
+      "description": "java.util.List<org.homo.dbconnect.config.DatabaseNode>"
     },
     {
-      "name": "pocket.cache.base",
-      "type": "org.hunter.pocket.config.CacheConfig",
-      "description": "main cache."
-    },
-    {
-      "name": "pocket.cache.base.hostName",
-      "type": "java.lang.String",
-      "description": "base cache hostName."
-    },
-    {
-      "name": "pocket.cache.base.password",
-      "type": "java.lang.String",
-      "description": "base cache password."
-    },
-    {
-      "name": "pocket.cache.logic",
-      "type": "org.hunter.pocket.config.CacheConfig",
-      "description": "bak cache."
-    },
-    {
-      "name": "pocket.cache.logic.hostName",
-      "type": "java.lang.String",
-      "description": "logic cache hostName."
-    },
-    {
-      "name": "pocket.cache.logic.password",
-      "type": "java.lang.String",
-      "description": "logic cache password."
+      "name": "pocket.datasource.node.cacheSize",
+      "type": "java.lang.Integer",
+      "description": "cache size."
     }
   ]
 }

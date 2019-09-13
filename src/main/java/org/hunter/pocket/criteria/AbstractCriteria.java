@@ -1,6 +1,7 @@
 package org.hunter.pocket.criteria;
 
 import org.hunter.pocket.config.DatabaseNodeConfig;
+import org.hunter.pocket.session.Session;
 import org.hunter.pocket.utils.FieldTypeStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,7 @@ abstract class AbstractCriteria {
     final FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
 
     final Class clazz;
+    final Session session;
     final Connection connection;
     final DatabaseNodeConfig databaseConfig;
 
@@ -33,10 +35,15 @@ abstract class AbstractCriteria {
     private Integer limit;
     StringBuilder completeSql = new StringBuilder();
 
-    AbstractCriteria(Class clazz, Connection connection, DatabaseNodeConfig databaseConfig) {
+    AbstractCriteria(Class clazz, Session session) {
         this.clazz = clazz;
-        this.connection = connection;
-        this.databaseConfig = databaseConfig;
+        this.session = session;
+        this.connection = this.session.getConnection();
+        this.databaseConfig = this.session.getDatabaseNodeConfig();
+    }
+
+    public Session getSession() {
+        return session;
     }
 
     void cleanAll() {

@@ -27,4 +27,9 @@ public interface Cache<K, V> {
      * @param key key
      */
     void remove(K key);
+
+    /**
+     * clear the cache pool
+     */
+    void clear();
 }

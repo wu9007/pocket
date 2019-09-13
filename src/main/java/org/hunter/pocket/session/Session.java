@@ -12,7 +12,13 @@ import java.sql.Connection;
  */
 
 public interface Session extends BuildDictionary, OperateDictionary, BuildTransaction {
-    //TODO 缓存实现方式  待定
+
+    /**
+     * 获取缓存持有者
+     *
+     * @return cache holder.
+     */
+    CacheHolder getCacheHolder();
 
     /**
      * 获取session name

@@ -6,7 +6,7 @@ apply plugin: 'build-dashboard'
 apply plugin: 'maven-publish'
 
 group = 'org.hunter'
-version = '0.7.7-PRE'
+version = '0.7.8-PRE'
 sourceCompatibility = 1.8
 
 compileJava {
@@ -27,6 +27,7 @@ jar {
     exclude "org/hunter/demo"
     exclude "application*.yml"
     exclude "pocket.sql"
+    exclude "./hunter.png"
 }
 
 javadoc {
