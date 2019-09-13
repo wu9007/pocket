@@ -30,7 +30,7 @@ public class FieldTypeStrategy {
     private static final Map<String, BiFunction<ResultSet, String, Object>> RESULT_STRATEGY_POOL = new ConcurrentHashMap<>(20);
     private static final Map<String, Consumer<PreparedSupplierValue>> PREPARED_STRATEGY_POOL = new ConcurrentHashMap<>(20);
 
-    private class PreparedSupplierValue {
+    private static class PreparedSupplierValue {
         private final PreparedStatement preparedStatement;
         private final Integer index;
         private Restrictions restrictions;

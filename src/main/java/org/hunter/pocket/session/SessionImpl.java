@@ -1,7 +1,5 @@
 package org.hunter.pocket.session;
 
-import org.apache.tomcat.jni.Proc;
-import org.hunter.pocket.cache.Cache;
 import org.hunter.pocket.connect.ConnectionManager;
 import org.hunter.pocket.annotation.Entity;
 import org.hunter.pocket.config.DatabaseNodeConfig;
