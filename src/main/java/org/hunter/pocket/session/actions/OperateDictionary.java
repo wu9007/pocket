@@ -43,6 +43,7 @@ public interface OperateDictionary {
      * @param clazz 类类型
      * @param uuid  数据标识
      * @return 实体对象
+     * @throws SQLException 语句异常
      */
     Object findDirect(Class clazz, Serializable uuid) throws SQLException;
 
@@ -62,6 +63,7 @@ public interface OperateDictionary {
      * @param cascade 是否进行级联保存操作
      * @return 影响行数（主+从）
      * @throws SQLException 语句异常
+     * @throws IllegalAccessException e
      */
     int save(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
 
@@ -81,6 +83,7 @@ public interface OperateDictionary {
      * @param cascade 是否进行级联保存操作
      * @return 影响行数
      * @throws SQLException 语句异常
+     * @throws IllegalAccessException e
      */
     int shallowSave(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
 
@@ -101,6 +104,7 @@ public interface OperateDictionary {
      * @param cascade 是否进行级联更新操作
      * @return 影响行数
      * @throws SQLException 语句异常
+     * @throws IllegalAccessException e
      */
     int update(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
 
@@ -110,6 +114,7 @@ public interface OperateDictionary {
      * @param entity 实体对象
      * @return 影响行数
      * @throws SQLException 语句异常
+     * @throws IllegalAccessException e
      */
     int delete(BaseEntity entity) throws SQLException, IllegalAccessException;
 
