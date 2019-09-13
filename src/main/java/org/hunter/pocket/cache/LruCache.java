@@ -88,7 +88,7 @@ public class LruCache<K, V> implements Cache<K, V> {
                 if (node.k.equals(this.head.k)) {
                     Node newHead = node.next;
                     newHead.pre = null;
-                    this.head = node;
+                    this.head = newHead;
                 } else if (node.k.equals(this.tail.k)) {
                     Node newTail = node.pre;
                     newTail.next = null;
