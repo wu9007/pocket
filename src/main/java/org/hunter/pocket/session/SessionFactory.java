@@ -49,7 +49,15 @@ public class SessionFactory {
      * @return session
      */
     public static Session getSession(String sessionName) {
-        return new SessionImpl(NODE_POOL.get(sessionName), sessionName);
+        if (NODE_POOL.size() == 0) {
+            throw new SessionException("Please wait a moment");
+        }
+        DatabaseNodeConfig databaseNodeConfig = NODE_POOL.get(sessionName);
+        if (databaseNodeConfig == null) {
+            throw new SessionException(String.format("No session named <<%s>> was found", sessionName));
+        } else {
+            return new SessionImpl(databaseNodeConfig, sessionName);
+        }
     }
 
     /**

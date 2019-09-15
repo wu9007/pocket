@@ -5,8 +5,8 @@ apply plugin: "jacoco"
 apply plugin: 'build-dashboard'
 apply plugin: 'maven-publish'
 
-group = 'org.hunter'
-version = '0.7.9-PRE'
+group = 'com.github.leyan95'
+version = '0.7.10-PRE'
 sourceCompatibility = 1.8
 
 compileJava {
