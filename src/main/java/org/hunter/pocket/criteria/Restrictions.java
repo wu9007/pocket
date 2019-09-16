@@ -28,6 +28,10 @@ public class Restrictions implements SqlBean {
     private Restrictions(String source, String sqlOperate, Object target) {
         this.source = source;
         this.sqlOperate = sqlOperate;
+        if (target == null) {
+            throw new CriteriaException(String.format("Parameter <<%s>> can not be null, please use method Restrictions.isNull(source) when you want to judge whether " +
+                    "it's empty or not", source));
+        }
         this.target = target;
     }
 
