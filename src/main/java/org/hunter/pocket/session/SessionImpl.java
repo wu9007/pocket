@@ -205,12 +205,12 @@ public class SessionImpl extends AbstractSession {
                     this.statementApply(fields, entity, preparedStatement);
                     preparedStatement.setObject(fields.length + 1, entity.getUuid());
                     effectRow = preparedStatement.executeUpdate();
-                    String key = this.cache.generateKey(clazz, entity.getUuid());
-                    this.cache.set(key, entity);
                 } finally {
                     ConnectionManager.closeIo(preparedStatement, null);
                 }
             }
+            String key = this.cache.generateKey(clazz, entity.getUuid());
+            this.cache.set(key, entity);
         }
         return effectRow;
     }

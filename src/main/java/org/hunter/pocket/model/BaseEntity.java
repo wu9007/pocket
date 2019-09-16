@@ -10,7 +10,7 @@ import java.lang.reflect.Field;
  * @author wujianchuan 2018/12/26
  * 万物得其本者生，万事得其道者成
  */
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class BaseEntity implements Serializable {
     private static final long serialVersionUID = -8735555543925687138L;
     @Column(name = "UUID")
