@@ -8,3 +8,6 @@ If you have any improvement, I will be happy to get a pull request from you!  
 ![Framework diagram](./hunter.png)
 
 **Document [Link](https://www.yuque.com/shusheng/suibqb)**
+
+## License
+[MIT](https://choosealicense.com/licenses/mit/)
