@@ -27,6 +27,9 @@ public abstract class BaseEntity implements Serializable {
     @Override
     public int hashCode() {
         int hashCode = 0;
+        if (this.getUuid() == null) {
+            return hashCode;
+        }
         Field[] fields = MapperFactory.getRepositoryFields(this.getClass().getName());
         try {
             for (Field field : fields) {
