@@ -5,8 +5,8 @@ apply plugin: "jacoco"
 apply plugin: 'build-dashboard'
 apply plugin: 'maven-publish'
 
-group = 'com.github.leyan95'
-version = '0.7.14-PRE'
+group = 'org.hv'
+version = '0.1.0'
 sourceCompatibility = 1.8
 
 compileJava {
@@ -23,11 +23,11 @@ jar {
                 'Implementation-Version': version
     }
 
-    exclude "org/hunter/Application.class"
-    exclude "org/hunter/demo"
+    exclude "org/hv/Application.class"
+    exclude "org/hv/demo"
     exclude "application*.yml"
     exclude "pocket.sql"
-    exclude "./hunter.png"
+    exclude "./hv.png"
 }
 
 javadoc {

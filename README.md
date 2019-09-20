@@ -5,7 +5,7 @@
 # Pocket🚀
 If you have any improvement, I will be happy to get a pull request from you!  
 
-![Framework diagram](./hunter.png)
+![Framework diagram](hv.png)
 
 **Document [Link](https://www.yuque.com/shusheng/suibqb)**
 

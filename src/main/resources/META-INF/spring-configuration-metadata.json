@@ -2,8 +2,8 @@
   "groups": [
     {
       "name": "pocket",
-      "type": "org.hunter.pocket.config.DatabaseConfig",
-      "sourceType": "org.hunter.pocket.config.DatabaseConfig"
+      "type": "org.hv.pocket.config.DatabaseConfig",
+      "sourceType": "org.hv.pocket.config.DatabaseConfig"
     }
   ],
   "properties": [
@@ -14,7 +14,7 @@
     },
     {
       "name": "pocket.datasource.node",
-      "type": "java.util.List<org.hunter.pocket.config.DatabaseNodeConfig>",
+      "type": "java.util.List<org.hv.pocket.config.DatabaseNodeConfig>",
       "description": "java.util.List<org.homo.dbconnect.config.DatabaseNode>"
     },
     {
