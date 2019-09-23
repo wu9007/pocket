@@ -27,7 +27,11 @@ public class CacheHolder {
     }
 
     void set(String key, Object value) {
-        this.lruCache.put(key, ((BaseEntity) value).clone());
+        if (value != null) {
+            this.lruCache.put(key, ((BaseEntity) value).clone());
+        } else {
+            this.lruCache.put(key, null);
+        }
     }
 
     public void remove(String key) {
