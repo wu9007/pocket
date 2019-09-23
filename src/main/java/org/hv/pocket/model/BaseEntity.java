@@ -8,10 +8,10 @@ import java.lang.reflect.Field;
 
 /**
  * @author wujianchuan 2018/12/26
- * 万物得其本者生，万事得其道者成
+ * Abandon the ship or abandon hope
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public abstract class BaseEntity implements Serializable {
+public abstract class BaseEntity implements Serializable, Cloneable {
     private static final long serialVersionUID = -8735555543925687138L;
     @Column(name = "UUID")
     private String uuid;
@@ -84,5 +84,25 @@ public abstract class BaseEntity implements Serializable {
                 throw new IllegalArgumentException(e.getMessage());
             }
         }
+    }
+
+    @Override
+    public Object clone() {
+        Object o;
+        Field[] fields = MapperFactory.getRepositoryFields(this.getClass().getName());
+        try {
+            o = super.clone();
+            for (Field field : fields) {
+                field.setAccessible(true);
+                Object value = field.get(this);
+                if (value instanceof BaseEntity) {
+                    field.set(o, ((BaseEntity) value).clone());
+                }
+            }
+        } catch (IllegalAccessException | CloneNotSupportedException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException(e.getMessage());
+        }
+        return o;
     }
 }

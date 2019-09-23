@@ -2,6 +2,7 @@ package org.hv.pocket.session;
 
 import org.hv.pocket.cache.Cache;
 import org.hv.pocket.cache.LruCache;
+import org.hv.pocket.model.BaseEntity;
 
 import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,7 +27,7 @@ public class CacheHolder {
     }
 
     void set(String key, Object value) {
-        this.lruCache.put(key, value);
+        this.lruCache.put(key, ((BaseEntity) value).clone());
     }
 
     public void remove(String key) {
