@@ -7,7 +7,6 @@ import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.criteria.Criteria;
 import org.hv.pocket.criteria.CriteriaImpl;
 import org.hv.pocket.criteria.Restrictions;
-import org.hv.pocket.exception.SessionException;
 import org.hv.pocket.model.DetailInductiveBox;
 import org.hv.pocket.model.MapperFactory;
 import org.hv.pocket.model.BaseEntity;
@@ -31,8 +30,6 @@ import java.util.List;
  */
 public class SessionImpl extends AbstractSession {
     private final Logger logger = LoggerFactory.getLogger(SessionImpl.class);
-    private static final String CACHE_UNLOCK = "CACHE_UNLOCK";
-    private static final String CACHE_LOCK = "CACHE_LOCK";
     private static final String IDENTIFICATION = "UUID";
     private static final String OPEN_LOCK = "OPEN_MONITOR";
     private static final String CLOSE_LOCK = "CLOSE_MONITOR";
@@ -111,37 +108,8 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public Object findOne(Class clazz, Serializable uuid) {
-        String cacheKey = this.cache.generateKey(clazz, uuid);
-        Object result = this.cache.get(cacheKey);
-        if (result != null) {
-            return result;
-        }
-
-        boolean lock = false;
-        try {
-            lock = this.cache.getMapLock().putIfAbsent(cacheKey, cacheKey) == null;
-            if (lock) {
-                result = this.findDirect(clazz, uuid);
-                this.cache.set(cacheKey, result);
-                synchronized (CACHE_UNLOCK) {
-                    CACHE_UNLOCK.notifyAll();
-                }
-            } else {
-                synchronized (CACHE_LOCK) {
-                    CACHE_LOCK.wait(10);
-                    result = this.findOne(clazz, uuid);
-                }
-            }
-        } catch (InterruptedException | SQLException e) {
-            Thread.currentThread().interrupt();
-            throw new SessionException(e.getMessage(), e, true, true);
-        } finally {
-            if (lock) {
-                this.cache.getMapLock().remove(cacheKey);
-            }
-        }
-        return result;
+    public Object findOne(Class clazz, Serializable uuid) throws SQLException {
+        return this.findDirect(clazz, uuid);
     }
 
     @Override
@@ -209,8 +177,6 @@ public class SessionImpl extends AbstractSession {
                     ConnectionManager.closeIo(preparedStatement, null);
                 }
             }
-            String key = this.cache.generateKey(clazz, entity.getUuid());
-            this.cache.set(key, entity);
         }
         return effectRow;
     }
@@ -290,8 +256,6 @@ public class SessionImpl extends AbstractSession {
                 preparedStatement = this.connection.prepareStatement(sql);
                 preparedStatement.setObject(1, uuid);
                 effectRow += preparedStatement.executeUpdate();
-                String key = this.cache.generateKey(clazz, uuid);
-                this.cache.remove(key);
             } finally {
                 ConnectionManager.closeIo(preparedStatement, null);
             }
@@ -322,6 +286,7 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public CacheHolder getCacheHolder() {
-        return this.cache;
+        // TODO
+        return null;
     }
 }

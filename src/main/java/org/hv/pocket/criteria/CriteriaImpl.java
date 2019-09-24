@@ -76,7 +76,6 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             preparedStatement = getPreparedStatement();
             return preparedStatement.executeUpdate();
         } finally {
-            super.getSession().getCacheHolder().clear();
             this.cleanAll();
         }
     }
@@ -219,7 +218,6 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             return preparedStatement.executeUpdate();
         } finally {
             ConnectionManager.closeIo(preparedStatement, null);
-            super.getSession().getCacheHolder().clear();
             this.cleanAll();
         }
     }

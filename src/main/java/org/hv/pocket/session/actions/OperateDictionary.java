@@ -35,7 +35,7 @@ public interface OperateDictionary {
      * @param uuid  数据标识
      * @return 实体对象
      */
-    Object findOne(Class clazz, Serializable uuid);
+    Object findOne(Class clazz, Serializable uuid) throws SQLException;
 
     /**
      * 强制通过数据库查询数据
