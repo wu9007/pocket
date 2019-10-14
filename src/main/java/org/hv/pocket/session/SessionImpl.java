@@ -113,6 +113,12 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
+    public List list(Class clazz) {
+        Criteria criteria = this.createCriteria(clazz);
+        return criteria.list(true);
+    }
+
+    @Override
     public Object findDirect(Class clazz, Serializable uuid) throws SQLException {
         Criteria criteria = this.createCriteria(clazz);
         criteria.add(Restrictions.equ("uuid", uuid));

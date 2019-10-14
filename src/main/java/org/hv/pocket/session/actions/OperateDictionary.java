@@ -4,6 +4,7 @@ import org.hv.pocket.model.BaseEntity;
 
 import java.io.Serializable;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * @author wujianchuan
@@ -38,6 +39,14 @@ public interface OperateDictionary {
     Object findOne(Class clazz, Serializable uuid) throws SQLException;
 
     /**
+     * 查询所有
+     *
+     * @param clazz 类类型
+     * @return 所有实体对象
+     */
+    List list(Class clazz);
+
+    /**
      * 强制通过数据库查询数据
      *
      * @param clazz 类类型
@@ -62,7 +71,7 @@ public interface OperateDictionary {
      * @param entity  entity
      * @param cascade 是否进行级联保存操作
      * @return 影响行数（主+从）
-     * @throws SQLException 语句异常
+     * @throws SQLException           语句异常
      * @throws IllegalAccessException e
      */
     int save(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
@@ -82,7 +91,7 @@ public interface OperateDictionary {
      * @param entity  实体对象
      * @param cascade 是否进行级联保存操作
      * @return 影响行数
-     * @throws SQLException 语句异常
+     * @throws SQLException           语句异常
      * @throws IllegalAccessException e
      */
     int shallowSave(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
@@ -103,7 +112,7 @@ public interface OperateDictionary {
      * @param entity  实体对象
      * @param cascade 是否进行级联更新操作
      * @return 影响行数
-     * @throws SQLException 语句异常
+     * @throws SQLException           语句异常
      * @throws IllegalAccessException e
      */
     int update(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
@@ -113,7 +122,7 @@ public interface OperateDictionary {
      *
      * @param entity 实体对象
      * @return 影响行数
-     * @throws SQLException 语句异常
+     * @throws SQLException           语句异常
      * @throws IllegalAccessException e
      */
     int delete(BaseEntity entity) throws SQLException, IllegalAccessException;
