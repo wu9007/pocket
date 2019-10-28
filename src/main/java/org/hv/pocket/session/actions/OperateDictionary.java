@@ -57,7 +57,7 @@ public interface OperateDictionary {
     Object findDirect(Class clazz, Serializable uuid) throws SQLException;
 
     /**
-     * 保存(NULL同样进行保存)
+     * 保存(NULL不纳入保存范围保留数据库默认值)
      *
      * @param entity 实体对象
      * @return 影响行数
@@ -66,7 +66,7 @@ public interface OperateDictionary {
     int save(BaseEntity entity) throws SQLException;
 
     /**
-     * 保存(NULL同样进行保存)
+     * 保存(NULL不纳入保存范围保留数据库默认值)
      *
      * @param entity  entity
      * @param cascade 是否进行级联保存操作
@@ -77,16 +77,16 @@ public interface OperateDictionary {
     int save(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
 
     /**
-     * 保存(NULL不纳入保存范围保留数据库默认值)
+     * 保存(NULL同样进行保存)
      *
      * @param entity 实体对象
      * @return 影响行数
      * @throws SQLException 语句异常
      */
-    int shallowSave(BaseEntity entity) throws SQLException;
+    int forcibleSave(BaseEntity entity) throws SQLException;
 
     /**
-     * 保存(NULL不纳入保存范围保留数据库默认值)
+     * 保存(NULL同样进行保存)
      *
      * @param entity  实体对象
      * @param cascade 是否进行级联保存操作
@@ -94,7 +94,7 @@ public interface OperateDictionary {
      * @throws SQLException           语句异常
      * @throws IllegalAccessException e
      */
-    int shallowSave(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
+    int forcibleSave(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
 
     /**
      * 更新实体

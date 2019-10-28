@@ -127,28 +127,28 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public int save(BaseEntity entity) throws SQLException {
-        return super.saveEntity(entity, true);
+        return super.saveEntity(entity, false);
     }
 
     @Override
     public int save(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException {
         int effectRow = this.save(entity);
         if (cascade) {
-            effectRow += super.saveDetails(entity, true);
+            effectRow += super.saveDetails(entity, false);
         }
         return effectRow;
     }
 
     @Override
-    public int shallowSave(BaseEntity entity) throws SQLException {
-        return super.saveEntity(entity, false);
+    public int forcibleSave(BaseEntity entity) throws SQLException {
+        return super.saveEntity(entity, true);
     }
 
     @Override
-    public int shallowSave(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException {
-        int effectRow = this.shallowSave(entity);
+    public int forcibleSave(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException {
+        int effectRow = this.forcibleSave(entity);
         if (cascade) {
-            effectRow += super.saveDetails(entity, false);
+            effectRow += super.saveDetails(entity, true);
         }
         return effectRow;
     }
