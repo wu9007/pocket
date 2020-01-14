@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.IntStream;
 
 /**
  * @author wujianchuan 2019/1/15
@@ -134,13 +135,15 @@ public class CriteriaTest {
 
     @Test
     public void test10() throws InterruptedException {
-        PocketExecutor.execute(Executors.newFixedThreadPool(100), 100, () -> {
-            Criteria criteria = this.session.createCriteria(Order.class);
-            List list = criteria.add(Restrictions.like("code", "%001%"))
-                    .add(Sort.desc("price"))
-                    .add(Sort.asc("uuid"))
-                    .list();
-            System.out.println(list);
+        PocketExecutor.execute(Executors.newFixedThreadPool(50), 50, () -> {
+            IntStream.range(0, 100).forEach((index) -> {
+                Criteria criteria = this.session.createCriteria(Order.class);
+                List list = criteria.add(Restrictions.like("code", "%001%"))
+                        .add(Sort.desc("price"))
+                        .add(Sort.asc("uuid"))
+                        .list();
+                System.out.println(list);
+            });
         });
     }
 
@@ -174,14 +177,10 @@ public class CriteriaTest {
         order.setPrice(new BigDecimal("99.56789"));
         order.setDay(LocalDate.now());
         this.session.save(order);
-        PocketExecutor.execute(executor, 500, () -> {
-            try {
-                Order repositoryOrder = (Order) session.findOne(Order.class, order.getUuid());
-                System.out.println(repositoryOrder.getCode());
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        });
+        for (int index = 0; index < 500; index++) {
+            Order repositoryOrder = (Order) session.findOne(Order.class, order.getUuid());
+            System.out.println(repositoryOrder.getCode());
+        }
         this.session.delete(order);
         executor.shutdown();
     }

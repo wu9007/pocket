@@ -39,11 +39,12 @@ public class SessionTest {
     }
 
     @Test
-    public void test1() throws SQLException {
+    public void test1() throws SQLException, IllegalAccessException {
         RelevantBill order = (RelevantBill) this.session.findOne(RelevantBill.class, "10130");
         System.out.println(order.getCode());
         order.setCode("Hello-001");
         this.session.update(order);
         System.out.println(order.getCode());
+        this.session.delete(order);
     }
 }
