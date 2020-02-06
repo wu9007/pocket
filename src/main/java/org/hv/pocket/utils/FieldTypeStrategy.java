@@ -174,6 +174,8 @@ public class FieldTypeStrategy {
                 Object object = resultSet.getObject(columnName);
                 if (object == null) {
                     return null;
+                } else if (object instanceof Boolean) {
+                    return object;
                 } else {
                     return Integer.parseInt(String.valueOf(object)) != 0;
                 }
