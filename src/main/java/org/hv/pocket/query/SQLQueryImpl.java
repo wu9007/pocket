@@ -131,10 +131,13 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
         return preparedStatement.executeQuery();
     }
 
-    private Map<String, Object> getObjects(ResultSet resultSet) throws SQLException {
+    private Object getObjects(ResultSet resultSet) throws SQLException {
         int columnNameSize = this.columnNameList.size();
         int columnSize = ((ResultSetImpl) resultSet).getColumnDefinition().getFields().length;
         if (columnNameSize != columnSize) {
+            if (columnNameSize == 0 && columnSize == 1) {
+                return resultSet.getObject(1);
+            }
             throw new SQLException("Column mapping failed");
         } else {
             Map<String, Object> result = new LinkedHashMap<>();
