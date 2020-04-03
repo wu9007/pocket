@@ -3,6 +3,7 @@ package org.hv.pocket.session;
 import org.hv.pocket.config.DatabaseNodeConfig;
 import org.hv.pocket.connect.ConnectionManager;
 import org.hv.pocket.constant.CommonSql;
+import org.hv.pocket.logger.StatementProxy;
 import org.hv.pocket.model.BaseEntity;
 import org.hv.pocket.model.MapperFactory;
 import org.hv.pocket.utils.ReflectUtils;
@@ -27,6 +28,7 @@ abstract class AbstractSession implements Session {
     private static final String SET_UUID_LOCK = "setUUidLock";
 
     private final Logger logger = LoggerFactory.getLogger(AbstractSession.class);
+    final StatementProxy statementProxy;
 
     final DatabaseNodeConfig databaseNodeConfig;
     final String sessionName;
@@ -38,6 +40,7 @@ abstract class AbstractSession implements Session {
     AbstractSession(DatabaseNodeConfig databaseNodeConfig, String sessionName) {
         this.databaseNodeConfig = databaseNodeConfig;
         this.sessionName = sessionName;
+        this.statementProxy = StatementProxy.newInstance(this.databaseNodeConfig);
     }
 
     @Override
@@ -64,12 +67,6 @@ abstract class AbstractSession implements Session {
         this.closed = closed;
     }
 
-    void showSql(String sql) {
-        if (this.databaseNodeConfig.getShowSql()) {
-            this.logger.info("SQL: {}", sql);
-        }
-    }
-
     /**
      * 保存数据
      *
@@ -90,7 +87,6 @@ abstract class AbstractSession implements Session {
             synchronized (SET_UUID_LOCK) {
                 entity.setUuid(uuid);
                 String sql = nullAble ? this.buildSaveSqlNullable(entity) : this.buildSaveSqlNotNull(entity);
-                this.showSql(sql);
                 preparedStatement = this.connection.prepareStatement(sql);
                 if (nullAble) {
                     this.statementApplyNullable(entity, preparedStatement);
@@ -98,7 +94,7 @@ abstract class AbstractSession implements Session {
                     this.statementApplyNotNull(entity, preparedStatement);
                 }
             }
-            effectRow = preparedStatement.executeUpdate();
+            effectRow = this.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeUpdate);
         } finally {
             ConnectionManager.closeIo(preparedStatement, null);
         }

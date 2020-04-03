@@ -172,13 +172,12 @@ public class SessionImpl extends AbstractSession {
                 sql.append(String.join(CommonSql.COMMA, setValues))
                         .append(CommonSql.WHERE)
                         .append(IDENTIFICATION).append(CommonSql.EQUAL_TO).append(CommonSql.PLACEHOLDER);
-                this.showSql(sql.toString());
                 PreparedStatement preparedStatement = null;
                 try {
                     preparedStatement = this.connection.prepareStatement(sql.toString());
                     this.statementApply(fields, entity, preparedStatement);
                     preparedStatement.setObject(fields.length + 1, entity.getUuid());
-                    effectRow = preparedStatement.executeUpdate();
+                    effectRow = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeUpdate);
                 } finally {
                     ConnectionManager.closeIo(preparedStatement, null);
                 }
@@ -256,12 +255,11 @@ public class SessionImpl extends AbstractSession {
                     IDENTIFICATION +
                     CommonSql.EQUAL_TO +
                     CommonSql.PLACEHOLDER;
-            this.showSql(sql);
             PreparedStatement preparedStatement = null;
             try {
                 preparedStatement = this.connection.prepareStatement(sql);
                 preparedStatement.setObject(1, uuid);
-                effectRow += preparedStatement.executeUpdate();
+                effectRow += super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeUpdate);
             } finally {
                 ConnectionManager.closeIo(preparedStatement, null);
             }
@@ -278,7 +276,7 @@ public class SessionImpl extends AbstractSession {
                 + CommonSql.WHERE
                 + "UUID REGEXP '^" + serverId + annotation.tableId() + "'";
         PreparedStatement preparedStatement = this.connection.prepareStatement(sql);
-        ResultSet resultSet = preparedStatement.executeQuery();
+        ResultSet resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
         long uuid;
         if (resultSet.next()) {
             uuid = resultSet.getLong(1);

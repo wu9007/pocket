@@ -74,7 +74,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         PreparedStatement preparedStatement;
         try {
             preparedStatement = getPreparedStatement();
-            return super.executeWithLog(preparedStatement, PreparedStatement::executeUpdate);
+            return super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeUpdate);
         } finally {
             this.cleanAll();
         }
@@ -102,7 +102,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         ResultSet resultSet = null;
         try {
             preparedStatement = getPreparedStatement();
-            resultSet = super.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
+            resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
             List<BaseEntity> result = new ArrayList<>();
 
             while (resultSet.next()) {
@@ -154,7 +154,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         BaseEntity entity = null;
         try {
             preparedStatement = getPreparedStatement();
-            resultSet = super.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
+            resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
             int resultRowCount = ((ResultSetImpl) resultSet).getRows().size();
             if (resultRowCount > 1) {
                 throw new CriteriaException("Data is not unique, and multiple data are returned.");
@@ -197,7 +197,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
         try {
             preparedStatement = getPreparedStatement();
-            resultSet = super.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
+            resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
             if (resultSet.next()) {
                 return (long) resultSet.getObject(1);
             } else {
@@ -215,7 +215,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = getPreparedStatement();
-            return super.executeWithLog(preparedStatement, PreparedStatement::executeUpdate);
+            return super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeUpdate);
         } finally {
             ConnectionManager.closeIo(preparedStatement, null);
             this.cleanAll();
@@ -229,7 +229,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         ResultSet resultSet = null;
         try {
             preparedStatement = getPreparedStatement();
-            resultSet = super.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
+            resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
             if (resultSet.next()) {
                 return resultSet.getObject(1);
             } else {
