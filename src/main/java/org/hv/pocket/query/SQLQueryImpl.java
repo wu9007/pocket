@@ -41,7 +41,6 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
 
     @Override
     public Object unique() throws SQLException {
-        super.showSql();
         ResultSet resultSet = execute(sql);
         if (resultSet.next()) {
             if (clazz != null) {
@@ -67,7 +66,6 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
                     .append(CommonSql.COMMA)
                     .append(this.getLimit());
         }
-        super.showSql();
         ResultSet resultSet = execute(querySQL.toString());
         List<Object> results = new ArrayList<>();
         while (resultSet.next()) {
@@ -128,7 +126,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
         } else {
             preparedStatement = this.connection.prepareStatement(executeSql);
         }
-        return preparedStatement.executeQuery();
+        return super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
     }
 
     private Object getObjects(ResultSet resultSet) throws SQLException {
