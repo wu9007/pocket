@@ -1,9 +1,7 @@
 package org.hv.pocket.query;
 
 import org.hv.pocket.config.DatabaseNodeConfig;
-import org.hv.pocket.constant.CommonSql;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.hv.pocket.logger.StatementProxy;
 
 import java.sql.Connection;
 import java.util.HashMap;
@@ -15,7 +13,7 @@ import java.util.Map;
  * @author wujianchuan 2019/1/3
  */
 abstract class AbstractSQLQuery {
-    private final Logger logger = LoggerFactory.getLogger(AbstractSQLQuery.class);
+    final StatementProxy statementProxy;
     final Connection connection;
     private final DatabaseNodeConfig databaseNodeConfig;
     final String sql;
@@ -29,12 +27,14 @@ abstract class AbstractSQLQuery {
         this.sql = sql;
         this.connection = connection;
         this.databaseNodeConfig = databaseNodeConfig;
+        this.statementProxy = StatementProxy.newInstance(this.databaseNodeConfig);
     }
 
     AbstractSQLQuery(Connection connection, String sql, DatabaseNodeConfig databaseNodeConfig, Class clazz) {
         this.sql = sql;
         this.connection = connection;
         this.databaseNodeConfig = databaseNodeConfig;
+        this.statementProxy = StatementProxy.newInstance(this.databaseNodeConfig);
         this.clazz = clazz;
     }
 
@@ -55,14 +55,4 @@ abstract class AbstractSQLQuery {
         return limit;
     }
 
-    void showSql() {
-        if (this.databaseNodeConfig.getShowSql()) {
-            this.logger.info("Pocket: {}", this.limited() ?
-                    new StringBuilder(this.sql).append(" LIMIT ")
-                            .append(this.getStart())
-                            .append(CommonSql.COMMA)
-                            .append(this.getLimit())
-                    : this.sql);
-        }
-    }
 }
