@@ -1,6 +1,5 @@
 package org.hv.pocket.annotation;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Documented;
@@ -15,7 +14,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Bean
 @Component
 public @interface Entity {
     String table();
