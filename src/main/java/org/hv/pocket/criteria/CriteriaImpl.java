@@ -154,11 +154,11 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         try {
             preparedStatement = getPreparedStatement();
             resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
-            int resultRowCount = resultSet.getFetchSize();
-            if (resultRowCount > 1) {
-                throw new CriteriaException("Data is not unique, and multiple data are returned.");
-            }
-            if (resultSet.next()) {
+            int resultRowCount = 0;
+            while (resultSet.next()) {
+                if (++resultRowCount > 1) {
+                    throw new CriteriaException("Data is not unique, and multiple data are returned.");
+                }
                 try {
                     entity = (BaseEntity) clazz.newInstance();
                     for (Field field : MapperFactory.getViewFields(clazz.getName())) {

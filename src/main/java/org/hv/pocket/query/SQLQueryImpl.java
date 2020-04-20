@@ -1,6 +1,5 @@
 package org.hv.pocket.query;
 
-import com.mysql.cj.jdbc.result.ResultSetImpl;
 import org.hv.pocket.config.DatabaseNodeConfig;
 import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.criteria.ParameterTranslator;
@@ -131,7 +130,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
 
     private Object getObjects(ResultSet resultSet) throws SQLException {
         int columnNameSize = this.columnNameList.size();
-        int columnSize = ((ResultSetImpl) resultSet).getColumnDefinition().getFields().length;
+        int columnSize = resultSet.getMetaData().getColumnCount();
         if (columnNameSize != columnSize) {
             if (columnNameSize == 0 && columnSize == 1) {
                 return resultSet.getObject(1);
