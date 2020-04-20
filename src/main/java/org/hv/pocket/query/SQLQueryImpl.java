@@ -149,7 +149,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
     private Object getEntity(ResultSet resultSet) throws InstantiationException, IllegalAccessException {
         Object result = clazz.newInstance();
         List<Field> fields = Arrays.stream(MapperFactory.getViewFields(clazz.getName()))
-                .filter(field -> this.sql.contains(field.getName()))
+                .filter(field -> this.sql.contains(field.getName() + ",") || this.sql.contains(field.getName() + " "))
                 .collect(Collectors.toList());
         for (Field field : fields) {
             field.set(result, fieldTypeStrategy.getColumnValue(field, resultSet));
