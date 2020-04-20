@@ -1,6 +1,5 @@
 package org.hv.pocket.criteria;
 
-import com.mysql.cj.jdbc.result.ResultSetImpl;
 import org.hv.pocket.connect.ConnectionManager;
 import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.exception.CriteriaException;
@@ -155,7 +154,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         try {
             preparedStatement = getPreparedStatement();
             resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
-            int resultRowCount = ((ResultSetImpl) resultSet).getRows().size();
+            int resultRowCount = resultSet.getFetchSize();
             if (resultRowCount > 1) {
                 throw new CriteriaException("Data is not unique, and multiple data are returned.");
             }
