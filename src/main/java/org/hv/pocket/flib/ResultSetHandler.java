@@ -17,7 +17,7 @@ public class ResultSetHandler {
         this.resultSet = resultSet;
     }
 
-    public static ResultSetHandler newInstance(ResultSet resultSet){
+    public static ResultSetHandler newInstance(ResultSet resultSet) {
         return new ResultSetHandler(resultSet);
     }
 

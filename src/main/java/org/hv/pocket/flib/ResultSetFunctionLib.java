@@ -25,15 +25,15 @@ final public class ResultSetFunctionLib {
         RESULT_STRATEGY_POOL.put((double.class.getName()), ResultSet::getDouble);
         RESULT_STRATEGY_POOL.put((long.class.getName()), ResultSet::getLong);
         RESULT_STRATEGY_POOL.put((boolean.class.getName()), ResultSet::getBoolean);
-        RESULT_STRATEGY_POOL.put(String.class.getName(), ResultSet::getString);
-        RESULT_STRATEGY_POOL.put(BigDecimal.class.getName(), ResultSet::getBigDecimal);
-        RESULT_STRATEGY_POOL.put(Long.class.getName(), ResultSet::getLong);
-        RESULT_STRATEGY_POOL.put(Date.class.getName(), ResultSet::getTimestamp);
-        RESULT_STRATEGY_POOL.put(Integer.class.getName(), ResultSet::getInt);
-        RESULT_STRATEGY_POOL.put(Double.class.getName(), ResultSet::getDouble);
-        RESULT_STRATEGY_POOL.put(Serializable.class.getName(), ResultSet::getObject);
-        RESULT_STRATEGY_POOL.put(Byte[].class.getName(), ResultSet::getBytes);
         RESULT_STRATEGY_POOL.put(byte[].class.getName(), ResultSet::getBytes);
+        RESULT_STRATEGY_POOL.put(Byte[].class.getName(), ResultSet::getBytes);
+        RESULT_STRATEGY_POOL.put(Integer.class.getName(), ResultSet::getInt);
+        RESULT_STRATEGY_POOL.put(Long.class.getName(), ResultSet::getLong);
+        RESULT_STRATEGY_POOL.put(Double.class.getName(), ResultSet::getDouble);
+        RESULT_STRATEGY_POOL.put(String.class.getName(), ResultSet::getString);
+        RESULT_STRATEGY_POOL.put(Serializable.class.getName(), ResultSet::getObject);
+        RESULT_STRATEGY_POOL.put(BigDecimal.class.getName(), ResultSet::getBigDecimal);
+        RESULT_STRATEGY_POOL.put(Date.class.getName(), ResultSet::getTimestamp);
         RESULT_STRATEGY_POOL.put(LocalDate.class.getName(), (resultSet, columnName) -> {
             java.sql.Date date = resultSet.getDate(columnName);
             return date != null ? date.toLocalDate() : null;
@@ -54,7 +54,7 @@ final public class ResultSetFunctionLib {
         });
     }
 
-    static PocketBiFunction<ResultSet, String, Object> get(String fieldClassName){
+    static PocketBiFunction<ResultSet, String, Object> get(String fieldClassName) {
         return RESULT_STRATEGY_POOL.get(fieldClassName);
     }
 }
