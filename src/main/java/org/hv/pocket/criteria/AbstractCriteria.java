@@ -3,9 +3,6 @@ package org.hv.pocket.criteria;
 import org.hv.pocket.config.DatabaseNodeConfig;
 import org.hv.pocket.logger.StatementProxy;
 import org.hv.pocket.session.Session;
-import org.hv.pocket.utils.FieldTypeStrategy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.util.HashMap;
@@ -17,10 +14,7 @@ import java.util.Map;
  * @author wujianchuan 2019/1/10
  */
 abstract class AbstractCriteria {
-
-    final FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
     final StatementProxy statementProxy;
-
     final Class clazz;
     final Session session;
     final Connection connection;

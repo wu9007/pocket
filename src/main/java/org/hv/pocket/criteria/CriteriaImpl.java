@@ -3,6 +3,8 @@ package org.hv.pocket.criteria;
 import org.hv.pocket.connect.ConnectionManager;
 import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.exception.CriteriaException;
+import org.hv.pocket.flib.PreparedStatementHandler;
+import org.hv.pocket.flib.ResultSetHandler;
 import org.hv.pocket.model.MapperFactory;
 import org.hv.pocket.model.BaseEntity;
 import org.hv.pocket.session.Session;
@@ -102,12 +104,13 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         try {
             preparedStatement = getPreparedStatement();
             resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
+            ResultSetHandler resultSetHandler = ResultSetHandler.newInstance(resultSet);
             List<BaseEntity> result = new ArrayList<>();
 
             while (resultSet.next()) {
                 BaseEntity entity = (BaseEntity) clazz.newInstance();
                 for (Field field : MapperFactory.getViewFields(clazz.getName())) {
-                    field.set(entity, this.fieldTypeStrategy.getMappingColumnValue(clazz, field, resultSet));
+                    field.set(entity, resultSetHandler.getMappingColumnValue(clazz, field));
                 }
                 result.add(entity);
             }
@@ -154,6 +157,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         try {
             preparedStatement = getPreparedStatement();
             resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
+            ResultSetHandler resultSetHandler = ResultSetHandler.newInstance(resultSet);
             int resultRowCount = 0;
             while (resultSet.next()) {
                 if (++resultRowCount > 1) {
@@ -162,7 +166,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                 try {
                     entity = (BaseEntity) clazz.newInstance();
                     for (Field field : MapperFactory.getViewFields(clazz.getName())) {
-                        field.set(entity, this.fieldTypeStrategy.getMappingColumnValue(clazz, field, resultSet));
+                        field.set(entity, resultSetHandler.getMappingColumnValue(clazz, field));
                     }
                 } catch (InstantiationException | IllegalAccessException e) {
                     e.printStackTrace();
@@ -276,8 +280,8 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     private PreparedStatement getPreparedStatement() throws SQLException {
         PreparedStatement preparedStatement;
         preparedStatement = this.connection.prepareStatement(completeSql.toString());
-        fieldTypeStrategy.setPreparedStatement(preparedStatement, this.parameters,
-                this.sortedRestrictionsList);
+        PreparedStatementHandler preparedStatementHandler = PreparedStatementHandler.newInstance(preparedStatement);
+        preparedStatementHandler.completionPreparedStatement(this.parameters, this.sortedRestrictionsList);
         return preparedStatement;
     }
 }

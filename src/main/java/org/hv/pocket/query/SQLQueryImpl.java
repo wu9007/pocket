@@ -3,8 +3,9 @@ package org.hv.pocket.query;
 import org.hv.pocket.config.DatabaseNodeConfig;
 import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.criteria.ParameterTranslator;
+import org.hv.pocket.flib.PreparedStatementHandler;
+import org.hv.pocket.flib.ResultSetHandler;
 import org.hv.pocket.model.MapperFactory;
-import org.hv.pocket.utils.FieldTypeStrategy;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -27,8 +28,6 @@ import static org.hv.pocket.constant.RegexString.SQL_PARAMETER_REGEX;
  * @author wujianchuan 2019/1/3
  */
 public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
-
-    private final FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
 
     public SQLQueryImpl(String sql, Connection connection, DatabaseNodeConfig databaseNodeConfig) {
         super(sql, connection, databaseNodeConfig);
@@ -121,7 +120,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
                 }
             }
             preparedStatement = this.connection.prepareStatement(executeSql);
-            fieldTypeStrategy.setPreparedStatement(preparedStatement, queryParameters);
+            PreparedStatementHandler.newInstance(preparedStatement).completionPreparedStatement(queryParameters);
         } else {
             preparedStatement = this.connection.prepareStatement(executeSql);
         }
@@ -145,13 +144,14 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
         }
     }
 
-    private Object getEntity(ResultSet resultSet) throws InstantiationException, IllegalAccessException {
+    private Object getEntity(ResultSet resultSet) throws InstantiationException, IllegalAccessException, SQLException {
         Object result = clazz.newInstance();
         List<Field> fields = Arrays.stream(MapperFactory.getViewFields(clazz.getName()))
                 .filter(field -> this.sql.contains(field.getName() + ",") || this.sql.contains(field.getName() + " "))
                 .collect(Collectors.toList());
+        ResultSetHandler resultSetHandler = ResultSetHandler.newInstance(resultSet);
         for (Field field : fields) {
-            field.set(result, fieldTypeStrategy.getColumnValue(field, resultSet));
+            field.set(result, resultSetHandler.getColumnValue(field));
         }
         return result;
     }
