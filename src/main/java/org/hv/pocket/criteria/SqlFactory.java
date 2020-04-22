@@ -34,6 +34,7 @@ public class SqlFactory {
 
         Map<String, String> oracleSqlOperateTypes = new HashMap<>(20);
         oracleSqlOperateTypes.putAll(mySqlOperateTypes);
+        SQL_POOL.put(DatasourceDriverTypes.ORACLE_DRIVER_OLD, oracleSqlOperateTypes);
         SQL_POOL.put(DatasourceDriverTypes.ORACLE_DRIVER, oracleSqlOperateTypes);
     }
 
