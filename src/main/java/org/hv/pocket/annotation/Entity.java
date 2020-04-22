@@ -20,7 +20,5 @@ public @interface Entity {
 
     int tableId();
 
-    String uuidGenerator() default "str_increment";
-
     String businessName() default "";
 }

@@ -6,7 +6,7 @@ import org.hv.pocket.exception.CriteriaException;
 import org.hv.pocket.flib.PreparedStatementHandler;
 import org.hv.pocket.flib.ResultSetHandler;
 import org.hv.pocket.model.MapperFactory;
-import org.hv.pocket.model.BaseEntity;
+import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.session.Session;
 
 import java.lang.reflect.Field;
@@ -105,10 +105,10 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             preparedStatement = getPreparedStatement();
             resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
             ResultSetHandler resultSetHandler = ResultSetHandler.newInstance(resultSet);
-            List<BaseEntity> result = new ArrayList<>();
+            List<AbstractEntity> result = new ArrayList<>();
 
             while (resultSet.next()) {
-                BaseEntity entity = (BaseEntity) clazz.newInstance();
+                AbstractEntity entity = (AbstractEntity) clazz.newInstance();
                 for (Field field : MapperFactory.getViewFields(clazz.getName())) {
                     field.set(entity, resultSetHandler.getMappingColumnValue(clazz, field));
                 }
@@ -125,11 +125,11 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public List list(boolean cascade) {
-        List<BaseEntity> result = this.list();
+        List<AbstractEntity> result = this.list();
         if (result.size() > 0 && cascade) {
             Field[] fields = MapperFactory.getOneToMayFields(this.clazz.getName());
             if (fields.length > 0) {
-                for (BaseEntity entity : result) {
+                for (AbstractEntity entity : result) {
                     this.applyChildren(entity, fields);
                 }
             }
@@ -153,7 +153,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildSelectSql(databaseConfig));
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
-        BaseEntity entity = null;
+        AbstractEntity entity = null;
         try {
             preparedStatement = getPreparedStatement();
             resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
@@ -164,7 +164,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                     throw new CriteriaException("Data is not unique, and multiple data are returned.");
                 }
                 try {
-                    entity = (BaseEntity) clazz.newInstance();
+                    entity = (AbstractEntity) clazz.newInstance();
                     for (Field field : MapperFactory.getViewFields(clazz.getName())) {
                         field.set(entity, resultSetHandler.getMappingColumnValue(clazz, field));
                     }
@@ -181,7 +181,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public Object unique(boolean cascade) throws SQLException {
-        BaseEntity entity = (BaseEntity) this.unique();
+        AbstractEntity entity = (AbstractEntity) this.unique();
         if (entity != null && cascade) {
             Field[] fields = MapperFactory.getOneToMayFields(this.clazz.getName());
             if (fields.length > 0) {
@@ -249,7 +249,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
      *
      * @param entity 实体
      */
-    private void applyChildren(BaseEntity entity, Field[] fields) {
+    private void applyChildren(AbstractEntity entity, Field[] fields) {
         if (fields.length > 0) {
             for (Field field : fields) {
                 field.setAccessible(true);
@@ -261,11 +261,11 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                     Object upFieldValue = MapperFactory.getUpBridgeFieldValue(entity, mainClassName, childClass);
                     Criteria criteria = new CriteriaImpl(childClass, super.getSession())
                             .add(Restrictions.equ(downBridgeFieldName, upFieldValue));
-                    List<BaseEntity> details = criteria.list();
+                    List<AbstractEntity> details = criteria.list();
                     field.set(entity, details);
                     Field[] detailFields = MapperFactory.getOneToMayFields(childClass.getName());
                     if (detailFields.length > 0) {
-                        for (BaseEntity detail : details) {
+                        for (AbstractEntity detail : details) {
                             this.applyChildren(detail, detailFields);
                         }
                     }

@@ -3,7 +3,7 @@ package org.hv.pocket.lunch;
 import org.hv.pocket.annotation.Entity;
 import org.hv.pocket.config.DatabaseConfig;
 import org.hv.pocket.connect.ConnectionManager;
-import org.hv.pocket.model.BaseEntity;
+import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.session.SessionFactory;
 import org.hv.pocket.uuid.UuidGenerator;
 import org.hv.pocket.uuid.UuidGeneratorFactory;
@@ -31,10 +31,10 @@ public class DatabaseLauncher implements CommandLineRunner {
     List<UuidGenerator> uuidGeneratorList;
 
     private final
-    List<BaseEntity> entityList;
+    List<AbstractEntity> entityList;
 
     @Autowired
-    public DatabaseLauncher(DatabaseConfig databaseConfig, List<UuidGenerator> uuidGeneratorList, @Nullable List<BaseEntity> entityList) {
+    public DatabaseLauncher(DatabaseConfig databaseConfig, List<UuidGenerator> uuidGeneratorList, @Nullable List<AbstractEntity> entityList) {
         this.databaseConfig = databaseConfig;
         this.uuidGeneratorList = uuidGeneratorList;
         this.entityList = entityList;

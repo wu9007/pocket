@@ -4,13 +4,12 @@ import org.hv.pocket.config.DatabaseNodeConfig;
 import org.hv.pocket.connect.ConnectionManager;
 import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.logger.StatementProxy;
-import org.hv.pocket.model.BaseEntity;
+import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.model.MapperFactory;
 import org.hv.pocket.utils.ReflectUtils;
 import org.hv.pocket.uuid.UuidGeneratorFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -25,11 +24,9 @@ import java.util.stream.Stream;
  * @author wujianchuan 2019/1/9
  */
 abstract class AbstractSession implements Session {
-    private static final String SET_UUID_LOCK = "setUUidLock";
+    private static final String SET_IDENTIFY_LOCK = "setIdentifyLock";
 
-    private final Logger logger = LoggerFactory.getLogger(AbstractSession.class);
     final StatementProxy statementProxy;
-
     final DatabaseNodeConfig databaseNodeConfig;
     final String sessionName;
     volatile Connection connection;
@@ -75,17 +72,17 @@ abstract class AbstractSession implements Session {
      * @return effect row number
      * @throws SQLException sql exception
      */
-    int saveEntity(BaseEntity entity, boolean nullAble) throws SQLException {
-        Class clazz = entity.getClass();
+    int saveEntity(AbstractEntity entity, boolean nullAble) throws SQLException {
+        Class<?> clazz = entity.getClass();
 
         int effectRow;
         PreparedStatement preparedStatement = null;
         try {
-            String uuid = entity.getUuid() == null ? UuidGeneratorFactory.getInstance()
-                    .getUuidGenerator(MapperFactory.getUuidGenerator(clazz.getName()))
-                    .getUuid(entity.getClass(), this) : entity.getUuid();
-            synchronized (SET_UUID_LOCK) {
-                entity.setUuid(uuid);
+            Serializable uuid = entity.getIdentify() == null ? UuidGeneratorFactory.getInstance()
+                    .getUuidGenerator(MapperFactory.getUuidGenerationType(clazz.getName()))
+                    .getIdentify(entity.getClass(), this) : entity.getIdentify();
+            synchronized (SET_IDENTIFY_LOCK) {
+                entity.setIdentify(uuid);
                 String sql = nullAble ? this.buildSaveSqlNullable(entity) : this.buildSaveSqlNotNull(entity);
                 preparedStatement = this.connection.prepareStatement(sql);
                 if (nullAble) {
@@ -110,16 +107,16 @@ abstract class AbstractSession implements Session {
      * @throws IllegalAccessException e
      * @throws SQLException           e
      */
-    int saveDetails(BaseEntity entity, boolean nullAble) throws IllegalAccessException, SQLException {
+    int saveDetails(AbstractEntity entity, boolean nullAble) throws IllegalAccessException, SQLException {
         int effectRow = 0;
         String mainClassName = entity.getClass().getName();
         Field[] fields = MapperFactory.getOneToMayFields(mainClassName);
         if (fields.length > 0) {
             for (Field field : fields) {
                 field.setAccessible(true);
-                List details = (List) field.get(entity);
+                List<?> details = (List<?>) field.get(entity);
                 String mainFieldName = field.getName();
-                Class childClass = MapperFactory.getDetailClass(mainClassName, mainFieldName);
+                Class<?> childClass = MapperFactory.getDetailClass(mainClassName, mainFieldName);
                 String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, mainFieldName);
                 Field downBridgeField = MapperFactory.getField(childClass.getName(), downBridgeFieldName);
                 Object upBridgeFieldValue = MapperFactory.getUpBridgeFieldValue(entity, mainClassName, childClass);
@@ -127,8 +124,8 @@ abstract class AbstractSession implements Session {
                 if (details != null) {
                     for (Object detail : details) {
                         downBridgeField.set(detail, upBridgeFieldValue);
-                        this.saveEntity((BaseEntity) detail, nullAble);
-                        this.saveDetails((BaseEntity) detail, nullAble);
+                        this.saveEntity((AbstractEntity) detail, nullAble);
+                        this.saveDetails((AbstractEntity) detail, nullAble);
                     }
                     effectRow += details.size();
                 }
@@ -144,7 +141,7 @@ abstract class AbstractSession implements Session {
      * @param entity            entity
      * @param preparedStatement prepared statement
      */
-    void statementApply(Field[] fields, BaseEntity entity, PreparedStatement preparedStatement) {
+    void statementApply(Field[] fields, AbstractEntity entity, PreparedStatement preparedStatement) {
         for (int valueIndex = 0; valueIndex < fields.length; valueIndex++) {
             Field field = fields[valueIndex];
             field.setAccessible(true);
@@ -162,7 +159,7 @@ abstract class AbstractSession implements Session {
      * @param entity entity
      * @return sql
      */
-    private String buildSaveSqlNullable(BaseEntity entity) {
+    private String buildSaveSqlNullable(AbstractEntity entity) {
         return this.buildSaveSql(entity, false);
     }
 
@@ -172,7 +169,7 @@ abstract class AbstractSession implements Session {
      * @param entity entity
      * @return sql
      */
-    private String buildSaveSqlNotNull(BaseEntity entity) {
+    private String buildSaveSqlNotNull(AbstractEntity entity) {
         return this.buildSaveSql(entity, true);
     }
 
@@ -182,7 +179,7 @@ abstract class AbstractSession implements Session {
      * @param entity            entity
      * @param preparedStatement prepared statement
      */
-    private void statementApplyNullable(BaseEntity entity, PreparedStatement preparedStatement) {
+    private void statementApplyNullable(AbstractEntity entity, PreparedStatement preparedStatement) {
         this.statementApply(entity, preparedStatement, false);
     }
 
@@ -192,7 +189,7 @@ abstract class AbstractSession implements Session {
      * @param entity            entity
      * @param preparedStatement prepared statement
      */
-    private void statementApplyNotNull(BaseEntity entity, PreparedStatement preparedStatement) {
+    private void statementApplyNotNull(AbstractEntity entity, PreparedStatement preparedStatement) {
         this.statementApply(entity, preparedStatement, true);
     }
 
@@ -203,8 +200,8 @@ abstract class AbstractSession implements Session {
      * @param notNull 为空的属性是否纳入保存范围
      * @return sql
      */
-    private String buildSaveSql(BaseEntity entity, boolean notNull) {
-        Class clazz = entity.getClass();
+    private String buildSaveSql(AbstractEntity entity, boolean notNull) {
+        Class<?> clazz = entity.getClass();
         List<String> columns;
         if (notNull) {
             columns = this.validFieldStream(entity)
@@ -232,8 +229,8 @@ abstract class AbstractSession implements Session {
      * @param preparedStatement prepared statement
      * @param notNull           为空的属性是否纳入保存范围
      */
-    private void statementApply(BaseEntity entity, PreparedStatement preparedStatement, boolean notNull) {
-        Class clazz = entity.getClass();
+    private void statementApply(AbstractEntity entity, PreparedStatement preparedStatement, boolean notNull) {
+        Class<?> clazz = entity.getClass();
         Field[] fields;
         if (notNull) {
             fields = this.validFieldStream(entity)
@@ -244,7 +241,7 @@ abstract class AbstractSession implements Session {
         this.statementApply(fields, entity, preparedStatement);
     }
 
-    private Stream<Field> validFieldStream(BaseEntity entity) {
+    private Stream<Field> validFieldStream(AbstractEntity entity) {
         return Arrays.stream(MapperFactory.getRepositoryFields(entity.getClass().getName()))
                 .filter(field -> {
                     field.setAccessible(true);

@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public abstract class AbstractUuidGenerator implements UuidGenerator {
     final static Map<String, Long> POOL = new ConcurrentHashMap<>(60);
-    String generatorId;
+    GenerationType generationType;
     Integer serverId;
 
     @Override
@@ -23,7 +23,7 @@ public abstract class AbstractUuidGenerator implements UuidGenerator {
     public abstract void setGeneratorId();
 
     @Override
-    public String getGeneratorId() {
-        return this.generatorId;
+    public GenerationType getGenerationType() {
+        return this.generationType;
     }
 }

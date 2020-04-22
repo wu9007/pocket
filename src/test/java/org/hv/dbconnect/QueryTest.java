@@ -55,7 +55,7 @@ public class QueryTest {
         order.setDay(LocalDate.now());
         this.session.save(order);
         SQLQuery query = this.session.createSQLQuery("select uuid as uuid,code as code,'微信支付' as typeName from tbl_order where uuid = :uuid", Order.class);
-        Order repositoryOrder = (Order) query.setParameter("uuid", order.getUuid()).unique();
+        Order repositoryOrder = (Order) query.setParameter("uuid", order.getIdentify()).unique();
         System.out.println(repositoryOrder.getPrice());
         this.session.delete(repositoryOrder);
     }

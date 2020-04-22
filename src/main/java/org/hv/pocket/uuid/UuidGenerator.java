@@ -19,9 +19,9 @@ public interface UuidGenerator {
     /**
      * 获取生成策略标识
      *
-     * @return 策略标识
+     * @return 策略类型
      */
-    String getGeneratorId();
+    GenerationType getGenerationType();
 
     /**
      * 生成策略标识
@@ -35,5 +35,5 @@ public interface UuidGenerator {
      * @param session 缓存管理类
      * @return 数据标识
      */
-    String getUuid(Class clazz, Session session) throws SQLException;
+    String getIdentify(Class clazz, Session session) throws SQLException;
 }

@@ -2,6 +2,7 @@ package org.hv.pocket.model;
 
 import org.hv.pocket.annotation.Entity;
 import org.hv.pocket.constant.AnnotationType;
+import org.hv.pocket.uuid.GenerationType;
 import org.springframework.context.ApplicationContext;
 
 import java.lang.annotation.Annotation;
@@ -40,13 +41,33 @@ public class MapperFactory {
     }
 
     /**
+     * 获取主键列明
+     *
+     * @param className class name
+     * @return identify column name
+     */
+    public static String getIdentifyColumnName(String className) {
+        return ENTITY_MAPPER_POOL.get(className).getIdentifyColumnName();
+    }
+
+    /**
+     * 获取主键属性名
+     *
+     * @param className class name
+     * @return field simple name
+     */
+    public static String getIdentifyFieldName(String className) {
+        return ENTITY_MAPPER_POOL.get(className).getIdentifyField().getName();
+    }
+
+    /**
      * 获取主键生成策略
      *
      * @param className class name
      * @return uuid generator
      */
-    public static String getUuidGenerator(String className) {
-        return ENTITY_MAPPER_POOL.get(className).getUuidGenerator();
+    public static GenerationType getUuidGenerationType(String className) {
+        return ENTITY_MAPPER_POOL.get(className).getGenerationType();
     }
 
     /**
@@ -237,7 +258,7 @@ public class MapperFactory {
      * @return main field name
      * @throws IllegalAccessException e
      */
-    public static Object getUpBridgeFieldValue(BaseEntity entity, String mainClassName, Class childClass) throws IllegalAccessException {
+    public static Object getUpBridgeFieldValue(AbstractEntity entity, String mainClassName, Class childClass) throws IllegalAccessException {
         String upBridgeFiledName = MapperFactory.getManyToOneUpField(childClass.getName(), mainClassName);
         Field upBridgeField = MapperFactory.getField(mainClassName, upBridgeFiledName);
         upBridgeField.setAccessible(true);

@@ -23,11 +23,11 @@ public class IncrementStrGenerator extends AbstractUuidGenerator {
 
     @Override
     public void setGeneratorId() {
-        this.generatorId = "str_increment";
+        this.generationType = GenerationType.STR_INCREMENT;
     }
 
     @Override
-    public synchronized String getUuid(Class clazz, Session session) throws SQLException {
+    public synchronized String getIdentify(Class clazz, Session session) throws SQLException {
         int tableId = MapperFactory.getTableId(clazz.getName());
         String mapKey = this.serverId + UNDERLINE_DIVIDER + tableId;
         String leaderNum = "" + serverId + tableId;

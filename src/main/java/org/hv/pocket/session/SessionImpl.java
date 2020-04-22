@@ -9,7 +9,7 @@ import org.hv.pocket.criteria.CriteriaImpl;
 import org.hv.pocket.criteria.Restrictions;
 import org.hv.pocket.model.DetailInductiveBox;
 import org.hv.pocket.model.MapperFactory;
-import org.hv.pocket.model.BaseEntity;
+import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.query.ProcessQuery;
 import org.hv.pocket.query.ProcessQueryImpl;
 import org.hv.pocket.query.SQLQuery;
@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class SessionImpl extends AbstractSession {
     private final Logger logger = LoggerFactory.getLogger(SessionImpl.class);
-    private static final String IDENTIFICATION = "UUID";
+
     private static final String OPEN_LOCK = "OPEN_MONITOR";
     private static final String CLOSE_LOCK = "CLOSE_MONITOR";
     private static final String TRANSACTION_LOCK = "TRANSACTION_MONITOR";
@@ -121,17 +121,17 @@ public class SessionImpl extends AbstractSession {
     @Override
     public Object findDirect(Class clazz, Serializable uuid) throws SQLException {
         Criteria criteria = this.createCriteria(clazz);
-        criteria.add(Restrictions.equ("uuid", uuid));
+        criteria.add(Restrictions.equ(MapperFactory.getIdentifyFieldName(clazz.getName()), uuid));
         return criteria.unique(true);
     }
 
     @Override
-    public int save(BaseEntity entity) throws SQLException {
+    public int save(AbstractEntity entity) throws SQLException {
         return super.saveEntity(entity, false);
     }
 
     @Override
-    public int save(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException {
+    public int save(AbstractEntity entity, boolean cascade) throws SQLException, IllegalAccessException {
         int effectRow = this.save(entity);
         if (cascade) {
             effectRow += super.saveDetails(entity, false);
@@ -140,12 +140,12 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public int forcibleSave(BaseEntity entity) throws SQLException {
+    public int forcibleSave(AbstractEntity entity) throws SQLException {
         return super.saveEntity(entity, true);
     }
 
     @Override
-    public int forcibleSave(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException {
+    public int forcibleSave(AbstractEntity entity, boolean cascade) throws SQLException, IllegalAccessException {
         int effectRow = this.forcibleSave(entity);
         if (cascade) {
             effectRow += super.saveDetails(entity, true);
@@ -154,9 +154,9 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public int update(BaseEntity entity) throws SQLException {
+    public int update(AbstractEntity entity) throws SQLException {
         Class clazz = entity.getClass();
-        BaseEntity older = (BaseEntity) this.findOne(clazz, entity.getUuid());
+        AbstractEntity older = (AbstractEntity) this.findOne(clazz, entity.getIdentify());
         int effectRow = 0;
         if (older != null) {
             Field[] fields = reflectUtils.dirtyFieldFilter(entity, older);
@@ -171,12 +171,12 @@ public class SessionImpl extends AbstractSession {
                 }
                 sql.append(String.join(CommonSql.COMMA, setValues))
                         .append(CommonSql.WHERE)
-                        .append(IDENTIFICATION).append(CommonSql.EQUAL_TO).append(CommonSql.PLACEHOLDER);
+                        .append(MapperFactory.getIdentifyColumnName(clazz.getName())).append(CommonSql.EQUAL_TO).append(CommonSql.PLACEHOLDER);
                 PreparedStatement preparedStatement = null;
                 try {
                     preparedStatement = this.connection.prepareStatement(sql.toString());
                     this.statementApply(fields, entity, preparedStatement);
-                    preparedStatement.setObject(fields.length + 1, entity.getUuid());
+                    preparedStatement.setObject(fields.length + 1, entity.getIdentify());
                     effectRow = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeUpdate);
                 } finally {
                     ConnectionManager.closeIo(preparedStatement, null);
@@ -187,10 +187,10 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public int update(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException {
+    public int update(AbstractEntity entity, boolean cascade) throws SQLException, IllegalAccessException {
         int effectRow = 0;
         Class clazz = entity.getClass();
-        Object older = this.findOne(clazz, entity.getUuid());
+        Object older = this.findOne(clazz, entity.getIdentify());
         if (cascade) {
             String mainClassName = entity.getClass().getName();
             Field[] fields = MapperFactory.getOneToMayFields(mainClassName);
@@ -198,22 +198,22 @@ public class SessionImpl extends AbstractSession {
                 for (Field field : fields) {
                     field.setAccessible(true);
                     DetailInductiveBox detailBox = DetailInductiveBox.newInstance(field.get(entity), field.get(older));
-                    List<BaseEntity> newbornDetails = detailBox.getNewborn();
+                    List<AbstractEntity> newbornDetails = detailBox.getNewborn();
                     if (newbornDetails.size() > 0) {
                         Class childrenClass = MapperFactory.getDetailClass(mainClassName, field.getName());
                         String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, field.getName());
                         Field downBridgeField = MapperFactory.getField(childrenClass.getName(), downBridgeFieldName);
                         Object upBridgeFieldValue = MapperFactory.getUpBridgeFieldValue(entity, mainClassName, childrenClass);
                         downBridgeField.setAccessible(true);
-                        for (BaseEntity detail : newbornDetails) {
+                        for (AbstractEntity detail : newbornDetails) {
                             downBridgeField.set(detail, upBridgeFieldValue);
                             this.save(detail, true);
                         }
                     }
-                    for (BaseEntity detail : detailBox.getMoribund()) {
+                    for (AbstractEntity detail : detailBox.getMoribund()) {
                         this.delete(detail);
                     }
-                    for (BaseEntity detail : detailBox.getUpdate()) {
+                    for (AbstractEntity detail : detailBox.getUpdate()) {
                         this.update(detail, true);
                     }
                     effectRow += detailBox.getCount();
@@ -225,10 +225,10 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public int delete(BaseEntity entity) throws SQLException, IllegalAccessException {
+    public int delete(AbstractEntity entity) throws SQLException, IllegalAccessException {
         Class clazz = entity.getClass();
         String mainClassName = clazz.getName();
-        Serializable uuid = entity.getUuid();
+        Serializable uuid = entity.getIdentify();
 
         Object garbage = this.findOne(clazz, uuid);
         int effectRow = 0;
@@ -238,9 +238,9 @@ public class SessionImpl extends AbstractSession {
             if (fields.length > 0) {
                 for (Field field : fields) {
                     field.setAccessible(true);
-                    List<BaseEntity> details = (List<BaseEntity>) field.get(entity);
+                    List<AbstractEntity> details = (List<AbstractEntity>) field.get(entity);
                     if (details != null) {
-                        for (BaseEntity detail : details) {
+                        for (AbstractEntity detail : details) {
                             effectRow += this.delete(detail);
                         }
                     }
@@ -252,7 +252,7 @@ public class SessionImpl extends AbstractSession {
                     CommonSql.FROM +
                     MapperFactory.getTableName(clazz.getName()) +
                     CommonSql.WHERE +
-                    IDENTIFICATION +
+                    MapperFactory.getIdentifyColumnName(clazz.getName()) +
                     CommonSql.EQUAL_TO +
                     CommonSql.PLACEHOLDER;
             PreparedStatement preparedStatement = null;
@@ -270,11 +270,13 @@ public class SessionImpl extends AbstractSession {
     @Override
     public long getMaxUuid(Integer serverId, Class clazz) throws SQLException {
         Entity annotation = (Entity) clazz.getAnnotation(Entity.class);
+        String identifyColumnName = MapperFactory.getIdentifyColumnName(clazz.getName());
         String sql = CommonSql.SELECT
-                + "MAX(CONVERT(UUID,SIGNED))"
+                + "MAX(CONVERT(" + identifyColumnName + " ,SIGNED))"
                 + CommonSql.FROM + annotation.table()
                 + CommonSql.WHERE
-                + "UUID REGEXP '^" + serverId + annotation.tableId() + "'";
+                + identifyColumnName
+                + " REGEXP '^" + serverId + annotation.tableId() + "'";
         PreparedStatement preparedStatement = this.connection.prepareStatement(sql);
         ResultSet resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
         long uuid;

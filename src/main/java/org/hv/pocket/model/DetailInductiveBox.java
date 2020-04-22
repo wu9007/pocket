@@ -1,5 +1,6 @@
 package org.hv.pocket.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,35 +12,35 @@ public class DetailInductiveBox {
     /**
      * 更新明细
      */
-    private List<BaseEntity> update;
+    private final List<AbstractEntity> update;
     /**
      * 新增明细
      */
-    private List<BaseEntity> newborn;
+    private final List<AbstractEntity> newborn;
     /**
      * 删除明细
      */
-    private List<BaseEntity> moribund;
+    private final List<AbstractEntity> moribund;
     /**
      * 总行数
      */
-    private int count;
+    private final int count;
 
-    private DetailInductiveBox(List<BaseEntity> details, List<BaseEntity> olderDetails) {
+    private DetailInductiveBox(List<AbstractEntity> details, List<AbstractEntity> olderDetails) {
         if (details != null && details.size() > 0) {
             this.newborn = details.parallelStream()
-                    .filter(detail -> detail.getUuid() == null)
+                    .filter(detail -> detail.getIdentify() == null)
                     .collect(Collectors.toList());
         } else {
             this.newborn = new ArrayList<>();
         }
         if (olderDetails != null) {
             if (details != null && details.size() > 0) {
-                List<String> newDetailUuidList = details.stream()
-                        .map(BaseEntity::getUuid)
+                List<Serializable> newDetailUuidList = details.stream()
+                        .map(AbstractEntity::getIdentify)
                         .collect(Collectors.toList());
                 this.moribund = olderDetails.parallelStream()
-                        .filter(detail -> !newDetailUuidList.contains(detail.getUuid()))
+                        .filter(detail -> !newDetailUuidList.contains(detail.getIdentify()))
                         .collect(Collectors.toList());
                 this.update = details.parallelStream()
                         .filter(detail -> {
@@ -61,18 +62,18 @@ public class DetailInductiveBox {
     }
 
     public static DetailInductiveBox newInstance(Object details, Object olderDetails) {
-        return new DetailInductiveBox((List<BaseEntity>) details, (List<BaseEntity>) olderDetails);
+        return new DetailInductiveBox((List<AbstractEntity>) details, (List<AbstractEntity>) olderDetails);
     }
 
-    public List<BaseEntity> getUpdate() {
+    public List<AbstractEntity> getUpdate() {
         return update;
     }
 
-    public List<BaseEntity> getNewborn() {
+    public List<AbstractEntity> getNewborn() {
         return newborn;
     }
 
-    public List<BaseEntity> getMoribund() {
+    public List<AbstractEntity> getMoribund() {
         return moribund;
     }
 

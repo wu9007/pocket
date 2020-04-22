@@ -1,6 +1,6 @@
 package org.hv.pocket.session.actions;
 
-import org.hv.pocket.model.BaseEntity;
+import org.hv.pocket.model.AbstractEntity;
 
 import java.io.Serializable;
 import java.sql.SQLException;
@@ -63,7 +63,7 @@ public interface OperateDictionary {
      * @return 影响行数
      * @throws SQLException 语句异常
      */
-    int save(BaseEntity entity) throws SQLException;
+    int save(AbstractEntity entity) throws SQLException;
 
     /**
      * 保存(NULL不纳入保存范围保留数据库默认值)
@@ -74,7 +74,7 @@ public interface OperateDictionary {
      * @throws SQLException           语句异常
      * @throws IllegalAccessException e
      */
-    int save(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
+    int save(AbstractEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
 
     /**
      * 保存(NULL同样进行保存)
@@ -83,7 +83,7 @@ public interface OperateDictionary {
      * @return 影响行数
      * @throws SQLException 语句异常
      */
-    int forcibleSave(BaseEntity entity) throws SQLException;
+    int forcibleSave(AbstractEntity entity) throws SQLException;
 
     /**
      * 保存(NULL同样进行保存)
@@ -94,7 +94,7 @@ public interface OperateDictionary {
      * @throws SQLException           语句异常
      * @throws IllegalAccessException e
      */
-    int forcibleSave(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
+    int forcibleSave(AbstractEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
 
     /**
      * 更新实体
@@ -103,7 +103,7 @@ public interface OperateDictionary {
      * @return 影响行数
      * @throws SQLException 语句异常
      */
-    int update(BaseEntity entity) throws SQLException;
+    int update(AbstractEntity entity) throws SQLException;
 
 
     /**
@@ -115,7 +115,7 @@ public interface OperateDictionary {
      * @throws SQLException           语句异常
      * @throws IllegalAccessException e
      */
-    int update(BaseEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
+    int update(AbstractEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
 
     /**
      * 删除实体
@@ -125,7 +125,7 @@ public interface OperateDictionary {
      * @throws SQLException           语句异常
      * @throws IllegalAccessException e
      */
-    int delete(BaseEntity entity) throws SQLException, IllegalAccessException;
+    int delete(AbstractEntity entity) throws SQLException, IllegalAccessException;
 
     /**
      * 获取最大数据标识

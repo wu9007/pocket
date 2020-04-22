@@ -1,20 +1,21 @@
 package org.hv.demo.model;
 
-import org.hv.pocket.annotation.Column;
-import org.hv.pocket.annotation.Entity;
-import org.hv.pocket.annotation.Join;
-import org.hv.pocket.annotation.ManyToOne;
+import org.hv.pocket.annotation.*;
 import org.hv.pocket.constant.JoinMethod;
-import org.hv.pocket.model.BaseEntity;
+import org.hv.pocket.model.AbstractEntity;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
  * @author wujianchuan 2019/1/9
  */
 @Entity(table = "TBL_RELEVANT_BILL_DETAIL", tableId = 2)
-public class RelevantBillDetail extends BaseEntity {
+public class RelevantBillDetail extends AbstractEntity {
     private static final long serialVersionUID = -6711578420837877371L;
+    @Identify
+    @Column(name = "UUID")
+    private String uuid;
     @Column(name = "NAME")
     private String name;
     @Column(name = "PRICE", businessName = "金额")
@@ -24,8 +25,16 @@ public class RelevantBillDetail extends BaseEntity {
     @Join(columnName = "TYPE", columnSurname = "TYPE_NAME", businessName = "订单支付方式", joinTable = "TBL_ORDER_TYPE", joinTableSurname = "T1", joinMethod = JoinMethod.LEFT, bridgeColumn = "UUID", destinationColumn = "NAME")
     private String typeName;
 
-    @ManyToOne(columnName = "RELEVANT_BILL_UUID", clazz = RelevantBill.class, upBridgeField = "uuid")
+    @ManyToOne(columnName = "RELEVANT_BILL_UUID", clazz = RelevantBill.class, upBridgeField = "id")
     private String relevantBillUuid;
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
     public String getName() {
         return name;
@@ -65,5 +74,15 @@ public class RelevantBillDetail extends BaseEntity {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    @Override
+    public Serializable getIdentify() {
+        return this.uuid;
+    }
+
+    @Override
+    public void setIdentify(Serializable identify) {
+        this.uuid = (String) identify;
     }
 }
