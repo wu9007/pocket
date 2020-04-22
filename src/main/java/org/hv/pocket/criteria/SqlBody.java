@@ -5,6 +5,7 @@ import org.hv.pocket.config.DatabaseNodeConfig;
 import org.hv.pocket.constant.AnnotationType;
 import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.constant.SqlOperateTypes;
+import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.model.MapperFactory;
 
 import java.util.LinkedList;
@@ -17,12 +18,12 @@ import java.util.stream.Collectors;
  */
 public class SqlBody {
 
-    private Class clazz;
+    private Class<? extends AbstractEntity> clazz;
     private final List<Modern> modernList;
     private final List<Restrictions> restrictionsList;
     private final List<Sort> orderList;
 
-    private SqlBody(Class clazz, List<Restrictions> restrictionsList, List<Modern> modernList, List<Sort> orderList) {
+    private SqlBody(Class<? extends AbstractEntity> clazz, List<Restrictions> restrictionsList, List<Modern> modernList, List<Sort> orderList) {
         this.clazz = clazz;
         this.restrictionsList = restrictionsList;
         this.modernList = modernList;
@@ -35,7 +36,7 @@ public class SqlBody {
         this.orderList = orderList;
     }
 
-    public static SqlBody newInstance(Class clazz, List<Restrictions> restrictions, List<Modern> modernList, List<Sort> orderList) {
+    public static SqlBody newInstance(Class<? extends AbstractEntity> clazz, List<Restrictions> restrictions, List<Modern> modernList, List<Sort> orderList) {
         return new SqlBody(clazz, restrictions, modernList, orderList);
     }
 

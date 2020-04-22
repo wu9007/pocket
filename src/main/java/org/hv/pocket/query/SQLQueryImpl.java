@@ -33,7 +33,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
         super(sql, connection, databaseNodeConfig);
     }
 
-    public SQLQueryImpl(String sql, Connection connection, DatabaseNodeConfig databaseNodeConfig, Class clazz) {
+    public SQLQueryImpl(String sql, Connection connection, DatabaseNodeConfig databaseNodeConfig, Class<?> clazz) {
         super(connection, sql, databaseNodeConfig, clazz);
     }
 
@@ -56,7 +56,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
     }
 
     @Override
-    public List list() throws SQLException {
+    public <E> List<E> list() throws SQLException {
         StringBuilder querySQL = new StringBuilder(this.sql);
         if (this.limited()) {
             querySQL.append(" LIMIT ")
@@ -65,11 +65,11 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
                     .append(this.getLimit());
         }
         ResultSet resultSet = execute(querySQL.toString());
-        List<Object> results = new ArrayList<>();
+        List<E> results = new ArrayList<>();
         while (resultSet.next()) {
             if (clazz != null) {
                 try {
-                    Object result = getEntity(resultSet);
+                    E result = (E) getEntity(resultSet);
                     results.add(result);
                 } catch (InstantiationException | IllegalAccessException e) {
                     throw new IllegalAccessError();
@@ -111,7 +111,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
                 String name = regexString.substring(1);
                 Object parameter = this.parameterMap.get(name);
                 if (parameter instanceof List) {
-                    List<Object> parameters = (List<Object>) parameter;
+                    List<?> parameters = (List<?>) parameter;
                     executeSql = executeSql.replaceAll(regexString, parameters.stream().map(item -> CommonSql.PLACEHOLDER).collect(Collectors.joining(",")));
                     parameters.forEach(item -> queryParameters.add(ParameterTranslator.newInstance(item)));
                 } else {
@@ -127,12 +127,12 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
         return super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
     }
 
-    private Object getObjects(ResultSet resultSet) throws SQLException {
+    private <T> T getObjects(ResultSet resultSet) throws SQLException {
         int columnNameSize = this.columnNameList.size();
         int columnSize = resultSet.getMetaData().getColumnCount();
         if (columnNameSize != columnSize) {
             if (columnNameSize == 0 && columnSize == 1) {
-                return resultSet.getObject(1);
+                return (T) resultSet.getObject(1);
             }
             throw new SQLException("Column mapping failed");
         } else {
@@ -140,7 +140,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
             for (int nameIndex = 0, columnIndex = 1; nameIndex < columnNameSize; nameIndex++, columnIndex++) {
                 result.put(this.columnNameList.get(nameIndex), resultSet.getObject(columnIndex));
             }
-            return result;
+            return (T) result;
         }
     }
 

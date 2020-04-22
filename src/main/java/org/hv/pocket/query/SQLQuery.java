@@ -22,7 +22,7 @@ public interface SQLQuery {
      * @return list
      * @throws SQLException 语句异常
      */
-    List list() throws SQLException;
+    <E> List<E> list() throws SQLException;
 
     /**
      * 分页

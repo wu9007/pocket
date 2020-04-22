@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author wujianchuan 2019/1/15
@@ -80,7 +81,7 @@ public class QueryTest {
                 .mapperColumn("label", "value")
                 .setParameter("ORDER_CODE", "C-001")
                 .setParameter("DAY", new Date());
-        List orders = query.list();
+        List<Map<String, String>> orders = query.list();
         System.out.println(orders.size());
     }
 
@@ -90,7 +91,16 @@ public class QueryTest {
         SQLQuery query = this.session.createSQLQuery("select uuid, code from tbl_order where TYPE IN(:TYPE)")
                 .mapperColumn("label", "value")
                 .setParameter("TYPE", types);
-        List orders = query.list();
+        List<Map<String, String>> orders = query.list();
+        System.out.println(orders.size());
+    }
+
+    @Test
+    public void test6() throws SQLException {
+        SQLQuery query = this.session.createSQLQuery("select uuid from tbl_order where CODE = :ORDER_CODE AND DAY < :DAY")
+                .setParameter("ORDER_CODE", "C-001")
+                .setParameter("DAY", new Date());
+        List<?> orders = query.list();
         System.out.println(orders.size());
     }
 }

@@ -19,7 +19,7 @@ abstract class AbstractSQLQuery {
     final String sql;
     private Integer start;
     private Integer limit;
-    Class clazz;
+    Class<?> clazz;
     final Map<String, Object> parameterMap = new HashMap<>();
     final List<String> columnNameList = new LinkedList<>();
 
@@ -30,7 +30,7 @@ abstract class AbstractSQLQuery {
         this.statementProxy = StatementProxy.newInstance(this.databaseNodeConfig);
     }
 
-    AbstractSQLQuery(Connection connection, String sql, DatabaseNodeConfig databaseNodeConfig, Class clazz) {
+    AbstractSQLQuery(Connection connection, String sql, DatabaseNodeConfig databaseNodeConfig, Class<?> clazz) {
         this.sql = sql;
         this.connection = connection;
         this.databaseNodeConfig = databaseNodeConfig;

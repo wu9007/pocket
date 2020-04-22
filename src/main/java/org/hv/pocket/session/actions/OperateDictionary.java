@@ -32,11 +32,12 @@ public interface OperateDictionary {
     /**
      * 查询对象
      *
-     * @param clazz 类类型
-     * @param uuid  数据标识
+     * @param clazz    类类型
+     * @param identify 数据标识
      * @return 实体对象
+     * @throws SQLException e
      */
-    Object findOne(Class clazz, Serializable uuid) throws SQLException;
+    <T extends AbstractEntity> T findOne(Class<T> clazz, Serializable identify) throws SQLException;
 
     /**
      * 查询所有
@@ -44,17 +45,17 @@ public interface OperateDictionary {
      * @param clazz 类类型
      * @return 所有实体对象
      */
-    List list(Class clazz);
+    <E extends AbstractEntity> List<E> list(Class<E> clazz);
 
     /**
      * 强制通过数据库查询数据
      *
-     * @param clazz 类类型
-     * @param uuid  数据标识
+     * @param clazz    类类型
+     * @param identify 数据标识
      * @return 实体对象
      * @throws SQLException 语句异常
      */
-    Object findDirect(Class clazz, Serializable uuid) throws SQLException;
+    <T extends AbstractEntity> T findDirect(Class<T> clazz, Serializable identify) throws SQLException;
 
     /**
      * 保存(NULL不纳入保存范围保留数据库默认值)
@@ -135,5 +136,5 @@ public interface OperateDictionary {
      * @return 最大值
      * @throws SQLException 语句异常
      */
-    long getMaxUuid(Integer serverId, Class clazz) throws SQLException;
+    long getMaxIdentify(Integer serverId, Class<? extends AbstractEntity> clazz) throws SQLException;
 }

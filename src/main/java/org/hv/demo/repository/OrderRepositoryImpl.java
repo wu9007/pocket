@@ -20,7 +20,7 @@ public class OrderRepositoryImpl implements OrderRepository {
         session.open();
         Criteria criteria = session.createCriteria(Order.class)
                 .add(Restrictions.equ("code", "C-001"));
-        List<Order> orders = criteria.list();
+        List<Order> orders = criteria.listNotCleanRestrictions();
         session.close();
         return orders;
     }

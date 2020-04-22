@@ -7,7 +7,7 @@ import org.hv.pocket.logger.StatementProxy;
 import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.model.MapperFactory;
 import org.hv.pocket.utils.ReflectUtils;
-import org.hv.pocket.uuid.UuidGeneratorFactory;
+import org.hv.pocket.identify.IdentifyGeneratorFactory;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -78,11 +78,11 @@ abstract class AbstractSession implements Session {
         int effectRow;
         PreparedStatement preparedStatement = null;
         try {
-            Serializable uuid = entity.getIdentify() == null ? UuidGeneratorFactory.getInstance()
-                    .getUuidGenerator(MapperFactory.getUuidGenerationType(clazz.getName()))
+            Serializable identify = entity.getIdentify() == null ? IdentifyGeneratorFactory.getInstance()
+                    .getIdentifyGenerator(MapperFactory.getIdentifyGenerationType(clazz.getName()))
                     .getIdentify(entity.getClass(), this) : entity.getIdentify();
             synchronized (SET_IDENTIFY_LOCK) {
-                entity.setIdentify(uuid);
+                entity.setIdentify(identify);
                 String sql = nullAble ? this.buildSaveSqlNullable(entity) : this.buildSaveSqlNotNull(entity);
                 preparedStatement = this.connection.prepareStatement(sql);
                 if (nullAble) {
@@ -116,7 +116,7 @@ abstract class AbstractSession implements Session {
                 field.setAccessible(true);
                 List<?> details = (List<?>) field.get(entity);
                 String mainFieldName = field.getName();
-                Class<?> childClass = MapperFactory.getDetailClass(mainClassName, mainFieldName);
+                Class<? extends AbstractEntity> childClass = MapperFactory.getDetailClass(mainClassName, mainFieldName);
                 String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, mainFieldName);
                 Field downBridgeField = MapperFactory.getField(childClass.getName(), downBridgeFieldName);
                 Object upBridgeFieldValue = MapperFactory.getUpBridgeFieldValue(entity, mainClassName, childClass);
@@ -216,10 +216,10 @@ abstract class AbstractSession implements Session {
                 .append(String.join(CommonSql.COMMA, columns))
                 .append(CommonSql.RIGHT_BRACKET);
         columns.replaceAll(column -> CommonSql.PLACEHOLDER);
-        StringBuilder valuesSql = new StringBuilder(CommonSql.VALUES)
-                .append(CommonSql.LEFT_BRACKET)
-                .append(String.join(CommonSql.COMMA, columns))
-                .append(CommonSql.RIGHT_BRACKET);
+        String valuesSql = CommonSql.VALUES +
+                CommonSql.LEFT_BRACKET +
+                String.join(CommonSql.COMMA, columns) +
+                CommonSql.RIGHT_BRACKET;
         sql.append(valuesSql);
         return sql.toString();
     }

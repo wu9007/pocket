@@ -7,7 +7,7 @@ import org.hv.pocket.constant.StreamPredicates;
 import org.hv.pocket.exception.MapperException;
 import org.hv.pocket.exception.PocketIdentifyException;
 import org.hv.pocket.utils.CommonUtils;
-import org.hv.pocket.uuid.GenerationType;
+import org.hv.pocket.identify.GenerationType;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -42,7 +42,7 @@ class EntityMapper {
     private final Map<String, String> businessMapper;
 
     private final Field[] oneToManyFields;
-    private final Map<String, Class<?>> onToManyClassMapper;
+    private final Map<String, Class<? extends AbstractEntity>> onToManyClassMapper;
     /**
      * key->主类属性名，value->子类属性名
      */
@@ -117,7 +117,7 @@ class EntityMapper {
         return oneToManyFields;
     }
 
-    public Map<String, Class<?>> getOnToManyClassMapper() {
+    public Map<String, Class<? extends AbstractEntity>> getOnToManyClassMapper() {
         return onToManyClassMapper;
     }
 
@@ -157,7 +157,7 @@ class EntityMapper {
         Map<String, FieldData> fieldMapper = new LinkedHashMap<>(16);
         Map<String, String> repositoryColumnMapper = new LinkedHashMap<>(16), viewColumnMapperWithTableAs = new LinkedHashMap<>(16), viewColumnMapper = new LinkedHashMap<>(16), oneToManyDownMapper = new LinkedHashMap<>(16), manyToOneUpMapper = new LinkedHashMap<>(16), businessMapper = new LinkedHashMap<>(16);
         List<Field> repositoryFields = new LinkedList<>(), viewFields = new LinkedList<>(), businessFields = new LinkedList<>(), keyBusinessFields = new LinkedList<>(), oneToManyField = new LinkedList<>();
-        Map<String, Class<?>> onToManyClassMapper = new LinkedHashMap<>(16);
+        Map<String, Class<? extends AbstractEntity>> onToManyClassMapper = new LinkedHashMap<>(16);
         List<String> repositoryColumnNames = new LinkedList<>(), joinSqlList = new LinkedList<>();
 
         Identify identify = null;
@@ -238,7 +238,7 @@ class EntityMapper {
                          Field[] repositoryFields, List<String> repositoryColumnNames, Map<String, String> repositoryColumnMapper,
                          Field[] viewFields, Map<String, String> viewColumnMapperWithTableAs, Map<String, String> viewColumnMapper,
                          Field[] businessFields, Field[] keyBusinessFields, Map<String, String> businessMapper,
-                         Field[] oneToManyFields, Map<String, Class<?>> onToManyClassMapper, Map<String, String> oneToManyDownMapper,
+                         Field[] oneToManyFields, Map<String, Class<? extends AbstractEntity>> onToManyClassMapper, Map<String, String> oneToManyDownMapper,
                          Map<String, String> manyToOneUpMapper, List<String> joinSqlList) {
         this.tableId = tableId;
         this.tableName = tableName;

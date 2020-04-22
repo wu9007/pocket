@@ -2,6 +2,7 @@ package org.hv.pocket.criteria;
 
 import org.hv.pocket.config.DatabaseNodeConfig;
 import org.hv.pocket.logger.StatementProxy;
+import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.session.Session;
 
 import java.sql.Connection;
@@ -15,7 +16,7 @@ import java.util.Map;
  */
 abstract class AbstractCriteria {
     final StatementProxy statementProxy;
-    final Class clazz;
+    final Class<? extends AbstractEntity> clazz;
     final Session session;
     final Connection connection;
     final DatabaseNodeConfig databaseConfig;
@@ -30,7 +31,7 @@ abstract class AbstractCriteria {
     private Integer limit;
     StringBuilder completeSql = new StringBuilder();
 
-    AbstractCriteria(Class clazz, Session session) {
+    AbstractCriteria(Class<? extends AbstractEntity> clazz, Session session) {
         this.clazz = clazz;
         this.session = session;
         this.connection = this.session.getConnection();

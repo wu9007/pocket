@@ -1,6 +1,6 @@
 package org.hv.pocket.annotation;
 
-import org.hv.pocket.uuid.GenerationType;
+import org.hv.pocket.identify.GenerationType;
 
 import java.lang.annotation.*;
 

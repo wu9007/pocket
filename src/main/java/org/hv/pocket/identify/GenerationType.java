@@ -1,4 +1,4 @@
-package org.hv.pocket.uuid;
+package org.hv.pocket.identify;
 
 /**
  * @author wujianchuan

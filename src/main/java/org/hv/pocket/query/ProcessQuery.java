@@ -1,5 +1,7 @@
 package org.hv.pocket.query;
 
+import org.hv.pocket.model.AbstractEntity;
+
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.function.Function;
@@ -7,7 +9,7 @@ import java.util.function.Function;
 /**
  * @author wujianchuan 2019/2/14
  */
-public interface ProcessQuery<T> {
+public interface ProcessQuery<T extends AbstractEntity> {
 
     /**
      * 对条件进行赋值

@@ -27,11 +27,9 @@ final public class PreparedStatementConsumerLib {
         PREPARED_STRATEGY_POOL.put(Byte[].class.getName(), (value) -> value.getPreparedStatement().setObject(value.getIndex(), value.getSqlBean().getTarget()));
         PREPARED_STRATEGY_POOL.put(Boolean.class.getName(), (value) -> value.getPreparedStatement().setBoolean(value.getIndex(), (Boolean) value.getSqlBean().getTarget()));
         PREPARED_STRATEGY_POOL.put(Integer.class.getName(), (value) -> value.getPreparedStatement().setInt(value.getIndex(), (Integer) value.getSqlBean().getTarget()));
-        PREPARED_STRATEGY_POOL.put(Integer.class.getName(), (value) -> value.getPreparedStatement().setInt(value.getIndex(), (Integer) value.getSqlBean().getTarget()));
         PREPARED_STRATEGY_POOL.put(BigDecimal.class.getName(), (value) -> value.getPreparedStatement().setBigDecimal(value.getIndex(), (BigDecimal) value.getSqlBean().getTarget()));
         PREPARED_STRATEGY_POOL.put(String.class.getName(), (value) -> value.getPreparedStatement().setString(value.getIndex(), (String) value.getSqlBean().getTarget()));
         PREPARED_STRATEGY_POOL.put(Serializable.class.getName(), (value) -> value.getPreparedStatement().setObject(value.getIndex(), value.getSqlBean().getTarget()));
-        PREPARED_STRATEGY_POOL.put(Double.class.getName(), (value) -> value.getPreparedStatement().setDouble(value.getIndex(), (Double) value.getSqlBean().getTarget()));
         PREPARED_STRATEGY_POOL.put(Long.class.getName(), (value) -> value.getPreparedStatement().setLong(value.getIndex(), (Long) value.getSqlBean().getTarget()));
         PREPARED_STRATEGY_POOL.put(Double.class.getName(), (value) -> value.getPreparedStatement().setDouble(value.getIndex(), (Double) value.getSqlBean().getTarget()));
         PREPARED_STRATEGY_POOL.put(Date.class.getName(), (value) -> value.getPreparedStatement().setTimestamp(value.getIndex(), new Timestamp(((Date) value.getSqlBean().getTarget()).getTime())));

@@ -60,7 +60,11 @@ public class SessionTest {
         newOrder.setDetails(details);
         int n = this.session.save(newOrder, true);
         System.out.println("保存条数：" + n);
-        RelevantBill repositoryOrder = (RelevantBill) this.session.findOne(RelevantBill.class, "101312");
+        newOrder.getDetails().get(0).setName("==========");
+        newOrder.setAvailable(false);
+        n = this.session.update(newOrder, true);
+        System.out.println("更新条数：" + n);
+        RelevantBill repositoryOrder = this.session.findOne(RelevantBill.class, "101312");
         System.out.println(repositoryOrder.getCode());
         repositoryOrder.setCode("Hello-001");
         this.session.update(repositoryOrder);

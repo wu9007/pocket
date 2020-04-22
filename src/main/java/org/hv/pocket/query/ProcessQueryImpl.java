@@ -2,6 +2,7 @@ package org.hv.pocket.query;
 
 import org.hv.pocket.config.DatabaseNodeConfig;
 import org.hv.pocket.exception.QueryException;
+import org.hv.pocket.model.AbstractEntity;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -14,7 +15,7 @@ import java.util.function.Function;
 /**
  * @author wujianchuan 2019/2/14
  */
-public class ProcessQueryImpl<T> extends AbstractSQLQuery implements ProcessQuery<T> {
+public class ProcessQueryImpl<T extends AbstractEntity> extends AbstractSQLQuery implements ProcessQuery<T> {
 
     private String[] parameters;
 

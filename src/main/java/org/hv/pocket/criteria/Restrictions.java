@@ -6,6 +6,7 @@ import org.hv.pocket.constant.AnnotationType;
 import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.constant.SqlOperateTypes;
 import org.hv.pocket.exception.CriteriaException;
+import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.model.MapperFactory;
 
 import java.util.List;
@@ -85,14 +86,14 @@ public class Restrictions implements SqlBean {
         return new Restrictions(source, SqlOperateTypes.IS_NOT_NULL, null);
     }
 
-    public static Restrictions in(String source, List target) {
+    public static Restrictions in(String source, List<?> target) {
         if (target == null || target.size() == 0) {
             throw new CriteriaException("The set pointed by in function in SQL statement cannot be empty.");
         }
         return new Restrictions(source, SqlOperateTypes.IN, target);
     }
 
-    public static Restrictions notIn(String source, List target) {
+    public static Restrictions notIn(String source, List<?> target) {
         if (target == null || target.size() == 0) {
             throw new CriteriaException("The set pointed by notIn function in SQL statement cannot be empty.");
         }
@@ -135,7 +136,7 @@ public class Restrictions implements SqlBean {
         } else {
             if (!SqlOperateTypes.IS_NULL.equals(this.getSqlOperate()) && !SqlOperateTypes.IS_NOT_NULL.equals(this.getSqlOperate())) {
                 if (this.getTarget() instanceof List) {
-                    List targets = ((List) this.getTarget());
+                    List<?> targets = ((List<?>) this.getTarget());
                     for (Object item : targets) {
                         Restrictions.newParamInstance(item).pushTo(sortedRestrictionsList);
                     }
@@ -151,7 +152,7 @@ public class Restrictions implements SqlBean {
      *
      * @return SQL
      */
-    String parseSql(Class clazz, DatabaseNodeConfig databaseConfig) {
+    String parseSql(Class<? extends AbstractEntity> clazz, DatabaseNodeConfig databaseConfig) {
         StringBuilder sql = new StringBuilder();
         try {
             if (this.getLeftRestrictions() == null) {
@@ -169,7 +170,7 @@ public class Restrictions implements SqlBean {
                 }
                 if (this.getTarget() != null) {
                     if (SqlOperateTypes.IN.equals(this.getSqlOperate()) || SqlOperateTypes.NOT_IN.equals(this.getSqlOperate())) {
-                        List targets = (List) this.getTarget();
+                        List<?> targets = (List<?>) this.getTarget();
                         sql.append((targets).stream().map(item -> CommonSql.PLACEHOLDER).collect(Collectors.joining(",", "(", ")")));
                     } else {
                         sql.append(CommonSql.PLACEHOLDER);

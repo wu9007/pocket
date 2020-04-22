@@ -12,21 +12,21 @@ public class DetailInductiveBox {
     /**
      * 更新明细
      */
-    private final List<AbstractEntity> update;
+    private final List<? extends AbstractEntity> update;
     /**
      * 新增明细
      */
-    private final List<AbstractEntity> newborn;
+    private final List<? extends AbstractEntity> newborn;
     /**
      * 删除明细
      */
-    private final List<AbstractEntity> moribund;
+    private final List<? extends AbstractEntity> moribund;
     /**
      * 总行数
      */
     private final int count;
 
-    private DetailInductiveBox(List<AbstractEntity> details, List<AbstractEntity> olderDetails) {
+    private DetailInductiveBox(List<? extends AbstractEntity> details, List<? extends AbstractEntity> olderDetails) {
         if (details != null && details.size() > 0) {
             this.newborn = details.parallelStream()
                     .filter(detail -> detail.getIdentify() == null)
@@ -36,11 +36,11 @@ public class DetailInductiveBox {
         }
         if (olderDetails != null) {
             if (details != null && details.size() > 0) {
-                List<Serializable> newDetailUuidList = details.stream()
+                List<Serializable> newDetailIdentifyList = details.stream()
                         .map(AbstractEntity::getIdentify)
                         .collect(Collectors.toList());
                 this.moribund = olderDetails.parallelStream()
-                        .filter(detail -> !newDetailUuidList.contains(detail.getIdentify()))
+                        .filter(detail -> !newDetailIdentifyList.contains(detail.getIdentify()))
                         .collect(Collectors.toList());
                 this.update = details.parallelStream()
                         .filter(detail -> {
@@ -61,19 +61,19 @@ public class DetailInductiveBox {
         this.count = this.newborn.size() + this.moribund.size() + this.update.size();
     }
 
-    public static DetailInductiveBox newInstance(Object details, Object olderDetails) {
-        return new DetailInductiveBox((List<AbstractEntity>) details, (List<AbstractEntity>) olderDetails);
+    public static DetailInductiveBox newInstance(List<? extends AbstractEntity> details, List<? extends AbstractEntity> olderDetails) {
+        return new DetailInductiveBox(details, olderDetails);
     }
 
-    public List<AbstractEntity> getUpdate() {
+    public List<? extends AbstractEntity> getUpdate() {
         return update;
     }
 
-    public List<AbstractEntity> getNewborn() {
+    public List<? extends AbstractEntity> getNewborn() {
         return newborn;
     }
 
-    public List<AbstractEntity> getMoribund() {
+    public List<? extends AbstractEntity> getMoribund() {
         return moribund;
     }
 

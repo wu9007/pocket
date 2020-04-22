@@ -21,7 +21,7 @@ import java.util.List;
  */
 public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
-    public CriteriaImpl(Class clazz, Session session) {
+    public CriteriaImpl(Class<? extends AbstractEntity> clazz, Session session) {
         super(clazz, session);
     }
 
@@ -82,7 +82,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
-    public List list() {
+    public <E extends AbstractEntity> List<E> list() {
         try {
             return this.listNotCleanRestrictions();
         } finally {
@@ -91,7 +91,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
-    public List listNotCleanRestrictions() {
+    public <E extends AbstractEntity> List<E>  listNotCleanRestrictions() {
         completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildSelectSql(databaseConfig));
         if (this.limited()) {
             completeSql.append(CommonSql.LIMIT)
@@ -105,10 +105,10 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             preparedStatement = getPreparedStatement();
             resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
             ResultSetHandler resultSetHandler = ResultSetHandler.newInstance(resultSet);
-            List<AbstractEntity> result = new ArrayList<>();
+            List<E> result = new ArrayList<>();
 
             while (resultSet.next()) {
-                AbstractEntity entity = (AbstractEntity) clazz.newInstance();
+                E entity = (E) clazz.newInstance();
                 for (Field field : MapperFactory.getViewFields(clazz.getName())) {
                     field.set(entity, resultSetHandler.getMappingColumnValue(clazz, field));
                 }
@@ -124,8 +124,8 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
-    public List list(boolean cascade) {
-        List<AbstractEntity> result = this.list();
+    public <E extends AbstractEntity> List<E> list(boolean cascade) {
+        List<E> result = this.list();
         if (result.size() > 0 && cascade) {
             Field[] fields = MapperFactory.getOneToMayFields(this.clazz.getName());
             if (fields.length > 0) {
@@ -138,22 +138,22 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
-    public Object top() {
+    public <T extends AbstractEntity> T top() {
         return this.top(false);
     }
 
     @Override
-    public Object top(boolean cascade) {
-        List listResult = this.list(cascade);
+    public <T extends AbstractEntity> T top(boolean cascade) {
+        List<T> listResult = this.list(cascade);
         return listResult != null && listResult.size() > 0 ? listResult.get(0) : null;
     }
 
     @Override
-    public Object unique() throws SQLException {
+    public <T extends AbstractEntity> T unique() throws SQLException {
         completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildSelectSql(databaseConfig));
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
-        AbstractEntity entity = null;
+        T entity = null;
         try {
             preparedStatement = getPreparedStatement();
             resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
@@ -164,7 +164,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                     throw new CriteriaException("Data is not unique, and multiple data are returned.");
                 }
                 try {
-                    entity = (AbstractEntity) clazz.newInstance();
+                    entity = (T) clazz.newInstance();
                     for (Field field : MapperFactory.getViewFields(clazz.getName())) {
                         field.set(entity, resultSetHandler.getMappingColumnValue(clazz, field));
                     }
@@ -180,8 +180,8 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
-    public Object unique(boolean cascade) throws SQLException {
-        AbstractEntity entity = (AbstractEntity) this.unique();
+    public <T extends AbstractEntity> T unique(boolean cascade) throws SQLException {
+        T entity = this.unique();
         if (entity != null && cascade) {
             Field[] fields = MapperFactory.getOneToMayFields(this.clazz.getName());
             if (fields.length > 0) {
@@ -226,7 +226,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
-    public Object max(String fieldName) throws SQLException {
+    public <T extends AbstractEntity> T max(String fieldName) throws SQLException {
         completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildMaxSql(databaseConfig, fieldName));
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -234,7 +234,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             preparedStatement = getPreparedStatement();
             resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
             if (resultSet.next()) {
-                return resultSet.getObject(1);
+                return (T) resultSet.getObject(1);
             } else {
                 return null;
             }
@@ -256,12 +256,12 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                 try {
                     String mainClassName = entity.getClass().getName();
                     String mainFieldName = field.getName();
-                    Class childClass = MapperFactory.getDetailClass(mainClassName, mainFieldName);
+                    Class<? extends AbstractEntity> childClass = MapperFactory.getDetailClass(mainClassName, mainFieldName);
                     String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, mainFieldName);
                     Object upFieldValue = MapperFactory.getUpBridgeFieldValue(entity, mainClassName, childClass);
                     Criteria criteria = new CriteriaImpl(childClass, super.getSession())
                             .add(Restrictions.equ(downBridgeFieldName, upFieldValue));
-                    List<AbstractEntity> details = criteria.list();
+                    List<? extends AbstractEntity> details = criteria.list();
                     field.set(entity, details);
                     Field[] detailFields = MapperFactory.getOneToMayFields(childClass.getName());
                     if (detailFields.length > 0) {
