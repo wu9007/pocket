@@ -175,16 +175,6 @@ class EntityMapper {
             Join join = field.getAnnotation(Join.class);
             OneToMany oneToMany = field.getAnnotation(OneToMany.class);
             ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);
-            if (identify == null) {
-                identify = field.getAnnotation(Identify.class);
-                if (identify != null) {
-                    identifyField = field;
-                    identifyColumnName = column.name();
-                    generationType = identify.strategy();
-                }
-            } else if (field.getAnnotation(Identify.class) != null) {
-                throw new PocketIdentifyException("Multiple identify fields detected.");
-            }
             if (column != null) {
                 fieldMapper.put(filedName, new FieldData(field, AnnotationType.COLUMN, column));
                 repositoryFields.add(field);
@@ -198,6 +188,17 @@ class EntityMapper {
                 viewColumnMapperWithTableAs.put(filedName, tableName + CommonSql.DOT + columnName);
                 viewColumnMapper.put(filedName, columnName);
                 pushBusiness(businessFields, keyBusinessFields, businessMapper, field, filedName, column.businessName(), column.flagBusiness());
+
+                if (identify == null) {
+                    identify = field.getAnnotation(Identify.class);
+                    if (identify != null) {
+                        identifyField = field;
+                        identifyColumnName = columnName;
+                        generationType = identify.strategy();
+                    }
+                } else if (field.getAnnotation(Identify.class) != null) {
+                    throw new PocketIdentifyException("Multiple identify fields detected.");
+                }
             } else if (join != null) {
                 String bridgeColumnSurname = join.columnSurname().trim();
                 String joinTableSurname = join.joinTableSurname().trim();
