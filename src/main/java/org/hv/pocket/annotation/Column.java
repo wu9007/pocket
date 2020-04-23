@@ -13,7 +13,12 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Column {
-    String name();
+    /**
+     * 对应数据库列明(缺省时根据属性名驼峰转下划线)
+     *
+     * @return column name
+     */
+    String name() default "";
 
     String businessName() default "";
 

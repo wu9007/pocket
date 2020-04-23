@@ -8,6 +8,7 @@ import org.hv.pocket.exception.MapperException;
 import org.hv.pocket.exception.PocketIdentifyException;
 import org.hv.pocket.utils.CommonUtils;
 import org.hv.pocket.identify.GenerationType;
+import org.hv.pocket.utils.UnderlineHumpTranslator;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -141,7 +142,14 @@ class EntityMapper {
             tableName = entity.table();
             tableId = entity.tableId();
         } else {
-            throw new MapperException(String.format("%s: 未找到 : @Entity 注解。", clazz.getName()));
+            View view = clazz.getAnnotation(View.class);
+            if (view != null) {
+                entity = View.class.getAnnotation(Entity.class);
+                tableName = entity.table();
+                tableId = entity.tableId();
+            } else {
+                throw new MapperException(String.format("%s: 未找到 : @Entity 注解。", clazz.getName()));
+            }
         }
         Field[] superWithAnnotationFields = Arrays.stream(clazz.getSuperclass().getDeclaredFields()).filter(StreamPredicates.COLUMN_MAPPING_PREDICATE).toArray(Field[]::new);
         Field[] ownWithAnnotationFields = Arrays.stream(clazz.getDeclaredFields()).filter(StreamPredicates.COLUMN_MAPPING_PREDICATE).toArray(Field[]::new);
@@ -180,11 +188,15 @@ class EntityMapper {
             if (column != null) {
                 fieldMapper.put(filedName, new FieldData(field, AnnotationType.COLUMN, column));
                 repositoryFields.add(field);
-                repositoryColumnNames.add(column.name());
-                repositoryColumnMapper.put(filedName, column.name());
+                String columnName = column.name();
+                if (columnName.isEmpty()) {
+                    columnName = UnderlineHumpTranslator.humpToUnderline(filedName);
+                }
+                repositoryColumnNames.add(columnName);
+                repositoryColumnMapper.put(filedName,columnName);
                 viewFields.add(field);
-                viewColumnMapperWithTableAs.put(filedName, tableName + CommonSql.DOT + column.name());
-                viewColumnMapper.put(filedName, column.name());
+                viewColumnMapperWithTableAs.put(filedName, tableName + CommonSql.DOT + columnName);
+                viewColumnMapper.put(filedName, columnName);
                 pushBusiness(businessFields, keyBusinessFields, businessMapper, field, filedName, column.businessName(), column.flagBusiness());
             } else if (join != null) {
                 String bridgeColumnSurname = join.columnSurname().trim();
@@ -223,7 +235,7 @@ class EntityMapper {
                 manyToOneUpMapper.put(manyToOne.clazz().getName(), manyToOne.upBridgeField());
             }
         }
-        if (identify == null) {
+        if (identify == null && tableId > -1) {
             throw new PocketIdentifyException("Missing identify field.");
         }
         return new EntityMapper(tableId, tableName, identifyField, identifyColumnName, generationType, fieldMapper,

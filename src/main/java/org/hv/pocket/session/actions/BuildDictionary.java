@@ -33,7 +33,7 @@ public interface BuildDictionary {
      * @param clazz 返回类型
      * @return 查询对象
      */
-    SQLQuery createSQLQuery(String sql, Class<? extends AbstractEntity> clazz);
+    SQLQuery createSQLQuery(String sql, Class<?> clazz);
 
     /**
      * 获取ProcessSQL查询对象

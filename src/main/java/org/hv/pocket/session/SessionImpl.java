@@ -93,7 +93,7 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public SQLQuery createSQLQuery(String sql, Class<? extends AbstractEntity> clazz) {
+    public SQLQuery createSQLQuery(String sql, Class<?> clazz) {
         return new SQLQueryImpl(sql, connection, this.databaseNodeConfig, clazz);
     }
 
