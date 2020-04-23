@@ -17,21 +17,21 @@ import java.time.LocalDateTime;
 public class Order extends BaseEntity {
     private static final long serialVersionUID = 2560385391551524826L;
 
-    @Column(name = "RELEVANT_BILL_UUID", businessName = "关联单据的数据标识")
+    @Column(businessName = "关联单据的数据标识")
     private String relevantBillUuid;
-    @Column(name = "CODE", businessName = "编号")
+    @Column(businessName = "编号")
     private String code;
-    @Column(name = "PRICE", businessName = "单价")
+    @Column(businessName = "单价")
     private BigDecimal price;
-    @Column(name = "DAY", businessName = "日期")
+    @Column(businessName = "日期")
     private LocalDate day;
-    @Column(name = "TIME", businessName = "时间")
+    @Column(businessName = "时间")
     private LocalDateTime time;
-    @Column(name = "STATE", businessName = "状态")
+    @Column(businessName = "状态")
     private Boolean state;
-    @Column(name = "SORT", businessName = "排序码")
+    @Column(businessName = "排序码")
     private int sort;
-    @Column(name = "TYPE", businessName = "类型", flagBusiness = true)
+    @Column(businessName = "类型", flagBusiness = true)
     private String type;
     @Join(columnName = "TYPE", columnSurname = "TYPE_NAME", businessName = "订单支付方式", joinTable = "TBL_ORDER_TYPE", joinTableSurname = "T2", joinMethod = JoinMethod.LEFT, bridgeColumn = "UUID", destinationColumn = "NAME")
     private String typeName;

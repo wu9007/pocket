@@ -2,10 +2,8 @@ package org.hv.pocket.criteria;
 
 import org.hv.pocket.config.DatabaseNodeConfig;
 import org.hv.pocket.logger.StatementProxy;
+import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.session.Session;
-import org.hv.pocket.utils.FieldTypeStrategy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.util.HashMap;
@@ -17,11 +15,8 @@ import java.util.Map;
  * @author wujianchuan 2019/1/10
  */
 abstract class AbstractCriteria {
-
-    final FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
     final StatementProxy statementProxy;
-
-    final Class clazz;
+    final Class<? extends AbstractEntity> clazz;
     final Session session;
     final Connection connection;
     final DatabaseNodeConfig databaseConfig;
@@ -36,7 +31,7 @@ abstract class AbstractCriteria {
     private Integer limit;
     StringBuilder completeSql = new StringBuilder();
 
-    AbstractCriteria(Class clazz, Session session) {
+    AbstractCriteria(Class<? extends AbstractEntity> clazz, Session session) {
         this.clazz = clazz;
         this.session = session;
         this.connection = this.session.getConnection();

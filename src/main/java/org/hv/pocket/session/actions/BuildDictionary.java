@@ -1,6 +1,7 @@
 package org.hv.pocket.session.actions;
 
 import org.hv.pocket.criteria.Criteria;
+import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.query.ProcessQuery;
 import org.hv.pocket.query.SQLQuery;
 
@@ -23,7 +24,7 @@ public interface BuildDictionary {
      * @param clazz 实体类类型
      * @return SQL规范对象
      */
-    Criteria createCriteria(Class clazz);
+    Criteria createCriteria(Class<? extends AbstractEntity> clazz);
 
     /**
      * 获取SQL查询对象
@@ -32,7 +33,7 @@ public interface BuildDictionary {
      * @param clazz 返回类型
      * @return 查询对象
      */
-    SQLQuery createSQLQuery(String sql, Class clazz);
+    SQLQuery createSQLQuery(String sql, Class<?> clazz);
 
     /**
      * 获取ProcessSQL查询对象
@@ -40,5 +41,5 @@ public interface BuildDictionary {
      * @param processSQL 存储过程SQL
      * @return 查询对象
      */
-    <T> ProcessQuery<T> createProcessQuery(String processSQL);
+    <T extends AbstractEntity> ProcessQuery<T> createProcessQuery(String processSQL);
 }

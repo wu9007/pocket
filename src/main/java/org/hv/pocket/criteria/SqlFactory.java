@@ -13,21 +13,29 @@ public class SqlFactory {
     private static final Map<String, Map<String, String>> SQL_POOL = new HashMap<>();
 
     static {
-        Map<String, String> mysqlSqlOperateTypes = new HashMap<>(20);
-        mysqlSqlOperateTypes.put(SqlOperateTypes.AND, " AND ");
-        mysqlSqlOperateTypes.put(SqlOperateTypes.EQ, " = ");
-        mysqlSqlOperateTypes.put(SqlOperateTypes.NE, " <> ");
-        mysqlSqlOperateTypes.put(SqlOperateTypes.LIKE, " LIKE ");
-        mysqlSqlOperateTypes.put(SqlOperateTypes.GT, " > ");
-        mysqlSqlOperateTypes.put(SqlOperateTypes.LT, " < ");
-        mysqlSqlOperateTypes.put(SqlOperateTypes.GTE, " >= ");
-        mysqlSqlOperateTypes.put(SqlOperateTypes.LTE, " <= ");
-        mysqlSqlOperateTypes.put(SqlOperateTypes.IS_NULL, " IS NULL ");
-        mysqlSqlOperateTypes.put(SqlOperateTypes.IS_NOT_NULL, " IS NOT NULL ");
-        mysqlSqlOperateTypes.put(SqlOperateTypes.IN, " IN ");
-        mysqlSqlOperateTypes.put(SqlOperateTypes.NOT_IN, " NOT IN ");
-        mysqlSqlOperateTypes.put(SqlOperateTypes.OR, " OR ");
-        SQL_POOL.put(DatasourceDriverTypes.MYSQL_DRIVER, mysqlSqlOperateTypes);
+        Map<String, String> sqlOperateTypes = new HashMap<>(20);
+        sqlOperateTypes.put(SqlOperateTypes.AND, " AND ");
+        sqlOperateTypes.put(SqlOperateTypes.EQ, " = ");
+        sqlOperateTypes.put(SqlOperateTypes.NE, " <> ");
+        sqlOperateTypes.put(SqlOperateTypes.LIKE, " LIKE ");
+        sqlOperateTypes.put(SqlOperateTypes.GT, " > ");
+        sqlOperateTypes.put(SqlOperateTypes.LT, " < ");
+        sqlOperateTypes.put(SqlOperateTypes.GTE, " >= ");
+        sqlOperateTypes.put(SqlOperateTypes.LTE, " <= ");
+        sqlOperateTypes.put(SqlOperateTypes.IS_NULL, " IS NULL ");
+        sqlOperateTypes.put(SqlOperateTypes.IS_NOT_NULL, " IS NOT NULL ");
+        sqlOperateTypes.put(SqlOperateTypes.IN, " IN ");
+        sqlOperateTypes.put(SqlOperateTypes.NOT_IN, " NOT IN ");
+        sqlOperateTypes.put(SqlOperateTypes.OR, " OR ");
+
+        Map<String, String> mySqlOperateTypes = new HashMap<>(20);
+        mySqlOperateTypes.putAll(sqlOperateTypes);
+        SQL_POOL.put(DatasourceDriverTypes.MYSQL_DRIVER, mySqlOperateTypes);
+
+        Map<String, String> oracleSqlOperateTypes = new HashMap<>(20);
+        oracleSqlOperateTypes.putAll(mySqlOperateTypes);
+        SQL_POOL.put(DatasourceDriverTypes.ORACLE_DRIVER_OLD, oracleSqlOperateTypes);
+        SQL_POOL.put(DatasourceDriverTypes.ORACLE_DRIVER, oracleSqlOperateTypes);
     }
 
     private static final SqlFactory OUR_INSTANCE = new SqlFactory();

@@ -1,5 +1,7 @@
 package org.hv.pocket.annotation;
 
+import org.hv.pocket.model.AbstractEntity;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -18,7 +20,7 @@ public @interface OneToMany {
      *
      * @return Clazz
      */
-    Class clazz();
+    Class<? extends AbstractEntity> clazz();
 
     /**
      * 关联的类型属性

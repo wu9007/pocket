@@ -2,19 +2,30 @@ package org.hv.pocket.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.hv.pocket.annotation.Column;
+import org.hv.pocket.annotation.Identify;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
 
 /**
  * @author wujianchuan 2018/12/26
  * Abandon the ship or abandon hope
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public abstract class BaseEntity implements Serializable, Cloneable {
+public abstract class BaseEntity extends AbstractEntity {
     private static final long serialVersionUID = -8735555543925687138L;
+    @Identify
     @Column(name = "UUID")
     private String uuid;
+
+    @Override
+    public Serializable getIdentify() {
+        return this.getUuid();
+    }
+
+    @Override
+    public void setIdentify(Serializable identify) {
+        this.setUuid((String) identify);
+    }
 
     public String getUuid() {
         return uuid;
@@ -22,87 +33,5 @@ public abstract class BaseEntity implements Serializable, Cloneable {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
-    }
-
-    @Override
-    public int hashCode() {
-        int hashCode = 0;
-        if (this.getUuid() == null) {
-            return hashCode;
-        }
-        Field[] fields = MapperFactory.getRepositoryFields(this.getClass().getName());
-        try {
-            for (Field field : fields) {
-                field.setAccessible(true);
-                Object value = field.get(this);
-                if (value != null) {
-                    hashCode = 31 * hashCode + value.hashCode();
-                }
-            }
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException(e.getMessage());
-        }
-        return hashCode;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        } else if (obj == null) {
-            return false;
-        } else if (this.getClass() != obj.getClass()) {
-            return false;
-        } else {
-            BaseEntity other = (BaseEntity) obj;
-            Field[] fields = MapperFactory.getRepositoryFields(this.getClass().getName());
-            try {
-                for (Field field : fields) {
-                    field.setAccessible(true);
-                    Object otherValue = field.get(other);
-                    Object ownValue = field.get(this);
-                    if (ownValue == null) {
-                        if (otherValue != null) {
-                            return false;
-                        }
-                    } else {
-                        if (ownValue instanceof Number) {
-                            if (((Comparable) ownValue).compareTo(otherValue) != 0) {
-                                return false;
-                            }
-                        } else {
-                            if (!ownValue.equals(otherValue)) {
-                                return false;
-                            }
-                        }
-                    }
-                }
-                return true;
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-                throw new IllegalArgumentException(e.getMessage());
-            }
-        }
-    }
-
-    @Override
-    public Object clone() {
-        Object o;
-        Field[] fields = MapperFactory.getRepositoryFields(this.getClass().getName());
-        try {
-            o = super.clone();
-            for (Field field : fields) {
-                field.setAccessible(true);
-                Object value = field.get(this);
-                if (value instanceof BaseEntity) {
-                    field.set(o, ((BaseEntity) value).clone());
-                }
-            }
-        } catch (IllegalAccessException | CloneNotSupportedException e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException(e.getMessage());
-        }
-        return o;
     }
 }

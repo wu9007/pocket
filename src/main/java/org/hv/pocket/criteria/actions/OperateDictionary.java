@@ -1,5 +1,7 @@
 package org.hv.pocket.criteria.actions;
 
+import org.hv.pocket.model.AbstractEntity;
+
 import java.sql.SQLException;
 import java.util.List;
 
@@ -13,14 +15,14 @@ public interface OperateDictionary {
      *
      * @return 对象集合
      */
-    List list();
+    <E extends AbstractEntity> List<E> list();
 
     /**
      * 获取所有数据,持有条件集合可重复利用
      *
      * @return 对象集合
      */
-    List listNotCleanRestrictions();
+    <E extends AbstractEntity> List<E> listNotCleanRestrictions();
 
     /**
      * 获取所有数据
@@ -28,14 +30,14 @@ public interface OperateDictionary {
      * @param cascade 是否级联查询
      * @return 对象集合
      */
-    List list(boolean cascade);
+    <E extends AbstractEntity> List<E> list(boolean cascade);
 
     /**
      * 获取第一条数据 (默认不进行级联查询)
      *
      * @return obj
      */
-    Object top();
+    <T extends AbstractEntity> T top();
 
     /**
      * 获取第一条数据
@@ -43,7 +45,7 @@ public interface OperateDictionary {
      * @param cascade 是否级联
      * @return obj
      */
-    Object top(boolean cascade);
+    <T extends AbstractEntity> T top(boolean cascade);
 
     /**
      * 获取最大值
@@ -51,7 +53,7 @@ public interface OperateDictionary {
      * @param field 类型的属性
      * @return 返回对象
      */
-    Object max(String field) throws SQLException;
+    <T extends AbstractEntity> T max(String field) throws SQLException;
 
     /**
      * 查询总数
@@ -72,15 +74,16 @@ public interface OperateDictionary {
      *
      * @return 对象
      */
-    Object unique() throws SQLException;
+    <T extends AbstractEntity> T unique() throws SQLException;
 
     /**
      * 获取一条数据
      *
      * @param cascade 是否级联查询
      * @return 对象
+     * @throws SQLException e
      */
-    Object unique(boolean cascade) throws SQLException;
+    <T extends AbstractEntity> T unique(boolean cascade) throws SQLException;
 
     /**
      * 批量更新操作

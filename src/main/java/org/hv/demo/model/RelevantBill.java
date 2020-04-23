@@ -2,23 +2,36 @@ package org.hv.demo.model;
 
 import org.hv.pocket.annotation.Column;
 import org.hv.pocket.annotation.Entity;
+import org.hv.pocket.annotation.Identify;
 import org.hv.pocket.annotation.OneToMany;
-import org.hv.pocket.model.BaseEntity;
+import org.hv.pocket.model.AbstractEntity;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author wujianchuan
  */
 @Entity(table = "TBL_RELEVANT_BILL", tableId = 3, businessName = "关联单据")
-public class RelevantBill extends BaseEntity {
+public class RelevantBill extends AbstractEntity {
     private static final long serialVersionUID = -6343776766066672041L;
+    @Identify
+    @Column(name = "UUID")
+    private String id;
     @Column(name = "CODE", businessName = "编号")
     private String code;
     @Column(name = "AVAILABLE", businessName = "是否可用的")
     private Boolean available;
     @OneToMany(clazz = RelevantBillDetail.class, bridgeField = "relevantBillUuid", businessName = "明细信息")
     private List<RelevantBillDetail> details;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getCode() {
         return code;
@@ -42,5 +55,15 @@ public class RelevantBill extends BaseEntity {
 
     public void setDetails(List<RelevantBillDetail> details) {
         this.details = details;
+    }
+
+    @Override
+    public Serializable getIdentify() {
+        return this.id;
+    }
+
+    @Override
+    public void setIdentify(Serializable identify) {
+        this.id = (String) identify;
     }
 }

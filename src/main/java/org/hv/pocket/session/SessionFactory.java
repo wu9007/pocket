@@ -22,7 +22,10 @@ public class SessionFactory {
 
     public static void register(DatabaseConfig databaseConfig) {
         databaseConfig.getNode().forEach(databaseNodeConfig -> {
-            if (DatasourceDriverTypes.MYSQL_DRIVER.equals(databaseNodeConfig.getDriverName()) || DatasourceDriverTypes.ORACLE_DRIVER.equals(databaseNodeConfig.getDriverName())) {
+            String driverName = databaseNodeConfig.getDriverName();
+            if (DatasourceDriverTypes.MYSQL_DRIVER.equals(driverName)
+                    || DatasourceDriverTypes.ORACLE_DRIVER.equals(driverName)
+                    || DatasourceDriverTypes.ORACLE_DRIVER_OLD.equals(driverName)) {
                 Arrays.stream(databaseNodeConfig.getSession().split(CommonSql.COMMA))
                         .forEach(sessionName -> {
                             if (!NODE_POOL.containsKey(sessionName)) {

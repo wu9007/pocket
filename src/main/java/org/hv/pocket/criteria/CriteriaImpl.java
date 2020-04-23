@@ -1,11 +1,12 @@
 package org.hv.pocket.criteria;
 
-import com.mysql.cj.jdbc.result.ResultSetImpl;
 import org.hv.pocket.connect.ConnectionManager;
 import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.exception.CriteriaException;
+import org.hv.pocket.flib.PreparedStatementHandler;
+import org.hv.pocket.flib.ResultSetHandler;
 import org.hv.pocket.model.MapperFactory;
-import org.hv.pocket.model.BaseEntity;
+import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.session.Session;
 
 import java.lang.reflect.Field;
@@ -20,7 +21,7 @@ import java.util.List;
  */
 public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
-    public CriteriaImpl(Class clazz, Session session) {
+    public CriteriaImpl(Class<? extends AbstractEntity> clazz, Session session) {
         super(clazz, session);
     }
 
@@ -81,7 +82,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
-    public List list() {
+    public <E extends AbstractEntity> List<E> list() {
         try {
             return this.listNotCleanRestrictions();
         } finally {
@@ -90,7 +91,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
-    public List listNotCleanRestrictions() {
+    public <E extends AbstractEntity> List<E>  listNotCleanRestrictions() {
         completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildSelectSql(databaseConfig));
         if (this.limited()) {
             completeSql.append(CommonSql.LIMIT)
@@ -103,12 +104,13 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         try {
             preparedStatement = getPreparedStatement();
             resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
-            List<BaseEntity> result = new ArrayList<>();
+            ResultSetHandler resultSetHandler = ResultSetHandler.newInstance(resultSet);
+            List<E> result = new ArrayList<>();
 
             while (resultSet.next()) {
-                BaseEntity entity = (BaseEntity) clazz.newInstance();
+                E entity = (E) clazz.newInstance();
                 for (Field field : MapperFactory.getViewFields(clazz.getName())) {
-                    field.set(entity, this.fieldTypeStrategy.getMappingColumnValue(clazz, field, resultSet));
+                    field.set(entity, resultSetHandler.getMappingColumnValue(clazz, field));
                 }
                 result.add(entity);
             }
@@ -122,12 +124,12 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
-    public List list(boolean cascade) {
-        List<BaseEntity> result = this.list();
+    public <E extends AbstractEntity> List<E> list(boolean cascade) {
+        List<E> result = this.list();
         if (result.size() > 0 && cascade) {
             Field[] fields = MapperFactory.getOneToMayFields(this.clazz.getName());
             if (fields.length > 0) {
-                for (BaseEntity entity : result) {
+                for (AbstractEntity entity : result) {
                     this.applyChildren(entity, fields);
                 }
             }
@@ -136,34 +138,35 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
-    public Object top() {
+    public <T extends AbstractEntity> T top() {
         return this.top(false);
     }
 
     @Override
-    public Object top(boolean cascade) {
-        List listResult = this.list(cascade);
+    public <T extends AbstractEntity> T top(boolean cascade) {
+        List<T> listResult = this.list(cascade);
         return listResult != null && listResult.size() > 0 ? listResult.get(0) : null;
     }
 
     @Override
-    public Object unique() throws SQLException {
+    public <T extends AbstractEntity> T unique() throws SQLException {
         completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildSelectSql(databaseConfig));
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
-        BaseEntity entity = null;
+        T entity = null;
         try {
             preparedStatement = getPreparedStatement();
             resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
-            int resultRowCount = ((ResultSetImpl) resultSet).getRows().size();
-            if (resultRowCount > 1) {
-                throw new CriteriaException("Data is not unique, and multiple data are returned.");
-            }
-            if (resultSet.next()) {
+            ResultSetHandler resultSetHandler = ResultSetHandler.newInstance(resultSet);
+            int resultRowCount = 0;
+            while (resultSet.next()) {
+                if (++resultRowCount > 1) {
+                    throw new CriteriaException("Data is not unique, and multiple data are returned.");
+                }
                 try {
-                    entity = (BaseEntity) clazz.newInstance();
+                    entity = (T) clazz.newInstance();
                     for (Field field : MapperFactory.getViewFields(clazz.getName())) {
-                        field.set(entity, this.fieldTypeStrategy.getMappingColumnValue(clazz, field, resultSet));
+                        field.set(entity, resultSetHandler.getMappingColumnValue(clazz, field));
                     }
                 } catch (InstantiationException | IllegalAccessException e) {
                     e.printStackTrace();
@@ -177,8 +180,8 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
-    public Object unique(boolean cascade) throws SQLException {
-        BaseEntity entity = (BaseEntity) this.unique();
+    public <T extends AbstractEntity> T unique(boolean cascade) throws SQLException {
+        T entity = this.unique();
         if (entity != null && cascade) {
             Field[] fields = MapperFactory.getOneToMayFields(this.clazz.getName());
             if (fields.length > 0) {
@@ -223,7 +226,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
-    public Object max(String fieldName) throws SQLException {
+    public <T extends AbstractEntity> T max(String fieldName) throws SQLException {
         completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildMaxSql(databaseConfig, fieldName));
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -231,7 +234,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             preparedStatement = getPreparedStatement();
             resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
             if (resultSet.next()) {
-                return resultSet.getObject(1);
+                return (T) resultSet.getObject(1);
             } else {
                 return null;
             }
@@ -246,23 +249,23 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
      *
      * @param entity 实体
      */
-    private void applyChildren(BaseEntity entity, Field[] fields) {
+    private void applyChildren(AbstractEntity entity, Field[] fields) {
         if (fields.length > 0) {
             for (Field field : fields) {
                 field.setAccessible(true);
                 try {
                     String mainClassName = entity.getClass().getName();
                     String mainFieldName = field.getName();
-                    Class childClass = MapperFactory.getDetailClass(mainClassName, mainFieldName);
+                    Class<? extends AbstractEntity> childClass = MapperFactory.getDetailClass(mainClassName, mainFieldName);
                     String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, mainFieldName);
                     Object upFieldValue = MapperFactory.getUpBridgeFieldValue(entity, mainClassName, childClass);
                     Criteria criteria = new CriteriaImpl(childClass, super.getSession())
                             .add(Restrictions.equ(downBridgeFieldName, upFieldValue));
-                    List<BaseEntity> details = criteria.list();
+                    List<? extends AbstractEntity> details = criteria.list();
                     field.set(entity, details);
                     Field[] detailFields = MapperFactory.getOneToMayFields(childClass.getName());
                     if (detailFields.length > 0) {
-                        for (BaseEntity detail : details) {
+                        for (AbstractEntity detail : details) {
                             this.applyChildren(detail, detailFields);
                         }
                     }
@@ -277,8 +280,8 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     private PreparedStatement getPreparedStatement() throws SQLException {
         PreparedStatement preparedStatement;
         preparedStatement = this.connection.prepareStatement(completeSql.toString());
-        fieldTypeStrategy.setPreparedStatement(preparedStatement, this.parameters,
-                this.sortedRestrictionsList);
+        PreparedStatementHandler preparedStatementHandler = PreparedStatementHandler.newInstance(preparedStatement);
+        preparedStatementHandler.completionPreparedStatement(this.parameters, this.sortedRestrictionsList);
         return preparedStatement;
     }
 }

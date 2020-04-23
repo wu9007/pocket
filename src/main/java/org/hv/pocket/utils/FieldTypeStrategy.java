@@ -25,6 +25,7 @@ import java.util.function.Consumer;
 /**
  * @author wujianchuan 2019/1/3
  */
+@Deprecated
 public class FieldTypeStrategy {
     private static final FieldTypeStrategy STRATEGY = new FieldTypeStrategy();
     private static final Map<String, BiFunction<ResultSet, String, Object>> RESULT_STRATEGY_POOL = new ConcurrentHashMap<>(20);

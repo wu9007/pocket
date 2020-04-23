@@ -3,6 +3,7 @@ package org.hv.pocket.criteria;
 import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.exception.CriteriaException;
 import org.hv.pocket.exception.ErrorMessage;
+import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.model.MapperFactory;
 
 import java.util.List;
@@ -62,7 +63,7 @@ public class Modern implements SqlBean {
         return withPoEl;
     }
 
-    String parse(Class clazz, List<ParameterTranslator> parameters, Map<String, Object> parameterMap) {
+    String parse(Class<? extends AbstractEntity> clazz, List<ParameterTranslator> parameters, Map<String, Object> parameterMap) {
         if (this.getWithPoEl()) {
             String sql = poEl;
             Matcher fieldMatcher = fieldPattern.matcher(this.poEl);

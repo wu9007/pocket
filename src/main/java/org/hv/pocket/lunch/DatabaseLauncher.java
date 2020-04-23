@@ -3,10 +3,10 @@ package org.hv.pocket.lunch;
 import org.hv.pocket.annotation.Entity;
 import org.hv.pocket.config.DatabaseConfig;
 import org.hv.pocket.connect.ConnectionManager;
-import org.hv.pocket.model.BaseEntity;
+import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.session.SessionFactory;
-import org.hv.pocket.uuid.UuidGenerator;
-import org.hv.pocket.uuid.UuidGeneratorFactory;
+import org.hv.pocket.identify.IdentifyGenerator;
+import org.hv.pocket.identify.IdentifyGeneratorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
@@ -28,15 +28,15 @@ public class DatabaseLauncher implements CommandLineRunner {
     DatabaseConfig databaseConfig;
 
     private final
-    List<UuidGenerator> uuidGeneratorList;
+    List<IdentifyGenerator> identifyGeneratorList;
 
     private final
-    List<BaseEntity> entityList;
+    List<AbstractEntity> entityList;
 
     @Autowired
-    public DatabaseLauncher(DatabaseConfig databaseConfig, List<UuidGenerator> uuidGeneratorList, @Nullable List<BaseEntity> entityList) {
+    public DatabaseLauncher(DatabaseConfig databaseConfig, List<IdentifyGenerator> identifyGeneratorList, @Nullable List<AbstractEntity> entityList) {
         this.databaseConfig = databaseConfig;
-        this.uuidGeneratorList = uuidGeneratorList;
+        this.identifyGeneratorList = identifyGeneratorList;
         this.entityList = entityList;
     }
 
@@ -45,7 +45,7 @@ public class DatabaseLauncher implements CommandLineRunner {
         this.verifyEntity();
         this.initConnectionManager();
         this.initSessionFactory();
-        this.initUuidGenerator();
+        this.initIdentifyGenerator();
     }
 
     private void verifyEntity() {
@@ -70,13 +70,13 @@ public class DatabaseLauncher implements CommandLineRunner {
         SessionFactory.register(databaseConfig);
     }
 
-    private void initUuidGenerator() {
-        UuidGeneratorFactory uuidGeneratorFactory = UuidGeneratorFactory.getInstance();
+    private void initIdentifyGenerator() {
+        IdentifyGeneratorFactory identifyGeneratorFactory = IdentifyGeneratorFactory.getInstance();
         Integer serverId = databaseConfig.getServerId();
-        this.uuidGeneratorList.forEach(uuidGenerator -> {
-            uuidGenerator.setServerId(serverId);
-            uuidGenerator.setGeneratorId();
-            uuidGeneratorFactory.registerGenerator(uuidGenerator);
+        this.identifyGeneratorList.forEach(identifyGenerator -> {
+            identifyGenerator.setServerId(serverId);
+            identifyGenerator.setGeneratorId();
+            identifyGeneratorFactory.registerGenerator(identifyGenerator);
         });
     }
 }

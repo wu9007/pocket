@@ -1,5 +1,6 @@
-package org.hv.pocket.uuid;
+package org.hv.pocket.identify;
 
+import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.session.Session;
 
 import java.sql.SQLException;
@@ -7,7 +8,7 @@ import java.sql.SQLException;
 /**
  * @author wujianchuan 2019/1/2
  */
-public interface UuidGenerator {
+public interface IdentifyGenerator {
 
     /**
      * 保存服务ID
@@ -19,9 +20,9 @@ public interface UuidGenerator {
     /**
      * 获取生成策略标识
      *
-     * @return 策略标识
+     * @return 策略类型
      */
-    String getGeneratorId();
+    GenerationType getGenerationType();
 
     /**
      * 生成策略标识
@@ -34,6 +35,7 @@ public interface UuidGenerator {
      * @param clazz   实体类型
      * @param session 缓存管理类
      * @return 数据标识
+     * @throws SQLException e
      */
-    String getUuid(Class clazz, Session session) throws SQLException;
+    String getIdentify(Class<? extends AbstractEntity> clazz, Session session) throws SQLException;
 }

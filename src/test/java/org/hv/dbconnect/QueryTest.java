@@ -2,6 +2,7 @@ package org.hv.dbconnect;
 
 import org.hv.Application;
 import org.hv.demo.model.Order;
+import org.hv.demo.model.OrderView;
 import org.hv.pocket.query.SQLQuery;
 import org.hv.pocket.session.Session;
 import org.hv.pocket.session.SessionFactory;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author wujianchuan 2019/1/15
@@ -53,9 +55,10 @@ public class QueryTest {
         order.setTime(LocalDateTime.now());
         order.setPrice(new BigDecimal("99.56789"));
         order.setDay(LocalDate.now());
-        this.session.save(order);
+        int n = this.session.save(order);
+        System.out.println("保存条数：" + n);
         SQLQuery query = this.session.createSQLQuery("select uuid as uuid,code as code,'微信支付' as typeName from tbl_order where uuid = :uuid", Order.class);
-        Order repositoryOrder = (Order) query.setParameter("uuid", order.getUuid()).unique();
+        Order repositoryOrder = (Order) query.setParameter("uuid", order.getIdentify()).unique();
         System.out.println(repositoryOrder.getPrice());
         this.session.delete(repositoryOrder);
     }
@@ -80,7 +83,7 @@ public class QueryTest {
                 .mapperColumn("label", "value")
                 .setParameter("ORDER_CODE", "C-001")
                 .setParameter("DAY", new Date());
-        List orders = query.list();
+        List<Map<String, String>> orders = query.list();
         System.out.println(orders.size());
     }
 
@@ -90,7 +93,25 @@ public class QueryTest {
         SQLQuery query = this.session.createSQLQuery("select uuid, code from tbl_order where TYPE IN(:TYPE)")
                 .mapperColumn("label", "value")
                 .setParameter("TYPE", types);
-        List orders = query.list();
+        List<Map<String, String>> orders = query.list();
+        System.out.println(orders.size());
+    }
+
+    @Test
+    public void test6() throws SQLException {
+        SQLQuery query = this.session.createSQLQuery("select uuid from tbl_order where CODE = :ORDER_CODE AND DAY < :DAY")
+                .setParameter("ORDER_CODE", "C-001")
+                .setParameter("DAY", new Date());
+        List<?> orders = query.list();
+        System.out.println(orders.size());
+    }
+
+    @Test
+    public void test7() throws SQLException {
+        SQLQuery query = this.session.createSQLQuery("select CODE as code, PRICE as price from tbl_order where CODE = :ORDER_CODE AND DAY < :DAY", OrderView.class)
+                .setParameter("ORDER_CODE", "C-001")
+                .setParameter("DAY", new Date());
+        List<OrderView> orders = query.list();
         System.out.println(orders.size());
     }
 }

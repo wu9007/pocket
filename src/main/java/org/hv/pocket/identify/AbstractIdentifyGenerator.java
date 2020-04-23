@@ -1,4 +1,4 @@
-package org.hv.pocket.uuid;
+package org.hv.pocket.identify;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -6,9 +6,9 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author wujianchuan 2019/2/14
  */
-public abstract class AbstractUuidGenerator implements UuidGenerator {
+public abstract class AbstractIdentifyGenerator implements IdentifyGenerator {
     final static Map<String, Long> POOL = new ConcurrentHashMap<>(60);
-    String generatorId;
+    GenerationType generationType;
     Integer serverId;
 
     @Override
@@ -23,7 +23,7 @@ public abstract class AbstractUuidGenerator implements UuidGenerator {
     public abstract void setGeneratorId();
 
     @Override
-    public String getGeneratorId() {
-        return this.generatorId;
+    public GenerationType getGenerationType() {
+        return this.generationType;
     }
 }

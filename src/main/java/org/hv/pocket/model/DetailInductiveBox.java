@@ -1,5 +1,6 @@
 package org.hv.pocket.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,35 +12,35 @@ public class DetailInductiveBox {
     /**
      * 更新明细
      */
-    private List<BaseEntity> update;
+    private final List<? extends AbstractEntity> update;
     /**
      * 新增明细
      */
-    private List<BaseEntity> newborn;
+    private final List<? extends AbstractEntity> newborn;
     /**
      * 删除明细
      */
-    private List<BaseEntity> moribund;
+    private final List<? extends AbstractEntity> moribund;
     /**
      * 总行数
      */
-    private int count;
+    private final int count;
 
-    private DetailInductiveBox(List<BaseEntity> details, List<BaseEntity> olderDetails) {
+    private DetailInductiveBox(List<? extends AbstractEntity> details, List<? extends AbstractEntity> olderDetails) {
         if (details != null && details.size() > 0) {
             this.newborn = details.parallelStream()
-                    .filter(detail -> detail.getUuid() == null)
+                    .filter(detail -> detail.getIdentify() == null)
                     .collect(Collectors.toList());
         } else {
             this.newborn = new ArrayList<>();
         }
         if (olderDetails != null) {
             if (details != null && details.size() > 0) {
-                List<String> newDetailUuidList = details.stream()
-                        .map(BaseEntity::getUuid)
+                List<Serializable> newDetailIdentifyList = details.stream()
+                        .map(AbstractEntity::getIdentify)
                         .collect(Collectors.toList());
                 this.moribund = olderDetails.parallelStream()
-                        .filter(detail -> !newDetailUuidList.contains(detail.getUuid()))
+                        .filter(detail -> !newDetailIdentifyList.contains(detail.getIdentify()))
                         .collect(Collectors.toList());
                 this.update = details.parallelStream()
                         .filter(detail -> {
@@ -60,19 +61,19 @@ public class DetailInductiveBox {
         this.count = this.newborn.size() + this.moribund.size() + this.update.size();
     }
 
-    public static DetailInductiveBox newInstance(Object details, Object olderDetails) {
-        return new DetailInductiveBox((List<BaseEntity>) details, (List<BaseEntity>) olderDetails);
+    public static DetailInductiveBox newInstance(List<? extends AbstractEntity> details, List<? extends AbstractEntity> olderDetails) {
+        return new DetailInductiveBox(details, olderDetails);
     }
 
-    public List<BaseEntity> getUpdate() {
+    public List<? extends AbstractEntity> getUpdate() {
         return update;
     }
 
-    public List<BaseEntity> getNewborn() {
+    public List<? extends AbstractEntity> getNewborn() {
         return newborn;
     }
 
-    public List<BaseEntity> getMoribund() {
+    public List<? extends AbstractEntity> getMoribund() {
         return moribund;
     }
 

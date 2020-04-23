@@ -8,6 +8,9 @@ import org.slf4j.LoggerFactory;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+/**
+ * @author wujianchuan
+ */
 public class StatementProxy {
 
     private final Logger logger = LoggerFactory.getLogger(StatementProxy.class);

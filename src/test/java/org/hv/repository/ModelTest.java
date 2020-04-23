@@ -26,7 +26,7 @@ public class ModelTest {
     @Test
     public void test1() {
         Order order = new Order();
-        order.setUuid("001");
+        order.setIdentify("001");
         order.setCode("002");
         order.setPrice(new BigDecimal("11.2"));
         order.setDay(LocalDate.now());
@@ -34,7 +34,7 @@ public class ModelTest {
         order.setSort(2);
 
         Order order1 = new Order();
-        order1.setUuid("001");
+        order1.setIdentify("001");
         order1.setCode("002");
         order1.setPrice(new BigDecimal("11.2"));
         order1.setDay(order.getDay());

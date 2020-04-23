@@ -1,11 +1,11 @@
 package org.hv.pocket.query;
 
-import com.mysql.cj.jdbc.result.ResultSetImpl;
 import org.hv.pocket.config.DatabaseNodeConfig;
 import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.criteria.ParameterTranslator;
+import org.hv.pocket.flib.PreparedStatementHandler;
+import org.hv.pocket.flib.ResultSetHandler;
 import org.hv.pocket.model.MapperFactory;
-import org.hv.pocket.utils.FieldTypeStrategy;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -29,13 +29,11 @@ import static org.hv.pocket.constant.RegexString.SQL_PARAMETER_REGEX;
  */
 public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
 
-    private final FieldTypeStrategy fieldTypeStrategy = FieldTypeStrategy.getInstance();
-
     public SQLQueryImpl(String sql, Connection connection, DatabaseNodeConfig databaseNodeConfig) {
         super(sql, connection, databaseNodeConfig);
     }
 
-    public SQLQueryImpl(String sql, Connection connection, DatabaseNodeConfig databaseNodeConfig, Class clazz) {
+    public SQLQueryImpl(String sql, Connection connection, DatabaseNodeConfig databaseNodeConfig, Class<?> clazz) {
         super(connection, sql, databaseNodeConfig, clazz);
     }
 
@@ -58,7 +56,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
     }
 
     @Override
-    public List list() throws SQLException {
+    public <E> List<E> list() throws SQLException {
         StringBuilder querySQL = new StringBuilder(this.sql);
         if (this.limited()) {
             querySQL.append(" LIMIT ")
@@ -67,11 +65,11 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
                     .append(this.getLimit());
         }
         ResultSet resultSet = execute(querySQL.toString());
-        List<Object> results = new ArrayList<>();
+        List<E> results = new ArrayList<>();
         while (resultSet.next()) {
             if (clazz != null) {
                 try {
-                    Object result = getEntity(resultSet);
+                    E result = (E) getEntity(resultSet);
                     results.add(result);
                 } catch (InstantiationException | IllegalAccessException e) {
                     throw new IllegalAccessError();
@@ -113,7 +111,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
                 String name = regexString.substring(1);
                 Object parameter = this.parameterMap.get(name);
                 if (parameter instanceof List) {
-                    List<Object> parameters = (List<Object>) parameter;
+                    List<?> parameters = (List<?>) parameter;
                     executeSql = executeSql.replaceAll(regexString, parameters.stream().map(item -> CommonSql.PLACEHOLDER).collect(Collectors.joining(",")));
                     parameters.forEach(item -> queryParameters.add(ParameterTranslator.newInstance(item)));
                 } else {
@@ -122,19 +120,19 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
                 }
             }
             preparedStatement = this.connection.prepareStatement(executeSql);
-            fieldTypeStrategy.setPreparedStatement(preparedStatement, queryParameters);
+            PreparedStatementHandler.newInstance(preparedStatement).completionPreparedStatement(queryParameters);
         } else {
             preparedStatement = this.connection.prepareStatement(executeSql);
         }
         return super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
     }
 
-    private Object getObjects(ResultSet resultSet) throws SQLException {
+    private <T> T getObjects(ResultSet resultSet) throws SQLException {
         int columnNameSize = this.columnNameList.size();
-        int columnSize = ((ResultSetImpl) resultSet).getColumnDefinition().getFields().length;
+        int columnSize = resultSet.getMetaData().getColumnCount();
         if (columnNameSize != columnSize) {
             if (columnNameSize == 0 && columnSize == 1) {
-                return resultSet.getObject(1);
+                return (T) resultSet.getObject(1);
             }
             throw new SQLException("Column mapping failed");
         } else {
@@ -142,17 +140,18 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
             for (int nameIndex = 0, columnIndex = 1; nameIndex < columnNameSize; nameIndex++, columnIndex++) {
                 result.put(this.columnNameList.get(nameIndex), resultSet.getObject(columnIndex));
             }
-            return result;
+            return (T) result;
         }
     }
 
-    private Object getEntity(ResultSet resultSet) throws InstantiationException, IllegalAccessException {
+    private Object getEntity(ResultSet resultSet) throws InstantiationException, IllegalAccessException, SQLException {
         Object result = clazz.newInstance();
         List<Field> fields = Arrays.stream(MapperFactory.getViewFields(clazz.getName()))
-                .filter(field -> this.sql.contains(field.getName()))
+                .filter(field -> this.sql.contains(field.getName() + ",") || this.sql.contains(field.getName() + " "))
                 .collect(Collectors.toList());
+        ResultSetHandler resultSetHandler = ResultSetHandler.newInstance(resultSet);
         for (Field field : fields) {
-            field.set(result, fieldTypeStrategy.getColumnValue(field, resultSet));
+            field.set(result, resultSetHandler.getColumnValue(field));
         }
         return result;
     }
