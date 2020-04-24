@@ -6,17 +6,18 @@ import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.constant.StreamPredicates;
 import org.hv.pocket.exception.MapperException;
 import org.hv.pocket.exception.PocketIdentifyException;
-import org.hv.pocket.utils.CommonUtils;
 import org.hv.pocket.identify.GenerationType;
 import org.hv.pocket.utils.UnderlineHumpTranslator;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author wujianchuan
@@ -151,9 +152,14 @@ class EntityMapper {
                 throw new MapperException(String.format("%s: 未找到 : @Entity 注解。", clazz.getName()));
             }
         }
-        Field[] superWithAnnotationFields = Arrays.stream(clazz.getSuperclass().getDeclaredFields()).filter(StreamPredicates.COLUMN_MAPPING_PREDICATE).toArray(Field[]::new);
-        Field[] ownWithAnnotationFields = Arrays.stream(clazz.getDeclaredFields()).filter(StreamPredicates.COLUMN_MAPPING_PREDICATE).toArray(Field[]::new);
-        Field[] withAnnotationFields = (Field[]) CommonUtils.combinedArray(superWithAnnotationFields, ownWithAnnotationFields);
+        List<Field> allFields = new ArrayList<>();
+        Class<?> superClass = clazz;
+        while (superClass != null && superClass != Object.class && superClass != AbstractEntity.class) {
+            allFields.addAll(Arrays.stream(superClass.getDeclaredFields()).filter(StreamPredicates.COLUMN_MAPPING_PREDICATE).collect(Collectors.toList()));
+            superClass = superClass.getSuperclass();
+        }
+        Field[] withAnnotationFields = new Field[allFields.size()];
+        allFields.toArray(withAnnotationFields);
 
         return buildMapper(tableName, tableId, withAnnotationFields);
     }
@@ -183,7 +189,7 @@ class EntityMapper {
                     columnName = UnderlineHumpTranslator.humpToUnderline(filedName);
                 }
                 repositoryColumnNames.add(columnName);
-                repositoryColumnMapper.put(filedName,columnName);
+                repositoryColumnMapper.put(filedName, columnName);
                 viewFields.add(field);
                 viewColumnMapperWithTableAs.put(filedName, tableName + CommonSql.DOT + columnName);
                 viewColumnMapper.put(filedName, columnName);
