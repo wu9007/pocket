@@ -1,6 +1,12 @@
 package org.hv.pocket.model;
 
-import org.hv.pocket.annotation.*;
+import org.hv.pocket.annotation.Column;
+import org.hv.pocket.annotation.Entity;
+import org.hv.pocket.annotation.Identify;
+import org.hv.pocket.annotation.Join;
+import org.hv.pocket.annotation.ManyToOne;
+import org.hv.pocket.annotation.OneToMany;
+import org.hv.pocket.annotation.View;
 import org.hv.pocket.constant.AnnotationType;
 import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.constant.StreamPredicates;
@@ -13,6 +19,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -153,10 +160,8 @@ class EntityMapper {
             }
         }
         List<Field> allFields = new ArrayList<>();
-        Class<?> superClass = clazz;
-        while (superClass != null && superClass != Object.class && superClass != AbstractEntity.class) {
+        for (Class<?> superClass = clazz; superClass != null && superClass != Object.class && superClass != AbstractEntity.class; superClass = superClass.getSuperclass()) {
             allFields.addAll(Arrays.stream(superClass.getDeclaredFields()).filter(StreamPredicates.COLUMN_MAPPING_PREDICATE).collect(Collectors.toList()));
-            superClass = superClass.getSuperclass();
         }
         Field[] withAnnotationFields = new Field[allFields.size()];
         allFields.toArray(withAnnotationFields);
