@@ -77,12 +77,12 @@ public class RelevantBillDetail extends AbstractEntity {
     }
 
     @Override
-    public Serializable getIdentify() {
+    public Serializable loadIdentify() {
         return this.uuid;
     }
 
     @Override
-    public void setIdentify(Serializable identify) {
+    public void putIdentify(Serializable identify) {
         this.uuid = (String) identify;
     }
 }

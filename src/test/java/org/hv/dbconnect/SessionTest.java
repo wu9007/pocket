@@ -50,7 +50,7 @@ public class SessionTest {
         RelevantBill newOrder = new RelevantBill();
         newOrder.setCode("C-0001");
         newOrder.setAvailable(true);
-        newOrder.setIdentify("101312");
+        newOrder.putIdentify("101312");
         List<RelevantBillDetail> details = IntStream.range(0, 10).mapToObj(index -> {
             RelevantBillDetail detail = new RelevantBillDetail();
             detail.setName("明细" + index);

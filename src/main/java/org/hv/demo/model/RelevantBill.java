@@ -58,12 +58,12 @@ public class RelevantBill extends AbstractEntity {
     }
 
     @Override
-    public Serializable getIdentify() {
+    public Serializable loadIdentify() {
         return this.id;
     }
 
     @Override
-    public void setIdentify(Serializable identify) {
+    public void putIdentify(Serializable identify) {
         this.id = (String) identify;
     }
 }

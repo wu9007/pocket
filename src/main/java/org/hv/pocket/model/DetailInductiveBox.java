@@ -29,7 +29,7 @@ public class DetailInductiveBox {
     private DetailInductiveBox(List<? extends AbstractEntity> details, List<? extends AbstractEntity> olderDetails) {
         if (details != null && details.size() > 0) {
             this.newborn = details.parallelStream()
-                    .filter(detail -> detail.getIdentify() == null)
+                    .filter(detail -> detail.loadIdentify() == null)
                     .collect(Collectors.toList());
         } else {
             this.newborn = new ArrayList<>();
@@ -37,10 +37,10 @@ public class DetailInductiveBox {
         if (olderDetails != null) {
             if (details != null && details.size() > 0) {
                 List<Serializable> newDetailIdentifyList = details.stream()
-                        .map(AbstractEntity::getIdentify)
+                        .map(AbstractEntity::loadIdentify)
                         .collect(Collectors.toList());
                 this.moribund = olderDetails.parallelStream()
-                        .filter(detail -> !newDetailIdentifyList.contains(detail.getIdentify()))
+                        .filter(detail -> !newDetailIdentifyList.contains(detail.loadIdentify()))
                         .collect(Collectors.toList());
                 this.update = details.parallelStream()
                         .filter(detail -> {

@@ -19,7 +19,7 @@ public abstract class AbstractEntity implements Serializable, Cloneable {
      *
      * @return identify
      */
-    public abstract Serializable getIdentify();
+    public abstract Serializable loadIdentify();
 
     /**
      * 为避免在每次做持久化操作时使用反射为
@@ -27,12 +27,12 @@ public abstract class AbstractEntity implements Serializable, Cloneable {
      *
      * @param identify 主键
      */
-    public abstract void setIdentify(Serializable identify);
+    public abstract void putIdentify(Serializable identify);
 
     @Override
     public int hashCode() {
         int hashCode = 0;
-        if (this.getIdentify() == null) {
+        if (this.loadIdentify() == null) {
             return hashCode;
         }
         Field[] fields = MapperFactory.getRepositoryFields(this.getClass().getName());
