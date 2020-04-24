@@ -224,7 +224,7 @@ class EntityMapper {
                                 + bridgeColumnSurname);
                 viewColumnMapper.put(filedName, bridgeColumnSurname);
                 joinSqlList.add(join.joinMethod().getId()
-                        + joinTableName + CommonSql.AS + joinTableSurname
+                        + joinTableName + CommonSql.BLANK_SPACE + joinTableSurname
                         + CommonSql.ON
                         + (join.columnName().contains(CommonSql.DOT) ? join.columnName() : tableName + CommonSql.DOT + join.columnName())
                         + CommonSql.EQUAL_TO
