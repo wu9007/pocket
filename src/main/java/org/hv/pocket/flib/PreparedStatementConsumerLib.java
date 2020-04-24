@@ -19,6 +19,8 @@ final public class PreparedStatementConsumerLib {
 
     static {
         PREPARED_STRATEGY_POOL.put(boolean.class.getName(), (value) -> value.getPreparedStatement().setBoolean(value.getIndex(), (Boolean) value.getSqlBean().getTarget()));
+        PREPARED_STRATEGY_POOL.put(short.class.getName(), (value) -> value.getPreparedStatement().setShort(value.getIndex(), (Short) value.getSqlBean().getTarget()));
+        PREPARED_STRATEGY_POOL.put(byte.class.getName(), (value) -> value.getPreparedStatement().setByte(value.getIndex(), (Byte) value.getSqlBean().getTarget()));
         PREPARED_STRATEGY_POOL.put(int.class.getName(), (value) -> value.getPreparedStatement().setInt(value.getIndex(), (Integer) value.getSqlBean().getTarget()));
         PREPARED_STRATEGY_POOL.put(long.class.getName(), (value) -> value.getPreparedStatement().setLong(value.getIndex(), (Long) value.getSqlBean().getTarget()));
         PREPARED_STRATEGY_POOL.put(float.class.getName(), (value) -> value.getPreparedStatement().setFloat(value.getIndex(), (Float) value.getSqlBean().getTarget()));

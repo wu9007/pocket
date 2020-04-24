@@ -156,7 +156,7 @@ public class SessionImpl extends AbstractSession {
     @Override
     public int update(AbstractEntity entity) throws SQLException {
         Class<? extends AbstractEntity> clazz = entity.getClass();
-        AbstractEntity older = this.findOne(clazz, entity.getIdentify());
+        AbstractEntity older = this.findOne(clazz, entity.loadIdentify());
         int effectRow = 0;
         if (older != null) {
             Field[] fields = reflectUtils.dirtyFieldFilter(entity, older);
@@ -176,7 +176,7 @@ public class SessionImpl extends AbstractSession {
                 try {
                     preparedStatement = this.connection.prepareStatement(sql.toString());
                     this.statementApply(fields, entity, preparedStatement);
-                    preparedStatement.setObject(fields.length + 1, entity.getIdentify());
+                    preparedStatement.setObject(fields.length + 1, entity.loadIdentify());
                     effectRow = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeUpdate);
                 } finally {
                     ConnectionManager.closeIo(preparedStatement, null);
@@ -190,7 +190,7 @@ public class SessionImpl extends AbstractSession {
     public int update(AbstractEntity entity, boolean cascade) throws SQLException, IllegalAccessException {
         int effectRow = 0;
         Class<? extends AbstractEntity> clazz = entity.getClass();
-        Object older = this.findOne(clazz, entity.getIdentify());
+        Object older = this.findOne(clazz, entity.loadIdentify());
         if (cascade) {
             String mainClassName = entity.getClass().getName();
             Field[] fields = MapperFactory.getOneToMayFields(mainClassName);
@@ -228,7 +228,7 @@ public class SessionImpl extends AbstractSession {
     public int delete(AbstractEntity entity) throws SQLException, IllegalAccessException {
         Class<? extends AbstractEntity> clazz = entity.getClass();
         String mainClassName = clazz.getName();
-        Serializable identify = entity.getIdentify();
+        Serializable identify = entity.loadIdentify();
 
         Object garbage = this.findOne(clazz, identify);
         int effectRow = 0;

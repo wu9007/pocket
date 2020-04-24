@@ -18,12 +18,12 @@ public abstract class BaseEntity extends AbstractEntity {
     private String uuid;
 
     @Override
-    public Serializable getIdentify() {
+    public Serializable loadIdentify() {
         return this.getUuid();
     }
 
     @Override
-    public void setIdentify(Serializable identify) {
+    public void putIdentify(Serializable identify) {
         this.setUuid((String) identify);
     }
 

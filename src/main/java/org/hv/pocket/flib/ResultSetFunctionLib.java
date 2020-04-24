@@ -21,6 +21,8 @@ final public class ResultSetFunctionLib {
 
     static {
         RESULT_STRATEGY_POOL.put((int.class.getName()), ResultSet::getInt);
+        RESULT_STRATEGY_POOL.put((byte.class.getName()), ResultSet::getByte);
+        RESULT_STRATEGY_POOL.put((short.class.getName()), ResultSet::getShort);
         RESULT_STRATEGY_POOL.put((float.class.getName()), ResultSet::getFloat);
         RESULT_STRATEGY_POOL.put((double.class.getName()), ResultSet::getDouble);
         RESULT_STRATEGY_POOL.put((long.class.getName()), ResultSet::getLong);

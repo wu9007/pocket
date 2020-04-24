@@ -6,7 +6,7 @@ apply plugin: 'build-dashboard'
 apply plugin: 'maven-publish'
 
 group = 'com.github.leyan95'
-version = '0.1.6'
+version = '0.1.7'
 sourceCompatibility = 1.8
 
 compileJava {
@@ -49,6 +49,17 @@ publishing {
                 dependencyNode.appendNode('groupId', 'org.apache.commons')
                 dependencyNode.appendNode('artifactId', 'commons-lang3')
                 dependencyNode.appendNode('version', '3.8.1')
+            }
+        }
+    }
+    repositories {
+        repositories {
+            maven {
+                credentials {
+                    username "${upload_username}"
+                    password "${upload_password}"
+                }
+                url "${upload_url}"
             }
         }
     }

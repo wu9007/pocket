@@ -2,8 +2,6 @@ package org.hv.dbconnect;
 
 import org.hv.Application;
 import org.hv.PocketExecutor;
-import org.hv.demo.model.RelevantBill;
-import org.hv.demo.model.RelevantBillDetail;
 import org.hv.pocket.config.DatabaseConfig;
 import org.hv.pocket.criteria.Criteria;
 import org.hv.pocket.criteria.Modern;
@@ -30,7 +28,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -75,7 +72,7 @@ public class CriteriaTest {
         order.setState(false);
         order.setType("002");
         this.session.save(order);
-        Order newOrder = (Order) this.session.findOne(Order.class, order.getIdentify());
+        Order newOrder = (Order) this.session.findOne(Order.class, order.loadIdentify());
         System.out.println(newOrder.getDay());
     }
 
@@ -93,7 +90,7 @@ public class CriteriaTest {
         order.setDay(LocalDate.now());
         order.setTime(LocalDateTime.now());
         this.session.save(order);
-        Order newOrder = (Order) this.session.findOne(Order.class, order.getIdentify());
+        Order newOrder = (Order) this.session.findOne(Order.class, order.loadIdentify());
         newOrder.setPrice(newOrder.getPrice().multiply(new BigDecimal("1.5")));
         this.session.update(newOrder);
         Criteria criteria = this.session.createCriteria(Order.class);
@@ -181,7 +178,7 @@ public class CriteriaTest {
         order.setDay(LocalDate.now());
         this.session.save(order);
         for (int index = 0; index < 500; index++) {
-            Order repositoryOrder = (Order) session.findOne(Order.class, order.getIdentify());
+            Order repositoryOrder = (Order) session.findOne(Order.class, order.loadIdentify());
             System.out.println(repositoryOrder.getCode());
         }
         this.session.delete(order);

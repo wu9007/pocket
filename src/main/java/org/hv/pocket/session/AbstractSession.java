@@ -78,11 +78,11 @@ abstract class AbstractSession implements Session {
         int effectRow;
         PreparedStatement preparedStatement = null;
         try {
-            Serializable identify = entity.getIdentify() == null ? IdentifyGeneratorFactory.getInstance()
+            Serializable identify = entity.loadIdentify() == null ? IdentifyGeneratorFactory.getInstance()
                     .getIdentifyGenerator(MapperFactory.getIdentifyGenerationType(clazz.getName()))
-                    .getIdentify(entity.getClass(), this) : entity.getIdentify();
+                    .getIdentify(entity.getClass(), this) : entity.loadIdentify();
             synchronized (SET_IDENTIFY_LOCK) {
-                entity.setIdentify(identify);
+                entity.putIdentify(identify);
                 String sql = nullAble ? this.buildSaveSqlNullable(entity) : this.buildSaveSqlNotNull(entity);
                 preparedStatement = this.connection.prepareStatement(sql);
                 if (nullAble) {
