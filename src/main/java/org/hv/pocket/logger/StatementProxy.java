@@ -26,10 +26,14 @@ public class StatementProxy {
 
     public <R> R executeWithLog(PreparedStatement preparedStatement, PocketFunction<PreparedStatement, R> function) throws SQLException {
         long startTime = System.currentTimeMillis();
-        R result = function.apply(preparedStatement);
-        long endTime = System.currentTimeMillis();
-        if (this.databaseConfig.getShowSql()) {
-            this.logger.info("Sql: {} \n Milliseconds: {}", preparedStatement.toString(), endTime - startTime);
+        R result;
+        try {
+            result = function.apply(preparedStatement);
+        } finally {
+            long endTime = System.currentTimeMillis();
+            if (this.databaseConfig.getShowSql()) {
+                this.logger.info("Sql: {} \n Milliseconds: {}", preparedStatement.toString(), endTime - startTime);
+            }
         }
         return result;
     }
