@@ -32,7 +32,7 @@ public class StatementProxy {
         } finally {
             long endTime = System.currentTimeMillis();
             if (this.databaseConfig.getShowSql()) {
-                this.logger.info("Sql: {} \n Milliseconds: {}", preparedStatement.toString(), endTime - startTime);
+                this.logger.info("{} \n Milliseconds: {}", preparedStatement.toString(), endTime - startTime);
             }
         }
         return result;
