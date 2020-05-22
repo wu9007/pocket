@@ -43,23 +43,31 @@ abstract class AbstractCriteria {
         return session;
     }
 
+    public Class<? extends AbstractEntity> getClazz() {
+        return clazz;
+    }
+
+    public List<Restrictions> getRestrictionsList() {
+        return restrictionsList;
+    }
+
     void cleanAll() {
         this.cleanWithoutRestrictions();
         this.cleanRestrictions();
     }
 
     void cleanWithoutRestrictions() {
-        modernList = new LinkedList<>();
-        orderList = new LinkedList<>();
-        parameterMap = new HashMap<>(16);
-        parameters = new LinkedList<>();
-        start = null;
-        limit = null;
-        completeSql = new StringBuilder();
+        this.modernList = new LinkedList<>();
+        this.orderList = new LinkedList<>();
+        this.parameterMap = new HashMap<>(16);
+        this.parameters = new LinkedList<>();
+        this.start = null;
+        this.limit = null;
+        this.completeSql = new StringBuilder();
     }
 
     void cleanRestrictions() {
-        sortedRestrictionsList = new LinkedList<>();
+        this.sortedRestrictionsList = new LinkedList<>();
         this.restrictionsList = new LinkedList<>();
     }
 

@@ -71,10 +71,15 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public int update() throws SQLException {
+        return CriteriaLogProxy.newInstance(this).update();
+    }
+
+    int doUpdate(CriteriaLogProxy criteriaLogProxy) throws SQLException {
         completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildUpdateSql(parameters, parameterMap, databaseConfig));
         PreparedStatement preparedStatement;
         try {
             preparedStatement = getPreparedStatement();
+            criteriaLogProxy.setSql(preparedStatement.toString());
             return super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeUpdate);
         } finally {
             this.cleanAll();
@@ -91,7 +96,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
-    public <E extends AbstractEntity> List<E>  listNotCleanRestrictions() {
+    public <E extends AbstractEntity> List<E> listNotCleanRestrictions() {
         completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildSelectSql(databaseConfig));
         if (this.limited()) {
             completeSql.append(CommonSql.LIMIT)

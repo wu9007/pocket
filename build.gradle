@@ -6,7 +6,7 @@ apply plugin: 'build-dashboard'
 apply plugin: 'maven-publish'
 
 group = 'com.github.leyan95'
-version = '0.1.8'
+version = '0.1.9'
 sourceCompatibility = 1.8
 
 compileJava {
