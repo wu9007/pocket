@@ -1,22 +1,29 @@
 package org.hv.pocket.criteria;
 
+import org.hv.pocket.connect.ConnectionManager;
+import org.hv.pocket.flib.ResultSetHandler;
 import org.hv.pocket.logger.PersistenceLogSubject;
 import org.hv.pocket.model.AbstractEntity;
+import org.hv.pocket.model.MapperFactory;
 import org.hv.pocket.session.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Field;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author wujianchuan
  */
 public class CriteriaLogProxy {
+    private final Logger logger = LoggerFactory.getLogger(CriteriaLogProxy.class);
     private final CriteriaImpl target;
     private final Session session;
     private final Class<? extends AbstractEntity> clazz;
-    private String sql;
-    private List<?> beforeMirror;
-    private List<?> afterMirror;
 
     public static CriteriaLogProxy newInstance(CriteriaImpl target) {
         return new CriteriaLogProxy(target);
@@ -28,26 +35,72 @@ public class CriteriaLogProxy {
         this.clazz = target.getClazz();
     }
 
-    public int update() throws SQLException {
-        this.beforeMirror = this.loadMirror();
-        int result = target.doUpdate(this);
-        if (result > 0) {
-            this.afterMirror = this.loadMirror();
-            PersistenceLogSubject.getInstance().pushLog(this.sql, this.beforeMirror, this.afterMirror);
+    <E extends AbstractEntity> List<E> executeQuery() throws SQLException, IllegalAccessException, InstantiationException {
+        PreparedStatement preparedStatement = target.getPreparedStatement();
+        String sql = this.pickSql(preparedStatement);
+        long startTime = System.currentTimeMillis();
+        ResultSet resultSet = null;
+        try {
+            // 执行语句
+            resultSet = preparedStatement.executeQuery();
+            ResultSetHandler resultSetHandler = ResultSetHandler.newInstance(resultSet);
+            List<E> result = new ArrayList<>();
+            while (resultSet.next()) {
+                E entity = (E) clazz.newInstance();
+                for (Field field : MapperFactory.getViewFields(clazz.getName())) {
+                    field.set(entity, resultSetHandler.getMappingColumnValue(clazz, field));
+                }
+                result.add(entity);
+            }
+            return result;
+        } finally {
+            // 关闭资源
+            ConnectionManager.closeIo(preparedStatement, resultSet);
+
+            //控制台打印sql语句及执行耗时
+            if (target.databaseConfig.getShowSql()) {
+                long endTime = System.currentTimeMillis();
+                logger.info("【SQL】 {} \n 【Milliseconds】: {}", sql, endTime - startTime);
+            }
+
+            // 生成后镜像
+            if (this.target.databaseConfig.getCollectLog()) {
+                PersistenceLogSubject.getInstance().pushLog(sql, null, null);
+            }
         }
-        return result;
     }
 
-    public String getSql() {
-        return sql;
-    }
+    int executeUpdate() throws SQLException {
+        // 生成前镜像
+        List<?> beforeMirror = null;
+        if (this.target.databaseConfig.getCollectLog()) {
+            beforeMirror = this.loadMirror();
+        }
 
-    public List<?> getBeforeMirror() {
-        return beforeMirror;
-    }
+        PreparedStatement preparedStatement = target.getPreparedStatement();
+        String sql = this.pickSql(preparedStatement);
+        long startTime = System.currentTimeMillis();
+        int result = 0;
+        try {
+            // 执行语句
+            result = preparedStatement.executeUpdate();
+            return result;
+        } finally {
+            // 关闭资源
+            ConnectionManager.closeIo(preparedStatement, null);
 
-    public List<?> getAfterMirror() {
-        return afterMirror;
+            //控制台打印sql语句及执行耗时
+            if (target.databaseConfig.getShowSql()) {
+                long endTime = System.currentTimeMillis();
+                logger.info("【SQL】 {} \n 【Milliseconds】: {}", sql, endTime - startTime);
+            }
+
+            // 生成后镜像
+            if (this.target.databaseConfig.getCollectLog() && result > 0) {
+                List<?> afterMirror = this.loadMirror();
+                PersistenceLogSubject.getInstance().pushLog(sql, beforeMirror, afterMirror);
+            }
+        }
     }
 
     private List<?> loadMirror() {
@@ -56,7 +109,8 @@ public class CriteriaLogProxy {
         return selectCriteria.list();
     }
 
-    void setSql(String preparedStatementSql) {
-        this.sql = preparedStatementSql;
+    private String pickSql(PreparedStatement preparedStatement) {
+        String tempSql = preparedStatement.toString();
+        return tempSql.substring(tempSql.indexOf(":") + 2);
     }
 }

@@ -10,6 +10,7 @@ public class DatabaseNodeConfig {
     private String nodeName;
     private String driverName;
     private Boolean showSql;
+    private Boolean collectLog;
     private String user;
     private String password;
 
@@ -51,6 +52,14 @@ public class DatabaseNodeConfig {
 
     public void setShowSql(Boolean showSql) {
         this.showSql = showSql;
+    }
+
+    public Boolean getCollectLog() {
+        return collectLog;
+    }
+
+    public void setCollectLog(Boolean collectLog) {
+        this.collectLog = collectLog;
     }
 
     public String getUser() {

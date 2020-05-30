@@ -53,7 +53,7 @@ public interface OperateDictionary {
      * @param field 类型的属性
      * @return 返回对象
      */
-    <T extends AbstractEntity> T max(String field) throws SQLException;
+    Object max(String field);
 
     /**
      * 查询总数

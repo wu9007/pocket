@@ -6,6 +6,7 @@ pocket:
         nodeName: mysql-01
         driverName: com.mysql.cj.jdbc.Driver
         showSql: true
+        collectLog: true
         user: root
         password: root
         poolMiniSize: 10
@@ -18,6 +19,7 @@ pocket:
         nodeName: mysql-01-02
         driverName: com.mysql.cj.jdbc.Driver
         showSql: true
+        collectLog: true
         user: root
         password: root
         poolMiniSize: 10

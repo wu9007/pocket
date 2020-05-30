@@ -71,16 +71,9 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public int update() throws SQLException {
-        return CriteriaLogProxy.newInstance(this).update();
-    }
-
-    int doUpdate(CriteriaLogProxy criteriaLogProxy) throws SQLException {
-        completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildUpdateSql(parameters, parameterMap, databaseConfig));
-        PreparedStatement preparedStatement;
         try {
-            preparedStatement = getPreparedStatement();
-            criteriaLogProxy.setSql(preparedStatement.toString());
-            return super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeUpdate);
+            completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildUpdateSql(parameters, parameterMap, databaseConfig));
+            return CriteriaLogProxy.newInstance(this).executeUpdate();
         } finally {
             this.cleanAll();
         }
@@ -104,26 +97,11 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                     .append(CommonSql.COMMA)
                     .append(this.getLimit());
         }
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
         try {
-            preparedStatement = getPreparedStatement();
-            resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
-            ResultSetHandler resultSetHandler = ResultSetHandler.newInstance(resultSet);
-            List<E> result = new ArrayList<>();
-
-            while (resultSet.next()) {
-                E entity = (E) clazz.newInstance();
-                for (Field field : MapperFactory.getViewFields(clazz.getName())) {
-                    field.set(entity, resultSetHandler.getMappingColumnValue(clazz, field));
-                }
-                result.add(entity);
-            }
-            return result;
+            return CriteriaLogProxy.newInstance(this).executeQuery();
         } catch (IllegalAccessException | InstantiationException | SQLException e) {
             throw new CriteriaException(e.getMessage());
         } finally {
-            ConnectionManager.closeIo(preparedStatement, resultSet);
             this.cleanWithoutRestrictions();
         }
     }
@@ -154,38 +132,26 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
-    public <T extends AbstractEntity> T unique() throws SQLException {
+    public <T extends AbstractEntity> T unique() {
         completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildSelectSql(databaseConfig));
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        T entity = null;
         try {
-            preparedStatement = getPreparedStatement();
-            resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
-            ResultSetHandler resultSetHandler = ResultSetHandler.newInstance(resultSet);
-            int resultRowCount = 0;
-            while (resultSet.next()) {
-                if (++resultRowCount > 1) {
-                    throw new CriteriaException("Data is not unique, and multiple data are returned.");
-                }
-                try {
-                    entity = (T) clazz.newInstance();
-                    for (Field field : MapperFactory.getViewFields(clazz.getName())) {
-                        field.set(entity, resultSetHandler.getMappingColumnValue(clazz, field));
-                    }
-                } catch (InstantiationException | IllegalAccessException e) {
-                    e.printStackTrace();
-                }
+            List<T> resultList = CriteriaLogProxy.newInstance(this).executeQuery();
+            if (resultList.size() > 1) {
+                throw new CriteriaException("Data is not unique, and multiple data are returned.");
+            } else if (resultList.size() == 0) {
+                return null;
+            } else {
+                return resultList.get(0);
             }
+        } catch (SQLException | IllegalAccessException | InstantiationException e) {
+            throw new CriteriaException(e.getMessage());
         } finally {
-            ConnectionManager.closeIo(preparedStatement, resultSet);
             this.cleanAll();
         }
-        return entity;
     }
 
     @Override
-    public <T extends AbstractEntity> T unique(boolean cascade) throws SQLException {
+    public <T extends AbstractEntity> T unique(boolean cascade) {
         T entity = this.unique();
         if (entity != null && cascade) {
             Field[] fields = MapperFactory.getOneToMayFields(this.clazz.getName());
@@ -220,18 +186,15 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     @Override
     public int delete() throws SQLException {
         completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildDeleteSql(databaseConfig));
-        PreparedStatement preparedStatement = null;
         try {
-            preparedStatement = getPreparedStatement();
-            return super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeUpdate);
+            return CriteriaLogProxy.newInstance(this).executeUpdate();
         } finally {
-            ConnectionManager.closeIo(preparedStatement, null);
             this.cleanAll();
         }
     }
 
     @Override
-    public <T extends AbstractEntity> T max(String fieldName) throws SQLException {
+    public Object max(String fieldName) {
         completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildMaxSql(databaseConfig, fieldName));
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -239,10 +202,12 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             preparedStatement = getPreparedStatement();
             resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
             if (resultSet.next()) {
-                return (T) resultSet.getObject(1);
+                return resultSet.getObject(1);
             } else {
                 return null;
             }
+        } catch (SQLException e) {
+            throw new CriteriaException(e.getMessage());
         } finally {
             ConnectionManager.closeIo(preparedStatement, resultSet);
             this.cleanAll();
@@ -282,7 +247,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         }
     }
 
-    private PreparedStatement getPreparedStatement() throws SQLException {
+    PreparedStatement getPreparedStatement() throws SQLException {
         PreparedStatement preparedStatement;
         preparedStatement = this.connection.prepareStatement(completeSql.toString());
         PreparedStatementHandler preparedStatementHandler = PreparedStatementHandler.newInstance(preparedStatement);

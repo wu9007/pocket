@@ -46,13 +46,13 @@ public class SessionImpl extends AbstractSession {
                 if (this.connection == null) {
                     this.connection = ConnectionManager.getInstance().getConnection(databaseNodeConfig);
                     this.setClosed(false);
-                    this.logger.info("Session: {} turned on.", this.sessionName);
+                    this.logger.info("Session 【{}】 turned on", this.sessionName);
                 } else {
-                    this.logger.warn("This session is connected. Please don't try again.");
+                    this.logger.warn("This session is connected. Please don't try again");
                 }
             }
         } else {
-            this.logger.warn("This session is connected. Please don't try again.");
+            this.logger.warn("This session is connected. Please don't try again");
         }
     }
 
@@ -65,13 +65,13 @@ public class SessionImpl extends AbstractSession {
                     this.transaction = null;
                     this.connection = null;
                     this.setClosed(true);
-                    this.logger.info("Session: {} turned off.", this.sessionName);
+                    this.logger.info("Session 【{}】 turned off", this.sessionName);
                 } else {
-                    this.logger.warn("This session is closed. Please don't try again.");
+                    this.logger.warn("This session is closed. Please don't try again");
                 }
             }
         } else {
-            this.logger.warn("This session is closed. Please don't try again.");
+            this.logger.warn("This session is closed. Please don't try again");
         }
     }
 
