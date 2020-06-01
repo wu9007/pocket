@@ -151,7 +151,6 @@ public class PersistenceProxy {
 
     // =========================================== Class Private =========================================== //
 
-    // TODO 辅助查询不进行日志打印
     private List<?> loadMirror() {
         Criteria selectCriteria = session.createCriteria(clazz);
         selectCriteria.withLog(false);
