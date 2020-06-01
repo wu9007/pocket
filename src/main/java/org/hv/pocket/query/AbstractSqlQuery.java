@@ -1,7 +1,7 @@
 package org.hv.pocket.query;
 
 import org.hv.pocket.config.DatabaseNodeConfig;
-import org.hv.pocket.logger.StatementProxy;
+import org.hv.pocket.criteria.PersistenceProxy;
 
 import java.sql.Connection;
 import java.util.HashMap;
@@ -12,8 +12,8 @@ import java.util.Map;
 /**
  * @author wujianchuan 2019/1/3
  */
-abstract class AbstractSQLQuery {
-    final StatementProxy statementProxy;
+abstract class AbstractSqlQuery {
+    final PersistenceProxy persistenceProxy;
     final Connection connection;
     private final DatabaseNodeConfig databaseNodeConfig;
     final String sql;
@@ -23,18 +23,18 @@ abstract class AbstractSQLQuery {
     final Map<String, Object> parameterMap = new HashMap<>();
     final List<String> columnNameList = new LinkedList<>();
 
-    AbstractSQLQuery(String sql, Connection connection, DatabaseNodeConfig databaseNodeConfig) {
+    AbstractSqlQuery(String sql, Connection connection, DatabaseNodeConfig databaseNodeConfig) {
         this.sql = sql;
         this.connection = connection;
         this.databaseNodeConfig = databaseNodeConfig;
-        this.statementProxy = StatementProxy.newInstance(this.databaseNodeConfig);
+        this.persistenceProxy = PersistenceProxy.newInstance(this.databaseNodeConfig);
     }
 
-    AbstractSQLQuery(Connection connection, String sql, DatabaseNodeConfig databaseNodeConfig, Class<?> clazz) {
+    AbstractSqlQuery(Connection connection, String sql, DatabaseNodeConfig databaseNodeConfig, Class<?> clazz) {
         this.sql = sql;
         this.connection = connection;
         this.databaseNodeConfig = databaseNodeConfig;
-        this.statementProxy = StatementProxy.newInstance(this.databaseNodeConfig);
+        this.persistenceProxy = PersistenceProxy.newInstance(this.databaseNodeConfig);
         this.clazz = clazz;
     }
 

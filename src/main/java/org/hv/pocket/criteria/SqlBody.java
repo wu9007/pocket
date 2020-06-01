@@ -80,7 +80,7 @@ public class SqlBody {
                 this.parseRestrictionsSql(databaseConfig);
     }
 
-    String buildMaxSql(DatabaseNodeConfig databaseConfig, String fieldName) {
+    String buildMaxSql(DatabaseNodeConfig databaseConfig, String fieldName, boolean compareByNumType) {
         String columnName;
         if (AnnotationType.JOIN.equals(MapperFactory.getAnnotationType(clazz.getName(), fieldName))) {
             Join join = (Join) MapperFactory.getAnnotation(clazz.getName(), fieldName);
@@ -90,7 +90,9 @@ public class SqlBody {
         }
         return CommonSql.SELECT +
                 SqlOperateTypes.MAX +
-                CommonSql.LEFT_BRACKET + columnName + CommonSql.RIGHT_BRACKET +
+                CommonSql.LEFT_BRACKET +
+                (compareByNumType ? (SqlOperateTypes.CONVERT + CommonSql.LEFT_BRACKET + columnName + CommonSql.COMMA + SqlOperateTypes.SIGNED + CommonSql.RIGHT_BRACKET) : columnName) +
+                CommonSql.RIGHT_BRACKET +
                 CommonSql.FROM +
                 MapperFactory.getTableName(clazz.getName()) +
                 this.parseJoinSql() +

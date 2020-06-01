@@ -50,7 +50,7 @@ public class SessionTest {
         RelevantBill newOrder = new RelevantBill();
         newOrder.setCode("C-0001");
         newOrder.setAvailable(true);
-        newOrder.putIdentify("101312");
+        newOrder.putIdentify("101315");
         List<RelevantBillDetail> details = IntStream.range(0, 10).mapToObj(index -> {
             RelevantBillDetail detail = new RelevantBillDetail();
             detail.setName("明细" + index);
@@ -64,7 +64,7 @@ public class SessionTest {
         newOrder.setAvailable(false);
         n = this.session.update(newOrder, true);
         System.out.println("更新条数：" + n);
-        RelevantBill repositoryOrder = this.session.findOne(RelevantBill.class, "101312");
+        RelevantBill repositoryOrder = this.session.findOne(RelevantBill.class, "101315");
         System.out.println(repositoryOrder.getCode());
         repositoryOrder.setCode("Hello-001");
         this.session.update(repositoryOrder);

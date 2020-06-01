@@ -4,7 +4,6 @@ import org.hv.pocket.connect.ConnectionManager;
 import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.exception.CriteriaException;
 import org.hv.pocket.flib.PreparedStatementHandler;
-import org.hv.pocket.flib.ResultSetHandler;
 import org.hv.pocket.model.MapperFactory;
 import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.session.Session;
@@ -13,7 +12,6 @@ import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -73,7 +71,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     public int update() throws SQLException {
         try {
             completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildUpdateSql(parameters, parameterMap, databaseConfig));
-            return CriteriaLogProxy.newInstance(this).executeUpdate();
+            return PersistenceProxy.newInstance(this).executeUpdate();
         } finally {
             this.cleanAll();
         }
@@ -98,7 +96,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                     .append(this.getLimit());
         }
         try {
-            return CriteriaLogProxy.newInstance(this).executeQuery();
+            return PersistenceProxy.newInstance(this).executeQuery();
         } catch (IllegalAccessException | InstantiationException | SQLException e) {
             throw new CriteriaException(e.getMessage());
         } finally {
@@ -135,7 +133,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     public <T extends AbstractEntity> T unique() {
         completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildSelectSql(databaseConfig));
         try {
-            List<T> resultList = CriteriaLogProxy.newInstance(this).executeQuery();
+            List<T> resultList = PersistenceProxy.newInstance(this).executeQuery();
             if (resultList.size() > 1) {
                 throw new CriteriaException("Data is not unique, and multiple data are returned.");
             } else if (resultList.size() == 0) {
@@ -171,7 +169,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
         try {
             preparedStatement = getPreparedStatement();
-            resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
+            resultSet = PersistenceProxy.newInstance(this).getResultSet(preparedStatement);
             if (resultSet.next()) {
                 return (long) resultSet.getObject(1);
             } else {
@@ -187,7 +185,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     public int delete() throws SQLException {
         completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildDeleteSql(databaseConfig));
         try {
-            return CriteriaLogProxy.newInstance(this).executeUpdate();
+            return PersistenceProxy.newInstance(this).executeUpdate();
         } finally {
             this.cleanAll();
         }
@@ -195,12 +193,12 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
 
     @Override
     public Object max(String fieldName) {
-        completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildMaxSql(databaseConfig, fieldName));
+        completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildMaxSql(databaseConfig, fieldName, true));
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         try {
             preparedStatement = getPreparedStatement();
-            resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
+            resultSet = PersistenceProxy.newInstance(this).getResultSet(preparedStatement);
             if (resultSet.next()) {
                 return resultSet.getObject(1);
             } else {

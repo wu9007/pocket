@@ -1,7 +1,6 @@
 package org.hv.pocket.criteria;
 
 import org.hv.pocket.config.DatabaseNodeConfig;
-import org.hv.pocket.logger.StatementProxy;
 import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.session.Session;
 
@@ -15,7 +14,6 @@ import java.util.Map;
  * @author wujianchuan 2019/1/10
  */
 abstract class AbstractCriteria {
-    final StatementProxy statementProxy;
     final Class<? extends AbstractEntity> clazz;
     final Session session;
     final Connection connection;
@@ -36,7 +34,6 @@ abstract class AbstractCriteria {
         this.session = session;
         this.connection = this.session.getConnection();
         this.databaseConfig = this.session.getDatabaseNodeConfig();
-        this.statementProxy = StatementProxy.newInstance(this.databaseConfig);
     }
 
     public Session getSession() {

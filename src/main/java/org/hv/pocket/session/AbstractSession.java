@@ -3,7 +3,7 @@ package org.hv.pocket.session;
 import org.hv.pocket.config.DatabaseNodeConfig;
 import org.hv.pocket.connect.ConnectionManager;
 import org.hv.pocket.constant.CommonSql;
-import org.hv.pocket.logger.StatementProxy;
+import org.hv.pocket.criteria.PersistenceProxy;
 import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.model.MapperFactory;
 import org.hv.pocket.utils.ReflectUtils;
@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 abstract class AbstractSession implements Session {
     private static final String SET_IDENTIFY_LOCK = "setIdentifyLock";
 
-    final StatementProxy statementProxy;
+    final PersistenceProxy persistenceProxy;
     final DatabaseNodeConfig databaseNodeConfig;
     final String sessionName;
     volatile Connection connection;
@@ -37,7 +37,7 @@ abstract class AbstractSession implements Session {
     AbstractSession(DatabaseNodeConfig databaseNodeConfig, String sessionName) {
         this.databaseNodeConfig = databaseNodeConfig;
         this.sessionName = sessionName;
-        this.statementProxy = StatementProxy.newInstance(this.databaseNodeConfig);
+        this.persistenceProxy = PersistenceProxy.newInstance(this.databaseNodeConfig);
     }
 
     @Override
@@ -91,7 +91,7 @@ abstract class AbstractSession implements Session {
                     this.statementApplyNotNull(entity, preparedStatement);
                 }
             }
-            effectRow = this.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeUpdate);
+            effectRow = this.persistenceProxy.executeWithLog(preparedStatement, PreparedStatement::executeUpdate);
         } finally {
             ConnectionManager.closeIo(preparedStatement, null);
         }

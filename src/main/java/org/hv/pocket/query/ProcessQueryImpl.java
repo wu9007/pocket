@@ -15,7 +15,7 @@ import java.util.function.Function;
 /**
  * @author wujianchuan 2019/2/14
  */
-public class ProcessQueryImpl<T extends AbstractEntity> extends AbstractSQLQuery implements ProcessQuery<T> {
+public class ProcessQueryImpl<T extends AbstractEntity> extends AbstractSqlQuery implements ProcessQuery<T> {
 
     private String[] parameters;
 

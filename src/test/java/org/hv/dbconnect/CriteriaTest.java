@@ -15,6 +15,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -36,6 +38,7 @@ import java.util.stream.IntStream;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 public class CriteriaTest {
+    private final Logger logger = LoggerFactory.getLogger(CriteriaTest.class);
 
     private Session session;
     private Transaction transaction;
@@ -134,14 +137,14 @@ public class CriteriaTest {
 
     @Test
     public void test10() throws InterruptedException {
-        PocketExecutor.execute(Executors.newFixedThreadPool(50), 50, () -> {
+        PocketExecutor.execute(Executors.newFixedThreadPool(10), 10, () -> {
             IntStream.range(0, 100).forEach((index) -> {
                 Criteria criteria = this.session.createCriteria(Order.class);
-                List list = criteria.add(Restrictions.like("code", "%001%"))
+                List<?> list = criteria.add(Restrictions.like("code", "%001%"))
                         .add(Sort.desc("price"))
                         .add(Sort.asc("uuid"))
                         .list();
-                System.out.println(list);
+                this.logger.info(list.toString());
             });
         });
     }
