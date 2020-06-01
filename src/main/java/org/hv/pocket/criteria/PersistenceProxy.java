@@ -29,6 +29,7 @@ import java.util.concurrent.ExecutorService;
 public class PersistenceProxy {
     private final Logger logger = LoggerFactory.getLogger(PersistenceProxy.class);
     private final DatabaseNodeConfig databaseNodeConfig;
+    private boolean showSqlLog;
     private final ExecutorService executorService;
     private Session session;
     private CriteriaImpl target;
@@ -37,6 +38,7 @@ public class PersistenceProxy {
     private PersistenceProxy(CriteriaImpl target) {
         this.target = target;
         this.databaseNodeConfig = target.databaseConfig;
+        this.showSqlLog = target.showSqlLog;
         this.session = target.getSession();
         this.clazz = target.getClazz();
         this.executorService = EnumPocketThreadPool.INSTANCE.getPersistenceLogExecutorService();
@@ -149,8 +151,10 @@ public class PersistenceProxy {
 
     // =========================================== Class Private =========================================== //
 
+    // TODO 辅助查询不进行日志打印
     private List<?> loadMirror() {
         Criteria selectCriteria = session.createCriteria(clazz);
+        selectCriteria.withLog(false);
         target.getRestrictionsList().forEach(selectCriteria::add);
         return selectCriteria.list();
     }
@@ -161,7 +165,7 @@ public class PersistenceProxy {
     }
 
     private void consoleLog(String sql, long startTime) {
-        if (databaseNodeConfig.getShowSql()) {
+        if (this.showSqlLog) {
             this.executorService.execute(() -> {
                 long endTime = System.currentTimeMillis();
                 logger.info("【SQL】 {} \n 【Milliseconds】: {}", sql, endTime - startTime);
@@ -170,6 +174,6 @@ public class PersistenceProxy {
     }
 
     private void pushLog(String sql, List<?> beforeMirror, List<?> afterMirror) {
-        this.executorService.execute(() -> PersistenceLogSubject.getInstance().pushLog(sql, beforeMirror, afterMirror));
+        PersistenceLogSubject.getInstance().pushLog(sql, beforeMirror, afterMirror);
     }
 }

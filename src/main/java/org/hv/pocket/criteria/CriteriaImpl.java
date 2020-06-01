@@ -68,6 +68,12 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
+    public Criteria withLog(boolean withLog) {
+        super.showLog(withLog);
+        return this;
+    }
+
+    @Override
     public int update() throws SQLException {
         try {
             completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildUpdateSql(parameters, parameterMap, databaseConfig));

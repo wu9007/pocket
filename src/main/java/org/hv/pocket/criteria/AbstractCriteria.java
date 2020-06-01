@@ -18,6 +18,7 @@ abstract class AbstractCriteria {
     final Session session;
     final Connection connection;
     final DatabaseNodeConfig databaseConfig;
+    boolean showSqlLog;
 
     List<Restrictions> restrictionsList = new LinkedList<>();
     List<Restrictions> sortedRestrictionsList = new LinkedList<>();
@@ -34,6 +35,7 @@ abstract class AbstractCriteria {
         this.session = session;
         this.connection = this.session.getConnection();
         this.databaseConfig = this.session.getDatabaseNodeConfig();
+        this.showSqlLog = this.databaseConfig.getShowSql();
     }
 
     public Session getSession() {
@@ -83,5 +85,9 @@ abstract class AbstractCriteria {
 
     Integer getLimit() {
         return limit;
+    }
+
+    void showLog(boolean showLog) {
+        this.showSqlLog = showLog;
     }
 }

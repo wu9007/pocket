@@ -151,7 +151,6 @@ public class CriteriaTest {
 
     @Test
     public void test11() throws SQLException {
-        this.session.findDirect(Order.class, 11L);
         Order order = this.session.findOne(Order.class, 11L);
         if (order != null) {
             order.setPrice(order.getPrice().add(new BigDecimal("20.1")));
@@ -170,7 +169,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test15() throws InterruptedException, SQLException, IllegalAccessException {
+    public void test15() throws SQLException, IllegalAccessException {
         ExecutorService executor = Executors.newFixedThreadPool(500);
         Order order = new Order();
         order.setCode("F-00x");
