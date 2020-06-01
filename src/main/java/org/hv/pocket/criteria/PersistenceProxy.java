@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 /**
  * SQL语句执行代理
@@ -125,9 +126,9 @@ public class PersistenceProxy {
 
     int executeUpdate() throws SQLException {
         // 生成前镜像
-        List<?> beforeMirror = null;
+        List<? extends AbstractEntity> beforeMirror = new ArrayList<>();
         if (this.databaseNodeConfig.getCollectLog()) {
-            beforeMirror = this.loadMirror();
+            beforeMirror = this.loadBeforeMirror();
         }
         PreparedStatement preparedStatement = target.getPreparedStatement();
         String sql = this.pickSql(preparedStatement);
@@ -144,18 +145,32 @@ public class PersistenceProxy {
             this.consoleLog(sql, startTime);
             // 生成后镜像
             if (this.databaseNodeConfig.getCollectLog() && result > 0) {
-                this.pushLog(sql, beforeMirror, this.loadMirror());
+                this.pushLog(sql, beforeMirror, this.loadAfterMirror(beforeMirror));
             }
         }
     }
 
     // =========================================== Class Private =========================================== //
 
-    private List<?> loadMirror() {
+    private <E extends AbstractEntity> List<E> loadBeforeMirror() {
         Criteria selectCriteria = session.createCriteria(clazz);
         selectCriteria.withLog(false);
         target.getRestrictionsList().forEach(selectCriteria::add);
         return selectCriteria.list();
+    }
+
+    private <E extends AbstractEntity> List<E> loadAfterMirror(List<E> beforeMirror) {
+        if (beforeMirror.size() > 0) {
+
+            String identifyFieldName = MapperFactory.getIdentifyFieldName(clazz.getName());
+            Criteria selectCriteria = session.createCriteria(clazz);
+            selectCriteria.withLog(false);
+            List<String> ids = beforeMirror.stream().map(item -> (String) item.loadIdentify()).collect(Collectors.toList());
+            selectCriteria.add(Restrictions.in(identifyFieldName, ids));
+            return selectCriteria.list();
+        } else {
+            return new ArrayList<>();
+        }
     }
 
     private String pickSql(PreparedStatement preparedStatement) {
