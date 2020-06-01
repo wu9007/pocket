@@ -68,6 +68,9 @@ public class ConnectionManager {
                                 if (config.getShowSql() == null) {
                                     config.setShowSql(false);
                                 }
+                                if (config.getCollectLog() == null) {
+                                    config.setShowSql(false);
+                                }
                                 if (config.getPoolMiniSize() == null) {
                                     config.setPoolMiniSize(20);
                                 }
