@@ -75,10 +75,11 @@ public class PersistenceProxy {
             result = function.apply(preparedStatement);
         } finally {
             //控制台打印sql语句及执行耗时
-            this.consoleLog(sql, startTime);
+            long milliseconds = System.currentTimeMillis() - startTime;
+            this.consoleLog(sql, milliseconds);
             // 生成后镜像
-            if (this.databaseNodeConfig.getCollectLog()) {
-                this.pushLog(sql, null, null);
+            if (this.databaseNodeConfig.getCollectLog() && this.showSqlLog) {
+                this.pushLog(sql, null, null, milliseconds);
             }
         }
         return result;
@@ -94,10 +95,11 @@ public class PersistenceProxy {
             return preparedStatement.executeQuery();
         } finally {
             //控制台打印sql语句及执行耗时
-            this.consoleLog(sql, startTime);
+            long milliseconds = System.currentTimeMillis() - startTime;
+            this.consoleLog(sql, milliseconds);
             // 生成后镜像
-            if (this.databaseNodeConfig.getCollectLog()) {
-                this.pushLog(sql, null, null);
+            if (this.databaseNodeConfig.getCollectLog() && this.showSqlLog) {
+                this.pushLog(sql, null, null, milliseconds);
             }
         }
     }
@@ -142,10 +144,11 @@ public class PersistenceProxy {
             // 关闭资源
             ConnectionManager.closeIo(preparedStatement, null);
             //控制台打印sql语句及执行耗时
-            this.consoleLog(sql, startTime);
+            long milliseconds = System.currentTimeMillis() - startTime;
+            this.consoleLog(sql, milliseconds);
             // 生成后镜像
-            if (this.databaseNodeConfig.getCollectLog() && result > 0) {
-                this.pushLog(sql, beforeMirror, this.loadAfterMirror(beforeMirror));
+            if (this.databaseNodeConfig.getCollectLog() && this.showSqlLog && result > 0) {
+                this.pushLog(sql, beforeMirror, this.loadAfterMirror(beforeMirror), milliseconds);
             }
         }
     }
@@ -178,16 +181,13 @@ public class PersistenceProxy {
         return tempSql.substring(tempSql.indexOf(":") + 2);
     }
 
-    private void consoleLog(String sql, long startTime) {
+    private void consoleLog(String sql, long milliseconds) {
         if (this.showSqlLog) {
-            this.executorService.execute(() -> {
-                long endTime = System.currentTimeMillis();
-                logger.info("【SQL】 {} \n 【Milliseconds】: {}", sql, endTime - startTime);
-            });
+            this.executorService.execute(() -> logger.info("【SQL】 {} \n 【Milliseconds】: {}", sql, milliseconds));
         }
     }
 
-    private void pushLog(String sql, List<?> beforeMirror, List<?> afterMirror) {
-        PersistenceLogSubject.getInstance().pushLog(sql, beforeMirror, afterMirror);
+    private void pushLog(String sql, List<?> beforeMirror, List<?> afterMirror, long milliseconds) {
+        PersistenceLogSubject.getInstance().pushLog(sql, beforeMirror, afterMirror, milliseconds);
     }
 }

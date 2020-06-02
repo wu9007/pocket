@@ -106,7 +106,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
                 } else {
                     retryTimes.set(retryTimes.get() + 1);
                 }
-                logger.info("====================== The {} attempt to get a connection. ======================", retryTimes.get());
+                logger.debug("====================== The {} attempt to get a connection. ======================", retryTimes.get());
                 if (retryTimes.get() > this.databaseConfig.getRetry()) {
                     logger.warn("thread waiting for connection was time out!");
                     throw new ArrayIndexOutOfBoundsException("Sorry. The number of connections in the pool reaches the maximum number");
@@ -114,7 +114,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
                 connection = this.getConnection();
             }
             retryTimes.remove();
-            logger.info("【Get】 Connect: Active-{} Free-{}", this.getActiveNum(), this.freeConnections.size());
+            logger.debug("【Get】 Connect: Active-{} Free-{}", this.getActiveNum(), this.freeConnections.size());
             return connection;
         }
     }
@@ -136,7 +136,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
     @Override
     public void releaseConn(Connection connection) {
         synchronized (RELEASE_LOCK) {
-            logger.info("Release Node: 【{}】", this.getDatabaseConfig().getNodeName());
+            logger.debug("Release Node: 【{}】", this.getDatabaseConfig().getNodeName());
             this.activeConnections.remove(connection);
             currentConnection.remove();
             if (this.databaseManager.isValidConnection(connection)) {
@@ -144,7 +144,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
             } else {
                 this.freeConnections.add(this.newConnection());
             }
-            logger.info("【Release】 Connect: Active-{} Free-{}", this.getActiveNum(), this.freeConnections.size());
+            logger.debug("【Release】 Connect: Active-{} Free-{}", this.getActiveNum(), this.freeConnections.size());
             RELEASE_LOCK.notifyAll();
 
         }
@@ -180,8 +180,8 @@ public class ConnectionPoolImpl implements ConnectionPool {
         ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(2, new BasicThreadFactory.Builder().namingPattern(node + "-schedule-pool-%d").daemon(true).build());
 
         scheduledExecutorService.scheduleAtFixedRate(() -> {
-            logger.info("{} - free connection count: {}", node, this.getFreeNum());
-            logger.info("{} - activated connection count: {}", node, this.getActiveNum());
+            logger.debug("{} - free connection count: {}", node, this.getFreeNum());
+            logger.debug("{} - activated connection count: {}", node, this.getActiveNum());
         }, 1, 1, TimeUnit.SECONDS);
     }
 
@@ -219,7 +219,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
                 int totalConnection = this.connectionPool.getActiveNum() + this.connectionPool.getFreeNum();
                 int lackConnection = config.getPoolMiniSize() - totalConnection;
                 if (lackConnection > 0) {
-                    logger.info("【{}】 - The database connection pool has 【{}】 connections that need to be supplemented ", config.getNodeName(), lackConnection);
+                    logger.debug("【{}】 - The database connection pool has 【{}】 connections that need to be supplemented ", config.getNodeName(), lackConnection);
                     for (int index = 0; index < lackConnection; index++) {
                         this.connectionPool.pushToFreePool(connectionPool.newConnection());
                     }
