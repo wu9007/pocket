@@ -3,6 +3,7 @@ package org.hv.pocket.lunch;
 import org.hv.pocket.annotation.Entity;
 import org.hv.pocket.config.DatabaseConfig;
 import org.hv.pocket.connect.ConnectionManager;
+import org.hv.pocket.exception.MapperException;
 import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.model.MapperFactory;
 import org.hv.pocket.session.SessionFactory;
@@ -37,20 +38,20 @@ public class PocketConfigDefault implements PocketConfig {
     }
 
     @Override
-    public void init() {
-        this.verifyEntity();
-        this.initConnectionManager();
-        this.initSessionFactory();
-        this.initIdentifyGenerator();
-        MapperFactory.init(context);
+    public void init() throws MapperException {
+            this.verifyEntity();
+            this.initConnectionManager();
+            this.initSessionFactory();
+            this.initIdentifyGenerator();
+            MapperFactory.init(context);
     }
 
-    private void verifyEntity() {
+    private void verifyEntity() throws MapperException {
         Map<Integer, Boolean> counter = new HashMap<>(260);
         if (this.entityList != null) {
             for (Entity entityAnnotation : entityList.stream().map(entity -> entity.getClass().getAnnotation(Entity.class)).collect(Collectors.toList())) {
                 if (counter.containsKey(entityAnnotation.tableId())) {
-                    throw new IllegalArgumentException("Table ID - " + entityAnnotation.tableId() + " repeated.");
+                    throw new MapperException(String.format("Table ID - %s repeated.", entityAnnotation.tableId()));
                 } else {
                     counter.put(entityAnnotation.tableId(), true);
                 }

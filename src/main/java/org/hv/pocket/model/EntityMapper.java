@@ -142,7 +142,7 @@ class EntityMapper {
         return joinSqlList;
     }
 
-    public static EntityMapper newInstance(Class<?> clazz) {
+    public static EntityMapper newInstance(Class<?> clazz) throws MapperException {
         Entity entity = clazz.getAnnotation(Entity.class);
         String tableName;
         int tableId;

@@ -1,11 +1,14 @@
 package org.hv;
 
+import org.hv.pocket.exception.MapperException;
 import org.hv.pocket.lunch.PocketConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+
+import javax.annotation.PostConstruct;
 
 /**
  * @author wujianchuan 2018/12/25
@@ -17,13 +20,13 @@ public class Application {
     }
 
     @Bean
-    CommandLineRunner getCommandLineRunner() {
-        return new CommandLineRunner() {
+    Object getPersistenceConfig() {
+        return new Object() {
             @Autowired
             private PocketConfig pocketConfig;
 
-            @Override
-            public void run(String... args) throws Exception {
+            @PostConstruct
+            public void run() throws MapperException {
                 this.pocketConfig.init();
             }
         };

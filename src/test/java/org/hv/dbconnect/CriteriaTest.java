@@ -179,7 +179,7 @@ public class CriteriaTest {
         order.setDay(LocalDate.now());
         this.session.save(order);
         for (int index = 0; index < 500; index++) {
-            Order repositoryOrder = (Order) session.findOne(Order.class, order.loadIdentify());
+            Order repositoryOrder = session.findOne(Order.class, order.loadIdentify());
             System.out.println(repositoryOrder.getCode());
         }
         this.session.delete(order);

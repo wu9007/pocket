@@ -4,16 +4,22 @@ import org.hv.pocket.config.DatabaseConfig;
 import org.hv.pocket.config.DatabaseNodeConfig;
 import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.constant.DatasourceDriverTypes;
+import org.hv.pocket.exception.CriteriaException;
 import org.hv.pocket.exception.SessionException;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author wujianchuan 2018/12/31
  */
 public class SessionFactory {
+
+    private static final ReentrantLock LOCK = new ReentrantLock(true);
+    private static volatile int retry = 0;
+    private static int maxRetryTimes = 5;
     private static final Map<String, DatabaseNodeConfig> NODE_POOL = new ConcurrentHashMap<>(5);
     private static final Map<String, CacheHolder> CACHE_POOL = new ConcurrentHashMap<>(5);
 
@@ -53,7 +59,20 @@ public class SessionFactory {
      */
     public static Session getSession(String sessionName) {
         if (NODE_POOL.size() == 0) {
-            throw new SessionException("Please wait a moment");
+            if (retry > maxRetryTimes) {
+                throw new CriteriaException("The maximum number of attempts to get a session has been reached.");
+            }
+            LOCK.lock();
+            try {
+                if (NODE_POOL.size() == 0) {
+                    Thread.sleep(100);
+                }
+                return getSession(sessionName);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } finally {
+                LOCK.unlock();
+            }
         }
         DatabaseNodeConfig databaseNodeConfig = NODE_POOL.get(sessionName);
         if (databaseNodeConfig == null) {
