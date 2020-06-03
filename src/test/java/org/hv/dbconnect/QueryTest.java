@@ -102,7 +102,7 @@ public class QueryTest {
         SQLQuery query = this.session.createSQLQuery("select uuid from tbl_order where CODE = :ORDER_CODE AND DAY < :DAY")
                 .setParameter("ORDER_CODE", "C-001")
                 .setParameter("DAY", new Date());
-        List<?> orders = query.list();
+        List<String> orders = query.list();
         System.out.println(orders.size());
     }
 
