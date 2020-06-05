@@ -10,6 +10,7 @@ import org.hv.pocket.exception.SessionException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -18,8 +19,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public class SessionFactory {
 
     private static final ReentrantLock LOCK = new ReentrantLock(true);
-    private static volatile int retry = 0;
-    private static int maxRetryTimes = 5;
+    private static volatile AtomicInteger RETRY = new AtomicInteger(0);
+    private static final int MAX_RETRY_TIMES = 5;
     private static final Map<String, DatabaseNodeConfig> NODE_POOL = new ConcurrentHashMap<>(5);
     private static final Map<String, CacheHolder> CACHE_POOL = new ConcurrentHashMap<>(5);
 
@@ -59,7 +60,7 @@ public class SessionFactory {
      */
     public static Session getSession(String sessionName) {
         if (NODE_POOL.size() == 0) {
-            if (retry > maxRetryTimes) {
+            if (RETRY.getAndIncrement() > MAX_RETRY_TIMES) {
                 throw new CriteriaException("The maximum number of attempts to get a session has been reached.");
             }
             LOCK.lock();
