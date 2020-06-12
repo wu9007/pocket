@@ -7,7 +7,9 @@ import org.hv.pocket.constant.DatasourceDriverTypes;
 import org.hv.pocket.exception.CriteriaException;
 import org.hv.pocket.exception.SessionException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -19,16 +21,22 @@ import java.util.concurrent.locks.ReentrantLock;
 public class SessionFactory {
 
     private static final ReentrantLock LOCK = new ReentrantLock(true);
-    private static volatile AtomicInteger RETRY = new AtomicInteger(0);
+    private static final AtomicInteger RETRY = new AtomicInteger(0);
     private static final int MAX_RETRY_TIMES = 5;
     private static final Map<String, DatabaseNodeConfig> NODE_POOL = new ConcurrentHashMap<>(5);
     private static final Map<String, CacheHolder> CACHE_POOL = new ConcurrentHashMap<>(5);
+    private static final List<String> NODES = new ArrayList<>();
 
     private SessionFactory() {
     }
 
     public static void register(DatabaseConfig databaseConfig) {
-        databaseConfig.getNode().forEach(databaseNodeConfig -> {
+        for (DatabaseNodeConfig databaseNodeConfig : databaseConfig.getNode()) {
+            String nodeName = databaseNodeConfig.getNodeName();
+            if (NODES.contains(nodeName)) {
+                throw new SessionException("Node name duplicate.");
+            }
+            NODES.add(nodeName);
             String driverName = databaseNodeConfig.getDriverName();
             if (DatasourceDriverTypes.MYSQL_DRIVER.equals(driverName)
                     || DatasourceDriverTypes.ORACLE_DRIVER.equals(driverName)
@@ -49,7 +57,7 @@ public class SessionFactory {
             } else {
                 throw new SessionException("I'm sorry about that I don't support this database now.");
             }
-        });
+        }
     }
 
     /**
