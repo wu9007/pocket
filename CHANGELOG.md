@@ -18,3 +18,5 @@ public class PersistenceLogObserverImpl implements PersistenceLogObserver {
 ```
 ## 0.1.10 - 2020/06/12
 * 启动时检测多数据源配置中的 `nodeName` 不可重复。
+## 0.1.11 - 2020/06/26
+* 开关会话和事务打印日志改为debug。
