@@ -55,7 +55,7 @@ public class ConnectionManager {
 
     public void destroy() {
         this.connectionPoolMap.forEach((key, value) -> value.destroy());
-        logger.info("Database pool was destroy");
+        logger.debug("Database pool was destroy");
     }
 
     private static boolean verify(DatabaseNodeConfig config) {
@@ -67,6 +67,9 @@ public class ConnectionManager {
                             if (!config.getSession().isEmpty()) {
                                 if (config.getShowSql() == null) {
                                     config.setShowSql(false);
+                                }
+                                if (config.getCollectLog() == null) {
+                                    config.setCollectLog(false);
                                 }
                                 if (config.getPoolMiniSize() == null) {
                                     config.setPoolMiniSize(20);

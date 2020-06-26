@@ -27,7 +27,7 @@ import static org.hv.pocket.constant.RegexString.SQL_PARAMETER_REGEX;
 /**
  * @author wujianchuan 2019/1/3
  */
-public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
+public class SQLQueryImpl extends AbstractSqlQuery implements SQLQuery {
 
     public SQLQueryImpl(String sql, Connection connection, DatabaseNodeConfig databaseNodeConfig) {
         super(sql, connection, databaseNodeConfig);
@@ -124,7 +124,7 @@ public class SQLQueryImpl extends AbstractSQLQuery implements SQLQuery {
         } else {
             preparedStatement = this.connection.prepareStatement(executeSql);
         }
-        return super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
+        return super.persistenceProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
     }
 
     private <T> T getObjects(ResultSet resultSet) throws SQLException {

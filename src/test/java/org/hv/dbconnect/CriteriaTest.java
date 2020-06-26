@@ -15,6 +15,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -36,6 +38,7 @@ import java.util.stream.IntStream;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 public class CriteriaTest {
+    private final Logger logger = LoggerFactory.getLogger(CriteriaTest.class);
 
     private Session session;
     private Transaction transaction;
@@ -72,7 +75,7 @@ public class CriteriaTest {
         order.setState(false);
         order.setType("002");
         this.session.save(order);
-        Order newOrder = (Order) this.session.findOne(Order.class, order.loadIdentify());
+        Order newOrder = this.session.findOne(Order.class, order.loadIdentify());
         System.out.println(newOrder.getDay());
     }
 
@@ -90,7 +93,7 @@ public class CriteriaTest {
         order.setDay(LocalDate.now());
         order.setTime(LocalDateTime.now());
         this.session.save(order);
-        Order newOrder = (Order) this.session.findOne(Order.class, order.loadIdentify());
+        Order newOrder = this.session.findOne(Order.class, order.loadIdentify());
         newOrder.setPrice(newOrder.getPrice().multiply(new BigDecimal("1.5")));
         this.session.update(newOrder);
         Criteria criteria = this.session.createCriteria(Order.class);
@@ -100,7 +103,7 @@ public class CriteriaTest {
 
     @Test
     public void test5() throws SQLException {
-        Order order = (Order) this.session.findDirect(Order.class, 11L);
+        Order order = this.session.findDirect(Order.class, 11L);
         if (order != null) {
             System.out.println(order.getPrice());
         }
@@ -110,7 +113,7 @@ public class CriteriaTest {
     public void test6() throws SQLException {
         Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.equ("uuid", 11L));
-        Order order = (Order) criteria.unique(true);
+        Order order = criteria.unique(true);
     }
 
     @Test
@@ -126,31 +129,29 @@ public class CriteriaTest {
     public void test9() throws SQLException {
         Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.equ("code", "C-001"));
-        System.out.println(criteria.max("typeName"));
+        System.out.println(criteria.max("price"));
 
-        long count = criteria.add(Restrictions.like("code", "%001%"))
-                .count();
+        long count = criteria.add(Restrictions.like("code", "%001%")).count();
         System.out.println(count);
     }
 
     @Test
     public void test10() throws InterruptedException {
-        PocketExecutor.execute(Executors.newFixedThreadPool(50), 50, () -> {
+        PocketExecutor.execute(Executors.newFixedThreadPool(10), 10, () -> {
             IntStream.range(0, 100).forEach((index) -> {
                 Criteria criteria = this.session.createCriteria(Order.class);
-                List list = criteria.add(Restrictions.like("code", "%001%"))
+                List<?> list = criteria.add(Restrictions.like("code", "%001%"))
                         .add(Sort.desc("price"))
                         .add(Sort.asc("uuid"))
                         .list();
-                System.out.println(list);
+                this.logger.info(list.toString());
             });
         });
     }
 
     @Test
     public void test11() throws SQLException {
-        this.session.findDirect(Order.class, 11L);
-        Order order = (Order) this.session.findOne(Order.class, 11L);
+        Order order = this.session.findOne(Order.class, 11L);
         if (order != null) {
             order.setPrice(order.getPrice().add(new BigDecimal("20.1")));
             this.session.update(order);
@@ -163,12 +164,12 @@ public class CriteriaTest {
     @Test
     public void test14() throws SQLException {
         Criteria criteria = session.createCriteria(Order.class);
-        criteria.add(Restrictions.equ("uuid", 1011011L));
+        criteria.add(Restrictions.equ("uuid", 101099));
         criteria.delete();
     }
 
     @Test
-    public void test15() throws InterruptedException, SQLException, IllegalAccessException {
+    public void test15() throws SQLException, IllegalAccessException {
         ExecutorService executor = Executors.newFixedThreadPool(500);
         Order order = new Order();
         order.setCode("F-00x");
@@ -178,7 +179,7 @@ public class CriteriaTest {
         order.setDay(LocalDate.now());
         this.session.save(order);
         for (int index = 0; index < 500; index++) {
-            Order repositoryOrder = (Order) session.findOne(Order.class, order.loadIdentify());
+            Order repositoryOrder = session.findOne(Order.class, order.loadIdentify());
             System.out.println(repositoryOrder.getCode());
         }
         this.session.delete(order);
@@ -231,7 +232,7 @@ public class CriteriaTest {
     }
 
     @Test
-    public void test21() throws SQLException {
+    public void test21() {
         Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.like("type", "001"));
         List<Order> orders = criteria.list(true);
@@ -254,12 +255,12 @@ public class CriteriaTest {
     @Test
     public void test23() throws SQLException {
         Criteria criteria = this.session.createCriteria(Order.class);
-        criteria.add(Modern.set("type", "002"))
+        criteria.add(Modern.set("type", "001"))
                 .update();
     }
 
     @Test
-    public void test24() throws SQLException {
+    public void test24() {
         Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.or(Restrictions.isNull("state"), Restrictions.equ("code", "C-001")));
         List<Order> orders = criteria.list();
@@ -283,7 +284,7 @@ public class CriteriaTest {
         List<String> types2 = Arrays.asList("001", "003", "004");
         criteria.add(Restrictions.or(Restrictions.in("type", types1), Restrictions.in("type", types2)))
                 .add(Sort.asc("sort"));
-        Order order = (Order) criteria.top(false);
+        Order order = criteria.top(false);
         System.out.println(order);
     }
 }

@@ -1,7 +1,6 @@
 package org.hv.pocket.criteria;
 
 import org.hv.pocket.config.DatabaseNodeConfig;
-import org.hv.pocket.logger.StatementProxy;
 import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.session.Session;
 
@@ -15,11 +14,11 @@ import java.util.Map;
  * @author wujianchuan 2019/1/10
  */
 abstract class AbstractCriteria {
-    final StatementProxy statementProxy;
     final Class<? extends AbstractEntity> clazz;
     final Session session;
     final Connection connection;
     final DatabaseNodeConfig databaseConfig;
+    boolean showSqlLog;
 
     List<Restrictions> restrictionsList = new LinkedList<>();
     List<Restrictions> sortedRestrictionsList = new LinkedList<>();
@@ -36,11 +35,19 @@ abstract class AbstractCriteria {
         this.session = session;
         this.connection = this.session.getConnection();
         this.databaseConfig = this.session.getDatabaseNodeConfig();
-        this.statementProxy = StatementProxy.newInstance(this.databaseConfig);
+        this.showSqlLog = this.databaseConfig.getShowSql();
     }
 
     public Session getSession() {
         return session;
+    }
+
+    public Class<? extends AbstractEntity> getClazz() {
+        return clazz;
+    }
+
+    public List<Restrictions> getRestrictionsList() {
+        return restrictionsList;
     }
 
     void cleanAll() {
@@ -49,17 +56,17 @@ abstract class AbstractCriteria {
     }
 
     void cleanWithoutRestrictions() {
-        modernList = new LinkedList<>();
-        orderList = new LinkedList<>();
-        parameterMap = new HashMap<>(16);
-        parameters = new LinkedList<>();
-        start = null;
-        limit = null;
-        completeSql = new StringBuilder();
+        this.modernList = new LinkedList<>();
+        this.orderList = new LinkedList<>();
+        this.parameterMap = new HashMap<>(16);
+        this.parameters = new LinkedList<>();
+        this.start = null;
+        this.limit = null;
+        this.completeSql = new StringBuilder();
     }
 
     void cleanRestrictions() {
-        sortedRestrictionsList = new LinkedList<>();
+        this.sortedRestrictionsList = new LinkedList<>();
         this.restrictionsList = new LinkedList<>();
     }
 
@@ -78,5 +85,9 @@ abstract class AbstractCriteria {
 
     Integer getLimit() {
         return limit;
+    }
+
+    void showLog(boolean showLog) {
+        this.showSqlLog = showLog;
     }
 }

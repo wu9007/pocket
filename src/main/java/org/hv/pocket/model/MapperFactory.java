@@ -2,6 +2,7 @@ package org.hv.pocket.model;
 
 import org.hv.pocket.annotation.Entity;
 import org.hv.pocket.constant.AnnotationType;
+import org.hv.pocket.exception.MapperException;
 import org.hv.pocket.identify.GenerationType;
 import org.springframework.context.ApplicationContext;
 
@@ -270,13 +271,13 @@ public class MapperFactory {
      *
      * @param context application context
      */
-    public static void init(ApplicationContext context) {
+    public static void init(ApplicationContext context) throws MapperException {
         if (!COMPLETED.get()) {
             Map<String, Object> beans = context.getBeansWithAnnotation(Entity.class);
-            beans.forEach((name, bean) -> {
-                Class<?> clazz = bean.getClass();
+            for (Object value : beans.values()) {
+                Class<?> clazz = value.getClass();
                 ENTITY_MAPPER_POOL.put(clazz.getName(), EntityMapper.newInstance(clazz));
-            });
+            }
 
             COMPLETED.compareAndSet(false, true);
         }

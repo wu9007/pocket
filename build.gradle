@@ -6,7 +6,7 @@ apply plugin: 'build-dashboard'
 apply plugin: 'maven-publish'
 
 group = 'com.github.leyan95'
-version = '0.1.7'
+version = '0.1.11'
 sourceCompatibility = 1.8
 
 compileJava {
@@ -45,10 +45,14 @@ publishing {
             pom.withXml {
                 asNode().remove(asNode().get("dependencies"))
                 def dependenciesNode = asNode().appendNode("dependencies")
-                def dependencyNode = dependenciesNode.appendNode('dependency')
-                dependencyNode.appendNode('groupId', 'org.apache.commons')
-                dependencyNode.appendNode('artifactId', 'commons-lang3')
-                dependencyNode.appendNode('version', '3.8.1')
+                def lang3Node = dependenciesNode.appendNode('dependency')
+                lang3Node.appendNode('groupId', 'org.apache.commons')
+                lang3Node.appendNode('artifactId', 'commons-lang3')
+                lang3Node.appendNode('version', '3.8.1')
+                def guavaNode = dependenciesNode.appendNode('dependency')
+                guavaNode.appendNode('groupId', 'com.google.guava')
+                guavaNode.appendNode('artifactId', 'guava')
+                guavaNode.appendNode('version', '19.0')
             }
         }
     }
@@ -76,6 +80,7 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-web:2.1.1.RELEASE')
     implementation('org.springframework.boot:spring-boot-starter-aop:2.1.1.RELEASE')
     implementation('org.apache.commons:commons-lang3:3.8.1')
+    implementation ('com.google.guava:guava:19.0')
     implementation ('com.google.code.findbugs:jsr305:3.0.2')
     implementation('mysql:mysql-connector-java:8.0.13')
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor:2.1.1.RELEASE")

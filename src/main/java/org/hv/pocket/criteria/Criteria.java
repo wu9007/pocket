@@ -48,4 +48,12 @@ public interface Criteria extends OperateDictionary {
      * @return Criteria
      */
     Criteria limit(int start, int limit);
+
+    /**
+     * 辅助方法 动态设置是否打印日志
+     *
+     * @param withLog 是否打印日志
+     * @return Criteria
+     */
+    Criteria withLog(boolean withLog);
 }

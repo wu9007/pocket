@@ -3,13 +3,14 @@ package org.hv.pocket.lunch;
 import org.hv.pocket.annotation.Entity;
 import org.hv.pocket.config.DatabaseConfig;
 import org.hv.pocket.connect.ConnectionManager;
+import org.hv.pocket.exception.MapperException;
 import org.hv.pocket.model.AbstractEntity;
+import org.hv.pocket.model.MapperFactory;
 import org.hv.pocket.session.SessionFactory;
 import org.hv.pocket.identify.IdentifyGenerator;
 import org.hv.pocket.identify.IdentifyGeneratorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.core.annotation.Order;
+import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
@@ -22,38 +23,35 @@ import java.util.stream.Collectors;
  * @author wujianchuan 2019/1/12
  */
 @Component
-@Order(value = -100)
-public class DatabaseLauncher implements CommandLineRunner {
-    private final
-    DatabaseConfig databaseConfig;
-
-    private final
-    List<IdentifyGenerator> identifyGeneratorList;
-
-    private final
-    List<AbstractEntity> entityList;
+public class PocketConfigDefault implements PocketConfig {
+    private final DatabaseConfig databaseConfig;
+    private final ApplicationContext context;
+    private final List<IdentifyGenerator> identifyGeneratorList;
+    private final List<AbstractEntity> entityList;
 
     @Autowired
-    public DatabaseLauncher(DatabaseConfig databaseConfig, List<IdentifyGenerator> identifyGeneratorList, @Nullable List<AbstractEntity> entityList) {
+    public PocketConfigDefault(DatabaseConfig databaseConfig, List<IdentifyGenerator> identifyGeneratorList, @Nullable List<AbstractEntity> entityList, ApplicationContext context) {
         this.databaseConfig = databaseConfig;
         this.identifyGeneratorList = identifyGeneratorList;
         this.entityList = entityList;
+        this.context = context;
     }
 
     @Override
-    public void run(String... args) {
-        this.verifyEntity();
-        this.initConnectionManager();
-        this.initSessionFactory();
-        this.initIdentifyGenerator();
+    public void init() throws MapperException {
+            this.verifyEntity();
+            this.initConnectionManager();
+            this.initSessionFactory();
+            this.initIdentifyGenerator();
+            MapperFactory.init(context);
     }
 
-    private void verifyEntity() {
+    private void verifyEntity() throws MapperException {
         Map<Integer, Boolean> counter = new HashMap<>(260);
         if (this.entityList != null) {
             for (Entity entityAnnotation : entityList.stream().map(entity -> entity.getClass().getAnnotation(Entity.class)).collect(Collectors.toList())) {
                 if (counter.containsKey(entityAnnotation.tableId())) {
-                    throw new IllegalArgumentException("Table ID - " + entityAnnotation.tableId() + " repeated.");
+                    throw new MapperException(String.format("Table ID - %s repeated.", entityAnnotation.tableId()));
                 } else {
                     counter.put(entityAnnotation.tableId(), true);
                 }

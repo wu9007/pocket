@@ -27,6 +27,9 @@ public class SqlFactory {
         sqlOperateTypes.put(SqlOperateTypes.IN, " IN ");
         sqlOperateTypes.put(SqlOperateTypes.NOT_IN, " NOT IN ");
         sqlOperateTypes.put(SqlOperateTypes.OR, " OR ");
+        sqlOperateTypes.put(SqlOperateTypes.CONVERT, " CONVERT ");
+        sqlOperateTypes.put(SqlOperateTypes.SIGNED, " SIGNED ");
+        sqlOperateTypes.put(SqlOperateTypes.REGEXP, " REGEXP ");
 
         Map<String, String> mySqlOperateTypes = new HashMap<>(20);
         mySqlOperateTypes.putAll(sqlOperateTypes);

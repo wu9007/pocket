@@ -23,9 +23,9 @@ public class TransactionImpl implements Transaction {
         try {
             if (this.connection.getAutoCommit()) {
                 this.connection.setAutoCommit(false);
-                this.logger.info("transaction open.");
+                this.logger.debug("transaction 【open】");
             } else {
-                logger.warn("This transaction has already begun. Please do not try again.");
+                logger.warn("This transaction has already begun. Please do not try again");
             }
         } catch (SQLException e) {
             throw new TransactionException(e.getMessage());
@@ -42,9 +42,9 @@ public class TransactionImpl implements Transaction {
                 throw new TransactionException(e.getMessage());
             }
             this.connection = null;
-            this.logger.info("Transaction commit.");
+            this.logger.debug("Transaction 【commit】");
         } else {
-            logger.warn("This transaction has been committed. Please do not try again.");
+            logger.warn("This transaction has been committed. Please do not try again");
         }
     }
 
@@ -58,9 +58,9 @@ public class TransactionImpl implements Transaction {
                 throw new TransactionException(e.getMessage());
             }
             this.connection = null;
-            this.logger.info("Transaction rollback.");
+            this.logger.debug("Transaction 【rollback】");
         } else {
-            logger.warn("This transaction has been rolled back. Please do not try again.");
+            logger.warn("This transaction has been rolled back. Please do not try again");
         }
     }
 }

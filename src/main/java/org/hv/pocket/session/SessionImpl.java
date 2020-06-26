@@ -3,10 +3,11 @@ package org.hv.pocket.session;
 import org.hv.pocket.connect.ConnectionManager;
 import org.hv.pocket.annotation.Entity;
 import org.hv.pocket.config.DatabaseNodeConfig;
-import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.criteria.Criteria;
 import org.hv.pocket.criteria.CriteriaImpl;
+import org.hv.pocket.criteria.Modern;
 import org.hv.pocket.criteria.Restrictions;
+import org.hv.pocket.exception.CriteriaException;
 import org.hv.pocket.model.DetailInductiveBox;
 import org.hv.pocket.model.MapperFactory;
 import org.hv.pocket.model.AbstractEntity;
@@ -19,10 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -46,13 +44,13 @@ public class SessionImpl extends AbstractSession {
                 if (this.connection == null) {
                     this.connection = ConnectionManager.getInstance().getConnection(databaseNodeConfig);
                     this.setClosed(false);
-                    this.logger.info("Session: {} turned on.", this.sessionName);
+                    this.logger.debug("Session 【{}】 turned on", this.sessionName);
                 } else {
-                    this.logger.warn("This session is connected. Please don't try again.");
+                    this.logger.warn("This session is connected. Please don't try again");
                 }
             }
         } else {
-            this.logger.warn("This session is connected. Please don't try again.");
+            this.logger.warn("This session is connected. Please don't try again");
         }
     }
 
@@ -65,13 +63,13 @@ public class SessionImpl extends AbstractSession {
                     this.transaction = null;
                     this.connection = null;
                     this.setClosed(true);
-                    this.logger.info("Session: {} turned off.", this.sessionName);
+                    this.logger.debug("Session 【{}】 turned off", this.sessionName);
                 } else {
-                    this.logger.warn("This session is closed. Please don't try again.");
+                    this.logger.warn("This session is closed. Please don't try again");
                 }
             }
         } else {
-            this.logger.warn("This session is closed. Please don't try again.");
+            this.logger.warn("This session is closed. Please don't try again");
         }
     }
 
@@ -161,26 +159,18 @@ public class SessionImpl extends AbstractSession {
         if (older != null) {
             Field[] fields = reflectUtils.dirtyFieldFilter(entity, older);
             if (fields.length > 0) {
-                StringBuilder sql = new StringBuilder(CommonSql.UPDATE)
-                        .append(MapperFactory.getTableName(clazz.getName()))
-                        .append(CommonSql.SET);
-
-                List<String> setValues = new LinkedList<>();
+                Criteria criteria = this.createCriteria(clazz);
+                String identifyFieldName = MapperFactory.getIdentifyFieldName(clazz.getName());
+                criteria.add(Restrictions.equ(identifyFieldName, entity.loadIdentify()));
                 for (Field field : fields) {
-                    setValues.add(MapperFactory.getRepositoryColumnName(clazz.getName(), field.getName()) + CommonSql.EQUAL_TO + CommonSql.PLACEHOLDER);
+                    field.setAccessible(true);
+                    try {
+                        criteria.add(Modern.set(field.getName(), field.get(entity)));
+                    } catch (IllegalAccessException e) {
+                        throw new CriteriaException(e.getMessage());
+                    }
                 }
-                sql.append(String.join(CommonSql.COMMA, setValues))
-                        .append(CommonSql.WHERE)
-                        .append(MapperFactory.getIdentifyColumnName(clazz.getName())).append(CommonSql.EQUAL_TO).append(CommonSql.PLACEHOLDER);
-                PreparedStatement preparedStatement = null;
-                try {
-                    preparedStatement = this.connection.prepareStatement(sql.toString());
-                    this.statementApply(fields, entity, preparedStatement);
-                    preparedStatement.setObject(fields.length + 1, entity.loadIdentify());
-                    effectRow = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeUpdate);
-                } finally {
-                    ConnectionManager.closeIo(preparedStatement, null);
-                }
+                effectRow += criteria.update();
             }
         }
         return effectRow;
@@ -197,7 +187,7 @@ public class SessionImpl extends AbstractSession {
             if (fields.length > 0) {
                 for (Field field : fields) {
                     field.setAccessible(true);
-                    DetailInductiveBox detailBox = DetailInductiveBox.newInstance((List<? extends AbstractEntity>)field.get(entity), (List<? extends AbstractEntity>)field.get(older));
+                    DetailInductiveBox detailBox = DetailInductiveBox.newInstance((List<? extends AbstractEntity>) field.get(entity), (List<? extends AbstractEntity>) field.get(older));
                     List<? extends AbstractEntity> newbornDetails = detailBox.getNewborn();
                     if (newbornDetails.size() > 0) {
                         Class<? extends AbstractEntity> childrenClass = MapperFactory.getDetailClass(mainClassName, field.getName());
@@ -229,6 +219,7 @@ public class SessionImpl extends AbstractSession {
         Class<? extends AbstractEntity> clazz = entity.getClass();
         String mainClassName = clazz.getName();
         Serializable identify = entity.loadIdentify();
+        String identifyFieldName = MapperFactory.getIdentifyFieldName(clazz.getName());
 
         Object garbage = this.findOne(clazz, identify);
         int effectRow = 0;
@@ -248,46 +239,21 @@ public class SessionImpl extends AbstractSession {
             }
 
             // delete main data
-            String sql = CommonSql.DELETE +
-                    CommonSql.FROM +
-                    MapperFactory.getTableName(clazz.getName()) +
-                    CommonSql.WHERE +
-                    MapperFactory.getIdentifyColumnName(clazz.getName()) +
-                    CommonSql.EQUAL_TO +
-                    CommonSql.PLACEHOLDER;
-            PreparedStatement preparedStatement = null;
-            try {
-                preparedStatement = this.connection.prepareStatement(sql);
-                preparedStatement.setObject(1, identify);
-                effectRow += super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeUpdate);
-            } finally {
-                ConnectionManager.closeIo(preparedStatement, null);
-            }
+            Criteria criteria = this.createCriteria(clazz);
+            criteria.add(Restrictions.equ(identifyFieldName, identify));
+            effectRow += criteria.delete();
         }
         return effectRow;
     }
 
     @Override
-    public long getMaxIdentify(Integer serverId, Class<? extends AbstractEntity> clazz) throws SQLException {
+    public long getMaxIdentify(Integer serverId, Class<? extends AbstractEntity> clazz) {
         Entity annotation = clazz.getAnnotation(Entity.class);
-        String identifyColumnName = MapperFactory.getIdentifyColumnName(clazz.getName());
-        String sql = CommonSql.SELECT
-                + "MAX(CONVERT(" + identifyColumnName + " ,SIGNED))"
-                + CommonSql.FROM + annotation.table()
-                + CommonSql.WHERE
-                + identifyColumnName
-                + " REGEXP '^" + serverId + annotation.tableId() + "'";
-        PreparedStatement preparedStatement = this.connection.prepareStatement(sql);
-        ResultSet resultSet = super.statementProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
-        long identify;
-        if (resultSet.next()) {
-            identify = resultSet.getLong(1);
-        } else {
-            identify = 0;
-        }
-        resultSet.close();
-        preparedStatement.close();
-        return identify;
+        String identifyFieldName = MapperFactory.getIdentifyFieldName(clazz.getName());
+        Criteria criteria = this.createCriteria(clazz);
+        criteria.add(Restrictions.like("uuid", "" + serverId + annotation.tableId() + "%"));
+        Object maxIdentify = criteria.max(identifyFieldName);
+        return maxIdentify == null ? 0 : (long) maxIdentify;
     }
 
     @Override

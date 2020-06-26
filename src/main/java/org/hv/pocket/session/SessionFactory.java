@@ -4,24 +4,39 @@ import org.hv.pocket.config.DatabaseConfig;
 import org.hv.pocket.config.DatabaseNodeConfig;
 import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.constant.DatasourceDriverTypes;
+import org.hv.pocket.exception.CriteriaException;
 import org.hv.pocket.exception.SessionException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author wujianchuan 2018/12/31
  */
 public class SessionFactory {
+
+    private static final ReentrantLock LOCK = new ReentrantLock(true);
+    private static final AtomicInteger RETRY = new AtomicInteger(0);
+    private static final int MAX_RETRY_TIMES = 5;
     private static final Map<String, DatabaseNodeConfig> NODE_POOL = new ConcurrentHashMap<>(5);
     private static final Map<String, CacheHolder> CACHE_POOL = new ConcurrentHashMap<>(5);
+    private static final List<String> NODES = new ArrayList<>();
 
     private SessionFactory() {
     }
 
     public static void register(DatabaseConfig databaseConfig) {
-        databaseConfig.getNode().forEach(databaseNodeConfig -> {
+        for (DatabaseNodeConfig databaseNodeConfig : databaseConfig.getNode()) {
+            String nodeName = databaseNodeConfig.getNodeName();
+            if (NODES.contains(nodeName)) {
+                throw new SessionException("Node name duplicate.");
+            }
+            NODES.add(nodeName);
             String driverName = databaseNodeConfig.getDriverName();
             if (DatasourceDriverTypes.MYSQL_DRIVER.equals(driverName)
                     || DatasourceDriverTypes.ORACLE_DRIVER.equals(driverName)
@@ -42,7 +57,7 @@ public class SessionFactory {
             } else {
                 throw new SessionException("I'm sorry about that I don't support this database now.");
             }
-        });
+        }
     }
 
     /**
@@ -53,7 +68,20 @@ public class SessionFactory {
      */
     public static Session getSession(String sessionName) {
         if (NODE_POOL.size() == 0) {
-            throw new SessionException("Please wait a moment");
+            if (RETRY.getAndIncrement() > MAX_RETRY_TIMES) {
+                throw new CriteriaException("The maximum number of attempts to get a session has been reached.");
+            }
+            LOCK.lock();
+            try {
+                if (NODE_POOL.size() == 0) {
+                    Thread.sleep(100);
+                }
+                return getSession(sessionName);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } finally {
+                LOCK.unlock();
+            }
         }
         DatabaseNodeConfig databaseNodeConfig = NODE_POOL.get(sessionName);
         if (databaseNodeConfig == null) {
