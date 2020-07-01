@@ -3,6 +3,7 @@ package org.hv.pocket.identify;
 import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.session.Session;
 
+import java.io.Serializable;
 import java.sql.SQLException;
 
 /**
@@ -11,18 +12,11 @@ import java.sql.SQLException;
 public interface IdentifyGenerator {
 
     /**
-     * 保存服务ID
-     *
-     * @param serverId server id.
-     */
-    void setServerId(Integer serverId);
-
-    /**
      * 获取生成策略标识
      *
      * @return 策略类型
      */
-    GenerationType getGenerationType();
+    String getGenerationType();
 
     /**
      * 生成策略标识
@@ -37,5 +31,5 @@ public interface IdentifyGenerator {
      * @return 数据标识
      * @throws SQLException e
      */
-    String getIdentify(Class<? extends AbstractEntity> clazz, Session session) throws SQLException;
+    Serializable getIdentify(Class<? extends AbstractEntity> clazz, Session session) throws SQLException;
 }

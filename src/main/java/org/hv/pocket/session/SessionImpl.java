@@ -1,16 +1,15 @@
 package org.hv.pocket.session;
 
-import org.hv.pocket.connect.ConnectionManager;
-import org.hv.pocket.annotation.Entity;
 import org.hv.pocket.config.DatabaseNodeConfig;
+import org.hv.pocket.connect.ConnectionManager;
 import org.hv.pocket.criteria.Criteria;
 import org.hv.pocket.criteria.CriteriaImpl;
 import org.hv.pocket.criteria.Modern;
 import org.hv.pocket.criteria.Restrictions;
 import org.hv.pocket.exception.CriteriaException;
+import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.model.DetailInductiveBox;
 import org.hv.pocket.model.MapperFactory;
-import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.query.ProcessQuery;
 import org.hv.pocket.query.ProcessQueryImpl;
 import org.hv.pocket.query.SQLQuery;
@@ -244,16 +243,6 @@ public class SessionImpl extends AbstractSession {
             effectRow += criteria.delete();
         }
         return effectRow;
-    }
-
-    @Override
-    public long getMaxIdentify(Integer serverId, Class<? extends AbstractEntity> clazz) {
-        Entity annotation = clazz.getAnnotation(Entity.class);
-        String identifyFieldName = MapperFactory.getIdentifyFieldName(clazz.getName());
-        Criteria criteria = this.createCriteria(clazz);
-        criteria.add(Restrictions.like("uuid", "" + serverId + annotation.tableId() + "%"));
-        Object maxIdentify = criteria.max(identifyFieldName);
-        return maxIdentify == null ? 0 : (long) maxIdentify;
     }
 
     @Override

@@ -127,14 +127,4 @@ public interface OperateDictionary {
      * @throws IllegalAccessException e
      */
     int delete(AbstractEntity entity) throws SQLException, IllegalAccessException;
-
-    /**
-     * 获取最大数据标识
-     *
-     * @param serverId 服务名
-     * @param clazz    实体类型
-     * @return 最大值
-     * @throws SQLException 语句异常
-     */
-    long getMaxIdentify(Integer serverId, Class<? extends AbstractEntity> clazz) throws SQLException;
 }

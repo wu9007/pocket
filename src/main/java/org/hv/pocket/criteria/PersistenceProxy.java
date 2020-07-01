@@ -12,6 +12,7 @@ import org.hv.pocket.utils.EnumPocketThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -30,7 +31,6 @@ import java.util.stream.Collectors;
 public class PersistenceProxy {
     private final Logger logger = LoggerFactory.getLogger(PersistenceProxy.class);
     private final DatabaseNodeConfig databaseNodeConfig;
-    private boolean showSqlLog;
     private final ExecutorService executorService;
     private Session session;
     private CriteriaImpl target;
@@ -39,7 +39,6 @@ public class PersistenceProxy {
     private PersistenceProxy(CriteriaImpl target) {
         this.target = target;
         this.databaseNodeConfig = target.databaseConfig;
-        this.showSqlLog = target.showSqlLog;
         this.session = target.getSession();
         this.clazz = target.getClazz();
         this.executorService = EnumPocketThreadPool.INSTANCE.getPersistenceLogExecutorService();
@@ -78,7 +77,7 @@ public class PersistenceProxy {
             long milliseconds = System.currentTimeMillis() - startTime;
             this.consoleLog(sql, milliseconds);
             // 生成后镜像
-            if (this.databaseNodeConfig.getCollectLog() && this.showSqlLog) {
+            if (this.databaseNodeConfig.getCollectLog() && this.databaseNodeConfig.getShowSql()) {
                 this.pushLog(sql, null, null, milliseconds);
             }
         }
@@ -98,7 +97,7 @@ public class PersistenceProxy {
             long milliseconds = System.currentTimeMillis() - startTime;
             this.consoleLog(sql, milliseconds);
             // 生成后镜像
-            if (this.databaseNodeConfig.getCollectLog() && this.showSqlLog) {
+            if (this.databaseNodeConfig.getCollectLog() && this.databaseNodeConfig.getShowSql()) {
                 this.pushLog(sql, null, null, milliseconds);
             }
         }
@@ -147,7 +146,7 @@ public class PersistenceProxy {
             long milliseconds = System.currentTimeMillis() - startTime;
             this.consoleLog(sql, milliseconds);
             // 生成后镜像
-            if (this.databaseNodeConfig.getCollectLog() && this.showSqlLog && result > 0) {
+            if (this.databaseNodeConfig.getCollectLog() && this.databaseNodeConfig.getShowSql() && result > 0) {
                 this.pushLog(sql, beforeMirror, this.loadAfterMirror(beforeMirror), milliseconds);
             }
         }
@@ -168,7 +167,7 @@ public class PersistenceProxy {
             String identifyFieldName = MapperFactory.getIdentifyFieldName(clazz.getName());
             Criteria selectCriteria = session.createCriteria(clazz);
             selectCriteria.withLog(false);
-            List<String> ids = beforeMirror.stream().map(item -> (String) item.loadIdentify()).collect(Collectors.toList());
+            List<Serializable> ids = beforeMirror.stream().map(AbstractEntity::loadIdentify).collect(Collectors.toList());
             selectCriteria.add(Restrictions.in(identifyFieldName, ids));
             return selectCriteria.list();
         } else {
@@ -182,7 +181,7 @@ public class PersistenceProxy {
     }
 
     private void consoleLog(String sql, long milliseconds) {
-        if (this.showSqlLog) {
+        if (this.databaseNodeConfig.getShowSql()) {
             this.executorService.execute(() -> logger.info("【SQL】 {} \n 【Milliseconds】: {}", sql, milliseconds));
         }
     }

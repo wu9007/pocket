@@ -19,7 +19,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,11 +30,10 @@ import java.util.stream.Collectors;
  */
 class EntityMapper {
 
-    private final int tableId;
     private final String tableName;
     private final String identifyColumnName;
     private final Field identifyField;
-    private final GenerationType generationType;
+    private final String generationType;
     private final Map<String, FieldData> fieldMapper;
 
     private final Field[] repositoryFields;
@@ -62,10 +60,6 @@ class EntityMapper {
     private final Map<String, String> manyToOneUpMapper;
     private final List<String> joinSqlList;
 
-    int getTableId() {
-        return tableId;
-    }
-
     String getTableName() {
         return tableName;
     }
@@ -78,7 +72,7 @@ class EntityMapper {
         return identifyField;
     }
 
-    public GenerationType getGenerationType() {
+    public String getGenerationType() {
         return generationType;
     }
 
@@ -145,16 +139,13 @@ class EntityMapper {
     public static EntityMapper newInstance(Class<?> clazz) throws MapperException {
         Entity entity = clazz.getAnnotation(Entity.class);
         String tableName;
-        int tableId;
         if (entity != null) {
             tableName = entity.table();
-            tableId = entity.tableId();
         } else {
             View view = clazz.getAnnotation(View.class);
             if (view != null) {
                 entity = View.class.getAnnotation(Entity.class);
                 tableName = entity.table();
-                tableId = entity.tableId();
             } else {
                 throw new MapperException(String.format("%s: 未找到 : @Entity 注解。", clazz.getName()));
             }
@@ -166,13 +157,13 @@ class EntityMapper {
         Field[] withAnnotationFields = new Field[allFields.size()];
         allFields.toArray(withAnnotationFields);
 
-        return buildMapper(tableName, tableId, withAnnotationFields);
+        return buildMapper(tableName, withAnnotationFields);
     }
 
-    private static EntityMapper buildMapper(String tableName, int tableId, Field[] withAnnotationFields) {
+    private static EntityMapper buildMapper(String tableName, Field[] withAnnotationFields) {
         Field identifyField = null;
         String identifyColumnName = null;
-        GenerationType generationType = null;
+        String generationType = null;
         Map<String, FieldData> fieldMapper = new LinkedHashMap<>(16);
         Map<String, String> repositoryColumnMapper = new LinkedHashMap<>(16), viewColumnMapperWithTableAs = new LinkedHashMap<>(16), viewColumnMapper = new LinkedHashMap<>(16), oneToManyDownMapper = new LinkedHashMap<>(16), manyToOneUpMapper = new LinkedHashMap<>(16), businessMapper = new LinkedHashMap<>(16);
         List<Field> repositoryFields = new LinkedList<>(), viewFields = new LinkedList<>(), businessFields = new LinkedList<>(), keyBusinessFields = new LinkedList<>(), oneToManyField = new LinkedList<>();
@@ -247,10 +238,7 @@ class EntityMapper {
                 manyToOneUpMapper.put(manyToOne.clazz().getName(), manyToOne.upBridgeField());
             }
         }
-        if (identify == null && tableId > -1) {
-            throw new PocketIdentifyException("Missing identify field.");
-        }
-        return new EntityMapper(tableId, tableName, identifyField, identifyColumnName, generationType, fieldMapper,
+        return new EntityMapper(tableName, identifyField, identifyColumnName, generationType, fieldMapper,
                 repositoryFields.toArray(new Field[0]), repositoryColumnNames, repositoryColumnMapper,
                 viewFields.toArray(new Field[0]), viewColumnMapperWithTableAs, viewColumnMapper,
                 businessFields.toArray(new Field[0]), keyBusinessFields.toArray(new Field[0]), businessMapper,
@@ -258,13 +246,12 @@ class EntityMapper {
                 manyToOneUpMapper, joinSqlList);
     }
 
-    private EntityMapper(int tableId, String tableName, Field identifyFile, String identifyColumnName, GenerationType generationType, Map<String, FieldData> fieldMapper,
+    private EntityMapper(String tableName, Field identifyFile, String identifyColumnName, String generationType, Map<String, FieldData> fieldMapper,
                          Field[] repositoryFields, List<String> repositoryColumnNames, Map<String, String> repositoryColumnMapper,
                          Field[] viewFields, Map<String, String> viewColumnMapperWithTableAs, Map<String, String> viewColumnMapper,
                          Field[] businessFields, Field[] keyBusinessFields, Map<String, String> businessMapper,
                          Field[] oneToManyFields, Map<String, Class<? extends AbstractEntity>> onToManyClassMapper, Map<String, String> oneToManyDownMapper,
                          Map<String, String> manyToOneUpMapper, List<String> joinSqlList) {
-        this.tableId = tableId;
         this.tableName = tableName;
         this.identifyField = identifyFile;
         this.identifyColumnName = identifyColumnName;
