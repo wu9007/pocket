@@ -1,6 +1,5 @@
 pocket:
   datasource:
-    serverId: 101
     node:
       - url: jdbc:mysql://127.0.0.1:3306/home?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8
         nodeName: mysql-01
