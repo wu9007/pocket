@@ -8,11 +8,6 @@
   ],
   "properties": [
     {
-      "name": "pocket.datasource.serverId",
-      "type": "java.lang.String",
-      "description": "server id."
-    },
-    {
       "name": "pocket.datasource.node",
       "type": "java.util.List<org.hv.pocket.config.DatabaseNodeConfig>",
       "description": "java.util.List<org.homo.dbconnect.config.DatabaseNode>"

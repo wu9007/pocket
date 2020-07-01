@@ -26,3 +26,7 @@ public class PersistenceLogObserverImpl implements PersistenceLogObserver {
 ## 0.1.12 - 2020/07/01
 * 删除tableId，修改主键生成策略。
 * 添加数值类型的主键生成策略。
+
+## 0.1.13 - 2020/07/01
+* 可级联查询不清空过滤条件。
+* 将serverId从pocket配置中去除。

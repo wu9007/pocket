@@ -8,8 +8,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author wujianchuan 2019/2/14
  */
 public abstract class AbstractIdentifyGenerator implements IdentifyGenerator {
-    final static Map<String, AtomicLong> POOL = new ConcurrentHashMap<>(60);
-    String generationType;
+    protected final static Map<String, AtomicLong> POOL = new ConcurrentHashMap<>(60);
+    protected String generationType;
 
     /**
      * 设置数据标识生成方式名称
