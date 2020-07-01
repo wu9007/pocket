@@ -22,16 +22,6 @@ public class MapperFactory {
     private static final Map<String, EntityMapper> ENTITY_MAPPER_POOL = new ConcurrentHashMap<>();
 
     /**
-     * 获取表ID
-     *
-     * @param className class name
-     * @return table id
-     */
-    public static int getTableId(String className) {
-        return ENTITY_MAPPER_POOL.get(className).getTableId();
-    }
-
-    /**
      * 获取表名
      *
      * @param className class name
@@ -67,7 +57,7 @@ public class MapperFactory {
      * @param className class name
      * @return identify generator
      */
-    public static GenerationType getIdentifyGenerationType(String className) {
+    public static String getIdentifyGenerationType(String className) {
         return ENTITY_MAPPER_POOL.get(className).getGenerationType();
     }
 

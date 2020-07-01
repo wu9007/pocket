@@ -28,6 +28,7 @@ public class ConnectionTest {
         PocketExecutor.execute(Executors.newFixedThreadPool(THREAD_NUM), THREAD_NUM, () -> {
             ConnectionManager.getInstance().getConnection(databaseConfigs.getNode().get(0));
             ConnectionManager.getInstance().getConnection(databaseConfigs.getNode().get(1));
+            System.out.println("================= get connect ok ================= ");
         });
         ConnectionManager.getInstance().destroy();
     }

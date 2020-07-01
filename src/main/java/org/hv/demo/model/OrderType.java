@@ -10,7 +10,7 @@ import java.io.Serializable;
 /**
  * @author wujianchuan
  */
-@Entity(table = "TBL_ORDER_TYPE", tableId = 1)
+@Entity(table = "TBL_ORDER_TYPE")
 public class OrderType extends AbstractEntity {
     private static final long serialVersionUID = -4481356247007947438L;
 

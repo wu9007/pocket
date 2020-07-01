@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * @author wujianchuan
  */
-@Entity(table = "TBL_RELEVANT_BILL", tableId = 3, businessName = "关联单据")
+@Entity(table = "TBL_RELEVANT_BILL", businessName = "关联单据")
 public class RelevantBill extends AbstractEntity {
     private static final long serialVersionUID = -6343776766066672041L;
     @Identify

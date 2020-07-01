@@ -10,6 +10,6 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Entity(table = "", tableId = -1)
+@Entity(table = "")
 public @interface View {
 }

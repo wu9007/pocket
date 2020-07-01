@@ -1,6 +1,7 @@
 package org.hv.dbconnect;
 
 import org.hv.Application;
+import org.hv.PocketExecutor;
 import org.hv.demo.model.Order;
 import org.hv.demo.model.RelevantBill;
 import org.hv.demo.model.RelevantBillDetail;
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -81,5 +83,58 @@ public class SessionTest {
         order.setPrice(new BigDecimal("100.0"));
         this.session.save(order);
         this.session.delete(order);
+    }
+
+    @Test
+    public void test3() throws InterruptedException {
+        PocketExecutor.execute(Executors.newFixedThreadPool(10), 10, () -> {
+            Order order = new Order();
+            order.setCode("ORDER-F001");
+            order.setDay(LocalDate.now());
+            order.setPrice(new BigDecimal("200.0"));
+            try {
+                this.session.save(order);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    @Test
+    public void test4() throws SQLException {
+        for (int i = 0; i < 10; i++) {
+            Order order = new Order();
+            order.setCode("ORDER-F001");
+            order.setDay(LocalDate.now());
+            order.setPrice(new BigDecimal("200.0"));
+            this.session.save(order);
+        }
+    }
+
+    @Test
+    public void test5() throws SQLException, IllegalAccessException {
+        RelevantBill newOrder = new RelevantBill();
+        newOrder.setCode("C-0001");
+        newOrder.setAvailable(true);
+        List<RelevantBillDetail> details = IntStream.range(0, 10).mapToObj(index -> {
+            RelevantBillDetail detail = new RelevantBillDetail();
+            detail.setName("明细" + index);
+            detail.setPrice(new BigDecimal("100.0"));
+            return detail;
+        }).collect(Collectors.toList());
+        newOrder.setDetails(details);
+        int n = this.session.save(newOrder, true);
+        System.out.println("保存条数：" + n);
+        newOrder.getDetails().get(0).setName("==========");
+        newOrder.setAvailable(false);
+        n = this.session.update(newOrder, true);
+        System.out.println("更新条数：" + n);
+        RelevantBill repositoryOrder = this.session.findOne(RelevantBill.class, newOrder.loadIdentify());
+        System.out.println(repositoryOrder.getCode());
+        repositoryOrder.setCode("Hello-001");
+        this.session.update(repositoryOrder);
+        System.out.println(repositoryOrder.getCode());
+        n = this.session.delete(repositoryOrder);
+        System.out.println("删除条数：" + n);
     }
 }

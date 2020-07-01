@@ -24,8 +24,6 @@ import java.util.stream.Stream;
  * @author wujianchuan 2019/1/9
  */
 abstract class AbstractSession implements Session {
-    private static final String SET_IDENTIFY_LOCK = "setIdentifyLock";
-
     final PersistenceProxy persistenceProxy;
     final DatabaseNodeConfig databaseNodeConfig;
     final String sessionName;
@@ -81,15 +79,13 @@ abstract class AbstractSession implements Session {
             Serializable identify = entity.loadIdentify() == null ? IdentifyGeneratorFactory.getInstance()
                     .getIdentifyGenerator(MapperFactory.getIdentifyGenerationType(clazz.getName()))
                     .getIdentify(entity.getClass(), this) : entity.loadIdentify();
-            synchronized (SET_IDENTIFY_LOCK) {
-                entity.putIdentify(identify);
-                String sql = nullAble ? this.buildSaveSqlNullable(entity) : this.buildSaveSqlNotNull(entity);
-                preparedStatement = this.connection.prepareStatement(sql);
-                if (nullAble) {
-                    this.statementApplyNullable(entity, preparedStatement);
-                } else {
-                    this.statementApplyNotNull(entity, preparedStatement);
-                }
+            entity.putIdentify(identify);
+            String sql = nullAble ? this.buildSaveSqlNullable(entity) : this.buildSaveSqlNotNull(entity);
+            preparedStatement = this.connection.prepareStatement(sql);
+            if (nullAble) {
+                this.statementApplyNullable(entity, preparedStatement);
+            } else {
+                this.statementApplyNotNull(entity, preparedStatement);
             }
             effectRow = this.persistenceProxy.executeWithLog(preparedStatement, PreparedStatement::executeUpdate);
         } finally {

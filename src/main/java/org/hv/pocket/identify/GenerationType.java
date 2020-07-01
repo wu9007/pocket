@@ -3,9 +3,14 @@ package org.hv.pocket.identify;
 /**
  * @author wujianchuan
  */
-public enum GenerationType {
+public interface GenerationType {
+
     /**
-     * serverId + tableId + serialNumber
+     * yyyyMMdd append six digit serial number as long number.
      */
-    STR_INCREMENT,
+    String INCREMENT = "increment";
+    /**
+     * yyyyMMdd append six digit serial number as string.
+     */
+    String STR_INCREMENT = "strIncrement";
 }

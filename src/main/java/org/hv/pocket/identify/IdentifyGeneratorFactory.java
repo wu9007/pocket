@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author wujianchuan 2019/2/14
  */
 public class IdentifyGeneratorFactory {
-    private static final Map<GenerationType, IdentifyGenerator> GENERATOR_POOL = new ConcurrentHashMap<>(6);
+    private static final Map<String, IdentifyGenerator> GENERATOR_POOL = new ConcurrentHashMap<>(6);
     private static final IdentifyGeneratorFactory OUR_INSTANCE = new IdentifyGeneratorFactory();
 
     public static IdentifyGeneratorFactory getInstance() {
@@ -17,7 +17,7 @@ public class IdentifyGeneratorFactory {
     private IdentifyGeneratorFactory() {
     }
 
-    public IdentifyGenerator getIdentifyGenerator(GenerationType generationType) {
+    public IdentifyGenerator getIdentifyGenerator(String generationType) {
         return GENERATOR_POOL.get(generationType);
     }
 
