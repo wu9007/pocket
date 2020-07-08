@@ -35,7 +35,14 @@ final public class ResultSetFunctionLib {
         RESULT_STRATEGY_POOL.put(String.class.getName(), ResultSet::getString);
         RESULT_STRATEGY_POOL.put(Serializable.class.getName(), ResultSet::getObject);
         RESULT_STRATEGY_POOL.put(BigDecimal.class.getName(), ResultSet::getBigDecimal);
-        RESULT_STRATEGY_POOL.put(Date.class.getName(), ResultSet::getTimestamp);
+        RESULT_STRATEGY_POOL.put(Date.class.getName(), (resultSet, columnName) -> {
+            java.sql.Date sqlDate = resultSet.getDate(columnName);
+            Date date = null;
+            if (sqlDate != null) {
+                date = new Date(sqlDate.getTime());
+            }
+            return date;
+        });
         RESULT_STRATEGY_POOL.put(LocalDate.class.getName(), (resultSet, columnName) -> {
             java.sql.Date date = resultSet.getDate(columnName);
             return date != null ? date.toLocalDate() : null;
