@@ -31,5 +31,5 @@ public class PersistenceLogObserverImpl implements PersistenceLogObserver {
 * 可级联查询不清空过滤条件。
 * 将serverId从pocket配置中去除。
 
-## 0.1.14 - 2020/07/08
+## 0.1.15 - 2020/07/08
 * FIX BUG.

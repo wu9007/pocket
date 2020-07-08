@@ -95,8 +95,8 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public <T extends AbstractEntity> ProcessQuery<T> createProcessQuery(String processSQL) {
-        return new ProcessQueryImpl<>(processSQL, this.connection, this.databaseNodeConfig);
+    public <T extends AbstractEntity> ProcessQuery<T> createProcessQuery(String processSql) {
+        return new ProcessQueryImpl<>(processSql, this.connection, this.databaseNodeConfig);
     }
 
     @Override
@@ -111,8 +111,13 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public <E extends AbstractEntity> List<E> list(Class<E> clazz) {
+        return this.list(clazz, true);
+    }
+
+    @Override
+    public <E extends AbstractEntity> List<E> list(Class<E> clazz, boolean cascade) {
         Criteria criteria = this.createCriteria(clazz);
-        return criteria.list(true);
+        return criteria.list(cascade);
     }
 
     @Override
