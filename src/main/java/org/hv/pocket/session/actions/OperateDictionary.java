@@ -48,6 +48,15 @@ public interface OperateDictionary {
     <E extends AbstractEntity> List<E> list(Class<E> clazz);
 
     /**
+     * 查询所有
+     *
+     * @param clazz   类类型
+     * @param cascade 是否级联
+     * @return 所有实体对象
+     */
+    <E extends AbstractEntity> List<E> list(Class<E> clazz, boolean cascade);
+
+    /**
      * 强制通过数据库查询数据
      *
      * @param clazz    类类型
