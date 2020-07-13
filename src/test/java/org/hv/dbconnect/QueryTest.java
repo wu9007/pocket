@@ -114,4 +114,13 @@ public class QueryTest {
         List<OrderView> orders = query.list();
         System.out.println(orders.size());
     }
+
+    @Test
+    public void test8() throws SQLException {
+        SQLQuery query = this.session.createSQLQuery("delete from tbl_order where CODE = :ORDER_CODE AND DAY < :DAY", OrderView.class)
+                .setParameter("ORDER_CODE", "C-001")
+                .setParameter("DAY", new Date());
+        int row = query.execute();
+        System.out.println(row);
+    }
 }

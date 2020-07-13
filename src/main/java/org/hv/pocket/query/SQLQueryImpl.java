@@ -38,8 +38,13 @@ public class SQLQueryImpl extends AbstractSqlQuery implements SQLQuery {
     }
 
     @Override
+    public int execute() throws SQLException {
+        return executeUpdate(sql);
+    }
+
+    @Override
     public Object unique() throws SQLException {
-        ResultSet resultSet = execute(sql);
+        ResultSet resultSet = executeQuery(sql);
         if (resultSet.next()) {
             if (clazz != null) {
                 try {
@@ -64,7 +69,7 @@ public class SQLQueryImpl extends AbstractSqlQuery implements SQLQuery {
                     .append(CommonSql.COMMA)
                     .append(this.getLimit());
         }
-        ResultSet resultSet = execute(querySQL.toString());
+        ResultSet resultSet = executeQuery(querySQL.toString());
         List<E> results = new ArrayList<>();
         while (resultSet.next()) {
             if (clazz != null) {
@@ -99,7 +104,17 @@ public class SQLQueryImpl extends AbstractSqlQuery implements SQLQuery {
         return this;
     }
 
-    private ResultSet execute(String sql) throws SQLException {
+    private ResultSet executeQuery(String sql) throws SQLException {
+        PreparedStatement preparedStatement = getPreparedStatement(sql);
+        return super.persistenceProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
+    }
+
+    private int executeUpdate(String sql) throws SQLException {
+        PreparedStatement preparedStatement = getPreparedStatement(sql);
+        return super.persistenceProxy.executeWithLog(preparedStatement, PreparedStatement::executeUpdate);
+    }
+
+    private PreparedStatement getPreparedStatement(String sql) throws SQLException {
         PreparedStatement preparedStatement;
         String executeSql = sql;
         if (this.parameterMap.size() > 0) {
@@ -124,7 +139,7 @@ public class SQLQueryImpl extends AbstractSqlQuery implements SQLQuery {
         } else {
             preparedStatement = this.connection.prepareStatement(executeSql);
         }
-        return super.persistenceProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
+        return preparedStatement;
     }
 
     private <T> T getObjects(ResultSet resultSet) throws SQLException {
