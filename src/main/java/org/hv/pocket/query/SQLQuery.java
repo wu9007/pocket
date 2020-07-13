@@ -9,6 +9,14 @@ import java.util.List;
 public interface SQLQuery {
 
     /**
+     * 增删改
+     *
+     * @return 影响行数
+     * @throws SQLException 语句异常
+     */
+    int execute() throws SQLException;
+
+    /**
      * 单条查询
      *
      * @return 查询结果

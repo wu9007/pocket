@@ -33,3 +33,6 @@ public class PersistenceLogObserverImpl implements PersistenceLogObserver {
 
 ## 0.1.15 - 2020/07/08
 * FIX BUG.
+
+## 0.1.16 - 2020/07/13
+* SQLQuery支持增删改。
