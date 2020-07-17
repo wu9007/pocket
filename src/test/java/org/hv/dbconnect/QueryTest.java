@@ -123,4 +123,15 @@ public class QueryTest {
         int row = query.execute();
         System.out.println(row);
     }
+
+    @Test
+    public void test9() throws SQLException {
+        SQLQuery queryInsert = this.session.createSQLQuery("insert into tbl_order(uuid,code,price) values('00001','C-00001', 10)");
+        int rowInsert = queryInsert.execute();
+        System.out.println(rowInsert);
+        SQLQuery queryUpdate = this.session.createSQLQuery("update tbl_order set price = 11 where uuid='00001'");
+        queryUpdate.execute();
+        int rowUpdate = queryUpdate.execute();
+        System.out.println(rowUpdate);
+    }
 }

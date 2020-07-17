@@ -220,15 +220,15 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public int delete(AbstractEntity entity) throws SQLException, IllegalAccessException {
-        Class<? extends AbstractEntity> clazz = entity.getClass();
-        String mainClassName = clazz.getName();
-        Serializable identify = entity.loadIdentify();
-        String identifyFieldName = MapperFactory.getIdentifyFieldName(clazz.getName());
+        return this.delete(entity, true);
+    }
 
-        Object garbage = this.findOne(clazz, identify);
+    @Override
+    public int delete(AbstractEntity entity, boolean cascade) throws SQLException, IllegalAccessException {
         int effectRow = 0;
-        if (garbage != null) {
-            // delete detail list data
+        Class<? extends AbstractEntity> clazz = entity.getClass();
+        if (cascade) {
+            String mainClassName = clazz.getName();
             Field[] fields = MapperFactory.getOneToMayFields(mainClassName);
             if (fields.length > 0) {
                 for (Field field : fields) {
@@ -236,17 +236,13 @@ public class SessionImpl extends AbstractSession {
                     List<? extends AbstractEntity> details = (List<? extends AbstractEntity>) field.get(entity);
                     if (details != null) {
                         for (AbstractEntity detail : details) {
-                            effectRow += this.delete(detail);
+                            effectRow += this.delete(detail, true);
                         }
                     }
                 }
             }
-
-            // delete main data
-            Criteria criteria = this.createCriteria(clazz);
-            criteria.add(Restrictions.equ(identifyFieldName, identify));
-            effectRow += criteria.delete();
         }
+        effectRow += this.deleteEntity(entity);
         return effectRow;
     }
 
