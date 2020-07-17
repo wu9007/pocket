@@ -144,7 +144,6 @@ abstract class AbstractSession implements Session {
         Class<? extends AbstractEntity> clazz = entity.getClass();
         Serializable identify = entity.loadIdentify();
         String identifyFieldName = MapperFactory.getIdentifyFieldName(clazz.getName());
-
         Object garbage = this.findOne(clazz, identify, cascade);
         int effectRow = 0;
         if (garbage != null) {
