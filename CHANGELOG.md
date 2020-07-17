@@ -37,7 +37,7 @@ public class PersistenceLogObserverImpl implements PersistenceLogObserver {
 ## 0.1.16 - 2020/07/13
 * SQLQuery支持增删改。
 
-## 0.1.18 - 2020/07/17
+## 0.1.19 - 2020/07/17
 * 修改 Session 类：
 ```java
     /**

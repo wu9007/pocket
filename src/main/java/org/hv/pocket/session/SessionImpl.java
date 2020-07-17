@@ -252,7 +252,7 @@ public class SessionImpl extends AbstractSession {
                 }
             }
         }
-        effectRow += this.deleteEntity(entity);
+        effectRow += this.deleteEntity(entity, cascade);
         return effectRow;
     }
 
