@@ -6,10 +6,10 @@ import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.criteria.Criteria;
 import org.hv.pocket.criteria.PersistenceProxy;
 import org.hv.pocket.criteria.Restrictions;
+import org.hv.pocket.identify.IdentifyGeneratorFactory;
 import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.model.MapperFactory;
 import org.hv.pocket.utils.ReflectUtils;
-import org.hv.pocket.identify.IdentifyGeneratorFactory;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -135,16 +135,16 @@ abstract class AbstractSession implements Session {
     /**
      * 删除数据，非级联删除
      *
-     * @param entity 实例
+     * @param entity  实例
+     * @param cascade 是否进行级联保存操作
      * @return 影响行数
      * @throws SQLException e
      */
-    int deleteEntity(AbstractEntity entity) throws SQLException {
+    int deleteEntity(AbstractEntity entity, boolean cascade) throws SQLException {
         Class<? extends AbstractEntity> clazz = entity.getClass();
         Serializable identify = entity.loadIdentify();
         String identifyFieldName = MapperFactory.getIdentifyFieldName(clazz.getName());
-
-        Object garbage = this.findOne(clazz, identify);
+        Object garbage = this.findOne(clazz, identify, cascade);
         int effectRow = 0;
         if (garbage != null) {
             // delete main data
