@@ -3,7 +3,9 @@ package org.hv.pocket.session;
 import org.hv.pocket.config.DatabaseNodeConfig;
 import org.hv.pocket.connect.ConnectionManager;
 import org.hv.pocket.constant.CommonSql;
+import org.hv.pocket.criteria.Criteria;
 import org.hv.pocket.criteria.PersistenceProxy;
+import org.hv.pocket.criteria.Restrictions;
 import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.model.MapperFactory;
 import org.hv.pocket.utils.ReflectUtils;
@@ -126,6 +128,29 @@ abstract class AbstractSession implements Session {
                     effectRow += details.size();
                 }
             }
+        }
+        return effectRow;
+    }
+
+    /**
+     * 删除数据，非级联删除
+     *
+     * @param entity 实例
+     * @return 影响行数
+     * @throws SQLException e
+     */
+    int deleteEntity(AbstractEntity entity) throws SQLException {
+        Class<? extends AbstractEntity> clazz = entity.getClass();
+        Serializable identify = entity.loadIdentify();
+        String identifyFieldName = MapperFactory.getIdentifyFieldName(clazz.getName());
+
+        Object garbage = this.findOne(clazz, identify);
+        int effectRow = 0;
+        if (garbage != null) {
+            // delete main data
+            Criteria criteria = this.createCriteria(clazz);
+            criteria.add(Restrictions.equ(identifyFieldName, identify));
+            effectRow += criteria.delete();
         }
         return effectRow;
     }

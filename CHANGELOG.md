@@ -36,3 +36,28 @@ public class PersistenceLogObserverImpl implements PersistenceLogObserver {
 
 ## 0.1.16 - 2020/07/13
 * SQLQuery支持增删改。
+
+## 0.1.17 - 2020/07/17
+* 修改 Session 类：
+```java
+    /**
+     * 级联删除
+     *
+     * @param entity 实体对象
+     * @return 影响行数
+     * @throws SQLException           语句异常
+     * @throws IllegalAccessException e
+     */
+    int delete(AbstractEntity entity) throws SQLException, IllegalAccessException;
+
+    /**
+     * 删除实体
+     *
+     * @param entity  实体对象
+     * @param cascade 是否进行级联更新操作
+     * @return 影响行数
+     * @throws SQLException           语句异常
+     * @throws IllegalAccessException e
+     */
+    int delete(AbstractEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
+```
