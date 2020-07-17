@@ -37,9 +37,31 @@ public class PersistenceLogObserverImpl implements PersistenceLogObserver {
 ## 0.1.16 - 2020/07/13
 * SQLQuery支持增删改。
 
-## 0.1.17 - 2020/07/17
+## 0.1.18 - 2020/07/17
 * 修改 Session 类：
 ```java
+    /**
+     * 级联查询对象
+     *
+     * @param clazz    类类型
+     * @param identify 数据标识
+     * @return 实体对象
+     * @throws SQLException e
+     */
+    <T extends AbstractEntity> T findOne(Class<T> clazz, Serializable identify) throws SQLException;
+
+
+    /**
+     * 查询对象
+     *
+     * @param clazz    类类型
+     * @param identify 数据标识
+     * @param cascade  是否进行级联保存操作
+     * @return 实体对象
+     * @throws SQLException e
+     */
+    <T extends AbstractEntity> T findOne(Class<T> clazz, Serializable identify, boolean cascade) throws SQLException;
+
     /**
      * 级联删除
      *

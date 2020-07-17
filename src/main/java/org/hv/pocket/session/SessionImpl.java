@@ -110,6 +110,11 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
+    public <T extends AbstractEntity> T findOne(Class<T> clazz, Serializable identify, boolean cascade) throws SQLException {
+        return this.findDirect(clazz, identify, cascade);
+    }
+
+    @Override
     public <E extends AbstractEntity> List<E> list(Class<E> clazz) {
         return this.list(clazz, true);
     }
@@ -122,9 +127,14 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public <T extends AbstractEntity> T findDirect(Class<T> clazz, Serializable identify) throws SQLException {
+        return this.findDirect(clazz, identify, true);
+    }
+
+    @Override
+    public <T extends AbstractEntity> T findDirect(Class<T> clazz, Serializable identify, boolean cascade) throws SQLException {
         Criteria criteria = this.createCriteria(clazz);
         criteria.add(Restrictions.equ(MapperFactory.getIdentifyFieldName(clazz.getName()), identify));
-        return criteria.unique(true);
+        return criteria.unique(cascade);
     }
 
     @Override
