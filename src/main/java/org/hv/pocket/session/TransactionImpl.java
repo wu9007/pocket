@@ -41,7 +41,6 @@ public class TransactionImpl implements Transaction {
             } catch (SQLException e) {
                 throw new TransactionException(e.getMessage());
             }
-            this.connection = null;
             this.logger.debug("Transaction 【commit】");
         } else {
             logger.warn("This transaction has been committed. Please do not try again");
@@ -57,10 +56,14 @@ public class TransactionImpl implements Transaction {
             } catch (SQLException e) {
                 throw new TransactionException(e.getMessage());
             }
-            this.connection = null;
             this.logger.debug("Transaction 【rollback】");
         } else {
             logger.warn("This transaction has been rolled back. Please do not try again");
         }
+    }
+
+    @Override
+    public void removeConnection() {
+        this.connection = null;
     }
 }

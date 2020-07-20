@@ -60,7 +60,7 @@ pocket:
 ### 主类
 
 ```java
-@Entity(table = "TBL_ORDER", tableId = 200)
+@Entity(table = "TBL_ORDER")
 public class Order extends BaseEntity {
     private static final long serialVersionUID = 2560385391551524826L;
 
@@ -89,7 +89,7 @@ public class Order extends BaseEntity {
 ### 明细类
 
 ```java
-@Entity(table = "TBL_COMMODITY", tableId = 201, businessName = "订单明细")
+@Entity(table = "TBL_COMMODITY", businessName = "订单明细")
 public class Commodity extends BaseEntity {
    private static final long serialVersionUID = -6711578420837877371L;
 
@@ -106,7 +106,7 @@ public class Commodity extends BaseEntity {
 ```
 
 > - 继承`BaseEntity`抽象类（数据标识为`String`）
-> - 类注解`@Entity`，`table` 对应数据库表名；`tableId` 对应数据库表标识，目的是为了在生成数据标识的时候区分表；`uuidGenerator` 对应主键生成策略，默认 `increment`，可通过集继承`AbstractUuidGenerator` 自定义主键生成策。
+> - 类注解`@Entity`，`table` 对应数据库表名；`uuidGenerator` 对应主键生成策略，默认 `increment`，可通过集继承`AbstractUuidGenerator` 自定义主键生成策。
 > - 属性注解`@Column`，`name` 对应数据库中对应的列名称，默认为属性转驼峰转下划线
 > - 属性注解`@OneToMany`， `clazz` 对应子类的类类型，`name` 对应该表数据标识在其子表中的字段名称
 > - 属性注解`@ManyToOne`，`name` 关联主表数据标识的列名称
