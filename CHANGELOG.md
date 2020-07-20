@@ -84,5 +84,5 @@ public class PersistenceLogObserverImpl implements PersistenceLogObserver {
     int delete(AbstractEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
 ```
 
-## 0.1.20 - 2020/07/20
+## 0.1.21 - 2020/07/20
 * Fix Transaction Bug.
