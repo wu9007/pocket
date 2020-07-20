@@ -59,6 +59,7 @@ public class SessionImpl extends AbstractSession {
             synchronized (CLOSE_LOCK) {
                 if (this.connection != null) {
                     ConnectionManager.getInstance().closeConnection(this.databaseNodeConfig.getNodeName(), this.connection);
+                    this.transaction.removeConnection();
                     this.transaction = null;
                     this.connection = null;
                     this.setClosed(true);
