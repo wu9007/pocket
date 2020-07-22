@@ -220,8 +220,17 @@ SQLQuery query = this.session.createSQLQuery("select uuid, code from tbl_order w
         .mapperColumn("label", "value")
         .setParameter("TYPE", types);
 List<Map<String, String>> orders = query.list();
-```
 
+// 批量语句执行
+SQLQuery queryInsert = this.session.createSQLQuery("insert into tbl_order(uuid,code,price) values(:UUID, :CODE, :PRICE)");
+for (int index = 0; index < 10; index++) {
+    queryInsert.setParameter("UUID", "2020" + index)
+            .setParameter("CODE", "C-00" + index)
+            .setParameter("PRICE", index)
+            .addBatch();
+}
+int[] rowInserts = queryInsert.executeBatch();
+```
 
 #### 使用 ProcessQuery 调用存储过程查询数据
 
@@ -262,6 +271,11 @@ public class UserRepositoryImpl extends AbstractRepository implements UserReposi
 
 ## TODO:
 - [ ] xml 中定义复杂查询
+- [ ] 根据实体自动创建表结构
+- [ ] 添加忽略自交字段注解
+- [ ] 语句加锁
+- [ ] 数据库用户名密码加密
+- [ ] 数据库用户名密码加密
 
 
 ## License
