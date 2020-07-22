@@ -86,3 +86,16 @@ public class PersistenceLogObserverImpl implements PersistenceLogObserver {
 
 ## 0.1.21 - 2020/07/20
 * Fix Transaction Bug.
+
+## 0.1.22 - 2020/07/22
+* 支持批量语句执行(需要注意是否开启事务)
+```java
+SQLQuery queryInsert = this.session.createSQLQuery("insert into tbl_order(uuid,code,price) values(:UUID, :CODE, :PRICE)");
+for (int index = 0; index < 10; index++) {
+    queryInsert.setParameter("UUID", "2020" + index)
+            .setParameter("CODE", "C-00" + index)
+            .setParameter("PRICE", index)
+            .addBatch();
+}
+int[] rowInserts = queryInsert.executeBatch();
+```
