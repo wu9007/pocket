@@ -30,7 +30,6 @@ _
 
 ```json
 pocket:
-  serverId: 200
   datasource:
     node:
       - url: jdbc:mysql://127.0.0.1:3306/pocket1
@@ -61,7 +60,7 @@ pocket:
 ### 主类
 
 ```java
-@Entity(table = "TBL_ORDER", tableId = 200)
+@Entity(table = "TBL_ORDER")
 public class Order extends BaseEntity {
     private static final long serialVersionUID = 2560385391551524826L;
 
@@ -90,7 +89,7 @@ public class Order extends BaseEntity {
 ### 明细类
 
 ```java
-@Entity(table = "TBL_COMMODITY", tableId = 201, businessName = "订单明细")
+@Entity(table = "TBL_COMMODITY", businessName = "订单明细")
 public class Commodity extends BaseEntity {
    private static final long serialVersionUID = -6711578420837877371L;
 
@@ -107,7 +106,7 @@ public class Commodity extends BaseEntity {
 ```
 
 > - 继承`BaseEntity`抽象类（数据标识为`String`）
-> - 类注解`@Entity`，`table` 对应数据库表名；`tableId` 对应数据库表标识，目的是为了在生成数据标识的时候区分表；`uuidGenerator` 对应主键生成策略，默认 `increment`，可通过集继承`AbstractUuidGenerator` 自定义主键生成策。
+> - 类注解`@Entity`，`table` 对应数据库表名；`uuidGenerator` 对应主键生成策略，默认 `increment`，可通过集继承`AbstractUuidGenerator` 自定义主键生成策。
 > - 属性注解`@Column`，`name` 对应数据库中对应的列名称，默认为属性转驼峰转下划线
 > - 属性注解`@OneToMany`， `clazz` 对应子类的类类型，`name` 对应该表数据标识在其子表中的字段名称
 > - 属性注解`@ManyToOne`，`name` 关联主表数据标识的列名称
@@ -221,8 +220,17 @@ SQLQuery query = this.session.createSQLQuery("select uuid, code from tbl_order w
         .mapperColumn("label", "value")
         .setParameter("TYPE", types);
 List<Map<String, String>> orders = query.list();
-```
 
+// 批量语句执行
+SQLQuery queryInsert = this.session.createSQLQuery("insert into tbl_order(uuid,code,price) values(:UUID, :CODE, :PRICE)");
+for (int index = 0; index < 10; index++) {
+    queryInsert.setParameter("UUID", "2020" + index)
+            .setParameter("CODE", "C-00" + index)
+            .setParameter("PRICE", index)
+            .addBatch();
+}
+int[] rowInserts = queryInsert.executeBatch();
+```
 
 #### 使用 ProcessQuery 调用存储过程查询数据
 
@@ -263,6 +271,11 @@ public class UserRepositoryImpl extends AbstractRepository implements UserReposi
 
 ## TODO:
 - [ ] xml 中定义复杂查询
+- [ ] 根据实体自动创建表结构
+- [ ] 添加忽略自交字段注解
+- [ ] 语句加锁
+- [ ] 数据库用户名密码加密
+- [ ] 数据库用户名密码加密
 
 
 ## License
