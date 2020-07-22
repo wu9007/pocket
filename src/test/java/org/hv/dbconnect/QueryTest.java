@@ -133,5 +133,28 @@ public class QueryTest {
         queryUpdate.execute();
         int rowUpdate = queryUpdate.execute();
         System.out.println(rowUpdate);
+        SQLQuery queryDelete = this.session.createSQLQuery("delete from tbl_order where uuid='00001'");
+        int rowDeleted = queryDelete.execute();
+        System.out.println(rowDeleted);
+    }
+
+    @Test
+    public void test10() throws SQLException {
+        SQLQuery queryInsert = this.session.createSQLQuery("insert into tbl_order(uuid,code,price) values(:UUID, :CODE, :PRICE)");
+        for (int index = 0; index < 10; index++) {
+            queryInsert.setParameter("UUID", "2020" + index)
+                    .setParameter("CODE", "C-00" + index)
+                    .setParameter("PRICE", index)
+                    .addBatch();
+        }
+        int[] rowInserts = queryInsert.executeBatch();
+        System.out.println(Arrays.toString(rowInserts));
+        SQLQuery queryDelete = this.session.createSQLQuery("delete from tbl_order where uuid = :UUID");
+        for (int index = 0; index < 10; index++) {
+            queryDelete.setParameter("UUID", "2020" + index)
+                    .addBatch();
+        }
+        int[] rowDeletes = queryDelete.executeBatch();
+        System.out.println(Arrays.toString(rowDeletes));
     }
 }

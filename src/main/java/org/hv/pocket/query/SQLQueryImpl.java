@@ -15,7 +15,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -39,12 +38,12 @@ public class SQLQueryImpl extends AbstractSqlQuery implements SQLQuery {
 
     @Override
     public int execute() throws SQLException {
-        return executeUpdate(sql);
+        return executeUpdate();
     }
 
     @Override
     public Object unique() throws SQLException {
-        ResultSet resultSet = executeQuery(sql);
+        ResultSet resultSet = executeQuery();
         if (resultSet.next()) {
             if (clazz != null) {
                 try {
@@ -62,14 +61,13 @@ public class SQLQueryImpl extends AbstractSqlQuery implements SQLQuery {
 
     @Override
     public <E> List<E> list() throws SQLException {
-        StringBuilder querySQL = new StringBuilder(this.sql);
         if (this.limited()) {
-            querySQL.append(" LIMIT ")
-                    .append(this.getStart())
-                    .append(CommonSql.COMMA)
-                    .append(this.getLimit());
+            super.sql = this.sql + " LIMIT " +
+                    this.getStart() +
+                    CommonSql.COMMA +
+                    this.getLimit();
         }
-        ResultSet resultSet = executeQuery(querySQL.toString());
+        ResultSet resultSet = executeQuery();
         List<E> results = new ArrayList<>();
         while (resultSet.next()) {
             if (clazz != null) {
@@ -104,42 +102,68 @@ public class SQLQueryImpl extends AbstractSqlQuery implements SQLQuery {
         return this;
     }
 
-    private ResultSet executeQuery(String sql) throws SQLException {
-        PreparedStatement preparedStatement = getPreparedStatement(sql);
-        return super.persistenceProxy.executeWithLog(preparedStatement, PreparedStatement::executeQuery);
+    @Override
+    public SQLQuery addBatch() throws SQLException {
+        this.completePreparedStatement();
+        super.batchExecution = true;
+        super.preparedStatement.addBatch();
+        return this;
     }
 
-    private int executeUpdate(String sql) throws SQLException {
-        PreparedStatement preparedStatement = getPreparedStatement(sql);
-        return super.persistenceProxy.executeWithLog(preparedStatement, PreparedStatement::executeUpdate);
+    @Override
+    public int[] executeBatch() throws SQLException {
+        if (!super.batchExecution) {
+            throw new SQLException("It is not currently in batch execution mode.");
+        }
+        return super.preparedStatement.executeBatch();
     }
 
-    private PreparedStatement getPreparedStatement(String sql) throws SQLException {
-        PreparedStatement preparedStatement;
+    private ResultSet executeQuery() throws SQLException {
+        this.completePreparedStatement();
+        return super.persistenceProxy.executeWithLog(super.preparedStatement, PreparedStatement::executeQuery);
+    }
+
+    private int executeUpdate() throws SQLException {
+        this.completePreparedStatement();
+        return super.persistenceProxy.executeWithLog(super.preparedStatement, PreparedStatement::executeUpdate);
+    }
+
+    private void completePreparedStatement() throws SQLException {
         String executeSql = sql;
-        if (this.parameterMap.size() > 0) {
-            List<ParameterTranslator> queryParameters = new LinkedList<>();
+        if (super.parameterMap.size() > 0) {
             Pattern pattern = Pattern.compile(SQL_PARAMETER_REGEX);
             Matcher matcher = pattern.matcher(sql);
             while (matcher.find()) {
                 String regexString = matcher.group();
                 String name = regexString.substring(1);
-                Object parameter = this.parameterMap.get(name);
+                if (!super.parameterMap.containsKey(name)) {
+                    throw new SQLException(String.format("Parameter %s was not found", name));
+                }
+                Object parameter = super.parameterMap.get(name);
                 if (parameter instanceof List) {
                     List<?> parameters = (List<?>) parameter;
-                    executeSql = executeSql.replaceAll(regexString, parameters.stream().map(item -> CommonSql.PLACEHOLDER).collect(Collectors.joining(",")));
-                    parameters.forEach(item -> queryParameters.add(ParameterTranslator.newInstance(item)));
+                    if (preparedStatement == null) {
+                        executeSql = executeSql.replaceAll(regexString, parameters.stream().map(item -> CommonSql.PLACEHOLDER).collect(Collectors.joining(",")));
+                    }
+                    parameters.forEach(item -> super.queryParameters.add(ParameterTranslator.newInstance(item)));
                 } else {
-                    executeSql = executeSql.replaceAll(regexString, CommonSql.PLACEHOLDER);
-                    queryParameters.add(ParameterTranslator.newInstance(parameter));
+                    if (preparedStatement == null) {
+                        executeSql = executeSql.replaceAll(regexString, CommonSql.PLACEHOLDER);
+                    }
+                    super.queryParameters.add(ParameterTranslator.newInstance(parameter));
                 }
             }
-            preparedStatement = this.connection.prepareStatement(executeSql);
-            PreparedStatementHandler.newInstance(preparedStatement).completionPreparedStatement(queryParameters);
+            if (super.preparedStatement == null) {
+                super.preparedStatement = super.connection.prepareStatement(executeSql);
+            }
+            PreparedStatementHandler.newInstance(super.preparedStatement).completionPreparedStatement(super.queryParameters);
+            super.parameterMap.clear();
+            super.queryParameters.clear();
         } else {
-            preparedStatement = this.connection.prepareStatement(executeSql);
+            if (super.preparedStatement == null) {
+                super.preparedStatement = super.connection.prepareStatement(executeSql);
+            }
         }
-        return preparedStatement;
     }
 
     private <T> T getObjects(ResultSet resultSet) throws SQLException {

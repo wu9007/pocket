@@ -57,4 +57,27 @@ public interface SQLQuery {
      * @return sql query
      */
     SQLQuery mapperColumn(String... columnNames);
+
+    /**
+     * Adds a set of parameters to this <code>PreparedStatement</code>
+     * object's batch of commands.
+     *
+     * @return sql query
+     * @throws SQLException e
+     */
+    SQLQuery addBatch() throws SQLException;
+
+    /**
+     * Submits a batch of commands to the database for execution and
+     * if all commands execute successfully, returns an array of update counts.
+     * The <code>int</code> elements of the array that is returned are ordered
+     * to correspond to the commands in the batch, which are ordered
+     * according to the order in which they were added to the batch.
+     *
+     * @return an array of update counts containing one element for each
+     * command in the batch.  The elements of the array are ordered according
+     * to the order in which commands were added to the batch.
+     * @throws SQLException e
+     */
+    int[] executeBatch() throws SQLException;
 }
