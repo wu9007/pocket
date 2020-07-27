@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 public class PersistenceProxy {
     private final Logger logger = LoggerFactory.getLogger(PersistenceProxy.class);
     private final DatabaseNodeConfig databaseNodeConfig;
+    private boolean showSqlLog;
     private final ExecutorService executorService;
     private Session session;
     private CriteriaImpl target;
@@ -39,6 +40,7 @@ public class PersistenceProxy {
     private PersistenceProxy(CriteriaImpl target) {
         this.target = target;
         this.databaseNodeConfig = target.databaseConfig;
+        this.showSqlLog = target.showSqlLog;
         this.session = target.getSession();
         this.clazz = target.getClazz();
         this.executorService = EnumPocketThreadPool.INSTANCE.getPersistenceLogExecutorService();
@@ -167,7 +169,7 @@ public class PersistenceProxy {
             String identifyFieldName = MapperFactory.getIdentifyFieldName(clazz.getName());
             Criteria selectCriteria = session.createCriteria(clazz);
             selectCriteria.withLog(false);
-            List<Serializable> ids = beforeMirror.stream().map(AbstractEntity::loadIdentify).collect(Collectors.toList());
+            List<String> ids = beforeMirror.stream().map(item -> (String) item.loadIdentify()).collect(Collectors.toList());
             selectCriteria.add(Restrictions.in(identifyFieldName, ids));
             return selectCriteria.list();
         } else {

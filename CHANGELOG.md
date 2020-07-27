@@ -98,4 +98,3 @@ for (int index = 0; index < 10; index++) {
             .addBatch();
 }
 int[] rowInserts = queryInsert.executeBatch();
-```

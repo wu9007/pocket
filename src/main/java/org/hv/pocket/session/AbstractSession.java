@@ -26,6 +26,7 @@ import java.util.stream.Stream;
  * @author wujianchuan 2019/1/9
  */
 abstract class AbstractSession implements Session {
+  
     final PersistenceProxy persistenceProxy;
     final DatabaseNodeConfig databaseNodeConfig;
     final String sessionName;
