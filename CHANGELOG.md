@@ -16,7 +16,85 @@ public class PersistenceLogObserverImpl implements PersistenceLogObserver {
     }
 }
 ```
+
 ## 0.1.10 - 2020/06/12
 * 启动时检测多数据源配置中的 `nodeName` 不可重复。
+
 ## 0.1.11 - 2020/06/26
 * 开关会话和事务打印日志改为debug。
+
+## 0.1.12 - 2020/07/01
+* 删除tableId，修改主键生成策略。
+* 添加数值类型的主键生成策略。
+
+## 0.1.13 - 2020/07/01
+* 可级联查询不清空过滤条件。
+* 将serverId从pocket配置中去除。
+
+## 0.1.15 - 2020/07/08
+* FIX BUG.
+
+## 0.1.16 - 2020/07/13
+* SQLQuery支持增删改。
+
+## 0.1.19 - 2020/07/17
+* 修改 Session 类：
+```java
+    /**
+     * 级联查询对象
+     *
+     * @param clazz    类类型
+     * @param identify 数据标识
+     * @return 实体对象
+     * @throws SQLException e
+     */
+    <T extends AbstractEntity> T findOne(Class<T> clazz, Serializable identify) throws SQLException;
+
+
+    /**
+     * 查询对象
+     *
+     * @param clazz    类类型
+     * @param identify 数据标识
+     * @param cascade  是否进行级联保存操作
+     * @return 实体对象
+     * @throws SQLException e
+     */
+    <T extends AbstractEntity> T findOne(Class<T> clazz, Serializable identify, boolean cascade) throws SQLException;
+
+    /**
+     * 级联删除
+     *
+     * @param entity 实体对象
+     * @return 影响行数
+     * @throws SQLException           语句异常
+     * @throws IllegalAccessException e
+     */
+    int delete(AbstractEntity entity) throws SQLException, IllegalAccessException;
+
+    /**
+     * 删除实体
+     *
+     * @param entity  实体对象
+     * @param cascade 是否进行级联更新操作
+     * @return 影响行数
+     * @throws SQLException           语句异常
+     * @throws IllegalAccessException e
+     */
+    int delete(AbstractEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
+```
+
+## 0.1.21 - 2020/07/20
+* Fix Transaction Bug.
+
+## 0.1.22 - 2020/07/22
+* 支持批量语句执行(需要注意是否开启事务)
+```java
+SQLQuery queryInsert = this.session.createSQLQuery("insert into tbl_order(uuid,code,price) values(:UUID, :CODE, :PRICE)");
+for (int index = 0; index < 10; index++) {
+    queryInsert.setParameter("UUID", "2020" + index)
+            .setParameter("CODE", "C-00" + index)
+            .setParameter("PRICE", index)
+            .addBatch();
+}
+int[] rowInserts = queryInsert.executeBatch();

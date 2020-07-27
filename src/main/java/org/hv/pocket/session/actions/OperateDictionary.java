@@ -30,7 +30,7 @@ public interface OperateDictionary {
 
 
     /**
-     * 查询对象
+     * 级联查询对象
      *
      * @param clazz    类类型
      * @param identify 数据标识
@@ -38,6 +38,18 @@ public interface OperateDictionary {
      * @throws SQLException e
      */
     <T extends AbstractEntity> T findOne(Class<T> clazz, Serializable identify) throws SQLException;
+
+
+    /**
+     * 查询对象
+     *
+     * @param clazz    类类型
+     * @param identify 数据标识
+     * @param cascade  是否进行级联保存操作
+     * @return 实体对象
+     * @throws SQLException e
+     */
+    <T extends AbstractEntity> T findOne(Class<T> clazz, Serializable identify, boolean cascade) throws SQLException;
 
     /**
      * 查询所有
@@ -48,7 +60,16 @@ public interface OperateDictionary {
     <E extends AbstractEntity> List<E> list(Class<E> clazz);
 
     /**
-     * 强制通过数据库查询数据
+     * 查询所有
+     *
+     * @param clazz   类类型
+     * @param cascade 是否级联
+     * @return 所有实体对象
+     */
+    <E extends AbstractEntity> List<E> list(Class<E> clazz, boolean cascade);
+
+    /**
+     * 强制通过数据库级联查询数据
      *
      * @param clazz    类类型
      * @param identify 数据标识
@@ -56,6 +77,17 @@ public interface OperateDictionary {
      * @throws SQLException 语句异常
      */
     <T extends AbstractEntity> T findDirect(Class<T> clazz, Serializable identify) throws SQLException;
+
+    /**
+     * 强制通过数据库查询数据
+     *
+     * @param clazz    类类型
+     * @param identify 数据标识
+     * @param cascade  是否进行级联保存操作
+     * @return 实体对象
+     * @throws SQLException 语句异常
+     */
+    <T extends AbstractEntity> T findDirect(Class<T> clazz, Serializable identify, boolean cascade) throws SQLException;
 
     /**
      * 保存(NULL不纳入保存范围保留数据库默认值)
@@ -119,7 +151,7 @@ public interface OperateDictionary {
     int update(AbstractEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
 
     /**
-     * 删除实体
+     * 级联删除
      *
      * @param entity 实体对象
      * @return 影响行数
@@ -129,12 +161,13 @@ public interface OperateDictionary {
     int delete(AbstractEntity entity) throws SQLException, IllegalAccessException;
 
     /**
-     * 获取最大数据标识
+     * 删除实体
      *
-     * @param serverId 服务名
-     * @param clazz    实体类型
-     * @return 最大值
-     * @throws SQLException 语句异常
+     * @param entity  实体对象
+     * @param cascade 是否进行级联更新操作
+     * @return 影响行数
+     * @throws SQLException           语句异常
+     * @throws IllegalAccessException e
      */
-    long getMaxIdentify(Integer serverId, Class<? extends AbstractEntity> clazz) throws SQLException;
+    int delete(AbstractEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
 }

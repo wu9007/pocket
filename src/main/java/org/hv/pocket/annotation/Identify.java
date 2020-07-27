@@ -11,5 +11,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Identify {
-    GenerationType strategy() default GenerationType.STR_INCREMENT;
+    String strategy() default GenerationType.STR_INCREMENT;
 }

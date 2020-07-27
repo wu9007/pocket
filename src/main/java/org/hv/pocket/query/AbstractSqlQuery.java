@@ -1,9 +1,11 @@
 package org.hv.pocket.query;
 
 import org.hv.pocket.config.DatabaseNodeConfig;
+import org.hv.pocket.criteria.ParameterTranslator;
 import org.hv.pocket.criteria.PersistenceProxy;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,14 +15,17 @@ import java.util.Map;
  * @author wujianchuan 2019/1/3
  */
 abstract class AbstractSqlQuery {
+    boolean batchExecution = false;
     final PersistenceProxy persistenceProxy;
     final Connection connection;
     private final DatabaseNodeConfig databaseNodeConfig;
-    final String sql;
+    String sql;
+    PreparedStatement preparedStatement;
     private Integer start;
     private Integer limit;
     Class<?> clazz;
     final Map<String, Object> parameterMap = new HashMap<>();
+    final List<ParameterTranslator> queryParameters = new LinkedList<>();
     final List<String> columnNameList = new LinkedList<>();
 
     AbstractSqlQuery(String sql, Connection connection, DatabaseNodeConfig databaseNodeConfig) {

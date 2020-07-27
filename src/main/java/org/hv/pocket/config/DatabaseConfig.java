@@ -12,17 +12,7 @@ import java.util.List;
 @ConfigurationProperties(prefix = "pocket.datasource")
 public class DatabaseConfig {
 
-    private Integer serverId;
-
     private List<DatabaseNodeConfig> node;
-
-    public Integer getServerId() {
-        return serverId;
-    }
-
-    public void setServerId(Integer serverId) {
-        this.serverId = serverId;
-    }
 
     public List<DatabaseNodeConfig> getNode() {
         return node;

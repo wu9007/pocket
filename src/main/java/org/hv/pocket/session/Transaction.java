@@ -19,4 +19,9 @@ public interface Transaction {
      * 事务回滚
      */
     void rollBack();
+
+    /**
+     * 移除数据库连接
+     */
+    void removeConnection();
 }

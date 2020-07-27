@@ -3,11 +3,13 @@ package org.hv.pocket.session;
 import org.hv.pocket.config.DatabaseNodeConfig;
 import org.hv.pocket.connect.ConnectionManager;
 import org.hv.pocket.constant.CommonSql;
+import org.hv.pocket.criteria.Criteria;
 import org.hv.pocket.criteria.PersistenceProxy;
+import org.hv.pocket.criteria.Restrictions;
+import org.hv.pocket.identify.IdentifyGeneratorFactory;
 import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.model.MapperFactory;
 import org.hv.pocket.utils.ReflectUtils;
-import org.hv.pocket.identify.IdentifyGeneratorFactory;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -24,8 +26,7 @@ import java.util.stream.Stream;
  * @author wujianchuan 2019/1/9
  */
 abstract class AbstractSession implements Session {
-    private static final String SET_IDENTIFY_LOCK = "setIdentifyLock";
-
+  
     final PersistenceProxy persistenceProxy;
     final DatabaseNodeConfig databaseNodeConfig;
     final String sessionName;
@@ -81,15 +82,13 @@ abstract class AbstractSession implements Session {
             Serializable identify = entity.loadIdentify() == null ? IdentifyGeneratorFactory.getInstance()
                     .getIdentifyGenerator(MapperFactory.getIdentifyGenerationType(clazz.getName()))
                     .getIdentify(entity.getClass(), this) : entity.loadIdentify();
-            synchronized (SET_IDENTIFY_LOCK) {
-                entity.putIdentify(identify);
-                String sql = nullAble ? this.buildSaveSqlNullable(entity) : this.buildSaveSqlNotNull(entity);
-                preparedStatement = this.connection.prepareStatement(sql);
-                if (nullAble) {
-                    this.statementApplyNullable(entity, preparedStatement);
-                } else {
-                    this.statementApplyNotNull(entity, preparedStatement);
-                }
+            entity.putIdentify(identify);
+            String sql = nullAble ? this.buildSaveSqlNullable(entity) : this.buildSaveSqlNotNull(entity);
+            preparedStatement = this.connection.prepareStatement(sql);
+            if (nullAble) {
+                this.statementApplyNullable(entity, preparedStatement);
+            } else {
+                this.statementApplyNotNull(entity, preparedStatement);
             }
             effectRow = this.persistenceProxy.executeWithLog(preparedStatement, PreparedStatement::executeUpdate);
         } finally {
@@ -130,6 +129,29 @@ abstract class AbstractSession implements Session {
                     effectRow += details.size();
                 }
             }
+        }
+        return effectRow;
+    }
+
+    /**
+     * 删除数据，非级联删除
+     *
+     * @param entity  实例
+     * @param cascade 是否进行级联保存操作
+     * @return 影响行数
+     * @throws SQLException e
+     */
+    int deleteEntity(AbstractEntity entity, boolean cascade) throws SQLException {
+        Class<? extends AbstractEntity> clazz = entity.getClass();
+        Serializable identify = entity.loadIdentify();
+        String identifyFieldName = MapperFactory.getIdentifyFieldName(clazz.getName());
+        Object garbage = this.findOne(clazz, identify, cascade);
+        int effectRow = 0;
+        if (garbage != null) {
+            // delete main data
+            Criteria criteria = this.createCriteria(clazz);
+            criteria.add(Restrictions.equ(identifyFieldName, identify));
+            effectRow += criteria.delete();
         }
         return effectRow;
     }

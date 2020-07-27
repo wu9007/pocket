@@ -1,23 +1,19 @@
 package org.hv.pocket.lunch;
 
-import org.hv.pocket.annotation.Entity;
 import org.hv.pocket.config.DatabaseConfig;
 import org.hv.pocket.connect.ConnectionManager;
 import org.hv.pocket.exception.MapperException;
+import org.hv.pocket.identify.IdentifyGenerator;
+import org.hv.pocket.identify.IdentifyGeneratorFactory;
 import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.model.MapperFactory;
 import org.hv.pocket.session.SessionFactory;
-import org.hv.pocket.identify.IdentifyGenerator;
-import org.hv.pocket.identify.IdentifyGeneratorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @author wujianchuan 2019/1/12
@@ -39,24 +35,10 @@ public class PocketConfigDefault implements PocketConfig {
 
     @Override
     public void init() throws MapperException {
-            this.verifyEntity();
-            this.initConnectionManager();
-            this.initSessionFactory();
-            this.initIdentifyGenerator();
-            MapperFactory.init(context);
-    }
-
-    private void verifyEntity() throws MapperException {
-        Map<Integer, Boolean> counter = new HashMap<>(260);
-        if (this.entityList != null) {
-            for (Entity entityAnnotation : entityList.stream().map(entity -> entity.getClass().getAnnotation(Entity.class)).collect(Collectors.toList())) {
-                if (counter.containsKey(entityAnnotation.tableId())) {
-                    throw new MapperException(String.format("Table ID - %s repeated.", entityAnnotation.tableId()));
-                } else {
-                    counter.put(entityAnnotation.tableId(), true);
-                }
-            }
-        }
+        this.initConnectionManager();
+        this.initSessionFactory();
+        this.initIdentifyGenerator();
+        MapperFactory.init(context);
     }
 
     private void initConnectionManager() {
@@ -70,9 +52,7 @@ public class PocketConfigDefault implements PocketConfig {
 
     private void initIdentifyGenerator() {
         IdentifyGeneratorFactory identifyGeneratorFactory = IdentifyGeneratorFactory.getInstance();
-        Integer serverId = databaseConfig.getServerId();
         this.identifyGeneratorList.forEach(identifyGenerator -> {
-            identifyGenerator.setServerId(serverId);
             identifyGenerator.setGeneratorId();
             identifyGeneratorFactory.registerGenerator(identifyGenerator);
         });

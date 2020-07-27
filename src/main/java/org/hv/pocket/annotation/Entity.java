@@ -18,7 +18,5 @@ import java.lang.annotation.Target;
 public @interface Entity {
     String table();
 
-    int tableId();
-
     String businessName() default "";
 }

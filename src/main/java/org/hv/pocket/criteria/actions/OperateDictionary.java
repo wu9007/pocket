@@ -33,6 +33,15 @@ public interface OperateDictionary {
     <E extends AbstractEntity> List<E> list(boolean cascade);
 
     /**
+     * 获取所有数据,持有条件集合可重复利用
+     *
+     * @param cascade 是否级联查询
+     *
+     * @return 对象集合
+     */
+    <E extends AbstractEntity> List<E> listNotCleanRestrictions(boolean cascade);
+
+    /**
      * 获取第一条数据 (默认不进行级联查询)
      *
      * @return obj

@@ -125,6 +125,20 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
+    public <E extends AbstractEntity> List<E> listNotCleanRestrictions(boolean cascade) {
+        List<E> result = this.listNotCleanRestrictions();
+        if (result.size() > 0 && cascade) {
+            Field[] fields = MapperFactory.getOneToMayFields(this.clazz.getName());
+            if (fields.length > 0) {
+                for (AbstractEntity entity : result) {
+                    this.applyChildren(entity, fields);
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
     public <T extends AbstractEntity> T top() {
         return this.top(false);
     }

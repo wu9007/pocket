@@ -1,16 +1,15 @@
 package org.hv.pocket.session;
 
-import org.hv.pocket.connect.ConnectionManager;
-import org.hv.pocket.annotation.Entity;
 import org.hv.pocket.config.DatabaseNodeConfig;
+import org.hv.pocket.connect.ConnectionManager;
 import org.hv.pocket.criteria.Criteria;
 import org.hv.pocket.criteria.CriteriaImpl;
 import org.hv.pocket.criteria.Modern;
 import org.hv.pocket.criteria.Restrictions;
 import org.hv.pocket.exception.CriteriaException;
+import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.model.DetailInductiveBox;
 import org.hv.pocket.model.MapperFactory;
-import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.query.ProcessQuery;
 import org.hv.pocket.query.ProcessQueryImpl;
 import org.hv.pocket.query.SQLQuery;
@@ -60,7 +59,10 @@ public class SessionImpl extends AbstractSession {
             synchronized (CLOSE_LOCK) {
                 if (this.connection != null) {
                     ConnectionManager.getInstance().closeConnection(this.databaseNodeConfig.getNodeName(), this.connection);
-                    this.transaction = null;
+                    if (transaction != null) {
+                        this.transaction.removeConnection();
+                        this.transaction = null;
+                    }
                     this.connection = null;
                     this.setClosed(true);
                     this.logger.debug("Session 【{}】 turned off", this.sessionName);
@@ -96,8 +98,8 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public <T extends AbstractEntity> ProcessQuery<T> createProcessQuery(String processSQL) {
-        return new ProcessQueryImpl<>(processSQL, this.connection, this.databaseNodeConfig);
+    public <T extends AbstractEntity> ProcessQuery<T> createProcessQuery(String processSql) {
+        return new ProcessQueryImpl<>(processSql, this.connection, this.databaseNodeConfig);
     }
 
     @Override
@@ -111,16 +113,31 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
+    public <T extends AbstractEntity> T findOne(Class<T> clazz, Serializable identify, boolean cascade) throws SQLException {
+        return this.findDirect(clazz, identify, cascade);
+    }
+
+    @Override
     public <E extends AbstractEntity> List<E> list(Class<E> clazz) {
+        return this.list(clazz, true);
+    }
+
+    @Override
+    public <E extends AbstractEntity> List<E> list(Class<E> clazz, boolean cascade) {
         Criteria criteria = this.createCriteria(clazz);
-        return criteria.list(true);
+        return criteria.list(cascade);
     }
 
     @Override
     public <T extends AbstractEntity> T findDirect(Class<T> clazz, Serializable identify) throws SQLException {
+        return this.findDirect(clazz, identify, true);
+    }
+
+    @Override
+    public <T extends AbstractEntity> T findDirect(Class<T> clazz, Serializable identify, boolean cascade) throws SQLException {
         Criteria criteria = this.createCriteria(clazz);
         criteria.add(Restrictions.equ(MapperFactory.getIdentifyFieldName(clazz.getName()), identify));
-        return criteria.unique(true);
+        return criteria.unique(cascade);
     }
 
     @Override
@@ -216,15 +233,15 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public int delete(AbstractEntity entity) throws SQLException, IllegalAccessException {
-        Class<? extends AbstractEntity> clazz = entity.getClass();
-        String mainClassName = clazz.getName();
-        Serializable identify = entity.loadIdentify();
-        String identifyFieldName = MapperFactory.getIdentifyFieldName(clazz.getName());
+        return this.delete(entity, true);
+    }
 
-        Object garbage = this.findOne(clazz, identify);
+    @Override
+    public int delete(AbstractEntity entity, boolean cascade) throws SQLException, IllegalAccessException {
         int effectRow = 0;
-        if (garbage != null) {
-            // delete detail list data
+        Class<? extends AbstractEntity> clazz = entity.getClass();
+        if (cascade) {
+            String mainClassName = clazz.getName();
             Field[] fields = MapperFactory.getOneToMayFields(mainClassName);
             if (fields.length > 0) {
                 for (Field field : fields) {
@@ -232,28 +249,14 @@ public class SessionImpl extends AbstractSession {
                     List<? extends AbstractEntity> details = (List<? extends AbstractEntity>) field.get(entity);
                     if (details != null) {
                         for (AbstractEntity detail : details) {
-                            effectRow += this.delete(detail);
+                            effectRow += this.delete(detail, true);
                         }
                     }
                 }
             }
-
-            // delete main data
-            Criteria criteria = this.createCriteria(clazz);
-            criteria.add(Restrictions.equ(identifyFieldName, identify));
-            effectRow += criteria.delete();
         }
+        effectRow += this.deleteEntity(entity, cascade);
         return effectRow;
-    }
-
-    @Override
-    public long getMaxIdentify(Integer serverId, Class<? extends AbstractEntity> clazz) {
-        Entity annotation = clazz.getAnnotation(Entity.class);
-        String identifyFieldName = MapperFactory.getIdentifyFieldName(clazz.getName());
-        Criteria criteria = this.createCriteria(clazz);
-        criteria.add(Restrictions.like("uuid", "" + serverId + annotation.tableId() + "%"));
-        Object maxIdentify = criteria.max(identifyFieldName);
-        return maxIdentify == null ? 0 : (long) maxIdentify;
     }
 
     @Override

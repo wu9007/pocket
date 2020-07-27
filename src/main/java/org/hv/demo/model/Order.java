@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 /**
  * @author wujianchuan 2018/12/26
  */
-@Entity(table = "TBL_ORDER", tableId = 0, businessName = "单据")
+@Entity(table = "TBL_ORDER", businessName = "单据")
 public class Order extends BaseEntity {
     private static final long serialVersionUID = 2560385391551524826L;
 
