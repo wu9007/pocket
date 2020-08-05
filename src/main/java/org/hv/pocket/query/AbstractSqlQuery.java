@@ -18,7 +18,7 @@ abstract class AbstractSqlQuery {
     boolean batchExecution = false;
     final PersistenceProxy persistenceProxy;
     final Connection connection;
-    private final DatabaseNodeConfig databaseNodeConfig;
+    final DatabaseNodeConfig databaseNodeConfig;
     String sql;
     PreparedStatement preparedStatement;
     private Integer start;
@@ -27,6 +27,12 @@ abstract class AbstractSqlQuery {
     final Map<String, Object> parameterMap = new HashMap<>();
     final List<ParameterTranslator> queryParameters = new LinkedList<>();
     final List<String> columnNameList = new LinkedList<>();
+
+    AbstractSqlQuery(Connection connection, DatabaseNodeConfig databaseNodeConfig) {
+        this.connection = connection;
+        this.databaseNodeConfig = databaseNodeConfig;
+        this.persistenceProxy = PersistenceProxy.newInstance(this.databaseNodeConfig);
+    }
 
     AbstractSqlQuery(String sql, Connection connection, DatabaseNodeConfig databaseNodeConfig) {
         this.sql = sql;

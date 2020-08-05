@@ -18,14 +18,14 @@ public @interface ManyToOne {
      *
      * @return column name
      */
-    String columnName();
+    String columnName() default "";
 
     /**
      * 关联主类类类型
      *
      * @return 主类类类型
      */
-    Class clazz();
+    Class<?> clazz();
 
     /**
      * 主类关联属性名

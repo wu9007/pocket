@@ -6,6 +6,7 @@ pocket:
         driverName: com.mysql.cj.jdbc.Driver
         showSql: true
         collectLog: true
+        warningLogTimeout: 1000
         user: root
         password: root
         poolMiniSize: 10
@@ -19,6 +20,7 @@ pocket:
         driverName: com.mysql.cj.jdbc.Driver
         showSql: true
         collectLog: true
+        warningLogTimeout: 1000
         user: root
         password: root
         poolMiniSize: 10

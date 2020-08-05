@@ -7,7 +7,7 @@ import java.lang.reflect.Field;
 
 /**
  * @author wujianchuan 2018/12/26
- * Abandon the ship or abandon hope
+ * gu jin yong ren yi duo zhi bai, gu jin cai ren yi ao zhi bai
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class AbstractEntity implements Serializable, Cloneable {

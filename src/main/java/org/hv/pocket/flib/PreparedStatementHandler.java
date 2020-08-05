@@ -12,7 +12,7 @@ import java.util.List;
  * @author wujianchuan
  */
 public class PreparedStatementHandler {
-    private PreparedStatement preparedStatement;
+    private final PreparedStatement preparedStatement;
 
     private PreparedStatementHandler(PreparedStatement preparedStatement) {
         this.preparedStatement = preparedStatement;

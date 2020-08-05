@@ -1,6 +1,7 @@
 package org.hv.pocket.criteria;
 
 import org.hv.pocket.constant.DatasourceDriverTypes;
+import org.hv.pocket.constant.SqlFunctionTypes;
 import org.hv.pocket.constant.SqlOperateTypes;
 
 import java.util.HashMap;
@@ -30,15 +31,23 @@ public class SqlFactory {
         sqlOperateTypes.put(SqlOperateTypes.CONVERT, " CONVERT ");
         sqlOperateTypes.put(SqlOperateTypes.SIGNED, " SIGNED ");
         sqlOperateTypes.put(SqlOperateTypes.REGEXP, " REGEXP ");
+        //============================== MYSQL ==============================//
+        Map<String, String> mysqlFunctionTypes = new HashMap<>(20);
+        mysqlFunctionTypes.put(SqlFunctionTypes.NOW, " NOW() ");
+        //============================== ORACLE ==============================//
+        Map<String, String> oracleFunctionTypes = new HashMap<>(20);
+        oracleFunctionTypes.put(SqlFunctionTypes.NOW, " TO_CHAR(SYSDATE,'yyyy-mm-dd hh24:mi:ss') FROM DUAL ");
 
-        Map<String, String> mySqlOperateTypes = new HashMap<>(20);
-        mySqlOperateTypes.putAll(sqlOperateTypes);
-        SQL_POOL.put(DatasourceDriverTypes.MYSQL_DRIVER, mySqlOperateTypes);
+        Map<String, String> mysqlDialect = new HashMap<>(20);
+        mysqlDialect.putAll(sqlOperateTypes);
+        mysqlDialect.putAll(mysqlFunctionTypes);
+        SQL_POOL.put(DatasourceDriverTypes.MYSQL_DRIVER, mysqlDialect);
 
-        Map<String, String> oracleSqlOperateTypes = new HashMap<>(20);
-        oracleSqlOperateTypes.putAll(mySqlOperateTypes);
-        SQL_POOL.put(DatasourceDriverTypes.ORACLE_DRIVER_OLD, oracleSqlOperateTypes);
-        SQL_POOL.put(DatasourceDriverTypes.ORACLE_DRIVER, oracleSqlOperateTypes);
+        Map<String, String> oracleDialect = new HashMap<>(20);
+        oracleDialect.putAll(sqlOperateTypes);
+        oracleDialect.putAll(oracleFunctionTypes);
+        SQL_POOL.put(DatasourceDriverTypes.ORACLE_DRIVER_OLD, oracleDialect);
+        SQL_POOL.put(DatasourceDriverTypes.ORACLE_DRIVER, oracleDialect);
     }
 
     private static final SqlFactory OUR_INSTANCE = new SqlFactory();
@@ -50,7 +59,7 @@ public class SqlFactory {
     private SqlFactory() {
     }
 
-    String getSql(String driverName, String sqlOperateType) {
-        return SQL_POOL.get(driverName).get(sqlOperateType);
+    public String getSql(String driverName, String dialect) {
+        return SQL_POOL.get(driverName).get(dialect);
     }
 }

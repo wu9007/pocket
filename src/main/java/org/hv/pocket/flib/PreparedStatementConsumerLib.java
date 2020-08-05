@@ -25,8 +25,12 @@ final public class PreparedStatementConsumerLib {
         PREPARED_STRATEGY_POOL.put(long.class.getName(), (value) -> value.getPreparedStatement().setLong(value.getIndex(), (Long) value.getSqlBean().getTarget()));
         PREPARED_STRATEGY_POOL.put(float.class.getName(), (value) -> value.getPreparedStatement().setFloat(value.getIndex(), (Float) value.getSqlBean().getTarget()));
         PREPARED_STRATEGY_POOL.put(double.class.getName(), (value) -> value.getPreparedStatement().setDouble(value.getIndex(), (Double) value.getSqlBean().getTarget()));
+        PREPARED_STRATEGY_POOL.put(byte.class.getName(), (value) -> value.getPreparedStatement().setByte(value.getIndex(), (byte) value.getSqlBean().getTarget()));
+        PREPARED_STRATEGY_POOL.put(Byte.class.getName(), (value) -> value.getPreparedStatement().setByte(value.getIndex(), (Byte) value.getSqlBean().getTarget()));
         PREPARED_STRATEGY_POOL.put(byte[].class.getName(), (value) -> value.getPreparedStatement().setBytes(value.getIndex(), (byte[]) value.getSqlBean().getTarget()));
         PREPARED_STRATEGY_POOL.put(Byte[].class.getName(), (value) -> value.getPreparedStatement().setObject(value.getIndex(), value.getSqlBean().getTarget()));
+        PREPARED_STRATEGY_POOL.put(short.class.getName(), (value) -> value.getPreparedStatement().setShort(value.getIndex(), (short) value.getSqlBean().getTarget()));
+        PREPARED_STRATEGY_POOL.put(Short.class.getName(), (value) -> value.getPreparedStatement().setShort(value.getIndex(), (Short) value.getSqlBean().getTarget()));
         PREPARED_STRATEGY_POOL.put(Boolean.class.getName(), (value) -> value.getPreparedStatement().setBoolean(value.getIndex(), (Boolean) value.getSqlBean().getTarget()));
         PREPARED_STRATEGY_POOL.put(Integer.class.getName(), (value) -> value.getPreparedStatement().setInt(value.getIndex(), (Integer) value.getSqlBean().getTarget()));
         PREPARED_STRATEGY_POOL.put(BigDecimal.class.getName(), (value) -> value.getPreparedStatement().setBigDecimal(value.getIndex(), (BigDecimal) value.getSqlBean().getTarget()));

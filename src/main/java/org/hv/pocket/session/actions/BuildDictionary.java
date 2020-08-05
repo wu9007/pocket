@@ -13,6 +13,13 @@ public interface BuildDictionary {
     /**
      * 获取SQL查询对象
      *
+     * @return 查询对象
+     */
+    SQLQuery createSQLQuery();
+
+    /**
+     * 获取SQL查询对象
+     *
      * @param sql 查询语句
      * @return 查询对象
      */

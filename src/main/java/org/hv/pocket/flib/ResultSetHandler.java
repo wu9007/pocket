@@ -11,7 +11,7 @@ import java.sql.SQLException;
  * @author wujianchuan
  */
 public class ResultSetHandler {
-    private ResultSet resultSet;
+    private final ResultSet resultSet;
 
     private ResultSetHandler(ResultSet resultSet) {
         this.resultSet = resultSet;
@@ -26,7 +26,7 @@ public class ResultSetHandler {
         return ResultSetFunctionLib.get(field.getType().getName()).apply(resultSet, field.getName());
     }
 
-    public Object getMappingColumnValue(Class clazz, Field field) throws SQLException {
+    public Object getMappingColumnValue(Class<?> clazz, Field field) throws SQLException {
         field.setAccessible(true);
         PocketBiFunction<ResultSet, String, Object> strategy = ResultSetFunctionLib.get(field.getType().getName());
         if (strategy == null) {

@@ -1,6 +1,7 @@
 package org.hv.pocket.query;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -31,6 +32,8 @@ public interface SQLQuery {
      * @throws SQLException 语句异常
      */
     <E> List<E> list() throws SQLException;
+
+    LocalDateTime now() throws SQLException;
 
     /**
      * 分页

@@ -8,6 +8,8 @@ import org.hv.pocket.exception.MapperException;
 public interface PocketConfig {
     /**
      * 初始化持久化资源
+     *
+     * @throws MapperException e
      */
     void init() throws MapperException;
 }

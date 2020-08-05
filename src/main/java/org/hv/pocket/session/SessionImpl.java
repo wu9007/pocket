@@ -88,6 +88,11 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
+    public SQLQuery createSQLQuery() {
+        return new SQLQueryImpl(this.connection, this.databaseNodeConfig);
+    }
+
+    @Override
     public SQLQuery createSQLQuery(String sql) {
         return new SQLQueryImpl(sql, this.connection, this.databaseNodeConfig);
     }

@@ -1,5 +1,6 @@
 package org.hv.pocket.criteria;
 
+import com.mysql.cj.jdbc.ClientPreparedStatement;
 import org.hv.pocket.config.DatabaseNodeConfig;
 import org.hv.pocket.connect.ConnectionManager;
 import org.hv.pocket.flib.ResultSetHandler;
@@ -12,7 +13,6 @@ import org.hv.pocket.utils.EnumPocketThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -29,9 +29,8 @@ import java.util.stream.Collectors;
  * @author wujianchuan
  */
 public class PersistenceProxy {
-    private final Logger logger = LoggerFactory.getLogger(PersistenceProxy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceProxy.class);
     private final DatabaseNodeConfig databaseNodeConfig;
-    private boolean showSqlLog;
     private final ExecutorService executorService;
     private Session session;
     private CriteriaImpl target;
@@ -40,7 +39,6 @@ public class PersistenceProxy {
     private PersistenceProxy(CriteriaImpl target) {
         this.target = target;
         this.databaseNodeConfig = target.databaseConfig;
-        this.showSqlLog = target.showSqlLog;
         this.session = target.getSession();
         this.clazz = target.getClazz();
         this.executorService = EnumPocketThreadPool.INSTANCE.getPersistenceLogExecutorService();
@@ -74,10 +72,13 @@ public class PersistenceProxy {
         R result;
         try {
             result = function.apply(preparedStatement);
+        } catch (SQLException e) {
+            LOGGER.error(String.format("EXCEPTION ->> %s \nSQL ->> %s", e.getMessage(), sql));
+            throw e;
         } finally {
             //控制台打印sql语句及执行耗时
             long milliseconds = System.currentTimeMillis() - startTime;
-            this.consoleLog(sql, milliseconds);
+            this.log(sql, milliseconds);
             // 生成后镜像
             if (this.databaseNodeConfig.getCollectLog() && this.databaseNodeConfig.getShowSql()) {
                 this.pushLog(sql, null, null, milliseconds);
@@ -97,7 +98,7 @@ public class PersistenceProxy {
         } finally {
             //控制台打印sql语句及执行耗时
             long milliseconds = System.currentTimeMillis() - startTime;
-            this.consoleLog(sql, milliseconds);
+            this.log(sql, milliseconds);
             // 生成后镜像
             if (this.databaseNodeConfig.getCollectLog() && this.databaseNodeConfig.getShowSql()) {
                 this.pushLog(sql, null, null, milliseconds);
@@ -146,7 +147,7 @@ public class PersistenceProxy {
             ConnectionManager.closeIo(preparedStatement, null);
             //控制台打印sql语句及执行耗时
             long milliseconds = System.currentTimeMillis() - startTime;
-            this.consoleLog(sql, milliseconds);
+            this.log(sql, milliseconds);
             // 生成后镜像
             if (this.databaseNodeConfig.getCollectLog() && this.databaseNodeConfig.getShowSql() && result > 0) {
                 this.pushLog(sql, beforeMirror, this.loadAfterMirror(beforeMirror), milliseconds);
@@ -178,13 +179,16 @@ public class PersistenceProxy {
     }
 
     private String pickSql(PreparedStatement preparedStatement) {
-        String tempSql = preparedStatement.toString();
-        return tempSql.substring(tempSql.indexOf(":") + 2);
+        return ((ClientPreparedStatement) preparedStatement).getPreparedSql();
     }
 
-    private void consoleLog(String sql, long milliseconds) {
+    private void log(String sql, long milliseconds) {
         if (this.databaseNodeConfig.getShowSql()) {
-            this.executorService.execute(() -> logger.info("【SQL】 {} \n 【Milliseconds】: {}", sql, milliseconds));
+            this.executorService.execute(() -> LOGGER.info("SQL ->> {} \nMilliseconds ->> {}ms", sql, milliseconds));
+        }
+        Long warningLogTimeOut = this.databaseNodeConfig.getWarningLogTimeout();
+        if (warningLogTimeOut != null && milliseconds > warningLogTimeOut) {
+            LOGGER.warn("SQL ->> {} \nMilliseconds ->> {}ms", sql, milliseconds);
         }
     }
 

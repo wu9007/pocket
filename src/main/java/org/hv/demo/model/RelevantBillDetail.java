@@ -25,7 +25,7 @@ public class RelevantBillDetail extends AbstractEntity {
     @Join(columnName = "TYPE", columnSurname = "TYPE_NAME", businessName = "订单支付方式", joinTable = "TBL_ORDER_TYPE", joinTableSurname = "T1", joinMethod = JoinMethod.LEFT, bridgeColumn = "UUID", destinationColumn = "NAME")
     private String typeName;
 
-    @ManyToOne(columnName = "RELEVANT_BILL_UUID", clazz = RelevantBill.class, upBridgeField = "id")
+    @ManyToOne(clazz = RelevantBill.class, upBridgeField = "id")
     private String relevantBillUuid;
 
     public String getUuid() {

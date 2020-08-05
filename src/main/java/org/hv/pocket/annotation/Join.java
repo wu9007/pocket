@@ -20,7 +20,7 @@ public @interface Join {
      *
      * @return Column Name
      */
-    String columnName();
+    String columnName() default "";
 
     /**
      * 数据库字段别名，查询时使用，不用于保存操作
@@ -72,7 +72,7 @@ public @interface Join {
     String bridgeColumn();
 
     /**
-     * 关联数据库字段
+     * 关联查询出的属性值，作为最终结果赋值给字段
      *
      * @return Column Value Name
      */

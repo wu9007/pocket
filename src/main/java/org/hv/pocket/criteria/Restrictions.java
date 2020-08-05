@@ -23,8 +23,10 @@ public class Restrictions implements SqlBean {
     private String source;
     private String sqlOperate;
     private Object target;
-    private Restrictions leftRestrictions;
-    private Restrictions rightRestrictions;
+    /**
+     * The 'OR' or 'AND' {@link SqlOperateTypes} is applied to this property
+     */
+    private Restrictions[] restrictions;
 
     private Restrictions(String source, String sqlOperate, Object target) {
         this.source = source;
@@ -36,10 +38,13 @@ public class Restrictions implements SqlBean {
         this.target = target;
     }
 
-    private Restrictions(Restrictions leftRestrictions, String sqlOperate, Restrictions rightRestrictions) {
-        this.leftRestrictions = leftRestrictions;
+    private Restrictions(Restrictions[] restrictions, String sqlOperate) {
         this.sqlOperate = sqlOperate;
-        this.rightRestrictions = rightRestrictions;
+        int minItemCount = 2;
+        if (restrictions.length < minItemCount) {
+            throw new CriteriaException("This operation requires at least two elements.");
+        }
+        this.restrictions = restrictions;
     }
 
     private Restrictions(Object target) {
@@ -101,11 +106,21 @@ public class Restrictions implements SqlBean {
     }
 
     public static Restrictions and(Restrictions leftRestrictions, Restrictions rightRestrictions) {
-        return new Restrictions(leftRestrictions, SqlOperateTypes.AND, rightRestrictions);
+        Restrictions[] restrictions = {leftRestrictions, rightRestrictions};
+        return Restrictions.and(restrictions);
+    }
+
+    public static Restrictions and(Restrictions... orRestrictionsList) {
+        return new Restrictions(orRestrictionsList, SqlOperateTypes.AND);
     }
 
     public static Restrictions or(Restrictions leftRestrictions, Restrictions rightRestrictions) {
-        return new Restrictions(leftRestrictions, SqlOperateTypes.OR, rightRestrictions);
+        Restrictions[] restrictions = {leftRestrictions, rightRestrictions};
+        return Restrictions.or(restrictions);
+    }
+
+    public static Restrictions or(Restrictions... orRestrictionsList) {
+        return new Restrictions(orRestrictionsList, SqlOperateTypes.OR);
     }
 
     String getSource() {
@@ -121,18 +136,11 @@ public class Restrictions implements SqlBean {
         return target;
     }
 
-    private Restrictions getLeftRestrictions() {
-        return leftRestrictions;
-    }
-
-    private Restrictions getRightRestrictions() {
-        return rightRestrictions;
-    }
-
     void pushTo(List<Restrictions> sortedRestrictionsList) {
-        if (this.getLeftRestrictions() != null && this.getRightRestrictions() != null) {
-            this.getLeftRestrictions().pushTo(sortedRestrictionsList);
-            this.getRightRestrictions().pushTo(sortedRestrictionsList);
+        if (this.restrictions != null) {
+            for (Restrictions restrictions : this.restrictions) {
+                restrictions.pushTo(sortedRestrictionsList);
+            }
         } else {
             if (!SqlOperateTypes.IS_NULL.equals(this.getSqlOperate()) && !SqlOperateTypes.IS_NOT_NULL.equals(this.getSqlOperate())) {
                 if (this.getTarget() instanceof List) {
@@ -155,7 +163,7 @@ public class Restrictions implements SqlBean {
     String parseSql(Class<? extends AbstractEntity> clazz, DatabaseNodeConfig databaseConfig) {
         StringBuilder sql = new StringBuilder();
         try {
-            if (this.getLeftRestrictions() == null) {
+            if (this.restrictions == null) {
                 if (AnnotationType.JOIN.equals(MapperFactory.getAnnotationType(clazz.getName(), this.getSource()))) {
                     Join join = (Join) MapperFactory.getAnnotation(clazz.getName(), this.getSource());
                     sql.append(join.joinTableSurname())
@@ -177,11 +185,14 @@ public class Restrictions implements SqlBean {
                     }
                 }
             } else {
-                sql.append(CommonSql.LEFT_BRACKET)
-                        .append(this.getLeftRestrictions().parseSql(clazz, databaseConfig))
-                        .append(this.sqlFactory.getSql(databaseConfig.getDriverName(), this.getSqlOperate()))
-                        .append(this.getRightRestrictions().parseSql(clazz, databaseConfig))
-                        .append(CommonSql.RIGHT_BRACKET);
+                sql.append(CommonSql.LEFT_BRACKET);
+                for (int index = 0; index < restrictions.length; index++) {
+                    if (index != 0) {
+                        sql.append(this.sqlFactory.getSql(databaseConfig.getDriverName(), this.getSqlOperate()));
+                    }
+                    sql.append(restrictions[index].parseSql(clazz, databaseConfig));
+                }
+                sql.append(CommonSql.RIGHT_BRACKET);
             }
         } catch (NullPointerException e) {
             throw new CriteriaException(String.format(POCKET_ILLEGAL_FIELD_EXCEPTION, this.getSource()));

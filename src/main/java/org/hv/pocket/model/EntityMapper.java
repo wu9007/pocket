@@ -12,7 +12,6 @@ import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.constant.StreamPredicates;
 import org.hv.pocket.exception.MapperException;
 import org.hv.pocket.exception.PocketIdentifyException;
-import org.hv.pocket.identify.GenerationType;
 import org.hv.pocket.utils.UnderlineHumpTranslator;
 
 import java.lang.annotation.Annotation;
@@ -180,10 +179,7 @@ class EntityMapper {
             if (column != null) {
                 fieldMapper.put(filedName, new FieldData(field, AnnotationType.COLUMN, column));
                 repositoryFields.add(field);
-                String columnName = column.name();
-                if (columnName.isEmpty()) {
-                    columnName = UnderlineHumpTranslator.humpToUnderline(filedName);
-                }
+                String columnName = getColumnName(filedName, column.name());
                 repositoryColumnNames.add(columnName);
                 repositoryColumnMapper.put(filedName, columnName);
                 viewFields.add(field);
@@ -202,11 +198,8 @@ class EntityMapper {
                     throw new PocketIdentifyException("Multiple identify fields detected.");
                 }
             } else if (join != null) {
-                String bridgeColumnSurname = join.columnSurname().trim();
-                String joinTableSurname = join.joinTableSurname().trim();
-                String joinTableName = join.joinTable();
-                String bridgeColumnName = join.bridgeColumn();
-                String destinationColumn = join.destinationColumn();
+                String bridgeColumnSurname = join.columnSurname().trim(), joinTableSurname = join.joinTableSurname().trim(), joinTableName = join.joinTable(), bridgeColumnName = join.bridgeColumn(), destinationColumn = join.destinationColumn();
+                String columnName = getColumnName(filedName, join.columnName());
                 fieldMapper.put(filedName, new FieldData(field, AnnotationType.JOIN, join));
                 viewFields.add(field);
                 viewColumnMapperWithTableAs.put(filedName,
@@ -217,7 +210,7 @@ class EntityMapper {
                 joinSqlList.add(join.joinMethod().getId()
                         + joinTableName + CommonSql.BLANK_SPACE + joinTableSurname
                         + CommonSql.ON
-                        + (join.columnName().contains(CommonSql.DOT) ? join.columnName() : tableName + CommonSql.DOT + join.columnName())
+                        + (columnName.contains(CommonSql.DOT) ? columnName : tableName + CommonSql.DOT + columnName)
                         + CommonSql.EQUAL_TO
                         + joinTableSurname + CommonSql.DOT + bridgeColumnName);
                 pushBusiness(businessFields, keyBusinessFields, businessMapper, field, filedName, join.businessName(), join.flagBusiness());
@@ -230,11 +223,12 @@ class EntityMapper {
             } else if (manyToOne != null) {
                 fieldMapper.put(filedName, new FieldData(field, AnnotationType.MANY_TO_ONE, manyToOne));
                 repositoryFields.add(field);
-                repositoryColumnNames.add(manyToOne.columnName());
-                repositoryColumnMapper.put(filedName, manyToOne.columnName());
+                String columnName = getColumnName(filedName, manyToOne.columnName());
+                repositoryColumnNames.add(columnName);
+                repositoryColumnMapper.put(filedName, columnName);
                 viewFields.add(field);
-                viewColumnMapperWithTableAs.put(filedName, tableName + CommonSql.DOT + manyToOne.columnName());
-                viewColumnMapper.put(filedName, manyToOne.columnName());
+                viewColumnMapperWithTableAs.put(filedName, tableName + CommonSql.DOT + columnName);
+                viewColumnMapper.put(filedName, columnName);
                 manyToOneUpMapper.put(manyToOne.clazz().getName(), manyToOne.upBridgeField());
             }
         }
@@ -244,6 +238,13 @@ class EntityMapper {
                 businessFields.toArray(new Field[0]), keyBusinessFields.toArray(new Field[0]), businessMapper,
                 oneToManyField.toArray(new Field[0]), onToManyClassMapper, oneToManyDownMapper,
                 manyToOneUpMapper, joinSqlList);
+    }
+
+    private static String getColumnName(String filedName, String columnName) {
+        if (columnName.isEmpty()) {
+            columnName = UnderlineHumpTranslator.humpToUnderline(filedName);
+        }
+        return columnName;
     }
 
     private EntityMapper(String tableName, Field identifyFile, String identifyColumnName, String generationType, Map<String, FieldData> fieldMapper,

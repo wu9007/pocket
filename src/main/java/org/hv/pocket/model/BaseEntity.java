@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  * @author wujianchuan 2018/12/26
- * Abandon the ship or abandon hope
+ * cun qi jue jiang, er qu qi fen ji.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class BaseEntity extends AbstractEntity {

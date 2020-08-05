@@ -157,4 +157,11 @@ public class QueryTest {
         int[] rowDeletes = queryDelete.executeBatch();
         System.out.println(Arrays.toString(rowDeletes));
     }
+
+    @Test
+    public void test11() throws SQLException {
+        SQLQuery query = this.session.createSQLQuery();
+        LocalDateTime localDateTime = query.now();
+        System.out.println(localDateTime.toString());
+    }
 }

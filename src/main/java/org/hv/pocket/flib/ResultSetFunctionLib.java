@@ -28,6 +28,8 @@ final public class ResultSetFunctionLib {
         RESULT_STRATEGY_POOL.put((long.class.getName()), ResultSet::getLong);
         RESULT_STRATEGY_POOL.put((boolean.class.getName()), ResultSet::getBoolean);
         RESULT_STRATEGY_POOL.put(byte[].class.getName(), ResultSet::getBytes);
+        RESULT_STRATEGY_POOL.put((Short.class.getName()), ResultSet::getShort);
+        RESULT_STRATEGY_POOL.put((Byte.class.getName()), ResultSet::getByte);
         RESULT_STRATEGY_POOL.put(Byte[].class.getName(), ResultSet::getBytes);
         RESULT_STRATEGY_POOL.put(Integer.class.getName(), ResultSet::getInt);
         RESULT_STRATEGY_POOL.put(Long.class.getName(), ResultSet::getLong);

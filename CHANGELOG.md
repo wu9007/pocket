@@ -98,3 +98,31 @@ for (int index = 0; index < 10; index++) {
             .addBatch();
 }
 int[] rowInserts = queryInsert.executeBatch();
+```
+
+# 0.1.23 - 2020/07/28
+* 查询当下时间：
+`LocalDateTime localDateTime = this.session.createSQLQuery().now()`
+
+#0.1.24 - 2020/07/29
+* Upgrade Criteria.or and Criteria.and
+```java
+@Test
+public void test28() {
+    Criteria criteria = this.session.createCriteria(Order.class);
+    criteria.add(Restrictions.and(
+            Restrictions.or(
+                    Restrictions.gt("price", 13),
+                    Restrictions.lt("price", 12.58),
+                    Restrictions.lt("type", "001")),
+            Restrictions.like("code", "%A%")
+    ))
+            .add(Sort.asc("code"));
+    List<Order> orderList = criteria.list();
+    orderList.forEach(order -> System.out.println(order.getPrice()));
+}
+```
+
+#0.1.26 - 2020/07/31
+- 语句执行时长大于`pocket.datasource.node.warningLogTimeout`设置的值时则打印警告日志到控制台和文件。
+- 语句执行失败后打印异常语句到控制台和文件。

@@ -2,6 +2,7 @@ package org.hv.dbconnect;
 
 import org.hv.Application;
 import org.hv.PocketExecutor;
+import org.hv.demo.model.Order;
 import org.hv.pocket.config.DatabaseConfig;
 import org.hv.pocket.criteria.Criteria;
 import org.hv.pocket.criteria.Modern;
@@ -10,7 +11,6 @@ import org.hv.pocket.criteria.Sort;
 import org.hv.pocket.session.Session;
 import org.hv.pocket.session.SessionFactory;
 import org.hv.pocket.session.Transaction;
-import org.hv.demo.model.Order;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -286,5 +286,30 @@ public class CriteriaTest {
                 .add(Sort.asc("sort"));
         Order order = criteria.top(false);
         System.out.println(order);
+    }
+
+    @Test
+    public void test27() {
+        Criteria criteria = this.session.createCriteria(Order.class);
+        criteria.add(Restrictions.like("code", "%A%"))
+                .add(Restrictions.or(Restrictions.gt("price", 13), Restrictions.lt("price", 12.58), Restrictions.lt("type", "001")))
+                .add(Sort.asc("code"));
+        List<Order> orderList = criteria.list();
+        orderList.forEach(order -> System.out.println(order.getPrice()));
+    }
+
+    @Test
+    public void test28() {
+        Criteria criteria = this.session.createCriteria(Order.class);
+        criteria.add(Restrictions.and(
+                Restrictions.or(
+                        Restrictions.gt("price", 13),
+                        Restrictions.lt("price", 12.58),
+                        Restrictions.lt("type", "001")),
+                Restrictions.like("code", "%A%")
+        ))
+                .add(Sort.asc("code"));
+        List<Order> orderList = criteria.list();
+        orderList.forEach(order -> System.out.println(order.getPrice()));
     }
 }

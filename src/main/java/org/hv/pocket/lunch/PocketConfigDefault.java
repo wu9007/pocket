@@ -23,13 +23,11 @@ public class PocketConfigDefault implements PocketConfig {
     private final DatabaseConfig databaseConfig;
     private final ApplicationContext context;
     private final List<IdentifyGenerator> identifyGeneratorList;
-    private final List<AbstractEntity> entityList;
 
     @Autowired
-    public PocketConfigDefault(DatabaseConfig databaseConfig, List<IdentifyGenerator> identifyGeneratorList, @Nullable List<AbstractEntity> entityList, ApplicationContext context) {
+    public PocketConfigDefault(DatabaseConfig databaseConfig, List<IdentifyGenerator> identifyGeneratorList, ApplicationContext context) {
         this.databaseConfig = databaseConfig;
         this.identifyGeneratorList = identifyGeneratorList;
-        this.entityList = entityList;
         this.context = context;
     }
 

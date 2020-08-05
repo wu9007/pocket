@@ -11,6 +11,7 @@ public class DatabaseNodeConfig {
     private String driverName;
     private Boolean showSql;
     private Boolean collectLog;
+    private Long warningLogTimeout;
     private String user;
     private String password;
 
@@ -60,6 +61,14 @@ public class DatabaseNodeConfig {
 
     public void setCollectLog(Boolean collectLog) {
         this.collectLog = collectLog;
+    }
+
+    public Long getWarningLogTimeout() {
+        return warningLogTimeout;
+    }
+
+    public void setWarningLogTimeout(Long warningLogTimeout) {
+        this.warningLogTimeout = warningLogTimeout;
     }
 
     public String getUser() {

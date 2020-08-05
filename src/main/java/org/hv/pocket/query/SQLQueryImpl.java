@@ -2,7 +2,9 @@ package org.hv.pocket.query;
 
 import org.hv.pocket.config.DatabaseNodeConfig;
 import org.hv.pocket.constant.CommonSql;
+import org.hv.pocket.constant.SqlFunctionTypes;
 import org.hv.pocket.criteria.ParameterTranslator;
+import org.hv.pocket.criteria.SqlFactory;
 import org.hv.pocket.flib.PreparedStatementHandler;
 import org.hv.pocket.flib.ResultSetHandler;
 import org.hv.pocket.model.MapperFactory;
@@ -12,6 +14,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -27,6 +31,10 @@ import static org.hv.pocket.constant.RegexString.SQL_PARAMETER_REGEX;
  * @author wujianchuan 2019/1/3
  */
 public class SQLQueryImpl extends AbstractSqlQuery implements SQLQuery {
+
+    public SQLQueryImpl(Connection connection, DatabaseNodeConfig databaseNodeConfig) {
+        super(connection, databaseNodeConfig);
+    }
 
     public SQLQueryImpl(String sql, Connection connection, DatabaseNodeConfig databaseNodeConfig) {
         super(sql, connection, databaseNodeConfig);
@@ -85,6 +93,15 @@ public class SQLQueryImpl extends AbstractSqlQuery implements SQLQuery {
     }
 
     @Override
+    public LocalDateTime now() throws SQLException {
+        super.sql = "SELECT " + SqlFactory.getInstance().getSql(super.databaseNodeConfig.getDriverName(), SqlFunctionTypes.NOW);
+        ResultSet resultSet = executeQuery();
+        resultSet.next();
+        Timestamp timestamp = getObjects(resultSet);
+        return timestamp.toLocalDateTime();
+    }
+
+    @Override
     public SQLQuery limit(int start, int limit) {
         this.setLimit(start, limit);
         return this;
@@ -115,7 +132,7 @@ public class SQLQueryImpl extends AbstractSqlQuery implements SQLQuery {
         if (!super.batchExecution) {
             throw new SQLException("It is not currently in batch execution mode.");
         }
-        return super.preparedStatement.executeBatch();
+        return super.persistenceProxy.executeWithLog(super.preparedStatement, PreparedStatement::executeBatch);
     }
 
     private ResultSet executeQuery() throws SQLException {

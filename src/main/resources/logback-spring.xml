@@ -1,52 +1,69 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<configuration>
+<configuration packagingData="true">
 
     <property name="FILE_LOG_PATTERN" value="%date{HH:mm:ss.SSS} [%thread] %-5level %logger{36}   %msg%n"/>
-    <property name="CONSOLE_LOG_PATTERN" value="%date{HH:mm:ss.SSS} %highlight(%-5level) [%green(%thread)] %magenta(%logger{36})  --  %cyan(%msg%n)"/>
+    <property name="CONSOLE_LOG_PATTERN"
+              value="%date{HH:mm:ss.SSS} %highlight(%-5level) [%green(%thread)] %magenta(%logger{36})  --  %cyan(%msg%n)"/>
+    <property name="log.path" value="../"/>
 
-    <appender name="consoleLog" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
-            <pattern>
-                ${CONSOLE_LOG_PATTERN}
-            </pattern>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
         </layout>
     </appender>
 
-    <appender name="fileInfoLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="INFO_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>ERROR</level>
-            <onMatch>DENY</onMatch>
-            <onMismatch>ACCEPT</onMismatch>
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
         </filter>
         <encoder>
-            <pattern>
-                ${FILE_LOG_PATTERN}
-            </pattern>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>utf-8</charset>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>/var/log/tomcat/homo/info.%d.log</fileNamePattern>
+            <fileNamePattern>${log.path}/logs/info/%d.log</fileNamePattern>
         </rollingPolicy>
+        <append>true</append>
     </appender>
 
-    <appender name="fileErrorLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>ERROR</level>
         </filter>
         <encoder>
-            <pattern>
-                ${FILE_LOG_PATTERN}
-            </pattern>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>utf-8</charset>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>/var/log/tomcat/homo/error.%d.log</fileNamePattern>
+            <fileNamePattern>${log.path}/logs/error/%d.log</fileNamePattern>
         </rollingPolicy>
+        <append>true</append>
+    </appender>
+
+    <appender name="WARN_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/logs/warn/%d.log</fileNamePattern>
+        </rollingPolicy>
+        <append>true</append>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>utf-8</charset>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>WARN</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
     </appender>
 
     <root level="info">
-        <appender-ref ref="consoleLog"/>
-        <appender-ref ref="fileInfoLog"/>
-        <appender-ref ref="fileErrorLog"/>
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="INFO_FILE"/>
+        <appender-ref ref="WARN_FILE"/>
+        <appender-ref ref="ERROR_FILE"/>
     </root>
 
 </configuration>
