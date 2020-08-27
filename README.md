@@ -56,7 +56,8 @@ public class Order extends BaseEntity {
     private static final long serialVersionUID = 2560385391551524826L;
 
     // name 默认根据属性名驼峰转大写下划线
-    @Column(name = "CODE")
+    // encryptModel 标注持久化时选择的加密方式以及查询时选择的解密方式
+    @Column(businessName = "编号", encryptMode = EncryptType.DES)
     private String code;
     @Column
     private BigDecimal price;
@@ -166,7 +167,9 @@ this.session.close();
 
 ```java
 Criteria criteria = this.session.createCriteria(Order.class);
-criteria.add(Restrictions.like("code", "%A%"))
+// specifyField 查询指定列
+criteria.specifyField("code", "price")
+        .add(Restrictions.like("code", "%A%"))
         .add(Restrictions.or(
             Restrictions.gt("price", 13), 
             Restrictions.lt("price", 12.58)
@@ -218,18 +221,18 @@ criteria.add(Restrictions.equ("uuid", 1011011L)).delete();
 
 | **Modifier and Type** | **Method and Description** |
 | :---: | --- |
-| <E extends AbstractEntity> List<E> | [list](.)()<br />非级联查询持久化对象集合 |
-| <E extends AbstractEntity> List<E> | [listNotCleanRestrictions](.)()<br />非级联查询持久化对象集合（不清空条件） |
-| <E extends AbstractEntity> List<E> | [list](.)(boolean cascade)<br />查询持久化对象集合（可选是否级联） |
-| <E extends AbstractEntity> List<E> | [listNotCleanRestrictions](.)(boolean cascade)<br />查询持久化对象集合（不清空条件、可选是否级联） |
-| <T extends AbstractEntity> T | [top](.)()<br />非查询_第一条数据_ |
+| <E extends AbstractEntity> List<E> | list()<br />非级联查询持久化对象集合 |
+| <E extends AbstractEntity> List<E> | listNotCleanRestrictions()<br />非级联查询持久化对象集合（不清空条件） |
+| <E extends AbstractEntity> List<E> | list(boolean cascade)<br />查询持久化对象集合（可选是否级联） |
+| <E extends AbstractEntity> List<E> | listNotCleanRestrictions(boolean cascade)<br />查询持久化对象集合（不清空条件、可选是否级联） |
+| <T extends AbstractEntity> T | top()<br />非查询_第一条数据_ |
 | <T extends AbstractEntity> T | top(boolean cascade)<br />_获取第一条数据（可选是否级联）_ |
-| Object | [max](.)(String field)<br />_查询最大值_ |
-| long | [count](.)()<br />_查询总数_ |
-| int | [delete](.)()<br />非级联删除数据 |
-| <T extends AbstractEntity> T | [unique](.)()<br />非级联查询单条数据 |
-| <T extends AbstractEntity> T | [unique](.)(boolean cascade)<br />查询单条数据（可选是否级联） |
-| int | [update](.)()<br />非级联更新数据 |
+| Object | max(String field)<br />_查询最大值_ |
+| long | count()<br />_查询总数_ |
+| int | delete()<br />非级联删除数据 |
+| <T extends AbstractEntity> T | unique()<br />非级联查询单条数据 |
+| <T extends AbstractEntity> T | unique(boolean cascade)<br />查询单条数据（可选是否级联） |
+| int | update()<br />非级联更新数据 |
 
 
 
@@ -297,7 +300,7 @@ Function<ResultSet, Order> mapperFunction = (resultSet) -> {
         order.setCode(resultSet.getString(1));
         return order;
     } catch (SQLException e) {
-        e.printStackTrace();
+        LOGGER.warn(e.getMessage());
         return null;
     }
 };
@@ -334,7 +337,6 @@ public class UserRepositoryImpl extends AbstractRepository implements UserReposi
 
 - [ ] xml 中定义复杂查询
 - [ ] 根据实体自动创建表结构
-- [ ] 添加忽略比较字段注解
 - [ ] 数据库用户名密码加密
 - [ ] 数据库用户名密码加密
 

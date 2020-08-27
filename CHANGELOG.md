@@ -126,3 +126,55 @@ public void test28() {
 #0.1.26 - 2020/07/31
 - 语句执行时长大于`pocket.datasource.node.warningLogTimeout`设置的值时则打印警告日志到控制台和文件。
 - 语句执行失败后打印异常语句到控制台和文件。
+
+#0.1.28 - 2020/08/07
+- @Column @ManyToOne 添加属性 ignoreCompare 标识在更新数据比较实体获取脏数据时是否忽略该属性（默认不忽略）
+
+# 0.1.32 - 2020/08/18
+- @Column添加encryptModel参数标注持久化时选择的加密方式以及查询时选择的解密方式。
+- 加密字段禁止使用PoEl表达式进行更新。
+- 使用SQLQuery更新加密字段时需要使用`EncryptUtil`手动进行加密。
+
+# 0.1.34 - 2020/08/18
+- oracle 添加 limit 方言。
+- CriteriaImpl 的 count() 返回值有 long 修改为 Number。
+
+# 0.1.37 - 2020/08/20
+- @Join 以相同方式关联同一张表则在生成的sql中以and链接（解决重复链接同一张表的问题）。
+
+# 0.1.38 - 2020/08/20
+- Criteria 添加方法 specifyField 指定部分查询列。
+```java
+Criteria criteria = this.session.createCriteria(Order.class);
+criteria.add(Restrictions.equ("code", "C-006"))
+        .add(Sort.asc("code"))
+        .specifyField("code", "price");
+List<Order> orderList = criteria.list();
+```
+
+# 0.1.39 - 2020/08/21
+- debug日志打印sql中的具体参数。
+# 0.1.40 - 2020/08/21
+- FIX Join bug。
+# 0.1.41 - 2020/08/21
+- FIX complete prepared statement bug.
+# 0.1.42 - 2020/08/26
+- PERF add oneToOne Annotation.
+```java
+public class Order {
+
+    @Column
+    private String typeUuid;
+    @OneToOne(ownField = "typeUuid", relatedField = "uuid")
+    private OrderType orderType;
+}
+
+public class OrderType {
+
+    @Identify
+    @Column
+    private String uuid;
+    @Column
+    private String name;
+}
+```

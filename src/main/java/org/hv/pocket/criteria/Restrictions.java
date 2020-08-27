@@ -123,12 +123,18 @@ public class Restrictions implements SqlBean {
         return new Restrictions(orRestrictionsList, SqlOperateTypes.OR);
     }
 
-    String getSource() {
+    @Override
+    public String getSource() {
         return source;
     }
 
     String getSqlOperate() {
         return sqlOperate;
+    }
+
+    @Override
+    public void setTarget(Object target) {
+        this.target = target;
     }
 
     @Override

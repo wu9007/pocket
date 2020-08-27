@@ -1,7 +1,7 @@
 pocket:
   datasource:
     node:
-      - url: jdbc:mysql://127.0.0.1:3306/home?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8
+      - url: jdbc:mysql://127.0.0.1:3306/homo?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8
         nodeName: mysql-01
         driverName: com.mysql.cj.jdbc.Driver
         showSql: true
@@ -15,7 +15,7 @@ pocket:
         retry: 5
         cacheSize: 1000
         session: homo,user
-      - url: jdbc:mysql://127.0.0.1:3306/home?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8
+      - url: jdbc:mysql://127.0.0.1:3306/homo?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8
         nodeName: mysql-01-02
         driverName: com.mysql.cj.jdbc.Driver
         showSql: true
@@ -39,3 +39,7 @@ spring:
     redis:
       repositories:
         enabled: false
+
+logging:
+  level:
+    org.hv: debug

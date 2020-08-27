@@ -9,7 +9,11 @@ import org.hv.pocket.criteria.Restrictions;
 import org.hv.pocket.identify.IdentifyGeneratorFactory;
 import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.model.MapperFactory;
+import org.hv.pocket.utils.EncryptUtil;
 import org.hv.pocket.utils.ReflectUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -26,7 +30,8 @@ import java.util.stream.Stream;
  * @author wujianchuan 2019/1/9
  */
 abstract class AbstractSession implements Session {
-  
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSession.class);
+
     final PersistenceProxy persistenceProxy;
     final DatabaseNodeConfig databaseNodeConfig;
     final String sessionName;
@@ -90,7 +95,7 @@ abstract class AbstractSession implements Session {
             } else {
                 this.statementApplyNotNull(entity, preparedStatement);
             }
-            effectRow = this.persistenceProxy.executeWithLog(preparedStatement, PreparedStatement::executeUpdate);
+            effectRow = this.persistenceProxy.executeWithLog(preparedStatement, PreparedStatement::executeUpdate, sql);
         } finally {
             ConnectionManager.closeIo(preparedStatement, null);
         }
@@ -168,9 +173,15 @@ abstract class AbstractSession implements Session {
             Field field = fields[valueIndex];
             field.setAccessible(true);
             try {
-                preparedStatement.setObject(valueIndex + 1, field.get(entity));
+                String encryptModel = MapperFactory.getEncryptModel(entity.getClass().getName(), field.getName());
+                Object fieldValue = field.get(entity);
+                // 判断是否需要加密持久化
+                if (fieldValue != null && !StringUtils.isEmpty(encryptModel)) {
+                    fieldValue = EncryptUtil.encrypt(encryptModel, "sward9007", fieldValue.toString());
+                }
+                preparedStatement.setObject(valueIndex + 1, fieldValue);
             } catch (SQLException | IllegalAccessException e) {
-                e.printStackTrace();
+                LOGGER.error(e.getMessage());
             }
         }
     }
@@ -270,6 +281,7 @@ abstract class AbstractSession implements Session {
                     try {
                         return field.get(entity) != null;
                     } catch (IllegalAccessException e) {
+                        LOGGER.warn(e.getMessage());
                         return false;
                     }
                 });

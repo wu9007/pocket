@@ -13,20 +13,22 @@ import java.util.List;
  */
 public class PreparedStatementHandler {
     private final PreparedStatement preparedStatement;
+    private final Class<?> clazz;
 
-    private PreparedStatementHandler(PreparedStatement preparedStatement) {
+    private PreparedStatementHandler(Class<?> clazz, PreparedStatement preparedStatement) {
+        this.clazz = clazz;
         this.preparedStatement = preparedStatement;
     }
 
-    public static PreparedStatementHandler newInstance(PreparedStatement preparedStatement) {
-        return new PreparedStatementHandler(preparedStatement);
+    public static PreparedStatementHandler newInstance(Class<?> clazz, PreparedStatement preparedStatement) {
+        return new PreparedStatementHandler(clazz, preparedStatement);
     }
 
     public void completionPreparedStatement(List<ParameterTranslator> parameters, List<Restrictions> restrictionsList) throws SQLException {
         this.completionPreparedStatement(parameters);
         for (int index = 0; index < restrictionsList.size(); index++) {
             Restrictions restrictions = restrictionsList.get(index);
-            PreparedSupplierValue preparedSupplierValue = new PreparedSupplierValue(preparedStatement, parameters.size() + index + 1, restrictions);
+            PreparedSupplierValue preparedSupplierValue = new PreparedSupplierValue(clazz, preparedStatement, parameters.size() + index + 1, restrictions);
             this.apply(preparedSupplierValue);
         }
     }
@@ -34,21 +36,24 @@ public class PreparedStatementHandler {
     public void completionPreparedStatement(List<ParameterTranslator> parameterTranslatorList) throws SQLException {
         for (int index = 0; index < parameterTranslatorList.size(); index++) {
             ParameterTranslator parameterTranslator = parameterTranslatorList.get(index);
-            PreparedSupplierValue preparedSupplierValue = new PreparedSupplierValue(preparedStatement, index + 1, parameterTranslator);
+            PreparedSupplierValue preparedSupplierValue = new PreparedSupplierValue(clazz, preparedStatement, index + 1, parameterTranslator);
             this.apply(preparedSupplierValue);
         }
     }
 
+    /**
+     * Sets the designated parameter to the given Java value.
+     *
+     * @param preparedSupplierValue box
+     * @throws SQLException e
+     */
     private void apply(PreparedSupplierValue preparedSupplierValue) throws SQLException {
         SqlBean sqlBean = preparedSupplierValue.getSqlBean();
         if (sqlBean.getTarget() != null) {
-            PreparedStatementConsumerLib.get(sqlBean.getTarget().getClass().getName()).accept(preparedSupplierValue);
+            String targetClassName = sqlBean.getTarget().getClass().getName();
+            PreparedStatementConsumerLib.get(targetClassName).accept(preparedSupplierValue);
         } else {
-            try {
-                preparedStatement.setObject(preparedSupplierValue.getIndex(), sqlBean.getTarget());
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            preparedStatement.setObject(preparedSupplierValue.getIndex(), null);
         }
     }
 }

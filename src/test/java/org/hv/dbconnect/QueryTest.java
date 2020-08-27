@@ -3,10 +3,12 @@ package org.hv.dbconnect;
 import org.hv.Application;
 import org.hv.demo.model.Order;
 import org.hv.demo.model.OrderView;
+import org.hv.pocket.constant.EncryptType;
 import org.hv.pocket.query.SQLQuery;
 import org.hv.pocket.session.Session;
 import org.hv.pocket.session.SessionFactory;
 import org.hv.pocket.session.Transaction;
+import org.hv.pocket.utils.EncryptUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -108,9 +110,8 @@ public class QueryTest {
 
     @Test
     public void test7() throws SQLException {
-        SQLQuery query = this.session.createSQLQuery("select CODE as code, PRICE as price from tbl_order where CODE = :ORDER_CODE AND DAY < :DAY", OrderView.class)
-                .setParameter("ORDER_CODE", "C-001")
-                .setParameter("DAY", new Date());
+        SQLQuery query = this.session.createSQLQuery("select CODE as code, PRICE as price, TIME as time from tbl_order where CODE = :ORDER_CODE", OrderView.class)
+                .setParameter("ORDER_CODE", EncryptUtil.encrypt(EncryptType.DES, "sward9007", "C-006"));
         List<OrderView> orders = query.list();
         System.out.println(orders.size());
     }
@@ -140,10 +141,10 @@ public class QueryTest {
 
     @Test
     public void test10() throws SQLException {
-        SQLQuery queryInsert = this.session.createSQLQuery("insert into tbl_order(uuid,code,price) values(:UUID, :CODE, :PRICE)");
+        SQLQuery queryInsert = this.session.createSQLQuery("insert into tbl_order(uuid,code,price) values(:ID, :IDCODE, :PRICE)");
         for (int index = 0; index < 10; index++) {
-            queryInsert.setParameter("UUID", "2020" + index)
-                    .setParameter("CODE", "C-00" + index)
+            queryInsert.setParameter("ID", "2220" + index)
+                    .setParameter("IDCODE", "C-00" + index)
                     .setParameter("PRICE", index)
                     .addBatch();
         }
@@ -151,7 +152,7 @@ public class QueryTest {
         System.out.println(Arrays.toString(rowInserts));
         SQLQuery queryDelete = this.session.createSQLQuery("delete from tbl_order where uuid = :UUID");
         for (int index = 0; index < 10; index++) {
-            queryDelete.setParameter("UUID", "2020" + index)
+            queryDelete.setParameter("UUID", "2220" + index)
                     .addBatch();
         }
         int[] rowDeletes = queryDelete.executeBatch();

@@ -5,6 +5,7 @@ import org.hv.pocket.exception.CriteriaException;
 import org.hv.pocket.exception.ErrorMessage;
 import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.model.MapperFactory;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -46,8 +47,14 @@ public class Modern implements SqlBean {
         return new Modern(poEl);
     }
 
+    @Override
     public String getSource() {
         return source;
+    }
+
+    @Override
+    public void setTarget(Object target) {
+        this.target = target;
     }
 
     @Override
@@ -72,6 +79,10 @@ public class Modern implements SqlBean {
             try {
                 while (fieldMatcher.find()) {
                     fieldName = fieldMatcher.group().substring(1);
+                    String encryptModel = MapperFactory.getEncryptModel(clazz.getName(), fieldName);
+                    if (!StringUtils.isEmpty(encryptModel)) {
+                        throw new CriteriaException(String.format("Encrypt field <<%s>> not support plEl.", fieldName));
+                    }
                     sql = sql.replace(fieldMatcher.group(), MapperFactory.getRepositoryColumnName(clazz.getName(), fieldName));
                 }
             } catch (NullPointerException e) {
@@ -79,11 +90,11 @@ public class Modern implements SqlBean {
             }
             while (valueMatcher.find()) {
                 sql = sql.replace(valueMatcher.group(), CommonSql.PLACEHOLDER);
-                parameters.add(ParameterTranslator.newInstance(parameterMap.get(valueMatcher.group().substring(1))));
+                parameters.add(ParameterTranslator.newInstance(fieldName, parameterMap.get(valueMatcher.group().substring(1))));
             }
             return sql;
         } else {
-            parameters.add(ParameterTranslator.newInstance(this.target));
+            parameters.add(ParameterTranslator.newInstance(this.source, this.target));
             return MapperFactory.getRepositoryColumnName(clazz.getName(), this.getSource()) + CommonSql.EQUAL_TO + CommonSql.PLACEHOLDER;
         }
     }

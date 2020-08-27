@@ -5,6 +5,7 @@ import org.hv.pocket.annotation.View;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 /**
  * @author wujianchuan
@@ -17,6 +18,8 @@ public class OrderView implements Serializable {
     private String code;
     @Column
     private BigDecimal price;
+    @Column
+    private LocalDateTime time;
 
     public String getCode() {
         return code;
@@ -32,5 +35,13 @@ public class OrderView implements Serializable {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    public LocalDateTime getTime() {
+        return time;
+    }
+
+    public void setTime(LocalDateTime time) {
+        this.time = time;
     }
 }

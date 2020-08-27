@@ -1,6 +1,5 @@
 package org.hv.pocket.criteria;
 
-import com.mysql.cj.jdbc.ClientPreparedStatement;
 import org.hv.pocket.config.DatabaseNodeConfig;
 import org.hv.pocket.connect.ConnectionManager;
 import org.hv.pocket.flib.ResultSetHandler;
@@ -9,16 +8,21 @@ import org.hv.pocket.logger.PersistenceLogSubject;
 import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.model.MapperFactory;
 import org.hv.pocket.session.Session;
+import org.hv.pocket.utils.EncryptUtil;
 import org.hv.pocket.utils.EnumPocketThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
@@ -66,8 +70,7 @@ public class PersistenceProxy {
      * @return result
      * @throws SQLException e
      */
-    public <R> R executeWithLog(PreparedStatement preparedStatement, PocketFunction<PreparedStatement, R> function) throws SQLException {
-        String sql = this.pickSql(preparedStatement);
+    public <R> R executeWithLog(PreparedStatement preparedStatement, PocketFunction<PreparedStatement, R> function, String sql) throws SQLException {
         long startTime = System.currentTimeMillis();
         R result;
         try {
@@ -89,8 +92,7 @@ public class PersistenceProxy {
 
     // =========================================== Package Private =========================================== //
 
-    ResultSet getResultSet(PreparedStatement preparedStatement) throws SQLException {
-        String sql = this.pickSql(preparedStatement);
+    ResultSet getResultSet(PreparedStatement preparedStatement, String sql) throws SQLException {
         long startTime = System.currentTimeMillis();
         try {
             // 执行语句
@@ -106,18 +108,31 @@ public class PersistenceProxy {
         }
     }
 
-    <E extends AbstractEntity> List<E> executeQuery() throws SQLException, IllegalAccessException, InstantiationException {
+    <E extends AbstractEntity> List<E> executeQuery(String sql, Set<String> specifyFieldNames) throws SQLException, IllegalAccessException, InstantiationException {
         PreparedStatement preparedStatement = target.getPreparedStatement();
         ResultSet resultSet = null;
         try {
             // 执行语句
-            resultSet = this.getResultSet(preparedStatement);
+            resultSet = this.getResultSet(preparedStatement, sql);
             ResultSetHandler resultSetHandler = ResultSetHandler.newInstance(resultSet);
             List<E> result = new ArrayList<>();
             while (resultSet.next()) {
                 E entity = (E) clazz.newInstance();
-                for (Field field : MapperFactory.getViewFields(clazz.getName())) {
-                    field.set(entity, resultSetHandler.getMappingColumnValue(clazz, field));
+                List<Field> allViewField = Arrays.asList(MapperFactory.getViewFields(clazz.getName()));
+                List<Field> fields = new LinkedList<>();
+                if (specifyFieldNames.isEmpty()) {
+                    fields.addAll(allViewField);
+                } else {
+                    fields.addAll(allViewField.stream().filter(field -> specifyFieldNames.contains(field.getName())).collect(Collectors.toList()));
+                }
+                for (Field field : fields) {
+                    Object columnValue = resultSetHandler.getMappingColumnValue(clazz, field);
+                    String encryptModel = MapperFactory.getEncryptModel(clazz.getName(), field.getName());
+                    // 判断是否需要解密
+                    if (columnValue != null && !StringUtils.isEmpty(encryptModel)) {
+                        columnValue = EncryptUtil.decrypt(encryptModel, "sward9007", columnValue.toString());
+                    }
+                    field.set(entity, columnValue);
                 }
                 result.add(entity);
             }
@@ -128,14 +143,13 @@ public class PersistenceProxy {
         }
     }
 
-    int executeUpdate() throws SQLException {
+    int executeUpdate(String sql) throws SQLException {
         // 生成前镜像
         List<? extends AbstractEntity> beforeMirror = new ArrayList<>();
         if (this.databaseNodeConfig.getCollectLog()) {
             beforeMirror = this.loadBeforeMirror();
         }
         PreparedStatement preparedStatement = target.getPreparedStatement();
-        String sql = this.pickSql(preparedStatement);
         long startTime = System.currentTimeMillis();
         int result = 0;
         try {
@@ -176,10 +190,6 @@ public class PersistenceProxy {
         } else {
             return new ArrayList<>();
         }
-    }
-
-    private String pickSql(PreparedStatement preparedStatement) {
-        return ((ClientPreparedStatement) preparedStatement).getPreparedSql();
     }
 
     private void log(String sql, long milliseconds) {

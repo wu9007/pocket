@@ -12,6 +12,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -30,6 +32,7 @@ import java.util.stream.IntStream;
 @SpringBootTest(classes = Application.class)
 public class SessionTest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionTest.class);
     private Session session;
     private Transaction transaction;
 
@@ -95,7 +98,7 @@ public class SessionTest {
             try {
                 this.session.save(order);
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOGGER.debug(e.getMessage());
             }
         });
     }
@@ -136,5 +139,22 @@ public class SessionTest {
         System.out.println(repositoryOrder.getCode());
         n = this.session.delete(repositoryOrder);
         System.out.println("删除条数：" + n);
+    }
+
+    @Test
+    public void test6() throws SQLException, IllegalAccessException {
+        RelevantBill newOrder = new RelevantBill();
+        newOrder.setCode("C-1001");
+        newOrder.setAvailable(true);
+
+        int n = this.session.save(newOrder, true);
+        System.out.println("保存条数：" + n);
+        newOrder.setCode("C-1010");
+        n = this.session.update(newOrder);
+        System.out.println("更新条数：" + n);
+        RelevantBill persistenceBill = this.session.findDirect(RelevantBill.class, newOrder.loadIdentify());
+        System.out.println(persistenceBill.getCode());
+        List<RelevantBill> relevantBills = this.session.list(RelevantBill.class);
+        System.out.println(relevantBills.size());
     }
 }

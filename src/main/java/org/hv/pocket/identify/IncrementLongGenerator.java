@@ -7,6 +7,7 @@ import org.hv.pocket.session.Session;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicLong;
@@ -32,9 +33,9 @@ public class IncrementLongGenerator extends AbstractIdentifyGenerator {
             synchronized (this) {
                 serialNumber = POOL.getOrDefault(tableName, new AtomicLong(0L));
                 if (serialNumber.get() == 0) {
-                    Long maxIdentify = this.getMaxIdentify(session, clazz);
-                    if (maxIdentify != null && maxIdentify > baseIdentify) {
-                        serialNumber.addAndGet(maxIdentify);
+                    Number maxIdentify = this.getMaxIdentify(session, clazz);
+                    if (maxIdentify != null && maxIdentify.longValue() > baseIdentify) {
+                        serialNumber.addAndGet(maxIdentify.longValue());
                     } else {
                         serialNumber.addAndGet(baseIdentify);
                     }
@@ -51,9 +52,9 @@ public class IncrementLongGenerator extends AbstractIdentifyGenerator {
         }
     }
 
-    private Long getMaxIdentify(Session session, Class<? extends AbstractEntity> clazz) {
+    private Number getMaxIdentify(Session session, Class<? extends AbstractEntity> clazz) {
         String identifyFieldName = MapperFactory.getIdentifyFieldName(clazz.getName());
         Criteria criteria = session.createCriteria(clazz);
-        return (Long) criteria.max(identifyFieldName);
+        return (Number) criteria.max(identifyFieldName);
     }
 }

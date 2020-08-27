@@ -56,4 +56,12 @@ public interface Criteria extends OperateDictionary {
      * @return Criteria
      */
     Criteria withLog(boolean withLog);
+
+    /**
+     * 指定要查询的列，如果不指定则查询所有列
+     *
+     * @param fieldNames 需要查询字段对应持久化类中的属性
+     * @return Criteria
+     */
+    Criteria specifyField(String... fieldNames);
 }

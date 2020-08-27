@@ -21,7 +21,8 @@ public interface SqlOperateTypes {
     String COUNT = "count";
     String DESC = "desc";
     String ASC = "asc";
-    String CONVERT = " convert ";
-    String SIGNED = " signed ";
+    String TO_NUM = "toNum";
     String REGEXP = " regexp ";
+    String NOW = "now";
+    String LIMIT = " limit ";
 }

@@ -60,9 +60,9 @@ public class CriteriaTest {
     @Test
     public void test1() {
         Criteria criteria = this.session.createCriteria(Order.class);
-        criteria.add(Restrictions.like("code", "%A%"))
-                .add(Restrictions.or(Restrictions.gt("price", 13), Restrictions.lt("price", 12.58)))
-                .add(Sort.asc("code"));
+        criteria.add(Restrictions.equ("code", "C-006"))
+                .add(Sort.asc("code"))
+                .specifyField("code", "price", "price");
         List<Order> orderList = criteria.list();
         orderList.forEach(order -> System.out.println(order.getPrice()));
     }
@@ -112,8 +112,10 @@ public class CriteriaTest {
     @Test
     public void test6() throws SQLException {
         Criteria criteria = this.session.createCriteria(Order.class);
-        criteria.add(Restrictions.equ("uuid", 11L));
+        criteria.specifyField("code", "day")
+                .add(Restrictions.equ("uuid", "20200817000002"));
         Order order = criteria.unique(true);
+        System.out.println(order);
     }
 
     @Test
@@ -131,7 +133,7 @@ public class CriteriaTest {
         criteria.add(Restrictions.equ("code", "C-001"));
         System.out.println(criteria.max("price"));
 
-        long count = criteria.add(Restrictions.like("code", "%001%")).count();
+        long count = (long) criteria.add(Restrictions.like("code", "%001%")).count();
         System.out.println(count);
     }
 
@@ -206,20 +208,19 @@ public class CriteriaTest {
 
     @Test
     public void test18() throws SQLException {
-        session.createCriteria(Order.class)
-                .add(Modern.setWithPoEl("#code  = CONCAT_WS('', #code, :STR_VALUE)"))
+        int n = session.createCriteria(Order.class)
                 .add(Modern.setWithPoEl("#price  = #price + :ADD_PRICE"))
-                .add(Restrictions.equ("uuid", "10"))
-                .setParameter("STR_VALUE", " - A")
-                .setParameter("ADD_PRICE", 100)
+                .add(Restrictions.equ("uuid", "20200817000002"))
+                .setParameter("ADD_PRICE", 10)
                 .update();
+        System.out.println(n);
     }
 
     @Test
     public void test19() throws SQLException {
         Criteria criteria = this.session.createCriteria(Order.class)
                 .add(Restrictions.equ("state", false));
-        long count = criteria.count();
+        long count = (long) criteria.count();
         System.out.println(count);
     }
 
@@ -242,9 +243,7 @@ public class CriteriaTest {
     @Test
     public void test22() throws SQLException {
         Criteria criteria = this.session.createCriteria(Order.class);
-        criteria.add(Restrictions.equ("typeName", "手机支付"))
-                .add(Restrictions.equ("type", "001"))
-                .add(Sort.asc("typeName"))
+        criteria.add(Sort.asc("typeName"))
                 .add(Sort.asc("type"))
                 .limit(0, 5);
         List<Order> orders = criteria.listNotCleanRestrictions();
@@ -255,7 +254,7 @@ public class CriteriaTest {
     @Test
     public void test23() throws SQLException {
         Criteria criteria = this.session.createCriteria(Order.class);
-        criteria.add(Modern.set("type", "001"))
+        criteria.add(Modern.set("code", "C-001"))
                 .update();
     }
 
@@ -309,6 +308,20 @@ public class CriteriaTest {
                 Restrictions.like("code", "%A%")
         ))
                 .add(Sort.asc("code"));
+        List<Order> orderList = criteria.list();
+        orderList.forEach(order -> System.out.println(order.getPrice()));
+    }
+
+    @Test
+    public void test29() {
+        Criteria criteria = this.session.createCriteria(Order.class);
+        criteria.add(Restrictions.equ("code", "C-006"))
+                .add(Sort.asc("code"));
+        List<Order> orderList = criteria.list();
+        orderList.forEach(order -> System.out.println(order.getPrice()));
+    }    @Test
+    public void test30() {
+        Criteria criteria = this.session.createCriteria(Order.class);
         List<Order> orderList = criteria.list();
         orderList.forEach(order -> System.out.println(order.getPrice()));
     }

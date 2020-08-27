@@ -4,6 +4,7 @@ import org.hv.pocket.annotation.Column;
 import org.hv.pocket.annotation.Entity;
 import org.hv.pocket.annotation.Identify;
 import org.hv.pocket.annotation.OneToMany;
+import org.hv.pocket.constant.EncryptType;
 import org.hv.pocket.model.AbstractEntity;
 
 import java.io.Serializable;
@@ -18,7 +19,7 @@ public class RelevantBill extends AbstractEntity {
     @Identify
     @Column(name = "UUID")
     private String id;
-    @Column(name = "CODE", businessName = "编号")
+    @Column(name = "CODE", businessName = "编号", encryptMode = EncryptType.DES)
     private String code;
     @Column(name = "AVAILABLE", businessName = "是否可用的")
     private Boolean available;

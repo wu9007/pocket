@@ -1,6 +1,10 @@
 package org.hv.pocket.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.hv.pocket.annotation.Column;
+import org.hv.pocket.annotation.ManyToOne;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -12,6 +16,7 @@ import java.lang.reflect.Field;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class AbstractEntity implements Serializable, Cloneable {
     private static final long serialVersionUID = -8735555543925687138L;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractEntity.class);
 
     /**
      * 为避免在每次做查询操作时使用反射为
@@ -38,6 +43,14 @@ public abstract class AbstractEntity implements Serializable, Cloneable {
         Field[] fields = MapperFactory.getRepositoryFields(this.getClass().getName());
         try {
             for (Field field : fields) {
+                Column column = field.getAnnotation(Column.class);
+                if (column != null && column.ignoreCompare()) {
+                    continue;
+                }
+                ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);
+                if (manyToOne != null && manyToOne.ignoreCompare()) {
+                    continue;
+                }
                 field.setAccessible(true);
                 Object value = field.get(this);
                 if (value != null) {
@@ -45,8 +58,7 @@ public abstract class AbstractEntity implements Serializable, Cloneable {
                 }
             }
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException(e.getMessage());
+            LOGGER.error(e.getMessage());
         }
         return hashCode;
     }
@@ -64,6 +76,14 @@ public abstract class AbstractEntity implements Serializable, Cloneable {
             Field[] fields = MapperFactory.getRepositoryFields(this.getClass().getName());
             try {
                 for (Field field : fields) {
+                    Column column = field.getAnnotation(Column.class);
+                    if (column != null && column.ignoreCompare()) {
+                        continue;
+                    }
+                    ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);
+                    if (manyToOne != null && manyToOne.ignoreCompare()) {
+                        continue;
+                    }
                     field.setAccessible(true);
                     Object otherValue = field.get(other);
                     Object ownValue = field.get(this);
@@ -85,15 +105,15 @@ public abstract class AbstractEntity implements Serializable, Cloneable {
                 }
                 return true;
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
-                throw new IllegalArgumentException(e.getMessage());
+                LOGGER.error(e.getMessage());
+                return false;
             }
         }
     }
 
     @Override
     public Object clone() {
-        Object o;
+        Object o = null;
         Field[] fields = MapperFactory.getRepositoryFields(this.getClass().getName());
         try {
             o = super.clone();
@@ -105,8 +125,7 @@ public abstract class AbstractEntity implements Serializable, Cloneable {
                 }
             }
         } catch (IllegalAccessException | CloneNotSupportedException e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException(e.getMessage());
+            LOGGER.error(e.getMessage());
         }
         return o;
     }

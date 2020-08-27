@@ -36,7 +36,6 @@ public interface OperateDictionary {
      * 获取所有数据,持有条件集合可重复利用
      *
      * @param cascade 是否级联查询
-     *
      * @return 对象集合
      */
     <E extends AbstractEntity> List<E> listNotCleanRestrictions(boolean cascade);
@@ -69,7 +68,7 @@ public interface OperateDictionary {
      *
      * @return long
      */
-    long count() throws SQLException;
+    Number count() throws SQLException;
 
     /**
      * 删除数据
@@ -83,16 +82,15 @@ public interface OperateDictionary {
      *
      * @return 对象
      */
-    <T extends AbstractEntity> T unique() throws SQLException;
+    <T extends AbstractEntity> T unique();
 
     /**
      * 获取一条数据
      *
      * @param cascade 是否级联查询
      * @return 对象
-     * @throws SQLException e
      */
-    <T extends AbstractEntity> T unique(boolean cascade) throws SQLException;
+    <T extends AbstractEntity> T unique(boolean cascade);
 
     /**
      * 批量更新操作

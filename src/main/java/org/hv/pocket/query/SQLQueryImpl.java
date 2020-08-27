@@ -2,12 +2,14 @@ package org.hv.pocket.query;
 
 import org.hv.pocket.config.DatabaseNodeConfig;
 import org.hv.pocket.constant.CommonSql;
-import org.hv.pocket.constant.SqlFunctionTypes;
+import org.hv.pocket.constant.SqlOperateTypes;
 import org.hv.pocket.criteria.ParameterTranslator;
 import org.hv.pocket.criteria.SqlFactory;
 import org.hv.pocket.flib.PreparedStatementHandler;
 import org.hv.pocket.flib.ResultSetHandler;
 import org.hv.pocket.model.MapperFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -31,6 +33,7 @@ import static org.hv.pocket.constant.RegexString.SQL_PARAMETER_REGEX;
  * @author wujianchuan 2019/1/3
  */
 public class SQLQueryImpl extends AbstractSqlQuery implements SQLQuery {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SQLQueryImpl.class);
 
     public SQLQueryImpl(Connection connection, DatabaseNodeConfig databaseNodeConfig) {
         super(connection, databaseNodeConfig);
@@ -94,7 +97,7 @@ public class SQLQueryImpl extends AbstractSqlQuery implements SQLQuery {
 
     @Override
     public LocalDateTime now() throws SQLException {
-        super.sql = "SELECT " + SqlFactory.getInstance().getSql(super.databaseNodeConfig.getDriverName(), SqlFunctionTypes.NOW);
+        super.sql = "SELECT " + SqlFactory.getInstance().getSql(super.databaseNodeConfig.getDriverName(), SqlOperateTypes.NOW);
         ResultSet resultSet = executeQuery();
         resultSet.next();
         Timestamp timestamp = getObjects(resultSet);
@@ -132,21 +135,24 @@ public class SQLQueryImpl extends AbstractSqlQuery implements SQLQuery {
         if (!super.batchExecution) {
             throw new SQLException("It is not currently in batch execution mode.");
         }
-        return super.persistenceProxy.executeWithLog(super.preparedStatement, PreparedStatement::executeBatch);
+        return super.persistenceProxy.executeWithLog(super.preparedStatement, PreparedStatement::executeBatch, sql);
     }
 
     private ResultSet executeQuery() throws SQLException {
         this.completePreparedStatement();
-        return super.persistenceProxy.executeWithLog(super.preparedStatement, PreparedStatement::executeQuery);
+        return super.persistenceProxy.executeWithLog(super.preparedStatement, PreparedStatement::executeQuery, sql);
     }
 
     private int executeUpdate() throws SQLException {
         this.completePreparedStatement();
-        return super.persistenceProxy.executeWithLog(super.preparedStatement, PreparedStatement::executeUpdate);
+        return super.persistenceProxy.executeWithLog(super.preparedStatement, PreparedStatement::executeUpdate, sql);
     }
 
     private void completePreparedStatement() throws SQLException {
         String executeSql = sql;
+        if (!parameterMap.isEmpty()) {
+            LOGGER.debug(parameterMap.entrySet().stream().map((item) -> "<" + item.getKey() + ":" + item.getValue() + ">").collect(Collectors.joining("\t")));
+        }
         if (super.parameterMap.size() > 0) {
             Pattern pattern = Pattern.compile(SQL_PARAMETER_REGEX);
             Matcher matcher = pattern.matcher(sql);
@@ -165,7 +171,9 @@ public class SQLQueryImpl extends AbstractSqlQuery implements SQLQuery {
                     parameters.forEach(item -> super.queryParameters.add(ParameterTranslator.newInstance(item)));
                 } else {
                     if (preparedStatement == null) {
-                        executeSql = executeSql.replaceAll(regexString, CommonSql.PLACEHOLDER);
+                        executeSql = executeSql.replaceAll(regexString + ",", CommonSql.PLACEHOLDER + ",")
+                                .replaceAll(regexString + "\\)", CommonSql.PLACEHOLDER + "\\)")
+                                .replaceAll(regexString + " ", CommonSql.PLACEHOLDER + " ");
                     }
                     super.queryParameters.add(ParameterTranslator.newInstance(parameter));
                 }
@@ -173,7 +181,7 @@ public class SQLQueryImpl extends AbstractSqlQuery implements SQLQuery {
             if (super.preparedStatement == null) {
                 super.preparedStatement = super.connection.prepareStatement(executeSql);
             }
-            PreparedStatementHandler.newInstance(super.preparedStatement).completionPreparedStatement(super.queryParameters);
+            PreparedStatementHandler.newInstance(super.clazz, super.preparedStatement).completionPreparedStatement(super.queryParameters);
             super.parameterMap.clear();
             super.queryParameters.clear();
         } else {

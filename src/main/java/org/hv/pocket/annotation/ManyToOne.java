@@ -33,4 +33,11 @@ public @interface ManyToOne {
      * @return up bridge field.
      */
     String upBridgeField();
+
+    /**
+     * 在更新数据比较实体获取脏数据时是否忽略该属性（默认不忽略）
+     *
+     * @return ignore to compare or not
+     */
+    boolean ignoreCompare() default false;
 }

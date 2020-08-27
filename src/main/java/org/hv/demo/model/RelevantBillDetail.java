@@ -16,7 +16,7 @@ public class RelevantBillDetail extends AbstractEntity {
     @Identify
     @Column(name = "UUID")
     private String uuid;
-    @Column(name = "NAME")
+    @Column(name = "NAME", ignoreCompare = true)
     private String name;
     @Column(name = "PRICE", businessName = "金额")
     private BigDecimal price;

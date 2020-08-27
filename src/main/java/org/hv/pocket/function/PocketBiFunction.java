@@ -37,7 +37,6 @@ import java.util.Objects;
  * @param <T> the type of the first argument to the function
  * @param <U> the type of the second argument to the function
  * @param <R> the type of the result of the function
- *
  * @see PocketFunction
  * @since 1.8
  */
@@ -50,6 +49,7 @@ public interface PocketBiFunction<T, U, R> {
      * @param t the first function argument
      * @param u the second function argument
      * @return the function result
+     * @throws SQLException e
      */
     R apply(T t, U u) throws SQLException;
 
@@ -59,8 +59,8 @@ public interface PocketBiFunction<T, U, R> {
      * If evaluation of either function throws an exception, it is relayed to
      * the caller of the composed function.
      *
-     * @param <V> the type of output of the {@code after} function, and of the
-     *           composed function
+     * @param <V>   the type of output of the {@code after} function, and of the
+     *              composed function
      * @param after the function to apply after this function is applied
      * @return a composed function that first applies this function and then
      * applies the {@code after} function

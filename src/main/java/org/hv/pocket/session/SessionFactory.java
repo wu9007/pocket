@@ -6,6 +6,8 @@ import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.constant.DatasourceDriverTypes;
 import org.hv.pocket.exception.CriteriaException;
 import org.hv.pocket.exception.SessionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +21,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author wujianchuan 2018/12/31
  */
 public class SessionFactory {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionFactory.class);
 
     private static final ReentrantLock LOCK = new ReentrantLock(true);
     private static final AtomicInteger RETRY = new AtomicInteger(0);
@@ -78,7 +81,7 @@ public class SessionFactory {
                 }
                 return getSession(sessionName);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                LOGGER.error(e.getMessage());
             } finally {
                 LOCK.unlock();
             }

@@ -6,28 +6,42 @@ import org.hv.pocket.annotation.Identify;
 import org.hv.pocket.annotation.Join;
 import org.hv.pocket.annotation.ManyToOne;
 import org.hv.pocket.annotation.OneToMany;
+import org.hv.pocket.annotation.OneToOne;
 import org.hv.pocket.annotation.View;
 import org.hv.pocket.constant.AnnotationType;
 import org.hv.pocket.constant.CommonSql;
-import org.hv.pocket.constant.StreamPredicates;
 import org.hv.pocket.exception.MapperException;
+import org.hv.pocket.exception.PocketColumnException;
 import org.hv.pocket.exception.PocketIdentifyException;
 import org.hv.pocket.utils.UnderlineHumpTranslator;
+import org.springframework.util.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
  * @author wujianchuan
  */
 class EntityMapper {
+    private static final String SERIAL_VERSION_UID = "serialVersionUID";
+    public static final Predicate<Field> COLUMN_MAPPING_PREDICATE =
+            field -> !SERIAL_VERSION_UID.equals(field.getName())
+                    &&
+                    ((field.getAnnotation(Column.class) != null
+                            || field.getAnnotation(OneToOne.class) != null
+                            || field.getAnnotation(ManyToOne.class) != null
+                            || field.getAnnotation(OneToMany.class) != null
+                            || field.getAnnotation(Join.class) != null
+                    ));
 
     private final String tableName;
     private final String identifyColumnName;
@@ -38,6 +52,7 @@ class EntityMapper {
     private final Field[] repositoryFields;
     private final List<String> repositoryColumnNames;
     private final Map<String, String> repositoryColumnMapper;
+    private final Map<String, String> encryptMapper;
 
     private final Field[] viewFields;
     private final Map<String, String> viewColumnMapperWithTableAs;
@@ -46,6 +61,11 @@ class EntityMapper {
     private final Field[] businessFields;
     private final Field[] keyBusinessFields;
     private final Map<String, String> businessMapper;
+
+    private final Field[] oneToOneFields;
+    private final Map<String, Class<? extends AbstractEntity>> oneToOneClassMapper;
+    private final Map<String, String> oneToOneRelatedFieldMapper;
+    private final Map<String, String> oneToOneOwnFieldMapper;
 
     private final Field[] oneToManyFields;
     private final Map<String, Class<? extends AbstractEntity>> onToManyClassMapper;
@@ -57,7 +77,7 @@ class EntityMapper {
      * key->主类名称，value->关联的主类属性名
      */
     private final Map<String, String> manyToOneUpMapper;
-    private final List<String> joinSqlList;
+    private final Map<String, String> joinSqlMap;
 
     String getTableName() {
         return tableName;
@@ -115,6 +135,22 @@ class EntityMapper {
         return businessMapper;
     }
 
+    public Field[] getOneToOneFields() {
+        return oneToOneFields;
+    }
+
+    public Map<String, Class<? extends AbstractEntity>> getOneToOneClassMapper() {
+        return oneToOneClassMapper;
+    }
+
+    public Map<String, String> getOneToOneRelatedFieldMapper() {
+        return oneToOneRelatedFieldMapper;
+    }
+
+    public Map<String, String> getOneToOneOwnFieldMapper() {
+        return oneToOneOwnFieldMapper;
+    }
+
     Field[] getOneToManyFields() {
         return oneToManyFields;
     }
@@ -132,7 +168,11 @@ class EntityMapper {
     }
 
     List<String> getJoinSqlList() {
-        return joinSqlList;
+        return new ArrayList<>(joinSqlMap.values());
+    }
+
+    String getEncryptModel(String fieldName) {
+        return this.encryptMapper.get(fieldName);
     }
 
     public static EntityMapper newInstance(Class<?> clazz) throws MapperException {
@@ -151,7 +191,7 @@ class EntityMapper {
         }
         List<Field> allFields = new ArrayList<>();
         for (Class<?> superClass = clazz; superClass != null && superClass != Object.class && superClass != AbstractEntity.class; superClass = superClass.getSuperclass()) {
-            allFields.addAll(Arrays.stream(superClass.getDeclaredFields()).filter(StreamPredicates.COLUMN_MAPPING_PREDICATE).collect(Collectors.toList()));
+            allFields.addAll(Arrays.stream(superClass.getDeclaredFields()).filter(COLUMN_MAPPING_PREDICATE).collect(Collectors.toList()));
         }
         Field[] withAnnotationFields = new Field[allFields.size()];
         allFields.toArray(withAnnotationFields);
@@ -164,10 +204,14 @@ class EntityMapper {
         String identifyColumnName = null;
         String generationType = null;
         Map<String, FieldData> fieldMapper = new LinkedHashMap<>(16);
-        Map<String, String> repositoryColumnMapper = new LinkedHashMap<>(16), viewColumnMapperWithTableAs = new LinkedHashMap<>(16), viewColumnMapper = new LinkedHashMap<>(16), oneToManyDownMapper = new LinkedHashMap<>(16), manyToOneUpMapper = new LinkedHashMap<>(16), businessMapper = new LinkedHashMap<>(16);
-        List<Field> repositoryFields = new LinkedList<>(), viewFields = new LinkedList<>(), businessFields = new LinkedList<>(), keyBusinessFields = new LinkedList<>(), oneToManyField = new LinkedList<>();
-        Map<String, Class<? extends AbstractEntity>> onToManyClassMapper = new LinkedHashMap<>(16);
-        List<String> repositoryColumnNames = new LinkedList<>(), joinSqlList = new LinkedList<>();
+        Map<String, String> repositoryColumnMapper = new LinkedHashMap<>(16), viewColumnMapperWithTableAs = new LinkedHashMap<>(16), viewColumnMapper = new LinkedHashMap<>(16), oneToManyDownMapper = new LinkedHashMap<>(16), manyToOneUpMapper = new LinkedHashMap<>(16), businessMapper = new LinkedHashMap<>(16), encryptMapper = new HashMap<>(8), oneToOneRelatedFieldMapper = new LinkedHashMap<>(4), oneToOneOwnFieldMapper = new LinkedHashMap<>(4);
+        List<Field> repositoryFields = new LinkedList<>(), viewFields = new LinkedList<>(), businessFields = new LinkedList<>(), keyBusinessFields = new LinkedList<>(), oneToManyFields = new LinkedList<>(), oneToOneFields = new LinkedList<>();
+        Map<String, Class<? extends AbstractEntity>> onToManyClassMapper = new LinkedHashMap<>(16), oneToOneClassMapper = new LinkedHashMap<>();
+        List<String> repositoryColumnNames = new LinkedList<>();
+        // 相同方式关联相同表的不同字段使用AND拼接
+        Map<String, String> joinSqlMap = new LinkedHashMap<>(8);
+        // 相同方式关联相同表的相同字段不进行拼接
+        List<String> joinMethodTableColumnList = new ArrayList<>();
 
         Identify identify = null;
         for (Field field : withAnnotationFields) {
@@ -176,6 +220,7 @@ class EntityMapper {
             Join join = field.getAnnotation(Join.class);
             OneToMany oneToMany = field.getAnnotation(OneToMany.class);
             ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);
+            OneToOne oneToOne = field.getAnnotation(OneToOne.class);
             if (column != null) {
                 fieldMapper.put(filedName, new FieldData(field, AnnotationType.COLUMN, column));
                 repositoryFields.add(field);
@@ -197,6 +242,14 @@ class EntityMapper {
                 } else if (field.getAnnotation(Identify.class) != null) {
                     throw new PocketIdentifyException("Multiple identify fields detected.");
                 }
+
+                if (!StringUtils.isEmpty(column.encryptMode())) {
+                    if (String.class.equals(field.getType())) {
+                        encryptMapper.put(filedName, column.encryptMode());
+                    } else {
+                        throw new PocketColumnException("The encrypted field must be of type string.");
+                    }
+                }
             } else if (join != null) {
                 String bridgeColumnSurname = join.columnSurname().trim(), joinTableSurname = join.joinTableSurname().trim(), joinTableName = join.joinTable(), bridgeColumnName = join.bridgeColumn(), destinationColumn = join.destinationColumn();
                 String columnName = getColumnName(filedName, join.columnName());
@@ -207,17 +260,28 @@ class EntityMapper {
                                 + CommonSql.AS
                                 + bridgeColumnSurname);
                 viewColumnMapper.put(filedName, bridgeColumnSurname);
-                joinSqlList.add(join.joinMethod().getId()
-                        + joinTableName + CommonSql.BLANK_SPACE + joinTableSurname
-                        + CommonSql.ON
-                        + (columnName.contains(CommonSql.DOT) ? columnName : tableName + CommonSql.DOT + columnName)
-                        + CommonSql.EQUAL_TO
-                        + joinTableSurname + CommonSql.DOT + bridgeColumnName);
+                String joinMethodTableColumnStr = join.joinMethod() + "-" + joinTableSurname + "-" + join.bridgeColumn();
+                if (!joinMethodTableColumnList.contains(joinMethodTableColumnStr)) {
+                    String joinMapKey = join.joinMethod() + "-" + joinTableSurname;
+                    String joinSql = joinSqlMap.get(joinMapKey);
+                    if (joinSql != null) {
+                        joinSql += CommonSql.AND;
+                    } else {
+                        joinSql = join.joinMethod().getId()
+                                + joinTableName + CommonSql.BLANK_SPACE + joinTableSurname
+                                + CommonSql.ON;
+                    }
+                    joinSql += (columnName.contains(CommonSql.DOT) ? columnName : tableName + CommonSql.DOT + columnName)
+                            + CommonSql.EQUAL_TO
+                            + joinTableSurname + CommonSql.DOT + bridgeColumnName;
+                    joinSqlMap.put(joinMapKey, joinSql);
+                    joinMethodTableColumnList.add(joinMethodTableColumnStr);
+                }
                 pushBusiness(businessFields, keyBusinessFields, businessMapper, field, filedName, join.businessName(), join.flagBusiness());
             } else if (oneToMany != null) {
                 fieldMapper.put(filedName, new FieldData(field, AnnotationType.ONE_TO_MANY, oneToMany));
                 pushBusiness(businessFields, keyBusinessFields, businessMapper, field, filedName, oneToMany.businessName(), oneToMany.flagBusiness());
-                oneToManyField.add(field);
+                oneToManyFields.add(field);
                 onToManyClassMapper.put(filedName, oneToMany.clazz());
                 oneToManyDownMapper.put(filedName, oneToMany.bridgeField());
             } else if (manyToOne != null) {
@@ -230,14 +294,26 @@ class EntityMapper {
                 viewColumnMapperWithTableAs.put(filedName, tableName + CommonSql.DOT + columnName);
                 viewColumnMapper.put(filedName, columnName);
                 manyToOneUpMapper.put(manyToOne.clazz().getName(), manyToOne.upBridgeField());
+            } else if (oneToOne != null) {
+                fieldMapper.put(filedName, new FieldData(field, AnnotationType.ONE_TO_ONE, oneToOne));
+                oneToOneFields.add(field);
+                Class<?> oneClazz = field.getType();
+                if (!AbstractEntity.class.isAssignableFrom(oneClazz)) {
+                    throw new PocketColumnException("The declaring clazz of on-to-one field must be subclass of AbstractEntity.");
+                }
+                oneToOneClassMapper.put(filedName, (Class<? extends AbstractEntity>) field.getType());
+                oneToOneRelatedFieldMapper.put(filedName, oneToOne.relatedField());
+                oneToOneOwnFieldMapper.put(filedName, oneToOne.ownField());
             }
         }
         return new EntityMapper(tableName, identifyField, identifyColumnName, generationType, fieldMapper,
                 repositoryFields.toArray(new Field[0]), repositoryColumnNames, repositoryColumnMapper,
                 viewFields.toArray(new Field[0]), viewColumnMapperWithTableAs, viewColumnMapper,
                 businessFields.toArray(new Field[0]), keyBusinessFields.toArray(new Field[0]), businessMapper,
-                oneToManyField.toArray(new Field[0]), onToManyClassMapper, oneToManyDownMapper,
-                manyToOneUpMapper, joinSqlList);
+                oneToManyFields.toArray(new Field[0]), onToManyClassMapper, oneToManyDownMapper,
+                manyToOneUpMapper, joinSqlMap, encryptMapper,
+                oneToOneFields.toArray(new Field[0]), oneToOneClassMapper, oneToOneRelatedFieldMapper, oneToOneOwnFieldMapper
+        );
     }
 
     private static String getColumnName(String filedName, String columnName) {
@@ -252,7 +328,9 @@ class EntityMapper {
                          Field[] viewFields, Map<String, String> viewColumnMapperWithTableAs, Map<String, String> viewColumnMapper,
                          Field[] businessFields, Field[] keyBusinessFields, Map<String, String> businessMapper,
                          Field[] oneToManyFields, Map<String, Class<? extends AbstractEntity>> onToManyClassMapper, Map<String, String> oneToManyDownMapper,
-                         Map<String, String> manyToOneUpMapper, List<String> joinSqlList) {
+                         Map<String, String> manyToOneUpMapper, Map<String, String> joinSqlMap, Map<String, String> encryptMapper,
+                         Field[] oneToOneFields, Map<String, Class<? extends AbstractEntity>> oneToOneClassMapper, Map<String, String> oneToOneRelatedFieldMapper, Map<String, String> oneToOneOwnFieldMapper
+    ) {
         this.tableName = tableName;
         this.identifyField = identifyFile;
         this.identifyColumnName = identifyColumnName;
@@ -271,7 +349,12 @@ class EntityMapper {
         this.onToManyClassMapper = onToManyClassMapper;
         this.oneToManyDownMapper = oneToManyDownMapper;
         this.manyToOneUpMapper = manyToOneUpMapper;
-        this.joinSqlList = joinSqlList;
+        this.joinSqlMap = joinSqlMap;
+        this.encryptMapper = encryptMapper;
+        this.oneToOneFields = oneToOneFields;
+        this.oneToOneClassMapper = oneToOneClassMapper;
+        this.oneToOneRelatedFieldMapper = oneToOneRelatedFieldMapper;
+        this.oneToOneOwnFieldMapper = oneToOneOwnFieldMapper;
     }
 
     private static void pushBusiness(List<Field> businessFields, List<Field> keyBusinessFields, Map<String, String> businessMapper, Field field, String filedName, String businessName, boolean flagBusiness) {

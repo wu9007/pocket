@@ -5,10 +5,13 @@ import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.session.Session;
 
 import java.sql.Connection;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author wujianchuan 2019/1/10
@@ -26,6 +29,7 @@ abstract class AbstractCriteria {
     List<Sort> orderList = new LinkedList<>();
     Map<String, Object> parameterMap = new HashMap<>();
     List<ParameterTranslator> parameters = new LinkedList<>();
+    Set<String> specifyFieldNames = new HashSet<>();
     private Integer start;
     private Integer limit;
     StringBuilder completeSql = new StringBuilder();
@@ -89,5 +93,9 @@ abstract class AbstractCriteria {
 
     void showLog(boolean showLog) {
         this.showSqlLog = showLog;
+    }
+
+    void setSpecifyFieldNames(String... fieldNames) {
+        this.specifyFieldNames.addAll(Arrays.asList(fieldNames));
     }
 }

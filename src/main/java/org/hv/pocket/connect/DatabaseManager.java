@@ -3,6 +3,8 @@ package org.hv.pocket.connect;
 import org.hv.pocket.config.DatabaseNodeConfig;
 import org.hv.pocket.exception.ErrorMessage;
 import org.hv.pocket.exception.PocketConnectionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -14,6 +16,7 @@ import java.util.Map;
  * @author wujianchuan 2018/12/31
  */
 public class DatabaseManager {
+    private final Logger logger = LoggerFactory.getLogger(DatabaseManager.class);
     private static final Map<String, DatabaseManager> MANAGER_MAP = new HashMap<>(2);
     private final DatabaseNodeConfig config;
 
@@ -39,13 +42,18 @@ public class DatabaseManager {
         try {
             conn = DriverManager.getConnection(config.getUrl(), config.getUser(), config.getPassword());
         } catch (SQLException e) {
-            throw new PocketConnectionException(ErrorMessage.POCKET_CONNECT_DATABASE_EXCEPTION);
+            logger.error("\nurl:{}\nuser:{}\npassword:{}", config.getUrl(), config.getUser(), config.getPassword());
+            throw new PocketConnectionException(String.format(ErrorMessage.POCKET_CONNECT_DATABASE_EXCEPTION, e.getMessage()));
         }
         return conn;
     }
 
     Boolean isValidConnection(Connection connection) {
         try {
+            logger.debug("Connection {} null, {}, {}",
+                    (connection == null ? "is" : "isn't"),
+                    (connection != null && connection.isClosed() ? "Connection is closed" : ""),
+                    (connection != null && !connection.isValid(Math.toIntExact(config.getTimeout())) ? "Connection isn't valid" : ""));
             return connection != null && !connection.isClosed() && connection.isValid(Math.toIntExact(config.getTimeout()));
         } catch (SQLException e) {
             throw new PocketConnectionException(ErrorMessage.POCKET_CONNECTION_VARIABLE_EXCEPTION);

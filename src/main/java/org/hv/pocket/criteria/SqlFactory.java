@@ -1,17 +1,18 @@
 package org.hv.pocket.criteria;
 
 import org.hv.pocket.constant.DatasourceDriverTypes;
-import org.hv.pocket.constant.SqlFunctionTypes;
 import org.hv.pocket.constant.SqlOperateTypes;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiFunction;
 
 /**
  * @author wujianchuan 2019/1/14
  */
 public class SqlFactory {
-    private static final Map<String, Map<String, String>> SQL_POOL = new HashMap<>();
+    private static final Map<String, Map<String, String>> SQL_STR_POOL = new HashMap<>();
+    private static final Map<String, Map<String, BiFunction<String, Object[], String>>> SQL_FUNCTION_POOL = new HashMap<>();
 
     static {
         Map<String, String> sqlOperateTypes = new HashMap<>(20);
@@ -28,26 +29,60 @@ public class SqlFactory {
         sqlOperateTypes.put(SqlOperateTypes.IN, " IN ");
         sqlOperateTypes.put(SqlOperateTypes.NOT_IN, " NOT IN ");
         sqlOperateTypes.put(SqlOperateTypes.OR, " OR ");
-        sqlOperateTypes.put(SqlOperateTypes.CONVERT, " CONVERT ");
-        sqlOperateTypes.put(SqlOperateTypes.SIGNED, " SIGNED ");
         sqlOperateTypes.put(SqlOperateTypes.REGEXP, " REGEXP ");
-        //============================== MYSQL ==============================//
-        Map<String, String> mysqlFunctionTypes = new HashMap<>(20);
-        mysqlFunctionTypes.put(SqlFunctionTypes.NOW, " NOW() ");
-        //============================== ORACLE ==============================//
-        Map<String, String> oracleFunctionTypes = new HashMap<>(20);
-        oracleFunctionTypes.put(SqlFunctionTypes.NOW, " TO_CHAR(SYSDATE,'yyyy-mm-dd hh24:mi:ss') FROM DUAL ");
 
-        Map<String, String> mysqlDialect = new HashMap<>(20);
-        mysqlDialect.putAll(sqlOperateTypes);
-        mysqlDialect.putAll(mysqlFunctionTypes);
-        SQL_POOL.put(DatasourceDriverTypes.MYSQL_DRIVER, mysqlDialect);
+        //============================== MYSQL OPERATE ==============================//
+        Map<String, String> mysqlOperateTypes = new HashMap<>(20);
+        mysqlOperateTypes.put(SqlOperateTypes.TO_NUM, " CONVERT (?, SIGNED) ");
+        mysqlOperateTypes.put(SqlOperateTypes.NOW, " NOW() ");
 
-        Map<String, String> oracleDialect = new HashMap<>(20);
-        oracleDialect.putAll(sqlOperateTypes);
-        oracleDialect.putAll(oracleFunctionTypes);
-        SQL_POOL.put(DatasourceDriverTypes.ORACLE_DRIVER_OLD, oracleDialect);
-        SQL_POOL.put(DatasourceDriverTypes.ORACLE_DRIVER, oracleDialect);
+        Map<String, String> mysqlOperateDialect = new HashMap<>(20);
+        mysqlOperateDialect.putAll(sqlOperateTypes);
+        mysqlOperateDialect.putAll(mysqlOperateTypes);
+        SQL_STR_POOL.put(DatasourceDriverTypes.MYSQL_DRIVER, mysqlOperateDialect);
+
+        //============================== ORACLE OPERATE ==============================//
+        Map<String, String> oracleOperateTypes = new HashMap<>(20);
+        oracleOperateTypes.put(SqlOperateTypes.NOW, " TO_CHAR(SYSDATE,'yyyy-mm-dd hh24:mi:ss') FROM DUAL ");
+        oracleOperateTypes.put(SqlOperateTypes.TO_NUM, " TO_NUMBER (?) ");
+
+        Map<String, String> oracleOperateDialect = new HashMap<>(20);
+        oracleOperateDialect.putAll(sqlOperateTypes);
+        oracleOperateDialect.putAll(oracleOperateTypes);
+        SQL_STR_POOL.put(DatasourceDriverTypes.ORACLE_DRIVER_OLD, oracleOperateDialect);
+        SQL_STR_POOL.put(DatasourceDriverTypes.ORACLE_DRIVER, oracleOperateDialect);
+
+        //============================== MYSQL FUNCTION ==============================//
+        Map<String, BiFunction<String, Object[], String>> mysqlFunctionTypes = new HashMap<>(20);
+        mysqlFunctionTypes.put(SqlOperateTypes.LIMIT, (sql, args) -> sql + " limit " + args[0] + "," + args[1]);
+
+        Map<String, BiFunction<String, Object[], String>> mysqlFunctionDialect = new HashMap<>(20);
+        mysqlFunctionDialect.putAll(mysqlFunctionTypes);
+        SQL_FUNCTION_POOL.put(DatasourceDriverTypes.MYSQL_DRIVER, mysqlFunctionDialect);
+
+
+        //============================== ORACLE FUNCTION ==============================//
+        Map<String, BiFunction<String, Object[], String>> oracleFunctionTypes = new HashMap<>(20);
+        oracleFunctionTypes.put(SqlOperateTypes.LIMIT, (sql, args) -> {
+            String selectStr = sql.substring(sql.indexOf("SELECT") + 6, sql.indexOf("FROM"));
+            String tailStr = sql.substring(sql.indexOf(" FROM"));
+            String[] columns = selectStr.split(",");
+            for (int index = 0; index < columns.length; index++) {
+                String item = columns[index];
+                if (item.contains(" AS ")) {
+                    columns[index] = item.substring(item.indexOf(" AS ") + 4).replaceAll(" ", "");
+                } else {
+                    columns[index] = item.substring(item.indexOf(".") + 1).replaceAll(" ", "");
+                }
+            }
+            return "SELECT " + String.join(", ", columns) + " FROM (SELECT " + selectStr + ", ROWNUM " + tailStr
+                    + ") WHERE ROWNUM BETWEEN " + ((int) args[0] + 1) + " AND " + ((int) args[0] + (int) args[1]);
+        });
+
+        Map<String, BiFunction<String, Object[], String>> oracleFunctionDialect = new HashMap<>(20);
+        oracleFunctionDialect.putAll(oracleFunctionTypes);
+        SQL_FUNCTION_POOL.put(DatasourceDriverTypes.ORACLE_DRIVER_OLD, oracleFunctionDialect);
+        SQL_FUNCTION_POOL.put(DatasourceDriverTypes.ORACLE_DRIVER, oracleFunctionDialect);
     }
 
     private static final SqlFactory OUR_INSTANCE = new SqlFactory();
@@ -60,6 +95,10 @@ public class SqlFactory {
     }
 
     public String getSql(String driverName, String dialect) {
-        return SQL_POOL.get(driverName).get(dialect);
+        return SQL_STR_POOL.get(driverName).get(dialect);
+    }
+
+    public String applySql(String driverName, String dialect, String sql, Object[] args) {
+        return SQL_FUNCTION_POOL.get(driverName).get(dialect).apply(sql, args);
     }
 }

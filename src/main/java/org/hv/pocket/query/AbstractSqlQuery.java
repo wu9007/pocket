@@ -35,14 +35,14 @@ abstract class AbstractSqlQuery {
     }
 
     AbstractSqlQuery(String sql, Connection connection, DatabaseNodeConfig databaseNodeConfig) {
-        this.sql = sql;
+        this.sql = sql + " ";
         this.connection = connection;
         this.databaseNodeConfig = databaseNodeConfig;
         this.persistenceProxy = PersistenceProxy.newInstance(this.databaseNodeConfig);
     }
 
     AbstractSqlQuery(Connection connection, String sql, DatabaseNodeConfig databaseNodeConfig, Class<?> clazz) {
-        this.sql = sql;
+        this.sql = sql + " ";
         this.connection = connection;
         this.databaseNodeConfig = databaseNodeConfig;
         this.persistenceProxy = PersistenceProxy.newInstance(this.databaseNodeConfig);
@@ -66,4 +66,7 @@ abstract class AbstractSqlQuery {
         return limit;
     }
 
+    public PreparedStatement getPreparedStatement() {
+        return preparedStatement;
+    }
 }

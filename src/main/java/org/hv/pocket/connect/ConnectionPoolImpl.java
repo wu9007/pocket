@@ -25,7 +25,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
     private static final String RELEASE_LOCK = "RELEASE_MONITOR";
     private static final String DESTROY_LOCK = "DESTROY_MONITOR";
 
-    private static ThreadLocal<Integer> retryTimes = new ThreadLocal<>();
+    private static final ThreadLocal<Integer> RETRY_TIMES = new ThreadLocal<>();
 
     private final AtomicBoolean activated = new AtomicBoolean(false);
     /**
@@ -69,6 +69,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
             Connection connection = this.newConnection();
             this.freeConnections.add(connection);
             this.connectionCount.addAndGet(1);
+            logger.debug("Add connection <{}> to <{}> success and Free connection count：{}.", connection, this.databaseConfig.getNodeName(), this.freeConnections.size());
         }
         this.activated.compareAndSet(false, true);
     }
@@ -78,17 +79,21 @@ public class ConnectionPoolImpl implements ConnectionPool {
         synchronized (CONNECT_LOCK) {
             Connection connection;
             if (connectionCount.get() < this.databaseConfig.getPoolMaxSize()) {
+                logger.debug("Free connection count：{}.", this.freeConnections.size());
                 if (this.freeConnections.size() > 0) {
                     connection = this.freeConnections.pollFirst();
+                    logger.debug("Poll Connection-{} from free list\nThis connect {} valid.", connection, this.databaseManager.isValidConnection(connection) ? "is" : "isn't");
                     if (this.databaseManager.isValidConnection(connection)) {
                         this.activeConnections.add(connection);
                         currentConnection.set(connection);
                     } else {
                         this.connectionCount.decrementAndGet();
                         connection = this.getConnection();
+                        logger.debug("Get connection-{} success.", connection);
                     }
                 } else {
                     connection = this.newConnection();
+                    logger.debug("Creat a new connection-{}.", connection);
                     this.activeConnections.add(connection);
                     currentConnection.set(connection);
                     this.connectionCount.incrementAndGet();
@@ -99,21 +104,20 @@ public class ConnectionPoolImpl implements ConnectionPool {
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     logger.warn("the waiting thread is interrupted!");
-                    e.printStackTrace();
                 }
-                if (retryTimes.get() == null) {
-                    retryTimes.set(1);
+                if (RETRY_TIMES.get() == null) {
+                    RETRY_TIMES.set(1);
                 } else {
-                    retryTimes.set(retryTimes.get() + 1);
+                    RETRY_TIMES.set(RETRY_TIMES.get() + 1);
                 }
-                logger.debug("====================== The {} attempt to get a connection. ======================", retryTimes.get());
-                if (retryTimes.get() > this.databaseConfig.getRetry()) {
+                logger.debug("The {} attempt to get a connection.", RETRY_TIMES.get());
+                if (RETRY_TIMES.get() > this.databaseConfig.getRetry()) {
                     logger.warn("thread waiting for connection was time out!");
                     throw new ArrayIndexOutOfBoundsException("Sorry. The number of connections in the pool reaches the maximum number");
                 }
                 connection = this.getConnection();
             }
-            retryTimes.remove();
+            RETRY_TIMES.remove();
             logger.debug("【Get】 Connect: Active-{} Free-{}", this.getActiveNum(), this.freeConnections.size());
             return connection;
         }
@@ -141,12 +145,12 @@ public class ConnectionPoolImpl implements ConnectionPool {
             currentConnection.remove();
             if (this.databaseManager.isValidConnection(connection)) {
                 this.freeConnections.add(connection);
+                logger.debug("【Add to free】 Connect-{}: Active-{} Free-{}", connection, this.getActiveNum(), this.freeConnections.size());
             } else {
                 this.freeConnections.add(this.newConnection());
+                logger.debug("【New and add to free】 Connect-{}: Active-{} Free-{}", connection, this.getActiveNum(), this.freeConnections.size());
             }
-            logger.debug("【Release】 Connect: Active-{} Free-{}", this.getActiveNum(), this.freeConnections.size());
             RELEASE_LOCK.notifyAll();
-
         }
     }
 
@@ -161,7 +165,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
                     activeConnection.close();
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                logger.warn(e.getMessage());
             }
             this.activated.compareAndSet(true, false);
             this.freeConnections.clear();

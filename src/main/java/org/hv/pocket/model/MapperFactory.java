@@ -2,8 +2,8 @@ package org.hv.pocket.model;
 
 import org.hv.pocket.annotation.Entity;
 import org.hv.pocket.constant.AnnotationType;
+import org.hv.pocket.constant.EncryptType;
 import org.hv.pocket.exception.MapperException;
-import org.hv.pocket.identify.GenerationType;
 import org.springframework.context.ApplicationContext;
 
 import java.lang.annotation.Annotation;
@@ -198,6 +198,49 @@ public class MapperFactory {
     }
 
     /**
+     * 获取一对一的属性
+     *
+     * @param className class name
+     * @return one to one fields
+     */
+    public static Field[] getOneToOneFields(String className) {
+        return ENTITY_MAPPER_POOL.get(className).getOneToOneFields();
+    }
+
+    /**
+     * 获取关联类类型
+     *
+     * @param className main class name
+     * @param fieldName main class field name
+     * @return related class
+     */
+    public static Class<? extends AbstractEntity> getOneToOneClass(String className, String fieldName) {
+        return ENTITY_MAPPER_POOL.get(className).getOneToOneClassMapper().get(fieldName);
+    }
+
+    /**
+     * 获取对应关联类的关联属性的名称
+     *
+     * @param className main class name
+     * @param fieldName main class field name
+     * @return related field name
+     */
+    public static String getOneToOneRelationFieldName(String className, String fieldName) {
+        return ENTITY_MAPPER_POOL.get(className).getOneToOneRelatedFieldMapper().get(fieldName);
+    }
+
+    /**
+     * 获取一对一本类对应表的关联列对应本类属性的名称
+     *
+     * @param className main class name
+     * @param fieldName main class field name
+     * @return own field name
+     */
+    public static String getOneToOneOwnFieldName(String className, String fieldName) {
+        return ENTITY_MAPPER_POOL.get(className).getOneToOneOwnFieldMapper().get(fieldName);
+    }
+
+    /**
      * 获取一对多的属性
      *
      * @param className class name
@@ -254,6 +297,17 @@ public class MapperFactory {
         Field upBridgeField = MapperFactory.getField(mainClassName, upBridgeFiledName);
         upBridgeField.setAccessible(true);
         return upBridgeField.get(entity);
+    }
+
+    /**
+     * 获取字段加密方式
+     *
+     * @param className persistence class name
+     * @param fieldName persistence field name
+     * @return encrypt model{@link EncryptType}
+     */
+    public static String getEncryptModel(String className, String fieldName) {
+        return ENTITY_MAPPER_POOL.get(className).getEncryptModel(fieldName);
     }
 
     /**

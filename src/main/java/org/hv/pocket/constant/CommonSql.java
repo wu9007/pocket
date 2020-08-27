@@ -16,7 +16,6 @@ public interface CommonSql {
     String AND = " AND ";
     String ON = " ON ";
     String ORDER_BY = " ORDER BY ";
-    String LIMIT = " LIMIT ";
 
     String EQUAL_TO = " = ";
     String DOT = ".";

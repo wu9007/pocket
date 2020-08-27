@@ -7,17 +7,21 @@ import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.constant.SqlOperateTypes;
 import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.model.MapperFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
  * @author wujianchuan
  */
 public class SqlBody {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(SqlBody.class);
     private Class<? extends AbstractEntity> clazz;
     private final List<Modern> modernList;
     private final List<Restrictions> restrictionsList;
@@ -28,12 +32,14 @@ public class SqlBody {
         this.restrictionsList = restrictionsList;
         this.modernList = modernList;
         this.orderList = orderList;
+        this.debugLog();
     }
 
     private SqlBody(List<Restrictions> restrictionsList, List<Modern> modernList, List<Sort> orderList) {
         this.restrictionsList = restrictionsList;
         this.modernList = modernList;
         this.orderList = orderList;
+        this.debugLog();
     }
 
     public static SqlBody newInstance(Class<? extends AbstractEntity> clazz, List<Restrictions> restrictions, List<Modern> modernList, List<Sort> orderList) {
@@ -44,9 +50,9 @@ public class SqlBody {
         return new SqlBody(restrictions, modernList, orderList);
     }
 
-    String buildSelectSql(DatabaseNodeConfig databaseConfig) {
+    String buildSelectSql(DatabaseNodeConfig databaseConfig, Set<String> specifyFieldList) {
         return CommonSql.SELECT +
-                this.parseColumnSql() +
+                this.parseColumnSql(specifyFieldList) +
                 CommonSql.FROM +
                 MapperFactory.getTableName(clazz.getName()) +
                 this.parseJoinSql() +
@@ -91,7 +97,7 @@ public class SqlBody {
         return CommonSql.SELECT +
                 SqlOperateTypes.MAX +
                 CommonSql.LEFT_BRACKET +
-                (compareByNumType ? (SqlOperateTypes.CONVERT + CommonSql.LEFT_BRACKET + columnName + CommonSql.COMMA + SqlOperateTypes.SIGNED + CommonSql.RIGHT_BRACKET) : columnName) +
+                (compareByNumType ? (SqlFactory.getInstance().getSql(databaseConfig.getDriverName(), SqlOperateTypes.TO_NUM).replace(CommonSql.PLACEHOLDER, columnName)) : columnName) +
                 CommonSql.RIGHT_BRACKET +
                 CommonSql.FROM +
                 MapperFactory.getTableName(clazz.getName()) +
@@ -99,8 +105,18 @@ public class SqlBody {
                 this.parseRestrictionsSql(databaseConfig);
     }
 
-    private String parseColumnSql() {
-        return String.join(CommonSql.COMMA, MapperFactory.getViewColumnMapperWithAs(this.clazz.getName()).values());
+    private String parseColumnSql(Set<String> specifyFieldList) {
+        Map<String, String> viewColumnMapper = MapperFactory.getViewColumnMapperWithAs(this.clazz.getName());
+        Collection<String> columnCollection;
+        if (specifyFieldList.isEmpty()) {
+            columnCollection = viewColumnMapper.values();
+        } else {
+            columnCollection = new LinkedList<>();
+            for (String fieldName : specifyFieldList) {
+                columnCollection.add(viewColumnMapper.get(fieldName));
+            }
+        }
+        return String.join(CommonSql.COMMA, columnCollection);
     }
 
     private String parserModernSql(List<ParameterTranslator> parameters, Map<String, Object> parameterMap) {
@@ -136,6 +152,18 @@ public class SqlBody {
                             .collect(Collectors.joining(CommonSql.COMMA));
         } else {
             return "";
+        }
+    }
+
+    private void debugLog() {
+        if (!this.restrictionsList.isEmpty()) {
+            LOGGER.debug(this.restrictionsList.stream().map(restrictions -> "<" + restrictions.getSource() + " " + restrictions.getSqlOperate().toUpperCase() + " " + restrictions.getTarget() + ">").collect(Collectors.joining("\t")));
+        }
+        if (!this.modernList.isEmpty()) {
+            LOGGER.debug(this.modernList.stream().map(modern -> "<" + modern.getSource() + ":" + modern.getTarget() + ">").collect(Collectors.joining("\t")));
+        }
+        if (!this.orderList.isEmpty()) {
+            LOGGER.debug(this.orderList.stream().map(sort -> "<" + sort.getSource() + " " + sort.getSortType().toUpperCase() + ">").collect(Collectors.joining("\t")));
         }
     }
 }

@@ -3,6 +3,8 @@ package org.hv.demo.model;
 import org.hv.pocket.annotation.Column;
 import org.hv.pocket.annotation.Entity;
 import org.hv.pocket.annotation.Join;
+import org.hv.pocket.annotation.OneToOne;
+import org.hv.pocket.constant.EncryptType;
 import org.hv.pocket.constant.JoinMethod;
 import org.hv.pocket.model.BaseEntity;
 
@@ -19,7 +21,7 @@ public class Order extends BaseEntity {
 
     @Column(businessName = "关联单据的数据标识")
     private String relevantBillUuid;
-    @Column(businessName = "编号")
+    @Column(businessName = "编号", encryptMode = EncryptType.DES)
     private String code;
     @Column(businessName = "单价")
     private BigDecimal price;
@@ -33,6 +35,8 @@ public class Order extends BaseEntity {
     private int sort;
     @Column(businessName = "类型", flagBusiness = true)
     private String type;
+    @OneToOne(ownField = "type", relatedField = "uuid")
+    private OrderType orderType;
     @Join(columnName = "TYPE", columnSurname = "TYPE_NAME", businessName = "订单支付方式", joinTable = "TBL_ORDER_TYPE", joinTableSurname = "T2", joinMethod = JoinMethod.LEFT, bridgeColumn = "UUID", destinationColumn = "NAME")
     private String typeName;
 
@@ -113,5 +117,13 @@ public class Order extends BaseEntity {
 
     public void setTypeName(String typeName) {
         this.typeName = typeName;
+    }
+
+    public OrderType getOrderType() {
+        return orderType;
+    }
+
+    public void setOrderType(OrderType orderType) {
+        this.orderType = orderType;
     }
 }

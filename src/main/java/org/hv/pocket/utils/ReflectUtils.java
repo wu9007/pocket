@@ -1,6 +1,8 @@
 package org.hv.pocket.utils;
 
 import org.hv.pocket.model.MapperFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -10,6 +12,7 @@ import java.util.Arrays;
  */
 public class ReflectUtils {
     private static final ReflectUtils OUR_INSTANCE = new ReflectUtils();
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReflectUtils.class);
 
     public static ReflectUtils getInstance() {
         return OUR_INSTANCE;
@@ -44,7 +47,7 @@ public class ReflectUtils {
                         }
                         return !modernValue.equals(olderValue);
                     } catch (IllegalAccessException e) {
-                        e.printStackTrace();
+                        LOGGER.warn(e.getMessage());
                         return false;
                     }
                 })

@@ -1,5 +1,7 @@
 package org.hv.pocket.session;
 
+import org.hv.pocket.annotation.Column;
+import org.hv.pocket.annotation.ManyToOne;
 import org.hv.pocket.config.DatabaseNodeConfig;
 import org.hv.pocket.connect.ConnectionManager;
 import org.hv.pocket.criteria.Criteria;
@@ -14,12 +16,15 @@ import org.hv.pocket.query.ProcessQuery;
 import org.hv.pocket.query.ProcessQueryImpl;
 import org.hv.pocket.query.SQLQuery;
 import org.hv.pocket.query.SQLQueryImpl;
+import org.hv.pocket.utils.EncryptUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -180,14 +185,28 @@ public class SessionImpl extends AbstractSession {
         int effectRow = 0;
         if (older != null) {
             Field[] fields = reflectUtils.dirtyFieldFilter(entity, older);
-            if (fields.length > 0) {
+            boolean needUpdate = fields.length > 0 && Arrays.stream(fields).anyMatch(field -> {
+                Column column = field.getAnnotation(Column.class);
+                if (column != null && !column.ignoreCompare()) {
+                    return true;
+                }
+                ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);
+                return manyToOne != null && !manyToOne.ignoreCompare();
+            });
+            if (needUpdate) {
                 Criteria criteria = this.createCriteria(clazz);
                 String identifyFieldName = MapperFactory.getIdentifyFieldName(clazz.getName());
                 criteria.add(Restrictions.equ(identifyFieldName, entity.loadIdentify()));
                 for (Field field : fields) {
                     field.setAccessible(true);
                     try {
-                        criteria.add(Modern.set(field.getName(), field.get(entity)));
+                        Object value = field.get(entity);
+                        String encryptModel = MapperFactory.getEncryptModel(clazz.getName(), field.getName());
+                        // 判断是否需要加密持久化
+                        if (value != null && !StringUtils.isEmpty(encryptModel)) {
+                            value = EncryptUtil.encrypt(encryptModel, "sward9007", value.toString());
+                        }
+                        criteria.add(Modern.set(field.getName(), value));
                     } catch (IllegalAccessException e) {
                         throw new CriteriaException(e.getMessage());
                     }
