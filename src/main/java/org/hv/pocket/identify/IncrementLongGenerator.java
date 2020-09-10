@@ -7,16 +7,19 @@ import org.hv.pocket.session.Session;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.UnaryOperator;
 
 /**
  * @author wujianchuan 2019/1/2
  */
 @Component
 public class IncrementLongGenerator extends AbstractIdentifyGenerator {
+
+    private static final UnaryOperator<BigInteger> INTEGER_UNARY_OPERATOR = (item) -> item.add(BigInteger.ONE);
 
     @Override
     public void setGeneratorId() {
@@ -26,29 +29,33 @@ public class IncrementLongGenerator extends AbstractIdentifyGenerator {
     @Override
     public Serializable getIdentify(Class<? extends AbstractEntity> clazz, Session session) {
         String tableName = MapperFactory.getTableName(clazz.getName());
-        AtomicLong serialNumber = POOL.getOrDefault(tableName, new AtomicLong(0L));
+        AtomicReference<BigInteger> serialNumber = POOL.getOrDefault(tableName, new AtomicReference<>(BigInteger.ZERO));
         String localDateStr = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        long baseIdentify = Long.parseLong(localDateStr) * 1000000;
-        if (serialNumber.get() == 0) {
+        BigInteger baseIdentify = new BigInteger(localDateStr).multiply(new BigInteger("1000000"));
+        if (serialNumber.get().compareTo(BigInteger.ZERO) == 0) {
             synchronized (this) {
-                serialNumber = POOL.getOrDefault(tableName, new AtomicLong(0L));
-                if (serialNumber.get() == 0) {
+                serialNumber = POOL.getOrDefault(tableName, new AtomicReference<>(BigInteger.ZERO));
+                if (serialNumber.get().compareTo(BigInteger.ZERO) == 0) {
                     Number maxIdentify = this.getMaxIdentify(session, clazz);
-                    if (maxIdentify != null && maxIdentify.longValue() > baseIdentify) {
-                        serialNumber.addAndGet(maxIdentify.longValue());
+                    if (maxIdentify != null && (new BigInteger(maxIdentify.toString())).compareTo(baseIdentify) > 0) {
+                        serialNumber.compareAndSet(BigInteger.ZERO, new BigInteger(maxIdentify.toString()));
                     } else {
-                        serialNumber.addAndGet(baseIdentify);
+                        serialNumber.compareAndSet(BigInteger.ZERO, baseIdentify);
                     }
+                    serialNumber.updateAndGet(INTEGER_UNARY_OPERATOR);
+                    POOL.put(tableName, serialNumber);
+                    return serialNumber;
+                } else {
+                    return serialNumber.updateAndGet(INTEGER_UNARY_OPERATOR);
                 }
-                serialNumber.incrementAndGet();
-                POOL.put(tableName, serialNumber);
-                return serialNumber.get();
             }
         } else {
-            if (serialNumber.get() < baseIdentify) {
-                serialNumber = new AtomicLong(baseIdentify);
+            if (serialNumber.get().compareTo(baseIdentify) < 0) {
+                synchronized (this) {
+                    serialNumber.set(baseIdentify);
+                }
             }
-            return serialNumber.incrementAndGet();
+            return serialNumber.updateAndGet(INTEGER_UNARY_OPERATOR);
         }
     }
 

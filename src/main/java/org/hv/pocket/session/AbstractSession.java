@@ -20,7 +20,10 @@ import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -178,6 +181,13 @@ abstract class AbstractSession implements Session {
                 // 判断是否需要加密持久化
                 if (fieldValue != null && !StringUtils.isEmpty(encryptModel)) {
                     fieldValue = EncryptUtil.encrypt(encryptModel, "sward9007", fieldValue.toString());
+                }
+                if (fieldValue instanceof LocalDate) {
+                    fieldValue = java.sql.Date.valueOf((LocalDate) fieldValue);
+                } else if (fieldValue instanceof LocalDateTime) {
+                    fieldValue = java.sql.Timestamp.valueOf((LocalDateTime) fieldValue);
+                } else if (fieldValue instanceof Date) {
+                    fieldValue = new java.sql.Date(((Date) fieldValue).getTime());
                 }
                 preparedStatement.setObject(valueIndex + 1, fieldValue);
             } catch (SQLException | IllegalAccessException e) {

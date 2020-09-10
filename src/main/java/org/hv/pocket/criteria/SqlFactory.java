@@ -54,7 +54,7 @@ public class SqlFactory {
 
         //============================== MYSQL FUNCTION ==============================//
         Map<String, BiFunction<String, Object[], String>> mysqlFunctionTypes = new HashMap<>(20);
-        mysqlFunctionTypes.put(SqlOperateTypes.LIMIT, (sql, args) -> sql + " limit " + args[0] + "," + args[1]);
+        mysqlFunctionTypes.put(SqlOperateTypes.LIMIT, (sql, args) -> sql + " limit " + args[0] + ", " + args[1]);
 
         Map<String, BiFunction<String, Object[], String>> mysqlFunctionDialect = new HashMap<>(20);
         mysqlFunctionDialect.putAll(mysqlFunctionTypes);
@@ -75,8 +75,8 @@ public class SqlFactory {
                     columns[index] = item.substring(item.indexOf(".") + 1).replaceAll(" ", "");
                 }
             }
-            return "SELECT " + String.join(", ", columns) + " FROM (SELECT " + selectStr + ", ROWNUM " + tailStr
-                    + ") WHERE ROWNUM BETWEEN " + ((int) args[0] + 1) + " AND " + ((int) args[0] + (int) args[1]);
+            return "SELECT " + String.join(", ", columns) + " FROM (SELECT " + selectStr + ", ROWNUM AS POCKET_ROWNUM " + tailStr
+                    + ") WHERE POCKET_ROWNUM BETWEEN " + ((int) args[0] + 1) + " AND " + ((int) args[0] + (int) args[1]);
         });
 
         Map<String, BiFunction<String, Object[], String>> oracleFunctionDialect = new HashMap<>(20);

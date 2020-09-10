@@ -6,7 +6,7 @@ apply plugin: 'build-dashboard'
 apply plugin: 'maven-publish'
 
 group = 'com.github.leyan95'
-version = '0.1.42.PRE'
+version = '0.2.1.PRE'
 sourceCompatibility = 1.8
 
 compileJava {
@@ -70,6 +70,13 @@ publishing {
 }
 
 repositories {
+    maven {
+        url "${download_url}"
+        credentials {
+            username "${download_username}"
+            password "${download_password}"
+        }
+    }
     mavenLocal()
     mavenCentral()
 }
@@ -83,6 +90,7 @@ dependencies {
     implementation ('com.google.guava:guava:19.0')
     implementation ('com.google.code.findbugs:jsr305:3.0.2')
     implementation('mysql:mysql-connector-java:8.0.13')
+    implementation 'com.oracle:ojdbc6:11.2.0'
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor:2.1.1.RELEASE")
     testImplementation('org.springframework.boot:spring-boot-starter-test:2.1.1.RELEASE')
 }

@@ -1,9 +1,8 @@
 package org.hv;
 
-import org.hv.pocket.exception.MapperException;
+import org.hv.pocket.exception.PocketMapperException;
 import org.hv.pocket.lunch.PocketConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -26,7 +25,7 @@ public class Application {
             private PocketConfig pocketConfig;
 
             @PostConstruct
-            public void run() throws MapperException {
+            public void run() throws PocketMapperException {
                 this.pocketConfig.init();
             }
         };

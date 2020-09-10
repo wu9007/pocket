@@ -43,9 +43,9 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public void open() {
-        if (this.connection == null) {
+        if (this.getClosed()) {
             synchronized (OPEN_LOCK) {
-                if (this.connection == null) {
+                if (this.getClosed()) {
                     this.connection = ConnectionManager.getInstance().getConnection(databaseNodeConfig);
                     this.setClosed(false);
                     this.logger.debug("Session 【{}】 turned on", this.sessionName);
@@ -60,15 +60,13 @@ public class SessionImpl extends AbstractSession {
 
     @Override
     public void close() {
-        if (this.connection != null) {
+        if (!this.getClosed()) {
             synchronized (CLOSE_LOCK) {
-                if (this.connection != null) {
+                if (!this.getClosed()) {
                     ConnectionManager.getInstance().closeConnection(this.databaseNodeConfig.getNodeName(), this.connection);
                     if (transaction != null) {
-                        this.transaction.removeConnection();
                         this.transaction = null;
                     }
-                    this.connection = null;
                     this.setClosed(true);
                     this.logger.debug("Session 【{}】 turned off", this.sessionName);
                 } else {
@@ -222,6 +220,9 @@ public class SessionImpl extends AbstractSession {
         int effectRow = 0;
         Class<? extends AbstractEntity> clazz = entity.getClass();
         Object older = this.findOne(clazz, entity.loadIdentify());
+        if (older == null) {
+            logger.warn("The old data could not be found while performing the update operation.");
+        }
         if (cascade) {
             String mainClassName = entity.getClass().getName();
             Field[] fields = MapperFactory.getOneToMayFields(mainClassName);

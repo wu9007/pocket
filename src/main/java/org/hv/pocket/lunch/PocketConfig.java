@@ -1,6 +1,6 @@
 package org.hv.pocket.lunch;
 
-import org.hv.pocket.exception.MapperException;
+import org.hv.pocket.exception.PocketMapperException;
 
 /**
  * @author wujianchuan
@@ -9,7 +9,7 @@ public interface PocketConfig {
     /**
      * 初始化持久化资源
      *
-     * @throws MapperException e
+     * @throws PocketMapperException e
      */
-    void init() throws MapperException;
+    void init() throws PocketMapperException;
 }

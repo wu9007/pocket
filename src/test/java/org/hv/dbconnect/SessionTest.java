@@ -2,6 +2,7 @@ package org.hv.dbconnect;
 
 import org.hv.Application;
 import org.hv.PocketExecutor;
+import org.hv.demo.model.History;
 import org.hv.demo.model.Order;
 import org.hv.demo.model.RelevantBill;
 import org.hv.demo.model.RelevantBillDetail;
@@ -20,6 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -52,6 +54,7 @@ public class SessionTest {
 
     @Test
     public void test1() throws SQLException, IllegalAccessException {
+
         RelevantBill newOrder = new RelevantBill();
         newOrder.setCode("C-0001");
         newOrder.setAvailable(true);
@@ -83,9 +86,10 @@ public class SessionTest {
         Order order = new Order();
         order.setCode("ORDER-0001");
         order.setDay(LocalDate.now());
+        order.setTime(LocalDateTime.now());
         order.setPrice(new BigDecimal("100.0"));
-        this.session.save(order);
-        this.session.delete(order);
+        session.save(order);
+        session.delete(order);
     }
 
     @Test
@@ -156,5 +160,26 @@ public class SessionTest {
         System.out.println(persistenceBill.getCode());
         List<RelevantBill> relevantBills = this.session.list(RelevantBill.class);
         System.out.println(relevantBills.size());
+    }
+
+    @Test
+    public void test7() throws SQLException {
+        Session sessionUser = SessionFactory.getSession("user");
+        Session sessionOrder = SessionFactory.getSession("order");
+        sessionUser.open();
+        sessionOrder.open();
+        Transaction transactionUser = sessionUser.getTransaction();
+        Transaction transactionOrder = sessionOrder.getTransaction();
+        transactionUser.begin();
+        transactionOrder.begin();
+
+        History history = new History("test", LocalDate.now(), "测试", "001", "{\"userName\":\"测试\"}");
+        sessionUser.save(history);
+        transactionUser.commit();
+        history.setUuid(null);
+        sessionOrder.save(history);
+        transactionOrder.commit();
+        sessionOrder.close();
+        sessionUser.close();
     }
 }

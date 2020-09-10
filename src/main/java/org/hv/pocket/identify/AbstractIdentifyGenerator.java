@@ -1,14 +1,16 @@
 package org.hv.pocket.identify;
 
+import java.math.BigInteger;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author wujianchuan 2019/2/14
  */
 public abstract class AbstractIdentifyGenerator implements IdentifyGenerator {
-    protected final static Map<String, AtomicLong> POOL = new ConcurrentHashMap<>(60);
+    protected final static Map<String, AtomicReference<BigInteger>> POOL = new ConcurrentHashMap<>(60);
     protected String generationType;
 
     /**

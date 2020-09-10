@@ -40,6 +40,8 @@ public class DatabaseManager {
     Connection newConnection() {
         Connection conn;
         try {
+            logger.info("Attempts to establish a connection to the given database URL.");
+            DriverManager.setLoginTimeout(Math.toIntExact(config.getTimeout()));
             conn = DriverManager.getConnection(config.getUrl(), config.getUser(), config.getPassword());
         } catch (SQLException e) {
             logger.error("\nurl:{}\nuser:{}\npassword:{}", config.getUrl(), config.getUser(), config.getPassword());

@@ -2,6 +2,7 @@ package org.hv.dbconnect;
 
 import org.hv.Application;
 import org.hv.PocketExecutor;
+import org.hv.demo.model.History;
 import org.hv.demo.model.Order;
 import org.hv.pocket.config.DatabaseConfig;
 import org.hv.pocket.criteria.Criteria;
@@ -193,8 +194,9 @@ public class CriteriaTest {
         Criteria criteria = this.session.createCriteria(Order.class)
                 .add(Restrictions.equ("code", "C-001"))
                 .limit(0, 5);
-        List list = criteria.list();
-        list.size();
+        List<Order> list = criteria.list();
+        System.out.println(list.size());
+        ;
     }
 
     @Test
@@ -319,10 +321,21 @@ public class CriteriaTest {
                 .add(Sort.asc("code"));
         List<Order> orderList = criteria.list();
         orderList.forEach(order -> System.out.println(order.getPrice()));
-    }    @Test
+    }
+
+    @Test
     public void test30() {
         Criteria criteria = this.session.createCriteria(Order.class);
         List<Order> orderList = criteria.list();
         orderList.forEach(order -> System.out.println(order.getPrice()));
+    }
+
+    @Test
+    public void test31() {
+        Criteria criteria = this.session.createCriteria(History.class)
+                .add(Sort.asc("uuid"))
+                .limit(0, 3);
+        List<History> historyList = criteria.list();
+        historyList.forEach(order -> System.out.println(order.getUuid()));
     }
 }

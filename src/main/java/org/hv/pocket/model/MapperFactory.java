@@ -3,7 +3,7 @@ package org.hv.pocket.model;
 import org.hv.pocket.annotation.Entity;
 import org.hv.pocket.constant.AnnotationType;
 import org.hv.pocket.constant.EncryptType;
-import org.hv.pocket.exception.MapperException;
+import org.hv.pocket.exception.PocketMapperException;
 import org.springframework.context.ApplicationContext;
 
 import java.lang.annotation.Annotation;
@@ -28,7 +28,7 @@ public class MapperFactory {
      * @return table name
      */
     public static String getTableName(String className) {
-        return ENTITY_MAPPER_POOL.get(className).getTableName();
+        return getEntityMapper(className).getTableName();
     }
 
     /**
@@ -38,7 +38,7 @@ public class MapperFactory {
      * @return identify column name
      */
     public static String getIdentifyColumnName(String className) {
-        return ENTITY_MAPPER_POOL.get(className).getIdentifyColumnName();
+        return getEntityMapper(className).getIdentifyColumnName();
     }
 
     /**
@@ -48,7 +48,7 @@ public class MapperFactory {
      * @return field simple name
      */
     public static String getIdentifyFieldName(String className) {
-        return ENTITY_MAPPER_POOL.get(className).getIdentifyField().getName();
+        return getEntityMapper(className).getIdentifyField().getName();
     }
 
     /**
@@ -58,7 +58,7 @@ public class MapperFactory {
      * @return identify generator
      */
     public static String getIdentifyGenerationType(String className) {
-        return ENTITY_MAPPER_POOL.get(className).getGenerationType();
+        return getEntityMapper(className).getGenerationType();
     }
 
     /**
@@ -69,7 +69,9 @@ public class MapperFactory {
      * @return annotation type
      */
     public static AnnotationType getAnnotationType(String className, String fieldName) {
-        return ENTITY_MAPPER_POOL.get(className).getFieldMapper().get(fieldName).getAnnotationType();
+        EntityMapper entityMapper = getEntityMapper(className);
+        EntityMapper.FieldData fieldData = getFieldData(entityMapper, fieldName);
+        return fieldData.getAnnotationType();
     }
 
     /**
@@ -80,7 +82,9 @@ public class MapperFactory {
      * @return annotation
      */
     public static Annotation getAnnotation(String className, String fieldName) {
-        return ENTITY_MAPPER_POOL.get(className).getFieldMapper().get(fieldName).getAnnotation();
+        EntityMapper entityMapper = getEntityMapper(className);
+        EntityMapper.FieldData fieldData = getFieldData(entityMapper, fieldName);
+        return fieldData.getAnnotation();
     }
 
     /**
@@ -91,7 +95,9 @@ public class MapperFactory {
      * @return field
      */
     public static Field getField(String className, String fieldName) {
-        return ENTITY_MAPPER_POOL.get(className).getFieldMapper().get(fieldName).getField();
+        EntityMapper entityMapper = getEntityMapper(className);
+        EntityMapper.FieldData fieldData = getFieldData(entityMapper, fieldName);
+        return fieldData.getField();
     }
 
     /**
@@ -101,7 +107,7 @@ public class MapperFactory {
      * @return need repository fields
      */
     public static Field[] getRepositoryFields(String className) {
-        return ENTITY_MAPPER_POOL.get(className).getRepositoryFields();
+        return getEntityMapper(className).getRepositoryFields();
     }
 
     /**
@@ -111,7 +117,7 @@ public class MapperFactory {
      * @return column names
      */
     public static List<String> getRepositoryColumnNames(String className) {
-        return ENTITY_MAPPER_POOL.get(className).getRepositoryColumnNames();
+        return getEntityMapper(className).getRepositoryColumnNames();
     }
 
     /**
@@ -122,7 +128,7 @@ public class MapperFactory {
      * @return column name
      */
     public static String getRepositoryColumnName(String className, String fieldName) {
-        return ENTITY_MAPPER_POOL.get(className).getRepositoryColumnMapper().get(fieldName);
+        return getEntityMapper(className).getRepositoryColumnMapper().get(fieldName);
     }
 
     /**
@@ -132,7 +138,7 @@ public class MapperFactory {
      * @return join sql list
      */
     public static List<String> getJoinSqlList(String className) {
-        return ENTITY_MAPPER_POOL.get(className).getJoinSqlList();
+        return getEntityMapper(className).getJoinSqlList();
     }
 
     /**
@@ -142,7 +148,7 @@ public class MapperFactory {
      * @return need repository fields
      */
     public static Field[] getViewFields(String className) {
-        return ENTITY_MAPPER_POOL.get(className).getViewFields();
+        return getEntityMapper(className).getViewFields();
     }
 
     /**
@@ -152,7 +158,7 @@ public class MapperFactory {
      * @return field name-column name mapper
      */
     public static Map<String, String> getViewColumnMapperWithAs(String className) {
-        return ENTITY_MAPPER_POOL.get(className).getViewColumnMapperWithTableAs();
+        return getEntityMapper(className).getViewColumnMapperWithTableAs();
     }
 
     /**
@@ -163,7 +169,7 @@ public class MapperFactory {
      * @return view column name
      */
     public static String getViewColumnName(String className, String fieldName) {
-        return ENTITY_MAPPER_POOL.get(className).getViewColumnMapper().get(fieldName);
+        return getEntityMapper(className).getViewColumnMapper().get(fieldName);
     }
 
     /**
@@ -173,7 +179,7 @@ public class MapperFactory {
      * @return fields
      */
     public static Field[] getBusinessFields(String className) {
-        return ENTITY_MAPPER_POOL.get(className).getBusinessFields();
+        return getEntityMapper(className).getBusinessFields();
     }
 
     /**
@@ -183,7 +189,7 @@ public class MapperFactory {
      * @return fields
      */
     public static Field[] getKeyBusinessFields(String className) {
-        return ENTITY_MAPPER_POOL.get(className).getKeyBusinessFields();
+        return getEntityMapper(className).getKeyBusinessFields();
     }
 
     /**
@@ -194,7 +200,7 @@ public class MapperFactory {
      * @return business name
      */
     public static String getBusinessName(String className, String fieldName) {
-        return ENTITY_MAPPER_POOL.get(className).getBusinessMapper().get(fieldName);
+        return getEntityMapper(className).getBusinessMapper().get(fieldName);
     }
 
     /**
@@ -204,7 +210,7 @@ public class MapperFactory {
      * @return one to one fields
      */
     public static Field[] getOneToOneFields(String className) {
-        return ENTITY_MAPPER_POOL.get(className).getOneToOneFields();
+        return getEntityMapper(className).getOneToOneFields();
     }
 
     /**
@@ -215,7 +221,7 @@ public class MapperFactory {
      * @return related class
      */
     public static Class<? extends AbstractEntity> getOneToOneClass(String className, String fieldName) {
-        return ENTITY_MAPPER_POOL.get(className).getOneToOneClassMapper().get(fieldName);
+        return getEntityMapper(className).getOneToOneClassMapper().get(fieldName);
     }
 
     /**
@@ -226,7 +232,7 @@ public class MapperFactory {
      * @return related field name
      */
     public static String getOneToOneRelationFieldName(String className, String fieldName) {
-        return ENTITY_MAPPER_POOL.get(className).getOneToOneRelatedFieldMapper().get(fieldName);
+        return getEntityMapper(className).getOneToOneRelatedFieldMapper().get(fieldName);
     }
 
     /**
@@ -237,7 +243,7 @@ public class MapperFactory {
      * @return own field name
      */
     public static String getOneToOneOwnFieldName(String className, String fieldName) {
-        return ENTITY_MAPPER_POOL.get(className).getOneToOneOwnFieldMapper().get(fieldName);
+        return getEntityMapper(className).getOneToOneOwnFieldMapper().get(fieldName);
     }
 
     /**
@@ -247,7 +253,7 @@ public class MapperFactory {
      * @return one to many fields
      */
     public static Field[] getOneToMayFields(String className) {
-        return ENTITY_MAPPER_POOL.get(className).getOneToManyFields();
+        return getEntityMapper(className).getOneToManyFields();
     }
 
     /**
@@ -258,7 +264,7 @@ public class MapperFactory {
      * @return children class
      */
     public static Class<? extends AbstractEntity> getDetailClass(String className, String fieldName) {
-        return ENTITY_MAPPER_POOL.get(className).getOnToManyClassMapper().get(fieldName);
+        return getEntityMapper(className).getOnToManyClassMapper().get(fieldName);
     }
 
     /**
@@ -269,7 +275,7 @@ public class MapperFactory {
      * @return children field name
      */
     public static String getOneToMayDownFieldName(String className, String fieldName) {
-        return ENTITY_MAPPER_POOL.get(className).getOneToManyDownMapper().get(fieldName);
+        return getEntityMapper(className).getOneToManyDownMapper().get(fieldName);
     }
 
     /**
@@ -307,7 +313,7 @@ public class MapperFactory {
      * @return encrypt model{@link EncryptType}
      */
     public static String getEncryptModel(String className, String fieldName) {
-        return ENTITY_MAPPER_POOL.get(className).getEncryptModel(fieldName);
+        return getEntityMapper(className).getEncryptModel(fieldName);
     }
 
     /**
@@ -315,7 +321,7 @@ public class MapperFactory {
      *
      * @param context application context
      */
-    public static void init(ApplicationContext context) throws MapperException {
+    public static void init(ApplicationContext context) throws PocketMapperException {
         if (!COMPLETED.get()) {
             Map<String, Object> beans = context.getBeansWithAnnotation(Entity.class);
             for (Object value : beans.values()) {
@@ -325,5 +331,21 @@ public class MapperFactory {
 
             COMPLETED.compareAndSet(false, true);
         }
+    }
+
+    private static EntityMapper getEntityMapper(String className) {
+        EntityMapper entityMapper = ENTITY_MAPPER_POOL.get(className);
+        if (entityMapper == null) {
+            throw new IllegalArgumentException(String.format("The persistent mapping class cannot be found: %s", className));
+        }
+        return entityMapper;
+    }
+
+    private static EntityMapper.FieldData getFieldData(EntityMapper entityMapper, String fieldName) {
+        EntityMapper.FieldData fieldData = entityMapper.getFieldMapper().get(fieldName);
+        if (fieldData == null) {
+            throw new IllegalArgumentException(String.format("The persistent mapping class: %s's attribute: %s cannot be found", entityMapper.getClass().getName(), fieldName));
+        }
+        return fieldData;
     }
 }

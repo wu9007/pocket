@@ -10,9 +10,9 @@ import org.hv.pocket.annotation.OneToOne;
 import org.hv.pocket.annotation.View;
 import org.hv.pocket.constant.AnnotationType;
 import org.hv.pocket.constant.CommonSql;
-import org.hv.pocket.exception.MapperException;
 import org.hv.pocket.exception.PocketColumnException;
 import org.hv.pocket.exception.PocketIdentifyException;
+import org.hv.pocket.exception.PocketMapperException;
 import org.hv.pocket.utils.UnderlineHumpTranslator;
 import org.springframework.util.StringUtils;
 
@@ -175,7 +175,7 @@ class EntityMapper {
         return this.encryptMapper.get(fieldName);
     }
 
-    public static EntityMapper newInstance(Class<?> clazz) throws MapperException {
+    public static EntityMapper newInstance(Class<?> clazz) throws PocketMapperException {
         Entity entity = clazz.getAnnotation(Entity.class);
         String tableName;
         if (entity != null) {
@@ -186,7 +186,7 @@ class EntityMapper {
                 entity = View.class.getAnnotation(Entity.class);
                 tableName = entity.table();
             } else {
-                throw new MapperException(String.format("%s: 未找到 : @Entity 注解。", clazz.getName()));
+                throw new PocketMapperException(String.format("%s: 未找到 : @Entity 注解。", clazz.getName()));
             }
         }
         List<Field> allFields = new ArrayList<>();
@@ -199,7 +199,7 @@ class EntityMapper {
         return buildMapper(tableName, withAnnotationFields);
     }
 
-    private static EntityMapper buildMapper(String tableName, Field[] withAnnotationFields) {
+    private static EntityMapper buildMapper(String tableName, Field[] withAnnotationFields) throws PocketMapperException {
         Field identifyField = null;
         String identifyColumnName = null;
         String generationType = null;
@@ -357,7 +357,10 @@ class EntityMapper {
         this.oneToOneOwnFieldMapper = oneToOneOwnFieldMapper;
     }
 
-    private static void pushBusiness(List<Field> businessFields, List<Field> keyBusinessFields, Map<String, String> businessMapper, Field field, String filedName, String businessName, boolean flagBusiness) {
+    private static void pushBusiness(List<Field> businessFields, List<Field> keyBusinessFields, Map<String, String> businessMapper, Field field, String filedName, String businessName, boolean flagBusiness) throws PocketMapperException {
+        if (businessMapper.containsValue(businessName)) {
+            throw new PocketMapperException(String.format("Duplicate businessName -> %s in class -> %s.", businessName, field.getDeclaringClass()));
+        }
         if (businessName.trim().length() > 0) {
             if (flagBusiness) {
                 keyBusinessFields.add(field);

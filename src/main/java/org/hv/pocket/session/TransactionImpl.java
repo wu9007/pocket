@@ -12,7 +12,8 @@ import java.sql.SQLException;
  */
 public class TransactionImpl implements Transaction {
     private final Logger logger = LoggerFactory.getLogger(TransactionImpl.class);
-    private volatile Connection connection;
+    private final Connection connection;
+    private volatile boolean isBegin;
 
     TransactionImpl(Connection connection) {
         this.connection = connection;
@@ -21,9 +22,10 @@ public class TransactionImpl implements Transaction {
     @Override
     public void begin() {
         try {
-            if (this.connection.getAutoCommit()) {
+            if (!isBegin) {
                 this.connection.setAutoCommit(false);
-                this.logger.debug("transaction 【open】");
+                isBegin = true;
+                this.logger.debug("transaction 【begin】");
             } else {
                 logger.warn("This transaction has already begun. Please do not try again");
             }
@@ -34,10 +36,11 @@ public class TransactionImpl implements Transaction {
 
     @Override
     public void commit() {
-        if (this.connection != null) {
+        if (isBegin) {
             try {
                 this.connection.commit();
                 this.connection.setAutoCommit(true);
+                isBegin = false;
             } catch (SQLException e) {
                 throw new TransactionException(e.getMessage());
             }
@@ -49,10 +52,11 @@ public class TransactionImpl implements Transaction {
 
     @Override
     public void rollBack() {
-        if (this.connection != null) {
+        if (isBegin) {
             try {
                 this.connection.rollback();
                 this.connection.setAutoCommit(true);
+                isBegin = false;
             } catch (SQLException e) {
                 throw new TransactionException(e.getMessage());
             }
@@ -60,10 +64,5 @@ public class TransactionImpl implements Transaction {
         } else {
             logger.warn("This transaction has been rolled back. Please do not try again");
         }
-    }
-
-    @Override
-    public void removeConnection() {
-        this.connection = null;
     }
 }

@@ -165,4 +165,12 @@ public class QueryTest {
         LocalDateTime localDateTime = query.now();
         System.out.println(localDateTime.toString());
     }
+
+    @Test
+    public void test12() throws SQLException {
+        SQLQuery query = this.session.createSQLQuery("SELECT UUID FROM T_HISTORY ORDER BY UUID")
+                .limit(0, 10);
+        List<String> uuidList = query.list();
+        uuidList.forEach(System.out::println);
+    }
 }

@@ -73,10 +73,7 @@ public class SQLQueryImpl extends AbstractSqlQuery implements SQLQuery {
     @Override
     public <E> List<E> list() throws SQLException {
         if (this.limited()) {
-            super.sql = this.sql + " LIMIT " +
-                    this.getStart() +
-                    CommonSql.COMMA +
-                    this.getLimit();
+            super.sql = SqlFactory.getInstance().applySql(databaseNodeConfig.getDriverName(), SqlOperateTypes.LIMIT, super.sql, new Integer[]{this.getStart(), this.getLimit()});
         }
         ResultSet resultSet = executeQuery();
         List<E> results = new ArrayList<>();

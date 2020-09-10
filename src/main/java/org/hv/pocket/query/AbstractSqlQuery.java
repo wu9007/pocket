@@ -35,6 +35,7 @@ abstract class AbstractSqlQuery {
     }
 
     AbstractSqlQuery(String sql, Connection connection, DatabaseNodeConfig databaseNodeConfig) {
+        // NOTE: 为正确匹配查询参数，故在语句后加入空格。
         this.sql = sql + " ";
         this.connection = connection;
         this.databaseNodeConfig = databaseNodeConfig;
@@ -42,6 +43,7 @@ abstract class AbstractSqlQuery {
     }
 
     AbstractSqlQuery(Connection connection, String sql, DatabaseNodeConfig databaseNodeConfig, Class<?> clazz) {
+        // NOTE: 为正确匹配查询参数，故在语句后加入空格。
         this.sql = sql + " ";
         this.connection = connection;
         this.databaseNodeConfig = databaseNodeConfig;
