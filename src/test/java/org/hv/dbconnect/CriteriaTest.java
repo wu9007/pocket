@@ -84,7 +84,7 @@ public class CriteriaTest {
     public void test3() {
         Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.lt("time", new Date()));
-        List orderList = criteria.list(true);
+        List<Order> orderList = criteria.list(true);
         System.out.println(orderList.size());
     }
 
@@ -99,7 +99,7 @@ public class CriteriaTest {
         this.session.update(newOrder);
         Criteria criteria = this.session.createCriteria(Order.class);
         criteria.add(Restrictions.lt("time", new Date()));
-        List orderList = criteria.list();
+        List<Order> orderList = criteria.list();
     }
 
     @Test
@@ -337,5 +337,12 @@ public class CriteriaTest {
                 .limit(0, 3);
         List<History> historyList = criteria.list();
         historyList.forEach(order -> System.out.println(order.getUuid()));
+    }
+
+    @Test
+    public void test32() {
+        Criteria criteria = this.session.createCriteria(Order.class);
+        Order order = criteria.limit(0, 1).unique();
+        System.out.println(order.getCode());
     }
 }

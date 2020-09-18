@@ -173,4 +173,11 @@ public class QueryTest {
         List<String> uuidList = query.list();
         uuidList.forEach(System.out::println);
     }
+
+    @Test
+    public void test13() throws SQLException {
+        SQLQuery query = this.session.createSQLQuery("select uuid uuid,code code,price price from tbl_order limit 0, 1", Order.class);
+        Order order = (Order) query.unique();
+        System.out.println(order.getCode());
+    }
 }

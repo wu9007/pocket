@@ -5,6 +5,7 @@ import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.constant.SqlOperateTypes;
 import org.hv.pocket.criteria.ParameterTranslator;
 import org.hv.pocket.criteria.SqlFactory;
+import org.hv.pocket.exception.QueryException;
 import org.hv.pocket.flib.PreparedStatementHandler;
 import org.hv.pocket.flib.ResultSetHandler;
 import org.hv.pocket.model.MapperFactory;
@@ -54,20 +55,26 @@ public class SQLQueryImpl extends AbstractSqlQuery implements SQLQuery {
 
     @Override
     public Object unique() throws SQLException {
+        if (this.limited()) {
+            super.sql = SqlFactory.getInstance().applySql(databaseNodeConfig.getDriverName(), SqlOperateTypes.LIMIT, super.sql, new Integer[]{this.getStart(), this.getLimit()});
+        }
+        Object result = null;
         ResultSet resultSet = executeQuery();
         if (resultSet.next()) {
             if (clazz != null) {
                 try {
-                    return getEntity(resultSet);
+                    result = getEntity(resultSet);
                 } catch (InstantiationException | IllegalAccessException e) {
                     throw new IllegalAccessError();
                 }
             } else {
-                return getObjects(resultSet);
+                result = getObjects(resultSet);
             }
-        } else {
-            return null;
         }
+        if (resultSet.next()) {
+            throw new QueryException("Data is not unique, and multiple data are returned.");
+        }
+        return result;
     }
 
     @Override

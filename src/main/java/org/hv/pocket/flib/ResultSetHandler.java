@@ -2,6 +2,8 @@ package org.hv.pocket.flib;
 
 import org.hv.pocket.function.PocketBiFunction;
 import org.hv.pocket.model.MapperFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
@@ -12,6 +14,7 @@ import java.sql.SQLException;
  */
 public class ResultSetHandler {
     private final ResultSet resultSet;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResultSetHandler.class);
 
     private ResultSetHandler(ResultSet resultSet) {
         this.resultSet = resultSet;
@@ -32,6 +35,12 @@ public class ResultSetHandler {
         if (strategy == null) {
             throw new IllegalArgumentException(String.format("No strategy for parsing this field type: <<%s>> was found, Please submit issue here: https://github.com/leyan95/pocket/issues", field.getType()));
         }
-        return strategy.apply(resultSet, MapperFactory.getViewColumnName(clazz.getName(), field.getName()));
+        String columnName = MapperFactory.getViewColumnName(clazz.getName(), field.getName());
+        try {
+            return strategy.apply(resultSet, columnName);
+        } catch (SQLException e) {
+            LOGGER.warn("Check the {} field of the mapped database column {} in type {}", field.getName(), columnName, clazz.getName());
+            throw e;
+        }
     }
 }

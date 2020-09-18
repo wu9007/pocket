@@ -160,6 +160,10 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     @Override
     public <T extends AbstractEntity> T unique() {
         completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildSelectSql(databaseConfig, super.specifyFieldNames));
+        if (this.limited()) {
+            String sql = SqlFactory.getInstance().applySql(databaseConfig.getDriverName(), SqlOperateTypes.LIMIT, completeSql.toString(), new Integer[]{this.getStart(), this.getLimit()});
+            completeSql = new StringBuilder(sql);
+        }
         try {
             T result;
             List<T> resultList = PersistenceProxy.newInstance(this).executeQuery(completeSql.toString(), super.specifyFieldNames);

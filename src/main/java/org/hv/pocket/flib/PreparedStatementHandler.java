@@ -3,6 +3,9 @@ package org.hv.pocket.flib;
 import org.hv.pocket.criteria.ParameterTranslator;
 import org.hv.pocket.criteria.Restrictions;
 import org.hv.pocket.criteria.SqlBean;
+import org.hv.pocket.function.PocketConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -12,6 +15,7 @@ import java.util.List;
  * @author wujianchuan
  */
 public class PreparedStatementHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PreparedStatementHandler.class);
     private final PreparedStatement preparedStatement;
     private final Class<?> clazz;
 
@@ -51,7 +55,16 @@ public class PreparedStatementHandler {
         SqlBean sqlBean = preparedSupplierValue.getSqlBean();
         if (sqlBean.getTarget() != null) {
             String targetClassName = sqlBean.getTarget().getClass().getName();
-            PreparedStatementConsumerLib.get(targetClassName).accept(preparedSupplierValue);
+            PocketConsumer<PreparedSupplierValue> preparedSupplierValuePocketConsumer = PreparedStatementConsumerLib.get(targetClassName);
+            if (preparedSupplierValuePocketConsumer == null) {
+                LOGGER.error("No corresponding prepared statement consumer of type {} can be found in factory PreparedStatementConsumerLib.", targetClassName);
+            } else {
+                try {
+                    preparedSupplierValuePocketConsumer.accept(preparedSupplierValue);
+                } catch (SQLException e) {
+                    LOGGER.error("Please review parameters {} -> {}.", preparedSupplierValue.getSqlBean().getSource(), preparedSupplierValue.getSqlBean().getTarget());
+                }
+            }
         } else {
             preparedStatement.setObject(preparedSupplierValue.getIndex(), null);
         }

@@ -93,14 +93,14 @@ public class Restrictions implements SqlBean {
 
     public static Restrictions in(String source, List<?> target) {
         if (target == null || target.size() == 0) {
-            throw new CriteriaException("The set pointed by in function in SQL statement cannot be empty.");
+            throw new CriteriaException("The <<in>> function of Restrictions cannot be called with an empty argument.");
         }
         return new Restrictions(source, SqlOperateTypes.IN, target);
     }
 
     public static Restrictions notIn(String source, List<?> target) {
         if (target == null || target.size() == 0) {
-            throw new CriteriaException("The set pointed by notIn function in SQL statement cannot be empty.");
+            throw new CriteriaException("The <<notIn>> function of Restrictions cannot be called with an empty argument.");
         }
         return new Restrictions(source, SqlOperateTypes.NOT_IN, target);
     }
