@@ -6,6 +6,25 @@
 
 # 快速开始
 
+## 添加JitPack仓库
+```xml
+<repositories>
+  <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+  </repository>
+</repositories>
+```
+
+## 添加依赖
+```xml
+<dependency>
+    <groupId>com.github.leyan95</groupId>
+    <artifactId>pocket</artifactId>
+    <version>0.2.5.PRE</version>
+</dependency>
+```
+
 ## 多数据源配置
 
 <br />**这里以MySQL数据库为例**<br />
