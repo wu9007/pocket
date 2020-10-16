@@ -4,6 +4,8 @@
 
 ---
 
+> 示例： https://github.com/leyan95/poc-template
+
 # 快速开始
 
 ## 添加JitPack仓库
