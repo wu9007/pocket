@@ -23,8 +23,8 @@ public class ConnectionManager {
 
     public synchronized void register(DatabaseConfig databaseConfig) {
         databaseConfig.getNode().forEach(databaseNode -> {
-            ConnectionPool connectionPool = ConnectionPoolImpl.newInstance(databaseNode);
             boolean success = verify(databaseNode);
+            ConnectionPool connectionPool = ConnectionPoolImpl.newInstance(databaseNode);
             if (success) {
                 this.connectionPoolMap.put(databaseNode.getNodeName(), connectionPool);
             } else {
@@ -82,6 +82,12 @@ public class ConnectionManager {
                                 }
                                 if (config.getRetry() == null) {
                                     config.setRetry(5);
+                                }
+                                if (config.getMiniInterval() == null) {
+                                    config.setMiniInterval(24);
+                                }
+                                if (config.getAvailableInterval() == null) {
+                                    config.setAvailableInterval(7);
                                 }
                             } else {
                                 logger.error("Please configure the session correctly");

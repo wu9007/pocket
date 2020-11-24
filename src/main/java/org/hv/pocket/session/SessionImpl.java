@@ -16,10 +16,8 @@ import org.hv.pocket.query.ProcessQuery;
 import org.hv.pocket.query.ProcessQueryImpl;
 import org.hv.pocket.query.SQLQuery;
 import org.hv.pocket.query.SQLQueryImpl;
-import org.hv.pocket.utils.EncryptUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -198,13 +196,7 @@ public class SessionImpl extends AbstractSession {
                 for (Field field : fields) {
                     field.setAccessible(true);
                     try {
-                        Object value = field.get(entity);
-                        String encryptModel = MapperFactory.getEncryptModel(clazz.getName(), field.getName());
-                        // 判断是否需要加密持久化
-                        if (value != null && !StringUtils.isEmpty(encryptModel)) {
-                            value = EncryptUtil.encrypt(encryptModel, "sward9007", value.toString());
-                        }
-                        criteria.add(Modern.set(field.getName(), value));
+                        criteria.add(Modern.set(field.getName(), field.get(entity)));
                     } catch (IllegalAccessException e) {
                         throw new CriteriaException(e.getMessage());
                     }

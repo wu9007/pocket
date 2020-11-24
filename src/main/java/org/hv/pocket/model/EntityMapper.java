@@ -278,6 +278,14 @@ class EntityMapper {
                     joinMethodTableColumnList.add(joinMethodTableColumnStr);
                 }
                 pushBusiness(businessFields, keyBusinessFields, businessMapper, field, filedName, join.businessName(), join.flagBusiness());
+
+                if (!StringUtils.isEmpty(join.encryptMode())) {
+                    if (String.class.equals(field.getType())) {
+                        encryptMapper.put(filedName, join.encryptMode());
+                    } else {
+                        throw new PocketColumnException("The encrypted field must be of type string.");
+                    }
+                }
             } else if (oneToMany != null) {
                 fieldMapper.put(filedName, new FieldData(field, AnnotationType.ONE_TO_MANY, oneToMany));
                 pushBusiness(businessFields, keyBusinessFields, businessMapper, field, filedName, oneToMany.businessName(), oneToMany.flagBusiness());

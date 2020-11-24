@@ -34,4 +34,14 @@ public class ParameterTranslator implements SqlBean {
     public Object getTarget() {
         return target;
     }
+
+    @Override
+    public boolean getEncrypted() {
+        return false;
+    }
+
+    @Override
+    public void setEncrypted(boolean encrypted) {
+        throw new IllegalAccessError("加密字段不可被用作参数");
+    }
 }

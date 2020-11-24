@@ -37,7 +37,7 @@ public class Order extends BaseEntity {
     private String type;
     @OneToOne(ownField = "type", relatedField = "uuid")
     private OrderType orderType;
-    @Join(columnName = "TYPE", columnSurname = "TYPE_NAME", businessName = "订单支付方式", joinTable = "TBL_ORDER_TYPE", joinTableSurname = "T2", joinMethod = JoinMethod.LEFT, bridgeColumn = "UUID", destinationColumn = "NAME")
+    @Join(columnName = "TYPE", columnSurname = "TYPE_NAME", businessName = "订单支付方式", joinTable = "TBL_ORDER_TYPE", joinTableSurname = "T2", joinMethod = JoinMethod.LEFT, bridgeColumn = "UUID", destinationColumn = "NAME", encryptMode = EncryptType.DES)
     private String typeName;
 
     public static Order newInstance(String code, BigDecimal price) {

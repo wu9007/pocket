@@ -1,5 +1,6 @@
 package org.hv.pocket.annotation;
 
+import org.hv.pocket.constant.EncryptType;
 import org.hv.pocket.constant.JoinMethod;
 
 import java.lang.annotation.Documented;
@@ -77,4 +78,11 @@ public @interface Join {
      * @return Column Value Name
      */
     String destinationColumn();
+
+    /**
+     * 关联查询数据时使用的解密方式{@link EncryptType}
+     *
+     * @return 解密方式
+     */
+    String encryptMode() default "";
 }

@@ -23,6 +23,7 @@ public class Restrictions implements SqlBean {
     private String source;
     private String sqlOperate;
     private Object target;
+    private boolean encrypted;
     /**
      * The 'OR' or 'AND' {@link SqlOperateTypes} is applied to this property
      */
@@ -140,6 +141,16 @@ public class Restrictions implements SqlBean {
     @Override
     public Object getTarget() {
         return target;
+    }
+
+    @Override
+    public boolean getEncrypted() {
+        return encrypted;
+    }
+
+    @Override
+    public void setEncrypted(boolean encrypted) {
+        this.encrypted = encrypted;
     }
 
     void pushTo(List<Restrictions> sortedRestrictionsList) {

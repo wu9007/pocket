@@ -1,14 +1,15 @@
 package org.hv.dbconnect;
 
 import org.hv.Application;
-import org.hv.PocketExecutor;
 import org.hv.demo.model.History;
 import org.hv.demo.model.Order;
+import org.hv.demo.model.OrderType;
 import org.hv.demo.model.RelevantBill;
 import org.hv.demo.model.RelevantBillDetail;
 import org.hv.pocket.session.Session;
 import org.hv.pocket.session.SessionFactory;
 import org.hv.pocket.session.Transaction;
+import org.hv.pocket.utils.PocketExecutor;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -181,5 +182,15 @@ public class SessionTest {
         transactionOrder.commit();
         sessionOrder.close();
         sessionUser.close();
+    }
+
+    @Test
+    public void test8() throws SQLException {
+        OrderType orderType = new OrderType();
+        orderType.setName("测试类型");
+        this.session.save(orderType);
+        orderType.setName("测试类型2");
+        int row = this.session.update(orderType);
+        System.out.println(row);
     }
 }

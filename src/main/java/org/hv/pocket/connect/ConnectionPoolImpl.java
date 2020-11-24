@@ -6,9 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.LinkedList;
-import java.util.TimerTask;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -71,7 +71,9 @@ public class ConnectionPoolImpl implements ConnectionPool {
             this.connectionCount.addAndGet(1);
             logger.debug("Add connection <{}> to <{}> success and Free connection count：{}.", connection, this.databaseConfig.getNodeName(), this.freeConnections.size());
         }
-        this.activated.compareAndSet(false, true);
+        if (this.activated.compareAndSet(false, true)) {
+            this.checkPool();
+        }
     }
 
     @Override
@@ -179,17 +181,6 @@ public class ConnectionPoolImpl implements ConnectionPool {
     }
 
     @Override
-    public void checkPool() {
-        String node = this.databaseConfig.getNodeName();
-        ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(2, new BasicThreadFactory.Builder().namingPattern(node + "-schedule-pool-%d").daemon(true).build());
-
-        scheduledExecutorService.scheduleAtFixedRate(() -> {
-            logger.debug("{} - free connection count: {}", node, this.getFreeNum());
-            logger.debug("{} - activated connection count: {}", node, this.getActiveNum());
-        }, 1, 1, TimeUnit.SECONDS);
-    }
-
-    @Override
     public int getActiveNum() {
         return this.activeConnections.size();
     }
@@ -209,26 +200,38 @@ public class ConnectionPoolImpl implements ConnectionPool {
         return this.databaseConfig;
     }
 
-    class CheckFreePool extends TimerTask {
-        private final ConnectionPool connectionPool;
-
-        public CheckFreePool(ConnectionPool connectionPool) {
-            this.connectionPool = connectionPool;
-        }
-
-        @Override
-        public void run() {
-            if (this.connectionPool != null && this.connectionPool.isActive()) {
-                DatabaseNodeConfig config = this.connectionPool.getDatabaseConfig();
-                int totalConnection = this.connectionPool.getActiveNum() + this.connectionPool.getFreeNum();
-                int lackConnection = config.getPoolMiniSize() - totalConnection;
-                if (lackConnection > 0) {
-                    logger.debug("【{}】 - The database connection pool has 【{}】 connections that need to be supplemented ", config.getNodeName(), lackConnection);
-                    for (int index = 0; index < lackConnection; index++) {
-                        this.connectionPool.pushToFreePool(connectionPool.newConnection());
-                    }
+    /**
+     * Regularly maintain the number and availability of links in the pool
+     */
+    private void checkPool() {
+        String sql = "SELECT 0 FROM DUAL";
+        String node = this.databaseConfig.getNodeName();
+        ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(2, new BasicThreadFactory.Builder().namingPattern(node + "-schedule-pool-%d").daemon(true).build());
+        // The thread used to ensure link availability
+        scheduledExecutorService.scheduleAtFixedRate(() -> this.freeConnections.forEach(connection -> {
+            PreparedStatement preparedStatement;
+            try {
+                logger.info("maintain connection - {}", connection);
+                preparedStatement = connection.prepareStatement(sql);
+                preparedStatement.executeQuery();
+            } catch (SQLException e) {
+                logger.warn("this connection - {} is not available and needs to be removed\ne - {}", connection, e.getMessage());
+                this.releaseConn(connection);
+            }
+        }), databaseConfig.getAvailableInterval(), databaseConfig.getAvailableInterval(), TimeUnit.HOURS);
+        // Threads used to guarantee the number of links
+        scheduledExecutorService.scheduleAtFixedRate(() -> {
+            DatabaseNodeConfig config = this.getDatabaseConfig();
+            int totalConnection = this.getActiveNum() + this.getFreeNum();
+            int lackConnection = config.getPoolMiniSize() - totalConnection;
+            logger.info("{} - free connection count: {}", node, this.getFreeNum());
+            logger.info("{} - activated connection count: {}", node, this.getActiveNum());
+            if (lackConnection > 0) {
+                logger.info("【{}】 - The database connection pool has 【{}】 connections that need to be supplemented ", config.getNodeName(), lackConnection);
+                for (int index = 0; index < lackConnection; index++) {
+                    this.pushToFreePool(newConnection());
                 }
             }
-        }
+        }, databaseConfig.getMiniInterval(), databaseConfig.getMiniInterval(), TimeUnit.HOURS);
     }
 }

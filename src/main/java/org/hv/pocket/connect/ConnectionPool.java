@@ -55,11 +55,6 @@ interface ConnectionPool {
     boolean isActive();
 
     /**
-     * 定时检查池中的链接数量
-     */
-    void checkPool();
-
-    /**
      * 获取被激活的链接数量
      *
      * @return 被激活的链接数量

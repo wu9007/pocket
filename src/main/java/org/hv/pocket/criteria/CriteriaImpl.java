@@ -30,7 +30,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         if (sourceEmpty && restrictions.getSqlOperate() == null) {
             throw new CriteriaException("No field name found in your Restrictions.");
         }
-        this.restrictionsList.add(restrictions);
+        this.restrictionsList.add(encryptTarget(restrictions));
         restrictions.pushTo(this.sortedRestrictionsList);
         return this;
     }
@@ -42,7 +42,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         boolean sourceValuable = source != null && source.trim().length() > 0 && MapperFactory.getRepositoryColumnName(this.clazz.getName(), source) != null;
         boolean poElValuable = poEl != null && poEl.trim().length() > 0;
         if (sourceValuable || poElValuable) {
-            this.modernList.add(modern);
+            this.modernList.add(encryptTarget(modern));
         } else {
             throw new CriteriaException("No field name found in your Modern.");
         }
@@ -263,7 +263,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                 Class<? extends AbstractEntity> oneToOneClass = MapperFactory.getOneToOneClass(this.clazz.getName(), oneToOneField.getName());
                 String relationFieldName = MapperFactory.getOneToOneRelationFieldName(this.clazz.getName(), oneToOneField.getName());
                 String ownFieldName = MapperFactory.getOneToOneOwnFieldName(this.clazz.getName(), oneToOneField.getName());
-                Field ownField = this.clazz.getDeclaredField(ownFieldName);
+                Field ownField = MapperFactory.getField(this.clazz.getName(), ownFieldName);
                 ownField.setAccessible(true);
                 Object relationValue = ownField.get(result);
                 if (relationValue != null) {

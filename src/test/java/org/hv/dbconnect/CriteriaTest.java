@@ -1,9 +1,9 @@
 package org.hv.dbconnect;
 
 import org.hv.Application;
-import org.hv.PocketExecutor;
 import org.hv.demo.model.History;
 import org.hv.demo.model.Order;
+import org.hv.demo.model.OrderType;
 import org.hv.pocket.config.DatabaseConfig;
 import org.hv.pocket.criteria.Criteria;
 import org.hv.pocket.criteria.Modern;
@@ -12,6 +12,7 @@ import org.hv.pocket.criteria.Sort;
 import org.hv.pocket.session.Session;
 import org.hv.pocket.session.SessionFactory;
 import org.hv.pocket.session.Transaction;
+import org.hv.pocket.utils.PocketExecutor;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -344,5 +345,26 @@ public class CriteriaTest {
         Criteria criteria = this.session.createCriteria(Order.class);
         Order order = criteria.limit(0, 1).unique();
         System.out.println(order.getCode());
+    }
+
+    @Test
+    public void test33() throws SQLException {
+        OrderType orderType = new OrderType();
+        orderType.setName("测试类型");
+        this.session.save(orderType);
+        Criteria criteria = session.createCriteria(OrderType.class);
+        criteria.add(Restrictions.equ("name", "测试类型"));
+        List<OrderType> orderTypeList = criteria.listNotCleanRestrictions();
+        orderTypeList.forEach(item -> System.out.println(item.getName()));
+        criteria.add(Modern.set("name", "测试类型1"));
+        int a = criteria.update();
+        System.out.println(a);
+    }
+
+    @Test
+    public void test34() {
+        Criteria criteria = this.session.createCriteria(Order.class);
+        String code = (String) criteria.add(Restrictions.like("uuid", "2020102900%")).max("uuid");
+        System.out.println(code);
     }
 }

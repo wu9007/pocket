@@ -64,8 +64,8 @@ public class SqlFactory {
         //============================== ORACLE FUNCTION ==============================//
         Map<String, BiFunction<String, Object[], String>> oracleFunctionTypes = new HashMap<>(20);
         oracleFunctionTypes.put(SqlOperateTypes.LIMIT, (sql, args) -> {
-            String selectStr = sql.substring(sql.indexOf("SELECT") + 6, sql.indexOf("FROM"));
-            String tailStr = sql.substring(sql.indexOf(" FROM"));
+            String selectStr = sql.substring(sql.toUpperCase().indexOf("SELECT") + 6, sql.toUpperCase().indexOf("FROM"));
+            String tailStr = sql.substring(sql.toUpperCase().indexOf(" FROM"));
             String[] columns = selectStr.split(",");
             for (int index = 0; index < columns.length; index++) {
                 String item = columns[index];

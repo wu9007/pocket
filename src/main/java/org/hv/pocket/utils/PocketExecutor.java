@@ -1,4 +1,7 @@
-package org.hv;
+package org.hv.pocket.utils;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
@@ -8,6 +11,8 @@ import java.util.concurrent.Executor;
  * @version 1.0
  */
 public class PocketExecutor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PocketExecutor.class);
+
     public static void execute(Executor executor, int concurrency, final Runnable action) throws InterruptedException {
         CountDownLatch ready = new CountDownLatch(concurrency);
         CountDownLatch start = new CountDownLatch(1);
@@ -29,6 +34,6 @@ public class PocketExecutor {
         long startNanos = System.nanoTime();
         start.countDown();
         done.await();
-        System.out.println("耗时：" + ((double)System.nanoTime() - startNanos) / 1000000000 + "秒");
+        LOGGER.info("耗时：{}ms", ((double) System.nanoTime() - startNanos) / 1000000);
     }
 }

@@ -2,7 +2,10 @@ package org.hv.pocket.criteria;
 
 import org.hv.pocket.config.DatabaseNodeConfig;
 import org.hv.pocket.model.AbstractEntity;
+import org.hv.pocket.model.MapperFactory;
 import org.hv.pocket.session.Session;
+import org.hv.pocket.utils.EncryptUtil;
+import org.springframework.util.StringUtils;
 
 import java.sql.Connection;
 import java.util.Arrays;
@@ -97,5 +100,18 @@ abstract class AbstractCriteria {
 
     void setSpecifyFieldNames(String... fieldNames) {
         this.specifyFieldNames.addAll(Arrays.asList(fieldNames));
+    }
+
+    <T extends SqlBean> T encryptTarget(T sqlBean) {
+        if (clazz != null) {
+            String encryptModel = MapperFactory.getEncryptModel(clazz.getName(), sqlBean.getSource());
+            Object target = sqlBean.getTarget();
+            // NOTE: 判断字段值是否需要加密
+            if (target != null && !StringUtils.isEmpty(encryptModel) && !sqlBean.getEncrypted()) {
+                sqlBean.setEncrypted(true);
+                sqlBean.setTarget(EncryptUtil.encrypt(encryptModel, "sward9007", target.toString()));
+            }
+        }
+        return sqlBean;
     }
 }

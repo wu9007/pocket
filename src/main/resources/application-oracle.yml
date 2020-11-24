@@ -1,24 +1,24 @@
 pocket:
   datasource:
     node:
-      - url: jdbc:oracle:thin:@127.0.0.1:1521:exch
+      - url: jdbc:oracle:thin:@172.0.66.82:1521:exch
         nodeName: oracle-01
         driverName: oracle.jdbc.driver.OracleDriver
         showSql: true
         collectLog: true
-        user: root
-        password: root
+        user: EXCH
+        password: EXCH
         poolMiniSize: 5
         poolMaxSize: 50
         timeout: 1000
         session: homo,user
-      - url: jdbc:oracle:thin:@127.0.0.1:1521:exch
+      - url: jdbc:oracle:thin:@172.0.66.82:1521:exch
         nodeName: oracle-02
         driverName: oracle.jdbc.driver.OracleDriver
         showSql: true
         collectLog: true
-        user: root
-        password: root
+        user: EXCH
+        password: EXCH
         poolMiniSize: 5
         poolMaxSize: 50
         timeout: 1000

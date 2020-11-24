@@ -24,4 +24,18 @@ public interface SqlBean {
      * @return 参数值
      */
     Object getTarget();
+
+    /**
+     * target 是否已被加密
+     *
+     * @return 字段是否已被加密
+     */
+    boolean getEncrypted();
+
+    /**
+     * 设置加密状态
+     *
+     * @param encrypted 加密状态
+     */
+    void setEncrypted(boolean encrypted);
 }

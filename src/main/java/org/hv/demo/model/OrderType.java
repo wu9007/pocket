@@ -3,6 +3,7 @@ package org.hv.demo.model;
 import org.hv.pocket.annotation.Column;
 import org.hv.pocket.annotation.Entity;
 import org.hv.pocket.annotation.Identify;
+import org.hv.pocket.constant.EncryptType;
 import org.hv.pocket.model.AbstractEntity;
 
 import java.io.Serializable;
@@ -17,7 +18,7 @@ public class OrderType extends AbstractEntity {
     @Identify
     @Column(name = "UUID")
     private String uuid;
-    @Column(name = "NAME")
+    @Column(name = "NAME", encryptMode = EncryptType.DES)
     private String name;
 
     public String getUuid() {

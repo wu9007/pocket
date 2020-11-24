@@ -15,26 +15,22 @@ import java.sql.PreparedStatement;
  * @author wujianchuan
  */
 final class PreparedSupplierValue {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PreparedSupplierValue.class);
-    private final Class<?> clazz;
     private final PreparedStatement preparedStatement;
     private final Integer index;
     private Restrictions restrictions;
     private ParameterTranslator parameterTranslator;
 
 
-    PreparedSupplierValue(Class<?> clazz, PreparedStatement preparedStatement, Integer index, Restrictions restrictions) {
-        this.clazz = clazz;
+    PreparedSupplierValue(PreparedStatement preparedStatement, Integer index, Restrictions restrictions) {
         this.preparedStatement = preparedStatement;
         this.index = index;
-        this.restrictions = this.encryptTarget(restrictions);
+        this.restrictions = restrictions;
     }
 
-    PreparedSupplierValue(Class<?> clazz, PreparedStatement preparedStatement, Integer index, ParameterTranslator parameterTranslator) {
-        this.clazz = clazz;
+    PreparedSupplierValue(PreparedStatement preparedStatement, Integer index, ParameterTranslator parameterTranslator) {
         this.preparedStatement = preparedStatement;
         this.index = index;
-        this.parameterTranslator = this.encryptTarget(parameterTranslator);
+        this.parameterTranslator = parameterTranslator;
     }
 
     PreparedStatement getPreparedStatement() {
@@ -51,17 +47,5 @@ final class PreparedSupplierValue {
         } else {
             return this.parameterTranslator;
         }
-    }
-
-    private <T extends SqlBean> T encryptTarget(T sqlBean) {
-        if (clazz != null) {
-            String encryptModel = MapperFactory.getEncryptModel(clazz.getName(), sqlBean.getSource());
-            Object target = sqlBean.getTarget();
-            // NOTE: 判断字段值是否需要加密
-            if (target != null && !StringUtils.isEmpty(encryptModel)) {
-                sqlBean.setTarget(EncryptUtil.encrypt(encryptModel, "sward9007", target.toString()));
-            }
-        }
-        return sqlBean;
     }
 }

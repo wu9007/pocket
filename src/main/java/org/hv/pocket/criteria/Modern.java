@@ -26,6 +26,7 @@ public class Modern implements SqlBean {
     private Object target;
     private String poEl;
     private final Boolean withPoEl;
+    private boolean encrypted;
 
     private Modern(String source, Object target) {
         this.source = source;
@@ -60,6 +61,16 @@ public class Modern implements SqlBean {
     @Override
     public Object getTarget() {
         return target;
+    }
+
+    @Override
+    public boolean getEncrypted() {
+        return encrypted;
+    }
+
+    @Override
+    public void setEncrypted(boolean encrypted) {
+        this.encrypted = encrypted;
     }
 
     public String getPoEl() {

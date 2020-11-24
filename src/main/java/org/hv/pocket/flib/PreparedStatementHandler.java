@@ -32,7 +32,7 @@ public class PreparedStatementHandler {
         this.completionPreparedStatement(parameters);
         for (int index = 0; index < restrictionsList.size(); index++) {
             Restrictions restrictions = restrictionsList.get(index);
-            PreparedSupplierValue preparedSupplierValue = new PreparedSupplierValue(clazz, preparedStatement, parameters.size() + index + 1, restrictions);
+            PreparedSupplierValue preparedSupplierValue = new PreparedSupplierValue(preparedStatement, parameters.size() + index + 1, restrictions);
             this.apply(preparedSupplierValue);
         }
     }
@@ -40,7 +40,7 @@ public class PreparedStatementHandler {
     public void completionPreparedStatement(List<ParameterTranslator> parameterTranslatorList) throws SQLException {
         for (int index = 0; index < parameterTranslatorList.size(); index++) {
             ParameterTranslator parameterTranslator = parameterTranslatorList.get(index);
-            PreparedSupplierValue preparedSupplierValue = new PreparedSupplierValue(clazz, preparedStatement, index + 1, parameterTranslator);
+            PreparedSupplierValue preparedSupplierValue = new PreparedSupplierValue(preparedStatement, index + 1, parameterTranslator);
             this.apply(preparedSupplierValue);
         }
     }

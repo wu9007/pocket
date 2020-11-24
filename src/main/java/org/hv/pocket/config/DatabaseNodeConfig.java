@@ -20,6 +20,14 @@ public class DatabaseNodeConfig {
     private Long timeout;
     private Integer retry;
     private Integer cacheSize;
+    /**
+     * Length of time (in hours) between maintenance connect availability
+     */
+    private Integer availableInterval;
+    /**
+     * The length of time (in hours) between maintaining the number of connect list
+     */
+    private Integer miniInterval;
 
     private String session;
 
@@ -125,6 +133,22 @@ public class DatabaseNodeConfig {
 
     public void setCacheSize(Integer cacheSize) {
         this.cacheSize = cacheSize;
+    }
+
+    public Integer getAvailableInterval() {
+        return availableInterval;
+    }
+
+    public void setAvailableInterval(Integer availableInterval) {
+        this.availableInterval = availableInterval;
+    }
+
+    public Integer getMiniInterval() {
+        return miniInterval;
+    }
+
+    public void setMiniInterval(Integer miniInterval) {
+        this.miniInterval = miniInterval;
     }
 
     public String getSession() {
