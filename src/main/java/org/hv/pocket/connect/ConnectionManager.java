@@ -84,10 +84,10 @@ public class ConnectionManager {
                                     config.setRetry(5);
                                 }
                                 if (config.getMiniInterval() == null) {
-                                    config.setMiniInterval(24);
+                                    config.setMiniInterval(36000);
                                 }
                                 if (config.getAvailableInterval() == null) {
-                                    config.setAvailableInterval(7);
+                                    config.setAvailableInterval(1800);
                                 }
                             } else {
                                 logger.error("Please configure the session correctly");

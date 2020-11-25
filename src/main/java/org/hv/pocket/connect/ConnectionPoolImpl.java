@@ -218,7 +218,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
                 logger.warn("this connection - {} is not available and needs to be removed\ne - {}", connection, e.getMessage());
                 this.releaseConn(connection);
             }
-        }), databaseConfig.getAvailableInterval(), databaseConfig.getAvailableInterval(), TimeUnit.HOURS);
+        }), databaseConfig.getAvailableInterval(), databaseConfig.getAvailableInterval(), TimeUnit.SECONDS);
         // Threads used to guarantee the number of links
         scheduledExecutorService.scheduleAtFixedRate(() -> {
             DatabaseNodeConfig config = this.getDatabaseConfig();
@@ -232,6 +232,6 @@ public class ConnectionPoolImpl implements ConnectionPool {
                     this.pushToFreePool(newConnection());
                 }
             }
-        }, databaseConfig.getMiniInterval(), databaseConfig.getMiniInterval(), TimeUnit.HOURS);
+        }, databaseConfig.getMiniInterval(), databaseConfig.getMiniInterval(), TimeUnit.SECONDS);
     }
 }

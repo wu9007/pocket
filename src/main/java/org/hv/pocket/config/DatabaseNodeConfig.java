@@ -21,11 +21,11 @@ public class DatabaseNodeConfig {
     private Integer retry;
     private Integer cacheSize;
     /**
-     * Length of time (in hours) between maintenance connect availability
+     * Length of time (in second) between maintenance connect availability (default 36000s)
      */
     private Integer availableInterval;
     /**
-     * The length of time (in hours) between maintaining the number of connect list
+     * The length of time (in second) between maintaining the number of connect list (default 1800s)
      */
     private Integer miniInterval;
 

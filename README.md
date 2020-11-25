@@ -4,26 +4,14 @@
 
 ---
 
-> 示例： https://github.com/leyan95/poc-template
-
 # 快速开始
-
-## 添加JitPack仓库
-```xml
-<repositories>
-  <repository>
-      <id>jitpack.io</id>
-      <url>https://jitpack.io</url>
-  </repository>
-</repositories>
-```
 
 ## 添加依赖
 ```xml
 <dependency>
-    <groupId>com.github.leyan95</groupId>
-    <artifactId>pocket</artifactId>
-    <version>0.2.5.PRE</version>
+  <groupId>com.github.leyan95</groupId>
+  <artifactId>pocket</artifactId>
+  <version>${latestVersion}</version>
 </dependency>
 ```
 
