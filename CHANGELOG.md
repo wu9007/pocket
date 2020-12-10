@@ -204,5 +204,49 @@ FEAT: 链接池添加保活线程。
 FIX: 修复一对一查询异常（获取不到父类 Field）。
 
 # 0.2.14.PRE - 2020/11/25
+## FEAT：
 - availableInterval 维护链接池中链接可用性的时间间隔（每几【默认1800秒】多少秒使用链接池中的链接去执行一个简单的查询操作） 
 - miniInterval 维护连接池中的最小链接数的时间间隔（默认36000秒）
+
+# 0.2.17.PRE - 2020/11/26
+## PERF
+- timeout 默认值设置为 2s，修复获取链接长时间阻塞问题。
+## FIX
+- 修复查询加密数据问题: Restrictions.or(Restrictions...) 根据加密字段进行查询找不到值。
+
+# 0.2.22.PRE - 2020/11/27
+## FIX
+- SQLQueryImpl 查询异常
+- 保活线程释放连接后将链接从连接池中移除
+## PERF
+- 连接池中的链接不可用时销毁并重新创建
+
+# 0.2.27.PRE - 2020/11/30
+## FIX
+- 修复oracle分页查询排序问题。
+- 修复oracle查询当前时间问题。
+
+# 0.2.30.PRE - 2020/12/09
+## FEAT
+- 添加SM4加解密工具，数据库字段可配置 EncryptType.SM4_CEB EncryptType.SM4_CBC 对数据进行加密
+- 数据库账户和密码加密
+## PERF
+- 如果需要使用数据库字段加密和数据库用户名或密码加密，则需要在初始化orm资源前设置 des 和 sm2 的密钥
+
+```java
+@Bean
+Object getPersistenceConfig() {
+    return new Object() {
+        @Autowired
+        private PocketConfig pocketConfig;
+
+        @PostConstruct
+        public void run() throws PocketMapperException {
+            // init pocket resource.
+            this.pocketConfig.setDesKey("sward007")
+                    .setSm4Key("sward18713839007")
+                    .init();
+        }
+    };
+}
+```

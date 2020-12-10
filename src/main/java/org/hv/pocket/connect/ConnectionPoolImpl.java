@@ -8,12 +8,14 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * @author wujianchuan 2019/1/15
@@ -84,14 +86,15 @@ public class ConnectionPoolImpl implements ConnectionPool {
                 logger.debug("Free connection count：{}.", this.freeConnections.size());
                 if (this.freeConnections.size() > 0) {
                     connection = this.freeConnections.pollFirst();
-                    logger.debug("Poll Connection-{} from free list\nThis connect {} valid.", connection, this.databaseManager.isValidConnection(connection) ? "is" : "isn't");
-                    if (this.databaseManager.isValidConnection(connection)) {
+                    logger.debug("Free pool poll first connection node and current count : {}", freeConnections.size());
+                    boolean connectIsValid = this.databaseManager.isValidConnection(connection);
+                    logger.debug("Poll Connection-{} from free list\n This connect {} valid.", connection, connectIsValid ? "is" : "isn't");
+                    if (connectIsValid) {
                         this.activeConnections.add(connection);
                         currentConnection.set(connection);
                     } else {
-                        this.connectionCount.decrementAndGet();
-                        connection = this.getConnection();
-                        logger.debug("Get connection-{} success.", connection);
+                        connection = this.newConnection();
+                        logger.debug("Creat a new connection-{}.", connection);
                     }
                 } else {
                     connection = this.newConnection();
@@ -208,17 +211,29 @@ public class ConnectionPoolImpl implements ConnectionPool {
         String node = this.databaseConfig.getNodeName();
         ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(2, new BasicThreadFactory.Builder().namingPattern(node + "-schedule-pool-%d").daemon(true).build());
         // The thread used to ensure link availability
-        scheduledExecutorService.scheduleAtFixedRate(() -> this.freeConnections.forEach(connection -> {
-            PreparedStatement preparedStatement;
-            try {
-                logger.info("maintain connection - {}", connection);
-                preparedStatement = connection.prepareStatement(sql);
-                preparedStatement.executeQuery();
-            } catch (SQLException e) {
-                logger.warn("this connection - {} is not available and needs to be removed\ne - {}", connection, e.getMessage());
-                this.releaseConn(connection);
-            }
-        }), databaseConfig.getAvailableInterval(), databaseConfig.getAvailableInterval(), TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(() -> {
+            Collection<Connection> invalidConnections = this.freeConnections.stream().filter(connection -> {
+                PreparedStatement preparedStatement = null;
+                try {
+                    logger.info("maintain connection - {}", connection);
+                    preparedStatement = connection.prepareStatement(sql);
+                    logger.debug("Creates a <code>PreparedStatement</code> object");
+                    preparedStatement.executeQuery();
+                    return false;
+                } catch (SQLException e) {
+                    logger.warn("this connection - {} is not available and needs to be removed\n exception message is - {}", connection, e.getMessage());
+                    return true;
+                } finally {
+                    ConnectionManager.closeIo(preparedStatement, null);
+                }
+            }).collect(Collectors.toList());
+            invalidConnections.forEach(invalidConnection -> {
+                synchronized (RELEASE_LOCK) {
+                    this.freeConnections.remove(invalidConnection);
+                    this.connectionCount.getAndDecrement();
+                }
+            });
+        }, databaseConfig.getAvailableInterval(), databaseConfig.getAvailableInterval(), TimeUnit.SECONDS);
         // Threads used to guarantee the number of links
         scheduledExecutorService.scheduleAtFixedRate(() -> {
             DatabaseNodeConfig config = this.getDatabaseConfig();
@@ -228,8 +243,11 @@ public class ConnectionPoolImpl implements ConnectionPool {
             logger.info("{} - activated connection count: {}", node, this.getActiveNum());
             if (lackConnection > 0) {
                 logger.info("【{}】 - The database connection pool has 【{}】 connections that need to be supplemented ", config.getNodeName(), lackConnection);
-                for (int index = 0; index < lackConnection; index++) {
-                    this.pushToFreePool(newConnection());
+                synchronized (RELEASE_LOCK) {
+                    for (int index = 0; index < lackConnection; index++) {
+                        this.freeConnections.add(newConnection());
+                        this.connectionCount.getAndIncrement();
+                    }
                 }
             }
         }, databaseConfig.getMiniInterval(), databaseConfig.getMiniInterval(), TimeUnit.SECONDS);

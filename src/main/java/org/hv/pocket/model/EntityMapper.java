@@ -44,6 +44,7 @@ class EntityMapper {
                     ));
 
     private final String tableName;
+    private final String tableBusinessName;
     private final String identifyColumnName;
     private final Field identifyField;
     private final String generationType;
@@ -81,6 +82,10 @@ class EntityMapper {
 
     String getTableName() {
         return tableName;
+    }
+
+    public String getTableBusinessName() {
+        return tableBusinessName;
     }
 
     public String getIdentifyColumnName() {
@@ -178,13 +183,16 @@ class EntityMapper {
     public static EntityMapper newInstance(Class<?> clazz) throws PocketMapperException {
         Entity entity = clazz.getAnnotation(Entity.class);
         String tableName;
+        String tableBusinessName;
         if (entity != null) {
             tableName = entity.table();
+            tableBusinessName = entity.businessName();
         } else {
             View view = clazz.getAnnotation(View.class);
             if (view != null) {
                 entity = View.class.getAnnotation(Entity.class);
                 tableName = entity.table();
+                tableBusinessName = entity.businessName();
             } else {
                 throw new PocketMapperException(String.format("%s: 未找到 : @Entity 注解。", clazz.getName()));
             }
@@ -196,10 +204,10 @@ class EntityMapper {
         Field[] withAnnotationFields = new Field[allFields.size()];
         allFields.toArray(withAnnotationFields);
 
-        return buildMapper(tableName, withAnnotationFields);
+        return buildMapper(tableName, tableBusinessName, withAnnotationFields);
     }
 
-    private static EntityMapper buildMapper(String tableName, Field[] withAnnotationFields) throws PocketMapperException {
+    private static EntityMapper buildMapper(String tableName, String tableBusinessName, Field[] withAnnotationFields) throws PocketMapperException {
         Field identifyField = null;
         String identifyColumnName = null;
         String generationType = null;
@@ -314,7 +322,7 @@ class EntityMapper {
                 oneToOneOwnFieldMapper.put(filedName, oneToOne.ownField());
             }
         }
-        return new EntityMapper(tableName, identifyField, identifyColumnName, generationType, fieldMapper,
+        return new EntityMapper(tableName, tableBusinessName, identifyField, identifyColumnName, generationType, fieldMapper,
                 repositoryFields.toArray(new Field[0]), repositoryColumnNames, repositoryColumnMapper,
                 viewFields.toArray(new Field[0]), viewColumnMapperWithTableAs, viewColumnMapper,
                 businessFields.toArray(new Field[0]), keyBusinessFields.toArray(new Field[0]), businessMapper,
@@ -331,7 +339,7 @@ class EntityMapper {
         return columnName;
     }
 
-    private EntityMapper(String tableName, Field identifyFile, String identifyColumnName, String generationType, Map<String, FieldData> fieldMapper,
+    private EntityMapper(String tableName, String tableBusinessName, Field identifyFile, String identifyColumnName, String generationType, Map<String, FieldData> fieldMapper,
                          Field[] repositoryFields, List<String> repositoryColumnNames, Map<String, String> repositoryColumnMapper,
                          Field[] viewFields, Map<String, String> viewColumnMapperWithTableAs, Map<String, String> viewColumnMapper,
                          Field[] businessFields, Field[] keyBusinessFields, Map<String, String> businessMapper,
@@ -340,6 +348,7 @@ class EntityMapper {
                          Field[] oneToOneFields, Map<String, Class<? extends AbstractEntity>> oneToOneClassMapper, Map<String, String> oneToOneRelatedFieldMapper, Map<String, String> oneToOneOwnFieldMapper
     ) {
         this.tableName = tableName;
+        this.tableBusinessName = tableBusinessName;
         this.identifyField = identifyFile;
         this.identifyColumnName = identifyColumnName;
         this.generationType = generationType;

@@ -75,8 +75,9 @@ public class SqlFactory {
                     columns[index] = item.substring(item.indexOf(".") + 1).replaceAll(" ", "");
                 }
             }
-            return "SELECT " + String.join(", ", columns) + " FROM (SELECT " + selectStr + ", ROWNUM AS POCKET_ROWNUM " + tailStr
-                    + ") WHERE POCKET_ROWNUM BETWEEN " + ((int) args[0] + 1) + " AND " + ((int) args[0] + (int) args[1]);
+            String columnsSql = String.join(", ", columns);
+            return "SELECT " + columnsSql + " FROM (SELECT " + columnsSql + ", ROWNUM AS POCKET_ROWNUM" + " FROM (SELECT " + selectStr + tailStr
+                    + ")) WHERE POCKET_ROWNUM BETWEEN " + ((int) args[0] + 1) + " AND " + ((int) args[0] + (int) args[1]);
         });
 
         Map<String, BiFunction<String, Object[], String>> oracleFunctionDialect = new HashMap<>(20);

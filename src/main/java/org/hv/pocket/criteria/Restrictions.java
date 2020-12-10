@@ -133,6 +133,10 @@ public class Restrictions implements SqlBean {
         return sqlOperate;
     }
 
+    public Restrictions[] getRestrictions() {
+        return restrictions;
+    }
+
     @Override
     public void setTarget(Object target) {
         this.target = target;

@@ -130,7 +130,7 @@ public class PersistenceProxy {
                     String encryptModel = MapperFactory.getEncryptModel(clazz.getName(), field.getName());
                     // 判断是否需要解密
                     if (columnValue != null && !StringUtils.isEmpty(encryptModel)) {
-                        columnValue = EncryptUtil.decrypt(encryptModel, "sward9007", columnValue.toString());
+                        columnValue = EncryptUtil.decrypt(encryptModel, columnValue.toString());
                     }
                     field.set(entity, columnValue);
                 }

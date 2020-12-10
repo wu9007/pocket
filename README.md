@@ -6,15 +6,6 @@
 
 # 快速开始
 
-## 添加依赖
-```xml
-<dependency>
-  <groupId>com.github.leyan95</groupId>
-  <artifactId>pocket</artifactId>
-  <version>${latestVersion}</version>
-</dependency>
-```
-
 ## 多数据源配置
 
 <br />**这里以MySQL数据库为例**<br />
@@ -41,8 +32,9 @@ pocket:
         nodeName: mysql-02
         driverName: com.mysql.cj.jdbc.Driver
         showSql: true
-        user: root
-        password: root
+        ##数据库账户密码加密
+        encryptedUser: PPBlj83b1dJ+5Z6+4XoE0w==
+        encryptedPassword: kV0+tnZsZqNtcrNZTpWECA==
         poolMiniSize: 10
         poolMaxSize: 15
         timeout: 1000
@@ -314,29 +306,6 @@ Function<ResultSet, Order> mapperFunction = (resultSet) -> {
     }
 };
 Order order = processQuery.unique(mapperFunction);
-```
-
-
-<a name="E1zkB"></a>
-### 保存历史数据 `@Track`
-| 参数 | 值 |
-| --- | --- |
-| data | 存储对哪个实体操作的历史数据 |
-| operator | 操作人 |
-| operate | 操作类型 `OperateEnum` |
-
-
-
-```java
-@Repository
-public class UserRepositoryImpl extends AbstractRepository implements UserRepository {
-    @Override
-    @Track(data = "#user", operator = "#avatar", operate = OperateEnum.SAVE)
-    public int save(User user, String avatar) {
-      user.setEnable(true);
-      return this.getSession().save(user);
-    }
-}
 ```
 
 

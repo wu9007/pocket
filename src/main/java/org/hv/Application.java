@@ -26,7 +26,9 @@ public class Application {
 
             @PostConstruct
             public void run() throws PocketMapperException {
-                this.pocketConfig.init();
+                this.pocketConfig.setDesKey("sward007")
+                        .setSm4Key("sward18713839007")
+                        .init();
             }
         };
     }

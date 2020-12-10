@@ -26,13 +26,19 @@ public class SessionFactory {
     private static final ReentrantLock LOCK = new ReentrantLock(true);
     private static final AtomicInteger RETRY = new AtomicInteger(0);
     private static final int MAX_RETRY_TIMES = 5;
-    private static final Map<String, DatabaseNodeConfig> NODE_POOL = new ConcurrentHashMap<>(5);
+    private static final Map<String/* session name */, DatabaseNodeConfig/* node config */> NODE_POOL = new ConcurrentHashMap<>(5);
     private static final Map<String, CacheHolder> CACHE_POOL = new ConcurrentHashMap<>(5);
     private static final List<String> NODES = new ArrayList<>();
 
     private SessionFactory() {
     }
 
+    /**
+     * Register the database configuration corresponding to each Session name
+     * and create a corresponding cache
+     *
+     * @param databaseConfig database config
+     */
     public static void register(DatabaseConfig databaseConfig) {
         for (DatabaseNodeConfig databaseNodeConfig : databaseConfig.getNode()) {
             String nodeName = databaseNodeConfig.getNodeName();
@@ -64,7 +70,7 @@ public class SessionFactory {
     }
 
     /**
-     * 新建一个session对象
+     * Gets a database session object
      *
      * @param sessionName session name
      * @return session
@@ -95,7 +101,7 @@ public class SessionFactory {
     }
 
     /**
-     * 获取session对应的缓存空间
+     * 获Gets the cached object for a database session
      *
      * @param sessionName session name
      * @return cache

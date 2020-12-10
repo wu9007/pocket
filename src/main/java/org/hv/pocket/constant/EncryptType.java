@@ -5,4 +5,6 @@ package org.hv.pocket.constant;
  */
 public interface EncryptType {
     String DES = "des";
+    String SM4_CEB = "sm4_ceb";
+    String SM4_CBC = "sm4_cbc";
 }

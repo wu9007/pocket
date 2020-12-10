@@ -32,6 +32,16 @@ public class MapperFactory {
     }
 
     /**
+     * 获取表业务名
+     *
+     * @param className class name
+     * @return table business name
+     */
+    public static String getBusinessName(String className) {
+        return getEntityMapper(className).getTableBusinessName();
+    }
+
+    /**
      * 获取主键列明
      *
      * @param className class name

@@ -7,6 +7,8 @@ import org.hv.pocket.flib.PreparedStatementHandler;
 import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.model.MapperFactory;
 import org.hv.pocket.session.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
@@ -18,7 +20,7 @@ import java.util.List;
  * @author wujianchuan 2019/1/10
  */
 public class CriteriaImpl extends AbstractCriteria implements Criteria {
-
+    private final Logger logger = LoggerFactory.getLogger(CriteriaImpl.class);
     public CriteriaImpl(Class<? extends AbstractEntity> clazz, Session session) {
         super(clazz, session);
     }
@@ -250,6 +252,8 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
         }
     }
 
+    // ================================================= private ==================================================== //
+
     /**
      * 给实例追加一对一关联数据
      *
@@ -314,6 +318,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     PreparedStatement getPreparedStatement() throws SQLException {
         PreparedStatement preparedStatement;
         preparedStatement = this.connection.prepareStatement(completeSql.toString());
+        logger.debug("Creates a <code>PreparedStatement</code> object");
         PreparedStatementHandler preparedStatementHandler = PreparedStatementHandler.newInstance(this.clazz, preparedStatement);
         preparedStatementHandler.completionPreparedStatement(this.parameters, this.sortedRestrictionsList);
         return preparedStatement;

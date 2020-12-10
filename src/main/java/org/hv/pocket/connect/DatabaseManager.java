@@ -51,12 +51,14 @@ public class DatabaseManager {
     }
 
     Boolean isValidConnection(Connection connection) {
+        boolean connectionIsValid = false;
         try {
-            logger.debug("Connection {} null, {}, {}",
-                    (connection == null ? "is" : "isn't"),
-                    (connection != null && connection.isClosed() ? "Connection is closed" : ""),
-                    (connection != null && !connection.isValid(Math.toIntExact(config.getTimeout())) ? "Connection isn't valid" : ""));
-            return connection != null && !connection.isClosed() && connection.isValid(Math.toIntExact(config.getTimeout()));
+            logger.debug("Connection {} null, {}", (connection == null ? "is" : "isn't"),
+                    (connection != null && connection.isClosed() ? "Connection is closed" : ""));
+            if (connection != null && !connection.isClosed()) {
+                connectionIsValid = connection.isValid(Math.toIntExact(config.getTimeout()));
+            }
+            return connectionIsValid;
         } catch (SQLException e) {
             throw new PocketConnectionException(ErrorMessage.POCKET_CONNECTION_VARIABLE_EXCEPTION);
         }

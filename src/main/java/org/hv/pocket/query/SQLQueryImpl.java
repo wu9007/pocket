@@ -1,6 +1,7 @@
 package org.hv.pocket.query;
 
 import org.hv.pocket.config.DatabaseNodeConfig;
+import org.hv.pocket.connect.ConnectionManager;
 import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.constant.SqlOperateTypes;
 import org.hv.pocket.criteria.ParameterTranslator;
@@ -50,62 +51,81 @@ public class SQLQueryImpl extends AbstractSqlQuery implements SQLQuery {
 
     @Override
     public int execute() throws SQLException {
-        return executeUpdate();
+        try {
+            return executeUpdate();
+        } finally {
+            ConnectionManager.closeIo(super.preparedStatement, null);
+        }
     }
 
     @Override
     public Object unique() throws SQLException {
-        if (this.limited()) {
-            super.sql = SqlFactory.getInstance().applySql(databaseNodeConfig.getDriverName(), SqlOperateTypes.LIMIT, super.sql, new Integer[]{this.getStart(), this.getLimit()});
-        }
-        Object result = null;
-        ResultSet resultSet = executeQuery();
-        if (resultSet.next()) {
-            if (clazz != null) {
-                try {
-                    result = getEntity(resultSet);
-                } catch (InstantiationException | IllegalAccessException e) {
-                    throw new IllegalAccessError();
-                }
-            } else {
-                result = getObjects(resultSet);
+        ResultSet resultSet = null;
+        try {
+            if (this.limited()) {
+                super.sql = SqlFactory.getInstance().applySql(databaseNodeConfig.getDriverName(), SqlOperateTypes.LIMIT, super.sql, new Integer[]{this.getStart(), this.getLimit()});
             }
+            Object result = null;
+            resultSet = executeQuery();
+            if (resultSet.next()) {
+                if (clazz != null) {
+                    try {
+                        result = getEntity(resultSet);
+                    } catch (InstantiationException | IllegalAccessException e) {
+                        throw new IllegalAccessError();
+                    }
+                } else {
+                    result = getObjects(resultSet);
+                }
+            }
+            if (resultSet.next()) {
+                throw new QueryException("Data is not unique, and multiple data are returned.");
+            }
+            return result;
+        } finally {
+            ConnectionManager.closeIo(super.preparedStatement, resultSet);
         }
-        if (resultSet.next()) {
-            throw new QueryException("Data is not unique, and multiple data are returned.");
-        }
-        return result;
     }
 
     @Override
     public <E> List<E> list() throws SQLException {
-        if (this.limited()) {
-            super.sql = SqlFactory.getInstance().applySql(databaseNodeConfig.getDriverName(), SqlOperateTypes.LIMIT, super.sql, new Integer[]{this.getStart(), this.getLimit()});
-        }
-        ResultSet resultSet = executeQuery();
-        List<E> results = new ArrayList<>();
-        while (resultSet.next()) {
-            if (clazz != null) {
-                try {
-                    E result = (E) getEntity(resultSet);
-                    results.add(result);
-                } catch (InstantiationException | IllegalAccessException e) {
-                    throw new IllegalAccessError();
-                }
-            } else {
-                results.add(getObjects(resultSet));
+        ResultSet resultSet = null;
+        try {
+            if (this.limited()) {
+                super.sql = SqlFactory.getInstance().applySql(databaseNodeConfig.getDriverName(), SqlOperateTypes.LIMIT, super.sql, new Integer[]{this.getStart(), this.getLimit()});
             }
+            resultSet = executeQuery();
+            List<E> results = new ArrayList<>();
+            while (resultSet.next()) {
+                if (clazz != null) {
+                    try {
+                        E result = (E) getEntity(resultSet);
+                        results.add(result);
+                    } catch (InstantiationException | IllegalAccessException e) {
+                        throw new IllegalAccessError();
+                    }
+                } else {
+                    results.add(getObjects(resultSet));
+                }
+            }
+            return results;
+        } finally {
+            ConnectionManager.closeIo(super.preparedStatement, resultSet);
         }
-        return results;
     }
 
     @Override
     public LocalDateTime now() throws SQLException {
-        super.sql = "SELECT " + SqlFactory.getInstance().getSql(super.databaseNodeConfig.getDriverName(), SqlOperateTypes.NOW);
-        ResultSet resultSet = executeQuery();
-        resultSet.next();
-        Timestamp timestamp = getObjects(resultSet);
-        return timestamp.toLocalDateTime();
+        ResultSet resultSet = null;
+        try {
+            super.sql = "SELECT " + SqlFactory.getInstance().getSql(super.databaseNodeConfig.getDriverName(), SqlOperateTypes.NOW);
+            resultSet = executeQuery();
+            resultSet.next();
+            Timestamp timestamp = Timestamp.valueOf(getObjects(resultSet).toString());
+            return timestamp.toLocalDateTime();
+        } finally {
+            ConnectionManager.closeIo(super.preparedStatement, resultSet);
+        }
     }
 
     @Override
@@ -136,11 +156,17 @@ public class SQLQueryImpl extends AbstractSqlQuery implements SQLQuery {
 
     @Override
     public int[] executeBatch() throws SQLException {
-        if (!super.batchExecution) {
-            throw new SQLException("It is not currently in batch execution mode.");
+        try {
+            if (!super.batchExecution) {
+                throw new SQLException("It is not currently in batch execution mode.");
+            }
+            return super.persistenceProxy.executeWithLog(super.preparedStatement, PreparedStatement::executeBatch, sql);
+        } finally {
+            ConnectionManager.closeIo(super.preparedStatement, null);
         }
-        return super.persistenceProxy.executeWithLog(super.preparedStatement, PreparedStatement::executeBatch, sql);
     }
+
+    // ================================================== private =================================================== //
 
     private ResultSet executeQuery() throws SQLException {
         this.completePreparedStatement();
@@ -169,12 +195,12 @@ public class SQLQueryImpl extends AbstractSqlQuery implements SQLQuery {
                 Object parameter = super.parameterMap.get(name);
                 if (parameter instanceof List) {
                     List<?> parameters = (List<?>) parameter;
-                    if (preparedStatement == null) {
+                    if (super.preparedStatement == null || super.preparedStatement.isClosed()) {
                         executeSql = executeSql.replaceAll(regexString, parameters.stream().map(item -> CommonSql.PLACEHOLDER).collect(Collectors.joining(",")));
                     }
                     parameters.forEach(item -> super.queryParameters.add(ParameterTranslator.newInstance(item)));
                 } else {
-                    if (preparedStatement == null) {
+                    if (super.preparedStatement == null || super.preparedStatement.isClosed()) {
                         executeSql = executeSql.replaceAll(regexString + ",", CommonSql.PLACEHOLDER + ",")
                                 .replaceAll(regexString + "\\)", CommonSql.PLACEHOLDER + "\\)")
                                 .replaceAll(regexString + " ", CommonSql.PLACEHOLDER + " ");
@@ -182,15 +208,17 @@ public class SQLQueryImpl extends AbstractSqlQuery implements SQLQuery {
                     super.queryParameters.add(ParameterTranslator.newInstance(parameter));
                 }
             }
-            if (super.preparedStatement == null) {
+            if (super.preparedStatement == null || super.preparedStatement.isClosed()) {
                 super.preparedStatement = super.connection.prepareStatement(executeSql);
+                LOGGER.debug("Creates a <code>PreparedStatement</code> object");
             }
             PreparedStatementHandler.newInstance(super.clazz, super.preparedStatement).completionPreparedStatement(super.queryParameters);
             super.parameterMap.clear();
             super.queryParameters.clear();
         } else {
-            if (super.preparedStatement == null) {
+            if (super.preparedStatement == null || super.preparedStatement.isClosed()) {
                 super.preparedStatement = super.connection.prepareStatement(executeSql);
+                LOGGER.debug("Creates a <code>PreparedStatement</code> object");
             }
         }
     }

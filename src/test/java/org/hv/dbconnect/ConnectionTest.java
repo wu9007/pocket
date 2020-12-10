@@ -3,6 +3,7 @@ package org.hv.dbconnect;
 import org.hv.Application;
 import org.hv.pocket.config.DatabaseConfig;
 import org.hv.pocket.connect.ConnectionManager;
+import org.hv.pocket.session.Session;
 import org.hv.pocket.session.SessionFactory;
 import org.hv.pocket.utils.PocketExecutor;
 import org.junit.Test;
@@ -37,8 +38,10 @@ public class ConnectionTest {
     @Test
     public void test2() throws InterruptedException {
         PocketExecutor.execute(Executors.newFixedThreadPool(THREAD_NUM), THREAD_NUM, () -> {
-            SessionFactory.getSession("homo").open();
+            Session session = SessionFactory.getSession("homo");
+            session.open();
             System.out.println("================= open session ok ================= ");
+            session.close();
         });
     }
 }

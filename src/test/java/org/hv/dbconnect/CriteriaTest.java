@@ -62,7 +62,7 @@ public class CriteriaTest {
     @Test
     public void test1() {
         Criteria criteria = this.session.createCriteria(Order.class);
-        criteria.add(Restrictions.equ("code", "C-006"))
+        criteria.add(Restrictions.or(Restrictions.equ("code", "C-006"), Restrictions.equ("code", "C-001")))
                 .add(Sort.asc("code"))
                 .specifyField("code", "price", "price");
         List<Order> orderList = criteria.list();
@@ -197,7 +197,6 @@ public class CriteriaTest {
                 .limit(0, 5);
         List<Order> list = criteria.list();
         System.out.println(list.size());
-        ;
     }
 
     @Test
@@ -335,7 +334,8 @@ public class CriteriaTest {
     public void test31() {
         Criteria criteria = this.session.createCriteria(History.class)
                 .add(Sort.asc("uuid"))
-                .limit(0, 3);
+                .add(Restrictions.equ("operator", "ADMIN"))
+                .limit(5, 20);
         List<History> historyList = criteria.list();
         historyList.forEach(order -> System.out.println(order.getUuid()));
     }
@@ -359,12 +359,5 @@ public class CriteriaTest {
         criteria.add(Modern.set("name", "测试类型1"));
         int a = criteria.update();
         System.out.println(a);
-    }
-
-    @Test
-    public void test34() {
-        Criteria criteria = this.session.createCriteria(Order.class);
-        String code = (String) criteria.add(Restrictions.like("uuid", "2020102900%")).max("uuid");
-        System.out.println(code);
     }
 }

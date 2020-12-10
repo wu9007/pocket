@@ -1,6 +1,9 @@
 package org.hv.pocket.config;
 
 
+import org.hv.pocket.constant.EncryptType;
+import org.hv.pocket.utils.EncryptUtil;
+
 /**
  * @author wujianchuan 2018/12/31
  */
@@ -14,6 +17,8 @@ public class DatabaseNodeConfig {
     private Long warningLogTimeout;
     private String user;
     private String password;
+    private String encryptedUser;
+    private String encryptedPassword;
 
     private Integer poolMiniSize;
     private Integer poolMaxSize;
@@ -21,11 +26,11 @@ public class DatabaseNodeConfig {
     private Integer retry;
     private Integer cacheSize;
     /**
-     * Length of time (in second) between maintenance connect availability (default 36000s)
+     * Length of time (in second) between maintenance connect availability (default 1800s)
      */
     private Integer availableInterval;
     /**
-     * The length of time (in second) between maintaining the number of connect list (default 1800s)
+     * The length of time (in second) between maintaining the number of connect list (default 36000s)
      */
     private Integer miniInterval;
 
@@ -93,6 +98,22 @@ public class DatabaseNodeConfig {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getEncryptedUser() {
+        return encryptedUser;
+    }
+
+    public void setEncryptedUser(String encryptedUser) {
+        this.encryptedUser = encryptedUser;
+    }
+
+    public String getEncryptedPassword() {
+        return encryptedPassword;
+    }
+
+    public void setEncryptedPassword(String encryptedPassword) {
+        this.encryptedPassword = encryptedPassword;
     }
 
     public Integer getPoolMiniSize() {

@@ -7,11 +7,11 @@ pocket:
         showSql: true
         collectLog: true
         warningLogTimeout: 1000
-        user: root
-        password: root
+        encryptedUser: PPBlj83b1dJ+5Z6+4XoE0w==
+        encryptedPassword: kV0+tnZsZqNtcrNZTpWECA==
         poolMiniSize: 10
         poolMaxSize: 60
-        timeout: 1000
+        timeout: 5
         retry: 5
         cacheSize: 1000
         session: homo,user,test
@@ -21,11 +21,11 @@ pocket:
         showSql: true
         collectLog: true
         warningLogTimeout: 1000
-        user: root
-        password: root
+        encryptedUser: PPBlj83b1dJ+5Z6+4XoE0w==
+        encryptedPassword: kV0+tnZsZqNtcrNZTpWECA==
         poolMiniSize: 10
         poolMaxSize: 60
-        timeout: 1000
+        timeout: 5
         retry: 5
         cacheSize: 1000
         session: order,commodity
@@ -34,12 +34,6 @@ server:
   port: 8081
   servlet:
     context-path: /
-spring:
-  data:
-    redis:
-      repositories:
-        enabled: false
-
 logging:
   level:
     org.hv: debug

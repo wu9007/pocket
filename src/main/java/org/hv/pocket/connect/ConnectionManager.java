@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConnectionManager {
     private static final Logger logger = LoggerFactory.getLogger(ConnectionManager.class);
     private static final ConnectionManager OUR_INSTANCE = new ConnectionManager();
-    private final Map<String, ConnectionPool> connectionPoolMap = new ConcurrentHashMap<>(4);
+    private final Map<String/* node name */, ConnectionPool/* connection pool */> connectionPoolMap = new ConcurrentHashMap<>(4);
 
     public synchronized void register(DatabaseConfig databaseConfig) {
         databaseConfig.getNode().forEach(databaseNode -> {
@@ -78,7 +78,7 @@ public class ConnectionManager {
                                     config.setPoolMaxSize(100);
                                 }
                                 if (config.getTimeout() == null) {
-                                    config.setTimeout(2000L);
+                                    config.setTimeout(5L);
                                 }
                                 if (config.getRetry() == null) {
                                     config.setRetry(5);
@@ -118,11 +118,12 @@ public class ConnectionManager {
 
     public static void closeIo(PreparedStatement preparedStatement, ResultSet rs) {
         try {
-            if (rs != null) {
+            if (rs != null && !rs.isClosed()) {
                 rs.close();
             }
-            if (preparedStatement != null) {
+            if (preparedStatement != null && !preparedStatement.isClosed()) {
                 preparedStatement.close();
+                logger.debug("Releases a <code>PreparedStatement</code> object");
             }
         } catch (Exception e) {
             throw new PocketConnectionException(ErrorMessage.POCKET_IO_RELEASE_EXCEPTION);

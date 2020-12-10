@@ -177,7 +177,7 @@ public class SessionImpl extends AbstractSession {
     @Override
     public int update(AbstractEntity entity) throws SQLException {
         Class<? extends AbstractEntity> clazz = entity.getClass();
-        AbstractEntity older = this.findOne(clazz, entity.loadIdentify());
+        AbstractEntity older = this.findOne(clazz, entity.loadIdentify(), false);
         int effectRow = 0;
         if (older != null) {
             Field[] fields = reflectUtils.dirtyFieldFilter(entity, older);
@@ -211,7 +211,7 @@ public class SessionImpl extends AbstractSession {
     public int update(AbstractEntity entity, boolean cascade) throws SQLException, IllegalAccessException {
         int effectRow = 0;
         Class<? extends AbstractEntity> clazz = entity.getClass();
-        Object older = this.findOne(clazz, entity.loadIdentify());
+        Object older = this.findOne(clazz, entity.loadIdentify(), cascade);
         if (older == null) {
             logger.warn("The old data could not be found while performing the update operation.");
         }

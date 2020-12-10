@@ -93,6 +93,7 @@ abstract class AbstractSession implements Session {
             entity.putIdentify(identify);
             String sql = nullAble ? this.buildSaveSqlNullable(entity) : this.buildSaveSqlNotNull(entity);
             preparedStatement = this.connection.prepareStatement(sql);
+            LOGGER.debug("Creates a <code>PreparedStatement</code> object");
             if (nullAble) {
                 this.statementApplyNullable(entity, preparedStatement);
             } else {
@@ -180,7 +181,7 @@ abstract class AbstractSession implements Session {
                 Object fieldValue = field.get(entity);
                 // 判断是否需要加密持久化
                 if (fieldValue != null && !StringUtils.isEmpty(encryptModel)) {
-                    fieldValue = EncryptUtil.encrypt(encryptModel, "sward9007", fieldValue.toString());
+                    fieldValue = EncryptUtil.encrypt(encryptModel, fieldValue.toString());
                 }
                 if (fieldValue instanceof LocalDate) {
                     fieldValue = java.sql.Date.valueOf((LocalDate) fieldValue);

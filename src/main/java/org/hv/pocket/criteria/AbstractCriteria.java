@@ -104,12 +104,27 @@ abstract class AbstractCriteria {
 
     <T extends SqlBean> T encryptTarget(T sqlBean) {
         if (clazz != null) {
+            // NOTE: 判断字段值是否需要加密
+            if (sqlBean instanceof Restrictions) {
+                Restrictions[] restrictions = ((Restrictions) sqlBean).getRestrictions();
+                if (restrictions != null) {
+                    String innerEncryptModel;
+                    Object innerTarget;
+                    for (Restrictions restriction : restrictions) {
+                        innerEncryptModel = MapperFactory.getEncryptModel(clazz.getName(), restriction.getSource());
+                        innerTarget = restriction.getTarget();
+                        if (innerTarget != null && !StringUtils.isEmpty(innerEncryptModel) && !restriction.getEncrypted()) {
+                            restriction.setEncrypted(true);
+                            restriction.setTarget(EncryptUtil.encrypt(innerEncryptModel, innerTarget.toString()));
+                        }
+                    }
+                }
+            }
             String encryptModel = MapperFactory.getEncryptModel(clazz.getName(), sqlBean.getSource());
             Object target = sqlBean.getTarget();
-            // NOTE: 判断字段值是否需要加密
             if (target != null && !StringUtils.isEmpty(encryptModel) && !sqlBean.getEncrypted()) {
                 sqlBean.setEncrypted(true);
-                sqlBean.setTarget(EncryptUtil.encrypt(encryptModel, "sward9007", target.toString()));
+                sqlBean.setTarget(EncryptUtil.encrypt(encryptModel, target.toString()));
             }
         }
         return sqlBean;

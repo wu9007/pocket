@@ -111,7 +111,7 @@ public class QueryTest {
     @Test
     public void test7() throws SQLException {
         SQLQuery query = this.session.createSQLQuery("select CODE as code, PRICE as price, TIME as time from tbl_order where CODE = :ORDER_CODE", OrderView.class)
-                .setParameter("ORDER_CODE", EncryptUtil.encrypt(EncryptType.DES, "sward9007", "C-006"));
+                .setParameter("ORDER_CODE", EncryptUtil.encrypt(EncryptType.DES, "sward18713839007", "C-006"));
         List<OrderView> orders = query.list();
         System.out.println(orders.size());
     }
