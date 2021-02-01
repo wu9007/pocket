@@ -12,6 +12,7 @@ import org.hv.pocket.session.SessionFactory;
 import org.hv.pocket.utils.EncryptUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -20,7 +21,7 @@ import java.util.List;
 /**
  * @author wujianchuan 2019/1/12
  */
-@Component
+@Configuration
 public class PocketConfigDefault implements PocketConfig {
     private final DatabaseConfig databaseConfig;
     private final ApplicationContext context;

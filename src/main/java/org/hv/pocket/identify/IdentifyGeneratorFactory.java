@@ -24,7 +24,7 @@ public class IdentifyGeneratorFactory {
     public void registerGenerator(IdentifyGenerator identifyGenerator) {
         synchronized (this) {
             if (GENERATOR_POOL.containsKey(identifyGenerator.getGenerationType())) {
-                throw new IllegalArgumentException("This logo already exists. Please use another one.");
+                throw new IllegalArgumentException(String.format("This identify generator 【%s】 already exists. Please use another one.", identifyGenerator.getGenerationType()));
             } else {
                 GENERATOR_POOL.put(identifyGenerator.getGenerationType(), identifyGenerator);
             }

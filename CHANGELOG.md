@@ -250,3 +250,14 @@ Object getPersistenceConfig() {
     };
 }
 ```
+
+# 0.2.32.PRE - 2020/12/18
+## FEAT
+- 可动态设置数据库连接节点的地址
+```java
+databaseConfig.getNode("nodeName").setUrl("");
+ConnectionManager.getInstance().refreshDatabaseNode("nodeName")
+```
+
+# 0.2.32.PRE - 2021/01/28
+## PERF 添加自动配置类

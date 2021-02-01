@@ -81,4 +81,11 @@ interface ConnectionPool {
      * @return 数据库配置对象
      */
     DatabaseNodeConfig getDatabaseConfig();
+
+    /**
+     * 重新配置数据库节点信息后执行操作：
+     * 关闭并清空闲置链接
+     * 清空激活的链接
+     */
+    void refreshDatabaseNodeInfo();
 }

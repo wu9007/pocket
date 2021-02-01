@@ -63,7 +63,7 @@ public @interface Join {
      *
      * @return Join Method
      */
-    JoinMethod joinMethod();
+    JoinMethod joinMethod() default JoinMethod.LEFT;
 
     /**
      * 关联数据库字段

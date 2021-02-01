@@ -4,7 +4,6 @@ import org.hv.pocket.criteria.Criteria;
 import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.model.MapperFactory;
 import org.hv.pocket.session.Session;
-import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -16,7 +15,6 @@ import java.util.function.UnaryOperator;
 /**
  * @author wujianchuan 2019/1/2
  */
-@Component
 public class IncrementLongGenerator extends AbstractIdentifyGenerator {
 
     private static final UnaryOperator<BigInteger> INTEGER_UNARY_OPERATOR = (item) -> item.add(BigInteger.ONE);
@@ -30,8 +28,8 @@ public class IncrementLongGenerator extends AbstractIdentifyGenerator {
     public Serializable getIdentify(Class<? extends AbstractEntity> clazz, Session session) {
         String tableName = MapperFactory.getTableName(clazz.getName());
         AtomicReference<BigInteger> serialNumber = POOL.getOrDefault(tableName, new AtomicReference<>(BigInteger.ZERO));
-        String localDateStr = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        BigInteger baseIdentify = new BigInteger(localDateStr).multiply(new BigInteger("1000000"));
+        String localDateStr = LocalDate.now().format(DateTimeFormatter.ofPattern("yyMMdd"));
+        BigInteger baseIdentify = new BigInteger(localDateStr).multiply(new BigInteger("10000"));
         if (serialNumber.get().compareTo(BigInteger.ZERO) == 0) {
             synchronized (this) {
                 serialNumber = POOL.getOrDefault(tableName, new AtomicReference<>(BigInteger.ZERO));

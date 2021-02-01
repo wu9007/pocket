@@ -146,7 +146,15 @@ public class ConnectionPoolImpl implements ConnectionPool {
     public void releaseConn(Connection connection) {
         synchronized (RELEASE_LOCK) {
             logger.debug("Release Node: 【{}】", this.getDatabaseConfig().getNodeName());
-            this.activeConnections.remove(connection);
+            // 当数据库节点地址变更后，会清空 freeConnection 和 activeConnections 中的所有链接，
+            // 当释放原始数据库连接时在 activeConnection 中找不到此链接则关闭此链接
+            if (!this.activeConnections.remove(connection)) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    logger.warn(e.getMessage());
+                }
+            }
             currentConnection.remove();
             if (this.databaseManager.isValidConnection(connection)) {
                 this.freeConnections.add(connection);
@@ -175,6 +183,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
             this.activated.compareAndSet(true, false);
             this.freeConnections.clear();
             this.activeConnections.clear();
+            this.connectionCount.set(0);
         }
     }
 
@@ -201,6 +210,23 @@ public class ConnectionPoolImpl implements ConnectionPool {
     @Override
     public DatabaseNodeConfig getDatabaseConfig() {
         return this.databaseConfig;
+    }
+
+    @Override
+    public void refreshDatabaseNodeInfo() {
+        synchronized (CONNECT_LOCK) {
+            logger.info("refresh database node info");
+            for (Connection freeConnection : this.freeConnections) {
+                try {
+                    freeConnection.close();
+                } catch (SQLException e) {
+                    logger.warn(e.getMessage());
+                }
+            }
+            this.freeConnections.clear();
+            this.activeConnections.clear();
+            this.connectionCount.set(0);
+        }
     }
 
     /**

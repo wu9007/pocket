@@ -21,6 +21,24 @@ public class ConnectionManager {
     private static final ConnectionManager OUR_INSTANCE = new ConnectionManager();
     private final Map<String/* node name */, ConnectionPool/* connection pool */> connectionPoolMap = new ConcurrentHashMap<>(4);
 
+    public static ConnectionManager getInstance() {
+        return OUR_INSTANCE;
+    }
+
+    public static void closeIo(PreparedStatement preparedStatement, ResultSet rs) {
+        try {
+            if (rs != null && !rs.isClosed()) {
+                rs.close();
+            }
+            if (preparedStatement != null && !preparedStatement.isClosed()) {
+                preparedStatement.close();
+                logger.debug("Releases a <code>PreparedStatement</code> object");
+            }
+        } catch (Exception e) {
+            throw new PocketConnectionException(ErrorMessage.POCKET_IO_RELEASE_EXCEPTION);
+        }
+    }
+
     public synchronized void register(DatabaseConfig databaseConfig) {
         databaseConfig.getNode().forEach(databaseNode -> {
             boolean success = verify(databaseNode);
@@ -31,13 +49,6 @@ public class ConnectionManager {
                 throw new PocketConnectionException(ErrorMessage.POCKET_NODE_NOTFOUND_EXCEPTION);
             }
         });
-    }
-
-    private ConnectionManager() {
-    }
-
-    public static ConnectionManager getInstance() {
-        return OUR_INSTANCE;
     }
 
     public Connection getConnection(DatabaseNodeConfig databaseNodeConfig) {
@@ -56,6 +67,10 @@ public class ConnectionManager {
     public void destroy() {
         this.connectionPoolMap.forEach((key, value) -> value.destroy());
         logger.debug("Database pool was destroy");
+    }
+
+    public void refreshDatabaseNode(String nodeName) {
+        this.connectionPoolMap.get(nodeName).refreshDatabaseNodeInfo();
     }
 
     private static boolean verify(DatabaseNodeConfig config) {
@@ -116,17 +131,6 @@ public class ConnectionManager {
         return true;
     }
 
-    public static void closeIo(PreparedStatement preparedStatement, ResultSet rs) {
-        try {
-            if (rs != null && !rs.isClosed()) {
-                rs.close();
-            }
-            if (preparedStatement != null && !preparedStatement.isClosed()) {
-                preparedStatement.close();
-                logger.debug("Releases a <code>PreparedStatement</code> object");
-            }
-        } catch (Exception e) {
-            throw new PocketConnectionException(ErrorMessage.POCKET_IO_RELEASE_EXCEPTION);
-        }
+    private ConnectionManager() {
     }
 }
