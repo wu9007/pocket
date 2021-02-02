@@ -3,7 +3,7 @@ package org.hv.pocket.exception;
 /**
  * @author wujianchuan
  */
-public class QueryException extends RuntimeException {
+public class PocketSqlException extends RuntimeException {
 
     private static final long serialVersionUID = 3461708034111021888L;
     private String errorMsg;
@@ -26,11 +26,15 @@ public class QueryException extends RuntimeException {
         this.code = code;
     }
 
-    public QueryException(String errorMsg) {
+    public PocketSqlException(Throwable cause) {
+        super(cause);
+    }
+
+    public PocketSqlException(String errorMsg) {
         super(errorMsg);
     }
 
-    public QueryException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public PocketSqlException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }
