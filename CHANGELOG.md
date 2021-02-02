@@ -261,3 +261,6 @@ ConnectionManager.getInstance().refreshDatabaseNode("nodeName")
 
 # 0.2.32.PRE - 2021/01/28
 ## PERF 添加自动配置类
+
+# 0.2.34.PRE - 2021/02/02
+## PERF 添加数据库会话和事务管理功能
