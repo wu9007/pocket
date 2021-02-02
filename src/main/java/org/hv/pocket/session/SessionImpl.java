@@ -9,6 +9,7 @@ import org.hv.pocket.criteria.CriteriaImpl;
 import org.hv.pocket.criteria.Modern;
 import org.hv.pocket.criteria.Restrictions;
 import org.hv.pocket.exception.CriteriaException;
+import org.hv.pocket.exception.PocketSqlException;
 import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.model.DetailInductiveBox;
 import org.hv.pocket.model.MapperFactory;
@@ -21,7 +22,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -114,12 +114,12 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public <T extends AbstractEntity> T findOne(Class<T> clazz, Serializable identify) throws SQLException {
+    public <T extends AbstractEntity> T findOne(Class<T> clazz, Serializable identify) {
         return this.findDirect(clazz, identify);
     }
 
     @Override
-    public <T extends AbstractEntity> T findOne(Class<T> clazz, Serializable identify, boolean cascade) throws SQLException {
+    public <T extends AbstractEntity> T findOne(Class<T> clazz, Serializable identify, boolean cascade) {
         return this.findDirect(clazz, identify, cascade);
     }
 
@@ -135,24 +135,24 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public <T extends AbstractEntity> T findDirect(Class<T> clazz, Serializable identify) throws SQLException {
+    public <T extends AbstractEntity> T findDirect(Class<T> clazz, Serializable identify) {
         return this.findDirect(clazz, identify, true);
     }
 
     @Override
-    public <T extends AbstractEntity> T findDirect(Class<T> clazz, Serializable identify, boolean cascade) throws SQLException {
+    public <T extends AbstractEntity> T findDirect(Class<T> clazz, Serializable identify, boolean cascade) {
         Criteria criteria = this.createCriteria(clazz);
         criteria.add(Restrictions.equ(MapperFactory.getIdentifyFieldName(clazz.getName()), identify));
         return criteria.unique(cascade);
     }
 
     @Override
-    public int save(AbstractEntity entity) throws SQLException {
+    public int save(AbstractEntity entity) {
         return super.saveEntity(entity, false);
     }
 
     @Override
-    public int save(AbstractEntity entity, boolean cascade) throws SQLException, IllegalAccessException {
+    public int save(AbstractEntity entity, boolean cascade) {
         int effectRow = this.save(entity);
         if (cascade) {
             effectRow += super.saveDetails(entity, false);
@@ -161,12 +161,12 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public int forcibleSave(AbstractEntity entity) throws SQLException {
+    public int forcibleSave(AbstractEntity entity) {
         return super.saveEntity(entity, true);
     }
 
     @Override
-    public int forcibleSave(AbstractEntity entity, boolean cascade) throws SQLException, IllegalAccessException {
+    public int forcibleSave(AbstractEntity entity, boolean cascade) {
         int effectRow = this.forcibleSave(entity);
         if (cascade) {
             effectRow += super.saveDetails(entity, true);
@@ -175,7 +175,7 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public int update(AbstractEntity entity) throws SQLException {
+    public int update(AbstractEntity entity) {
         Class<? extends AbstractEntity> clazz = entity.getClass();
         AbstractEntity older = this.findOne(clazz, entity.loadIdentify(), false);
         int effectRow = 0;
@@ -208,53 +208,59 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
-    public int update(AbstractEntity entity, boolean cascade) throws SQLException, IllegalAccessException {
+    public int update(AbstractEntity entity, boolean cascade) {
         int effectRow = 0;
-        Class<? extends AbstractEntity> clazz = entity.getClass();
-        Object older = this.findOne(clazz, entity.loadIdentify(), cascade);
-        if (older == null) {
-            logger.warn("The old data could not be found while performing the update operation.");
-        }
-        if (cascade) {
-            String mainClassName = entity.getClass().getName();
-            Field[] fields = MapperFactory.getOneToMayFields(mainClassName);
-            if (fields.length > 0) {
-                for (Field field : fields) {
-                    field.setAccessible(true);
-                    DetailInductiveBox detailBox = DetailInductiveBox.newInstance((List<? extends AbstractEntity>) field.get(entity), (List<? extends AbstractEntity>) field.get(older));
-                    List<? extends AbstractEntity> newbornDetails = detailBox.getNewborn();
-                    if (newbornDetails.size() > 0) {
-                        Class<? extends AbstractEntity> childrenClass = MapperFactory.getDetailClass(mainClassName, field.getName());
-                        String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, field.getName());
-                        Field downBridgeField = MapperFactory.getField(childrenClass.getName(), downBridgeFieldName);
-                        Object upBridgeFieldValue = MapperFactory.getUpBridgeFieldValue(entity, mainClassName, childrenClass);
-                        downBridgeField.setAccessible(true);
-                        for (AbstractEntity detail : newbornDetails) {
-                            downBridgeField.set(detail, upBridgeFieldValue);
-                            this.save(detail, true);
+        try {
+            Class<? extends AbstractEntity> clazz = entity.getClass();
+            Object older = this.findOne(clazz, entity.loadIdentify(), cascade);
+            if (older == null) {
+                logger.warn("The old data could not be found while performing the update operation.");
+            }
+            if (cascade) {
+                String mainClassName = entity.getClass().getName();
+                Field[] fields = MapperFactory.getOneToMayFields(mainClassName);
+                if (fields.length > 0) {
+                    for (Field field : fields) {
+                        field.setAccessible(true);
+                        DetailInductiveBox detailBox = DetailInductiveBox.newInstance((List<? extends AbstractEntity>) field.get(entity), (List<? extends AbstractEntity>) field.get(older));
+                        List<? extends AbstractEntity> newbornDetails = detailBox.getNewborn();
+                        if (newbornDetails.size() > 0) {
+                            Class<? extends AbstractEntity> childrenClass = MapperFactory.getDetailClass(mainClassName, field.getName());
+                            String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, field.getName());
+                            Field downBridgeField = MapperFactory.getField(childrenClass.getName(), downBridgeFieldName);
+                            Object upBridgeFieldValue = MapperFactory.getUpBridgeFieldValue(entity, mainClassName, childrenClass);
+                            downBridgeField.setAccessible(true);
+                            for (AbstractEntity detail : newbornDetails) {
+
+                                downBridgeField.set(detail, upBridgeFieldValue);
+
+                                this.save(detail, true);
+                            }
                         }
+                        for (AbstractEntity detail : detailBox.getMoribund()) {
+                            this.delete(detail);
+                        }
+                        for (AbstractEntity detail : detailBox.getUpdate()) {
+                            this.update(detail, true);
+                        }
+                        effectRow += detailBox.getCount();
                     }
-                    for (AbstractEntity detail : detailBox.getMoribund()) {
-                        this.delete(detail);
-                    }
-                    for (AbstractEntity detail : detailBox.getUpdate()) {
-                        this.update(detail, true);
-                    }
-                    effectRow += detailBox.getCount();
                 }
             }
+        } catch (IllegalAccessException e) {
+            throw new PocketSqlException(e);
         }
         effectRow += this.update(entity);
         return effectRow;
     }
 
     @Override
-    public int delete(AbstractEntity entity) throws SQLException, IllegalAccessException {
+    public int delete(AbstractEntity entity) {
         return this.delete(entity, true);
     }
 
     @Override
-    public int delete(AbstractEntity entity, boolean cascade) throws SQLException, IllegalAccessException {
+    public int delete(AbstractEntity entity, boolean cascade) {
         int effectRow = 0;
         Class<? extends AbstractEntity> clazz = entity.getClass();
         if (cascade) {
@@ -263,7 +269,12 @@ public class SessionImpl extends AbstractSession {
             if (fields.length > 0) {
                 for (Field field : fields) {
                     field.setAccessible(true);
-                    List<? extends AbstractEntity> details = (List<? extends AbstractEntity>) field.get(entity);
+                    List<? extends AbstractEntity> details = null;
+                    try {
+                        details = (List<? extends AbstractEntity>) field.get(entity);
+                    } catch (IllegalAccessException e) {
+                        throw new PocketSqlException(e);
+                    }
                     if (details != null) {
                         for (AbstractEntity detail : details) {
                             effectRow += this.delete(detail, true);

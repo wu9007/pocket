@@ -306,13 +306,16 @@ public class MapperFactory {
      * @param mainClassName main class name
      * @param childClass    child class name
      * @return main field name
-     * @throws IllegalAccessException e
      */
-    public static Object getUpBridgeFieldValue(AbstractEntity entity, String mainClassName, Class<? extends AbstractEntity> childClass) throws IllegalAccessException {
+    public static Object getUpBridgeFieldValue(AbstractEntity entity, String mainClassName, Class<? extends AbstractEntity> childClass) {
         String upBridgeFiledName = MapperFactory.getManyToOneUpField(childClass.getName(), mainClassName);
         Field upBridgeField = MapperFactory.getField(mainClassName, upBridgeFiledName);
         upBridgeField.setAccessible(true);
-        return upBridgeField.get(entity);
+        try {
+            return upBridgeField.get(entity);
+        } catch (IllegalAccessException e) {
+            throw new PocketMapperException(e);
+        }
     }
 
     /**

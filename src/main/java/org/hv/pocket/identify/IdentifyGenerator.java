@@ -4,7 +4,6 @@ import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.session.Session;
 
 import java.io.Serializable;
-import java.sql.SQLException;
 
 /**
  * @author wujianchuan 2019/1/2
@@ -29,7 +28,6 @@ public interface IdentifyGenerator {
      * @param clazz   实体类型
      * @param session 缓存管理类
      * @return 数据标识
-     * @throws SQLException e
      */
-    Serializable getIdentify(Class<? extends AbstractEntity> clazz, Session session) throws SQLException;
+    Serializable getIdentify(Class<? extends AbstractEntity> clazz, Session session);
 }

@@ -6,7 +6,7 @@ import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.constant.SqlOperateTypes;
 import org.hv.pocket.criteria.ParameterTranslator;
 import org.hv.pocket.criteria.SqlFactory;
-import org.hv.pocket.exception.QueryException;
+import org.hv.pocket.exception.PocketSqlException;
 import org.hv.pocket.flib.PreparedStatementHandler;
 import org.hv.pocket.flib.ResultSetHandler;
 import org.hv.pocket.model.MapperFactory;
@@ -79,7 +79,7 @@ public class SQLQueryImpl extends AbstractSqlQuery implements SQLQuery {
                 }
             }
             if (resultSet.next()) {
-                throw new QueryException("Data is not unique, and multiple data are returned.");
+                throw new PocketSqlException("Data is not unique, and multiple data are returned.");
             }
             return result;
         } finally {

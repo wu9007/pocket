@@ -25,6 +25,10 @@ public class SessionException extends RuntimeException {
         this.code = code;
     }
 
+    public SessionException(Throwable cause) {
+        super(cause);
+    }
+
     public SessionException(String errorMsg) {
         super(errorMsg);
     }

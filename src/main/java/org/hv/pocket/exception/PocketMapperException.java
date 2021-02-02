@@ -3,7 +3,7 @@ package org.hv.pocket.exception;
 /**
  * @author wujianchuan
  */
-public class PocketMapperException extends Exception {
+public class PocketMapperException extends RuntimeException {
     private static final long serialVersionUID = -8252587819436358640L;
     private String errorMsg;
 
@@ -23,6 +23,10 @@ public class PocketMapperException extends Exception {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public PocketMapperException(Throwable cause) {
+        super(cause);
     }
 
     public PocketMapperException(String errorMsg) {

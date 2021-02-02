@@ -68,14 +68,14 @@ public interface OperateDictionary {
      *
      * @return long
      */
-    Number count() throws SQLException;
+    Number count();
 
     /**
      * 删除数据
      *
      * @return 影响行数
      */
-    int delete() throws SQLException;
+    int delete();
 
     /**
      * 获取一条数据
@@ -97,5 +97,5 @@ public interface OperateDictionary {
      *
      * @return 影响行数
      */
-    int update() throws SQLException;
+    int update();
 }

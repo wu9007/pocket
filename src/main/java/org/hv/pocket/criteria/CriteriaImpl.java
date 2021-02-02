@@ -3,6 +3,7 @@ package org.hv.pocket.criteria;
 import org.hv.pocket.connect.ConnectionManager;
 import org.hv.pocket.constant.SqlOperateTypes;
 import org.hv.pocket.exception.CriteriaException;
+import org.hv.pocket.exception.PocketSqlException;
 import org.hv.pocket.flib.PreparedStatementHandler;
 import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.model.MapperFactory;
@@ -21,6 +22,7 @@ import java.util.List;
  */
 public class CriteriaImpl extends AbstractCriteria implements Criteria {
     private final Logger logger = LoggerFactory.getLogger(CriteriaImpl.class);
+
     public CriteriaImpl(Class<? extends AbstractEntity> clazz, Session session) {
         super(clazz, session);
     }
@@ -82,10 +84,12 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
-    public int update() throws SQLException {
+    public int update() {
         try {
             completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildUpdateSql(parameters, parameterMap, databaseConfig));
             return PersistenceProxy.newInstance(this).executeUpdate(completeSql.toString());
+        } catch (SQLException e) {
+            throw new PocketSqlException(e);
         } finally {
             this.cleanAll();
         }
@@ -118,8 +122,6 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                 }
             }
             return result;
-        } catch (IllegalAccessException | InstantiationException | SQLException e) {
-            throw new CriteriaException(e.getMessage());
         } finally {
             this.cleanWithoutRestrictions();
         }
@@ -181,8 +183,6 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
                 }
             }
             return result;
-        } catch (SQLException | IllegalAccessException | InstantiationException e) {
-            throw new CriteriaException(e.getMessage());
         } finally {
             this.cleanAll();
         }
@@ -202,7 +202,7 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
-    public Number count() throws SQLException {
+    public Number count() {
         completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildCountSql(databaseConfig));
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -215,6 +215,8 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
             } else {
                 return 0;
             }
+        } catch (SQLException e) {
+            throw new PocketSqlException(e);
         } finally {
             ConnectionManager.closeIo(preparedStatement, resultSet);
             this.cleanAll();
@@ -222,10 +224,12 @@ public class CriteriaImpl extends AbstractCriteria implements Criteria {
     }
 
     @Override
-    public int delete() throws SQLException {
+    public int delete() {
         completeSql.append(SqlBody.newInstance(clazz, restrictionsList, modernList, orderList).buildDeleteSql(databaseConfig));
         try {
             return PersistenceProxy.newInstance(this).executeUpdate(completeSql.toString());
+        } catch (SQLException e) {
+            throw new PocketSqlException(e);
         } finally {
             this.cleanAll();
         }

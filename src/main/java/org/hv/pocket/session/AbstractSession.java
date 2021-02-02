@@ -6,6 +6,7 @@ import org.hv.pocket.constant.CommonSql;
 import org.hv.pocket.criteria.Criteria;
 import org.hv.pocket.criteria.PersistenceProxy;
 import org.hv.pocket.criteria.Restrictions;
+import org.hv.pocket.exception.PocketSqlException;
 import org.hv.pocket.identify.IdentifyGeneratorFactory;
 import org.hv.pocket.model.AbstractEntity;
 import org.hv.pocket.model.MapperFactory;
@@ -79,9 +80,8 @@ abstract class AbstractSession implements Session {
      * @param entity   entity
      * @param nullAble 保存时属性值是否不可为空（false：NULL 不进行保存  true:NULL 同样进行保存）
      * @return effect row number
-     * @throws SQLException sql exception
      */
-    int saveEntity(AbstractEntity entity, boolean nullAble) throws SQLException {
+    int saveEntity(AbstractEntity entity, boolean nullAble) {
         Class<?> clazz = entity.getClass();
 
         int effectRow;
@@ -100,6 +100,8 @@ abstract class AbstractSession implements Session {
                 this.statementApplyNotNull(entity, preparedStatement);
             }
             effectRow = this.persistenceProxy.executeWithLog(preparedStatement, PreparedStatement::executeUpdate, sql);
+        } catch (SQLException e) {
+            throw new PocketSqlException(e);
         } finally {
             ConnectionManager.closeIo(preparedStatement, null);
         }
@@ -112,32 +114,34 @@ abstract class AbstractSession implements Session {
      * @param entity   entity
      * @param nullAble 保存时属性值是否不可为空（false：NULL 不进行保存  true:NULL 同样进行保存）
      * @return effect row
-     * @throws IllegalAccessException e
-     * @throws SQLException           e
      */
-    int saveDetails(AbstractEntity entity, boolean nullAble) throws IllegalAccessException, SQLException {
+    int saveDetails(AbstractEntity entity, boolean nullAble) {
         int effectRow = 0;
-        String mainClassName = entity.getClass().getName();
-        Field[] fields = MapperFactory.getOneToMayFields(mainClassName);
-        if (fields.length > 0) {
-            for (Field field : fields) {
-                field.setAccessible(true);
-                List<?> details = (List<?>) field.get(entity);
-                String mainFieldName = field.getName();
-                Class<? extends AbstractEntity> childClass = MapperFactory.getDetailClass(mainClassName, mainFieldName);
-                String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, mainFieldName);
-                Field downBridgeField = MapperFactory.getField(childClass.getName(), downBridgeFieldName);
-                Object upBridgeFieldValue = MapperFactory.getUpBridgeFieldValue(entity, mainClassName, childClass);
-                downBridgeField.setAccessible(true);
-                if (details != null) {
-                    for (Object detail : details) {
-                        downBridgeField.set(detail, upBridgeFieldValue);
-                        this.saveEntity((AbstractEntity) detail, nullAble);
-                        this.saveDetails((AbstractEntity) detail, nullAble);
+        try {
+            String mainClassName = entity.getClass().getName();
+            Field[] fields = MapperFactory.getOneToMayFields(mainClassName);
+            if (fields.length > 0) {
+                for (Field field : fields) {
+                    field.setAccessible(true);
+                    List<?> details = (List<?>) field.get(entity);
+                    String mainFieldName = field.getName();
+                    Class<? extends AbstractEntity> childClass = MapperFactory.getDetailClass(mainClassName, mainFieldName);
+                    String downBridgeFieldName = MapperFactory.getOneToMayDownFieldName(mainClassName, mainFieldName);
+                    Field downBridgeField = MapperFactory.getField(childClass.getName(), downBridgeFieldName);
+                    Object upBridgeFieldValue = MapperFactory.getUpBridgeFieldValue(entity, mainClassName, childClass);
+                    downBridgeField.setAccessible(true);
+                    if (details != null) {
+                        for (Object detail : details) {
+                            downBridgeField.set(detail, upBridgeFieldValue);
+                            this.saveEntity((AbstractEntity) detail, nullAble);
+                            this.saveDetails((AbstractEntity) detail, nullAble);
+                        }
+                        effectRow += details.size();
                     }
-                    effectRow += details.size();
                 }
             }
+        } catch (IllegalAccessException e) {
+            throw new PocketSqlException(e);
         }
         return effectRow;
     }
@@ -148,13 +152,17 @@ abstract class AbstractSession implements Session {
      * @param entity  实例
      * @param cascade 是否进行级联保存操作
      * @return 影响行数
-     * @throws SQLException e
      */
-    int deleteEntity(AbstractEntity entity, boolean cascade) throws SQLException {
+    int deleteEntity(AbstractEntity entity, boolean cascade) {
         Class<? extends AbstractEntity> clazz = entity.getClass();
         Serializable identify = entity.loadIdentify();
         String identifyFieldName = MapperFactory.getIdentifyFieldName(clazz.getName());
-        Object garbage = this.findOne(clazz, identify, cascade);
+        Object garbage;
+        try {
+            garbage = this.findOne(clazz, identify, cascade);
+        } catch (SQLException e) {
+            throw new PocketSqlException(e);
+        }
         int effectRow = 0;
         if (garbage != null) {
             // delete main data

@@ -2,6 +2,7 @@ package org.hv.pocket.criteria;
 
 import org.hv.pocket.config.DatabaseNodeConfig;
 import org.hv.pocket.connect.ConnectionManager;
+import org.hv.pocket.exception.PocketSqlException;
 import org.hv.pocket.flib.ResultSetHandler;
 import org.hv.pocket.function.PocketFunction;
 import org.hv.pocket.logger.PersistenceLogSubject;
@@ -68,16 +69,15 @@ public class PersistenceProxy {
      * @param function          function
      * @param <R>               result
      * @return result
-     * @throws SQLException e
      */
-    public <R> R executeWithLog(PreparedStatement preparedStatement, PocketFunction<PreparedStatement, R> function, String sql) throws SQLException {
+    public <R> R executeWithLog(PreparedStatement preparedStatement, PocketFunction<PreparedStatement, R> function, String sql) {
         long startTime = System.currentTimeMillis();
         R result;
         try {
             result = function.apply(preparedStatement);
         } catch (SQLException e) {
             LOGGER.error(String.format("EXCEPTION ->> %s \nSQL ->> %s", e.getMessage(), sql));
-            throw e;
+            throw new PocketSqlException(e);
         } finally {
             //控制台打印sql语句及执行耗时
             long milliseconds = System.currentTimeMillis() - startTime;
@@ -92,11 +92,13 @@ public class PersistenceProxy {
 
     // =========================================== Package Private =========================================== //
 
-    ResultSet getResultSet(PreparedStatement preparedStatement, String sql) throws SQLException {
+    ResultSet getResultSet(PreparedStatement preparedStatement, String sql) {
         long startTime = System.currentTimeMillis();
         try {
             // 执行语句
             return preparedStatement.executeQuery();
+        } catch (SQLException e) {
+            throw new PocketSqlException(e);
         } finally {
             //控制台打印sql语句及执行耗时
             long milliseconds = System.currentTimeMillis() - startTime;
@@ -108,10 +110,11 @@ public class PersistenceProxy {
         }
     }
 
-    <E extends AbstractEntity> List<E> executeQuery(String sql, Set<String> specifyFieldNames) throws SQLException, IllegalAccessException, InstantiationException {
-        PreparedStatement preparedStatement = target.getPreparedStatement();
+    <E extends AbstractEntity> List<E> executeQuery(String sql, Set<String> specifyFieldNames) {
+        PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         try {
+            preparedStatement = target.getPreparedStatement();
             // 执行语句
             resultSet = this.getResultSet(preparedStatement, sql);
             ResultSetHandler resultSetHandler = ResultSetHandler.newInstance(resultSet);
@@ -137,6 +140,8 @@ public class PersistenceProxy {
                 result.add(entity);
             }
             return result;
+        } catch (SQLException | IllegalAccessException | InstantiationException e) {
+            throw new PocketSqlException(e);
         } finally {
             // 关闭资源
             ConnectionManager.closeIo(preparedStatement, resultSet);

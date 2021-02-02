@@ -1,7 +1,7 @@
 package org.hv.pocket.query;
 
 import org.hv.pocket.config.DatabaseNodeConfig;
-import org.hv.pocket.exception.QueryException;
+import org.hv.pocket.exception.PocketSqlException;
 import org.hv.pocket.model.AbstractEntity;
 
 import java.sql.CallableStatement;
@@ -39,7 +39,7 @@ public class ProcessQueryImpl<T extends AbstractEntity> extends AbstractSqlQuery
                 return null;
             }
         } catch (SQLException e) {
-            throw new QueryException(e.getMessage(), e, true, true);
+            throw new PocketSqlException(e.getMessage(), e, true, true);
         }
     }
 
@@ -53,7 +53,7 @@ public class ProcessQueryImpl<T extends AbstractEntity> extends AbstractSqlQuery
                 resultList.add(rowMapperFunction.apply(resultSet));
             }
         } catch (SQLException e) {
-            throw new QueryException(e.getMessage(), e, true, true);
+            throw new PocketSqlException(e.getMessage(), e, true, true);
         }
         return resultList;
     }
@@ -67,7 +67,7 @@ public class ProcessQueryImpl<T extends AbstractEntity> extends AbstractSqlQuery
             callableStatement.execute();
             return callableStatement.getResultSet();
         } catch (SQLException e) {
-            throw new QueryException(e.getMessage(), e, true, true);
+            throw new PocketSqlException(e.getMessage(), e, true, true);
         }
     }
 }
