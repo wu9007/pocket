@@ -284,6 +284,32 @@ FIX: 修复一对一查询异常（获取不到父类 Field）。
 
 - 添加SM4加解密工具，数据库字段可配置 EncryptType.SM4_CEB EncryptType.SM4_CBC 对数据进行加密
 - 数据库账户和密码加密
+```yaml
+pocket:
+  datasource:
+    node:
+      - url: jdbc:mysql://localhost:3306/spring-boot-demo?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8&allowMultiQueries=true
+        encryptedUser: 4jl3bfJRxeDaHSVLCPuOog==
+        encryptedPassword: 0gGDElMQoo801vjCQuknHA==
+        nodeName: mysql-02
+        driverName: com.mysql.cj.jdbc.Driver
+        showSql: true
+        poolMiniSize: 5
+        poolMaxSize: 50
+        timeout: 10
+        session: master
+```
+
+```java
+// pocket 数据库信息加密 密钥与数据库字段加密使用的密钥相同
+String key = new String(SecreteKeyUtils.generateSecretBytes("123"));
+EncryptUtil.setSm4Key(key);
+EncryptUtil.setDesKey(key);
+// encrypt user
+System.out.println(EncryptUtil.encrypt(EncryptType.SM4_CEB, "root"));
+// encrypt password
+System.out.println(EncryptUtil.encrypt(EncryptType.SM4_CBC, "root"));
+```
 
 ## PERF
 
