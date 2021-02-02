@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 
 /**
  * 对象持久化映射工具自动配置类
@@ -23,6 +24,7 @@ import org.springframework.context.annotation.Import;
 public class PocketAutoConfiguration {
 
     @Bean
+    @Primary
     public IdentifyGenerator incrementLongGenerator() {
         return new IncrementLongGenerator();
     }

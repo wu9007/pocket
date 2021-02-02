@@ -2,7 +2,7 @@ package org.hv.dbconnect;
 
 import org.hv.Application;
 import org.hv.demo.model.History;
-import org.hv.pocket.identify.IncrementLongGenerator;
+import org.hv.pocket.identify.IdentifyGenerator;
 import org.hv.pocket.session.Session;
 import org.hv.pocket.session.SessionFactory;
 import org.hv.pocket.session.Transaction;
@@ -29,7 +29,7 @@ public class MaxIdTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(MaxIdTest.class);
 
     @Autowired
-    private IncrementLongGenerator incrementLongGenerator;
+    private IdentifyGenerator incrementLongGenerator;
     private Session session;
     private Transaction transaction;
 

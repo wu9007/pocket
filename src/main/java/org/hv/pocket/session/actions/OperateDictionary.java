@@ -35,9 +35,8 @@ public interface OperateDictionary {
      * @param clazz    类类型
      * @param identify 数据标识
      * @return 实体对象
-     * @throws SQLException e
      */
-    <T extends AbstractEntity> T findOne(Class<T> clazz, Serializable identify) throws SQLException;
+    <T extends AbstractEntity> T findOne(Class<T> clazz, Serializable identify);
 
 
     /**
@@ -47,9 +46,8 @@ public interface OperateDictionary {
      * @param identify 数据标识
      * @param cascade  是否进行级联保存操作
      * @return 实体对象
-     * @throws SQLException e
      */
-    <T extends AbstractEntity> T findOne(Class<T> clazz, Serializable identify, boolean cascade) throws SQLException;
+    <T extends AbstractEntity> T findOne(Class<T> clazz, Serializable identify, boolean cascade);
 
     /**
      * 查询所有
@@ -74,9 +72,8 @@ public interface OperateDictionary {
      * @param clazz    类类型
      * @param identify 数据标识
      * @return 实体对象
-     * @throws SQLException 语句异常
      */
-    <T extends AbstractEntity> T findDirect(Class<T> clazz, Serializable identify) throws SQLException;
+    <T extends AbstractEntity> T findDirect(Class<T> clazz, Serializable identify);
 
     /**
      * 强制通过数据库查询数据
@@ -85,9 +82,8 @@ public interface OperateDictionary {
      * @param identify 数据标识
      * @param cascade  是否进行级联保存操作
      * @return 实体对象
-     * @throws SQLException 语句异常
      */
-    <T extends AbstractEntity> T findDirect(Class<T> clazz, Serializable identify, boolean cascade) throws SQLException;
+    <T extends AbstractEntity> T findDirect(Class<T> clazz, Serializable identify, boolean cascade);
 
     /**
      * 保存(NULL不纳入保存范围保留数据库默认值)
@@ -104,19 +100,16 @@ public interface OperateDictionary {
      * @param entity  entity
      * @param cascade 是否进行级联保存操作
      * @return 影响行数（主+从）
-     * @throws SQLException           语句异常
-     * @throws IllegalAccessException e
      */
-    int save(AbstractEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
+    int save(AbstractEntity entity, boolean cascade);
 
     /**
      * 保存(NULL同样进行保存)
      *
      * @param entity 实体对象
      * @return 影响行数
-     * @throws SQLException 语句异常
      */
-    int forcibleSave(AbstractEntity entity) throws SQLException;
+    int forcibleSave(AbstractEntity entity);
 
     /**
      * 保存(NULL同样进行保存)
@@ -124,19 +117,16 @@ public interface OperateDictionary {
      * @param entity  实体对象
      * @param cascade 是否进行级联保存操作
      * @return 影响行数
-     * @throws SQLException           语句异常
-     * @throws IllegalAccessException e
      */
-    int forcibleSave(AbstractEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
+    int forcibleSave(AbstractEntity entity, boolean cascade);
 
     /**
      * 更新实体
      *
      * @param entity 实体对象
      * @return 影响行数
-     * @throws SQLException 语句异常
      */
-    int update(AbstractEntity entity) throws SQLException;
+    int update(AbstractEntity entity);
 
 
     /**
@@ -145,20 +135,16 @@ public interface OperateDictionary {
      * @param entity  实体对象
      * @param cascade 是否进行级联更新操作
      * @return 影响行数
-     * @throws SQLException           语句异常
-     * @throws IllegalAccessException e
      */
-    int update(AbstractEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
+    int update(AbstractEntity entity, boolean cascade);
 
     /**
      * 级联删除
      *
      * @param entity 实体对象
      * @return 影响行数
-     * @throws SQLException           语句异常
-     * @throws IllegalAccessException e
      */
-    int delete(AbstractEntity entity) throws SQLException, IllegalAccessException;
+    int delete(AbstractEntity entity);
 
     /**
      * 删除实体
@@ -166,8 +152,6 @@ public interface OperateDictionary {
      * @param entity  实体对象
      * @param cascade 是否进行级联更新操作
      * @return 影响行数
-     * @throws SQLException           语句异常
-     * @throws IllegalAccessException e
      */
-    int delete(AbstractEntity entity, boolean cascade) throws SQLException, IllegalAccessException;
+    int delete(AbstractEntity entity, boolean cascade);
 }
