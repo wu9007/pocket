@@ -255,6 +255,11 @@ public class SessionImpl extends AbstractSession {
     }
 
     @Override
+    public <T extends AbstractEntity> int deleteOne(Class<T> clazz, Serializable identify) {
+        return this.createCriteria(clazz).add(Restrictions.equ(MapperFactory.getIdentifyFieldName(clazz.getName()), identify)).delete();
+    }
+
+    @Override
     public int delete(AbstractEntity entity) {
         return this.delete(entity, true);
     }
@@ -269,7 +274,7 @@ public class SessionImpl extends AbstractSession {
             if (fields.length > 0) {
                 for (Field field : fields) {
                     field.setAccessible(true);
-                    List<? extends AbstractEntity> details = null;
+                    List<? extends AbstractEntity> details;
                     try {
                         details = (List<? extends AbstractEntity>) field.get(entity);
                     } catch (IllegalAccessException e) {

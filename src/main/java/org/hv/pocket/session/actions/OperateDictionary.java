@@ -139,6 +139,16 @@ public interface OperateDictionary {
     int update(AbstractEntity entity, boolean cascade);
 
     /**
+     * 根据数据标识删除(非级联)
+     *
+     * @param clazz    类类型
+     * @param identify 数据标识
+     * @param <T>      泛型
+     * @return 影响行数
+     */
+    <T extends AbstractEntity> int deleteOne(Class<T> clazz, Serializable identify);
+
+    /**
      * 级联删除
      *
      * @param entity 实体对象
