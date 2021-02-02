@@ -158,11 +158,7 @@ abstract class AbstractSession implements Session {
         Serializable identify = entity.loadIdentify();
         String identifyFieldName = MapperFactory.getIdentifyFieldName(clazz.getName());
         Object garbage;
-        try {
-            garbage = this.findOne(clazz, identify, cascade);
-        } catch (SQLException e) {
-            throw new PocketSqlException(e);
-        }
+        garbage = this.findOne(clazz, identify, cascade);
         int effectRow = 0;
         if (garbage != null) {
             // delete main data
